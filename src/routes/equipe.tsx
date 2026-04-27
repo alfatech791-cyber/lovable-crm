@@ -18,6 +18,7 @@ const INITIAL_TEAM = [
 ];
 
 function EquipePage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [team, setTeam] = useState(INITIAL_TEAM);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user, profile } = useAuth();
@@ -27,9 +28,9 @@ function EquipePage() {
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
+        <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
         <div className="flex-1 flex flex-col min-w-0">
-          <Topbar title="Acesso Negado" subtitle="Você não tem permissão para ver esta página" />
+          <Topbar title="Acesso Negado" subtitle="Você não tem permissão para ver esta página" toggleSidebar={() => setSidebarOpen(true)} />
           <main className="flex-1 flex items-center justify-center p-6 text-center">
             <div className="max-w-md">
               <div className="h-20 w-20 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-6">
@@ -51,9 +52,9 @@ function EquipePage() {
 
   return (
     <div className="min-h-screen flex w-full bg-background">
-      <AppSidebar />
+      <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Equipe & Permissões" subtitle="Gerencie quem acessa o seu CRM" />
+        <Topbar title="Equipe & Permissões" subtitle="Gerencie quem acessa o seu CRM" toggleSidebar={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 bg-card border border-border p-4 rounded-2xl">
             <div className="flex items-center gap-4">

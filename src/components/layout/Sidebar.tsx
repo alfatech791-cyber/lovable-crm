@@ -5,14 +5,27 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import { sidebarItems } from "@/lib/mock";
 
-export function AppSidebar() {
+export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: boolean) => void }) {
   const location = useLocation();
   const { user, logout } = useAuth();
 
   const filteredItems = sidebarItems;
 
   return (
-    <aside className="hidden lg:flex w-[244px] shrink-0 flex-col bg-sidebar text-sidebar-foreground">
+    <>
+      {/* Mobile Overlay */}
+      {open && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setOpen?.(false)}
+        />
+      )}
+      
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-[244px] bg-sidebar text-sidebar-foreground flex flex-col transition-transform duration-300 ease-in-out
+        lg:relative lg:translate-x-0
+        ${open ? "translate-x-0" : "-translate-x-full"}
+      `}>
       {/* Brand */}
       <div className="flex items-center gap-2.5 px-5 h-[68px] border-b border-sidebar-border">
         <div className="h-9 w-9 rounded-xl bg-gradient-primary grid place-items-center shadow-glow">
@@ -101,5 +114,6 @@ export function AppSidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }

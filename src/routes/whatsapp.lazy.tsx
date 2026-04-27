@@ -12,6 +12,7 @@ export const Route = createLazyFileRoute("/whatsapp")({
 });
 
 function WhatsAppPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [instances, setInstances] = useState<Instance[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
@@ -99,9 +100,13 @@ function WhatsAppPage() {
 
   return (
     <div className="min-h-screen flex w-full bg-background">
-      <AppSidebar />
+      <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Gestão de WhatsApp" subtitle="Hub de conexões via Evolution API" />
+        <Topbar 
+          title="Gestão de WhatsApp" 
+          subtitle="Hub de conexões via Evolution API" 
+          toggleSidebar={() => setSidebarOpen(true)}
+        />
 
         <main className="flex-1 overflow-y-auto p-4 lg:p-8 space-y-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

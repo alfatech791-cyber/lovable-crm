@@ -11,7 +11,7 @@ export function QuickActions() {
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-6 gap-3 mb-6">
       {actions.map((action) => {
         const Icon = action.icon;
         return (
