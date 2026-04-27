@@ -1,6 +1,14 @@
- import { useState, useMemo } from "react";
- import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight } from "lucide-react";
+ import { useState, useMemo, useEffect } from "react";
+ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info } from "lucide-react";
  import { products, Product } from "@/lib/mock";
+ import { toast } from "sonner";
+ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+ import { Button } from "@/components/ui/button";
+ import { Input } from "@/components/ui/input";
+ import { Label } from "@/components/ui/label";
+ import { Badge } from "@/components/ui/badge";
+ import { ScrollArea } from "@/components/ui/scroll-area";
+ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
  
  interface CartItem extends Product {
    quantity: number;
@@ -10,6 +18,11 @@
    const [cart, setCart] = useState<CartItem[]>([]);
    const [search, setSearch] = useState("");
    const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
+   const [selectedCustomer, setSelectedCustomer] = useState<{ id: string; name: string } | null>(null);
+   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+   const [receivedAmount, setReceivedAmount] = useState<string>("");
+   const [discountValue, setDiscountValue] = useState<number>(0);
  
    const filteredProducts = useMemo(() => {
      if (!search) return [];
@@ -47,11 +60,126 @@
    };
  
    const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-   const discount = 0; // Mock discount
-   const total = subtotal - discount;
+   const total = subtotal - discountValue;
+   
+   const change = receivedAmount ? Math.max(0, parseFloat(receivedAmount) - total) : 0;
+ 
+   const handleFinishSale = () => {
+     toast.success("Venda finalizada com sucesso!", {
+       description: `Total de ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} em ${paymentMethod?.toUpperCase()}`,
+     });
+     setCart([]);
+     setPaymentMethod(null);
+     setSelectedCustomer(null);
+     setIsCheckoutModalOpen(false);
+     setReceivedAmount("");
+     setDiscountValue(0);
+   };
  
    return (
-     <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-6 h-[calc(100vh-180px)]">
+     <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-6 h-[calc(100vh-160px)]">
+       <Dialog open={isCheckoutModalOpen} onOpenChange={setIsCheckoutModalOpen}>
+         <DialogContent className="sm:max-w-[500px]">
+           <DialogHeader>
+             <DialogTitle>Finalizar Venda</DialogTitle>
+           </DialogHeader>
+           <div className="space-y-6 py-4">
+             <div className="grid grid-cols-2 gap-4">
+               <div className="space-y-2">
+                 <Label>Total a Pagar</Label>
+                 <div className="text-2xl font-black text-primary">
+                   {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                 </div>
+               </div>
+               <div className="space-y-2 text-right">
+                 <Label>Troco</Label>
+                 <div className="text-2xl font-black text-success">
+                   {change.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                 </div>
+               </div>
+             </div>
+ 
+             <div className="space-y-4">
+               <div className="space-y-2">
+                 <Label>Valor Recebido</Label>
+                 <div className="relative">
+                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">R$</span>
+                   <Input 
+                     type="number" 
+                     placeholder="0,00" 
+                     className="pl-10 h-12 text-lg font-bold"
+                     value={receivedAmount}
+                     onChange={(e) => setReceivedAmount(e.target.value)}
+                     autoFocus
+                   />
+                 </div>
+               </div>
+ 
+               <div className="bg-muted/50 p-4 rounded-xl space-y-2 border border-border">
+                 <div className="flex justify-between text-sm">
+                   <span className="text-muted-foreground">Forma de Pagamento:</span>
+                   <span className="font-bold uppercase text-primary flex items-center gap-2">
+                     {paymentMethod === 'money' && <Banknote className="h-4 w-4" />}
+                     {paymentMethod === 'card' && <CreditCard className="h-4 w-4" />}
+                     {paymentMethod === 'pix' && <QrCode className="h-4 w-4" />}
+                     {paymentMethod}
+                   </span>
+                 </div>
+                 <div className="flex justify-between text-sm">
+                   <span className="text-muted-foreground">Cliente:</span>
+                   <span className="font-bold">{selectedCustomer?.name || 'Consumidor Final'}</span>
+                 </div>
+               </div>
+             </div>
+           </div>
+           <DialogFooter>
+             <Button variant="outline" onClick={() => setIsCheckoutModalOpen(false)}>Voltar</Button>
+             <Button 
+               className="bg-primary hover:bg-primary/90 min-w-[150px]" 
+               onClick={handleFinishSale}
+               disabled={!receivedAmount || parseFloat(receivedAmount) < total}
+             >
+               Confirmar Recebimento
+             </Button>
+           </DialogFooter>
+         </DialogContent>
+       </Dialog>
+ 
+       <Dialog open={isCustomerModalOpen} onOpenChange={setIsCustomerModalOpen}>
+         <DialogContent>
+           <DialogHeader>
+             <DialogTitle>Vincular Cliente</DialogTitle>
+           </DialogHeader>
+           <div className="space-y-4 py-4">
+             <div className="relative">
+               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+               <Input placeholder="Buscar cliente por nome ou CPF..." className="pl-9" />
+             </div>
+             <ScrollArea className="h-[200px] rounded-md border p-4">
+               <div className="space-y-2">
+                 {['João Silva', 'Maria Oliveira', 'Pedro Santos'].map((name, i) => (
+                   <button
+                     key={i}
+                     onClick={() => {
+                       setSelectedCustomer({ id: String(i), name });
+                       setIsCustomerModalOpen(false);
+                       toast.info(`Cliente ${name} vinculado.`);
+                     }}
+                     className="w-full text-left p-3 hover:bg-muted rounded-lg border border-transparent hover:border-border transition flex items-center justify-between group"
+                   >
+                     <div className="font-medium">{name}</div>
+                     <Plus className="h-4 w-4 opacity-0 group-hover:opacity-100 transition" />
+                   </button>
+                 ))}
+               </div>
+             </ScrollArea>
+             <Button variant="secondary" className="w-full gap-2">
+               <UserPlus className="h-4 w-4" /> Cadastrar Novo Cliente
+             </Button>
+           </div>
+         </DialogContent>
+       </Dialog>
+ 
        {/* Left Side: Product Selection */}
        <div className="flex flex-col gap-6 overflow-hidden">
          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
@@ -100,14 +228,27 @@
            )}
          </div>
  
-         {/* Categories / Quick Actions */}
-         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 overflow-y-auto pr-2">
-           {['Smartphones', 'Acessórios', 'Peças', 'Serviços'].map(cat => (
-             <button key={cat} className="h-24 rounded-2xl border border-border bg-card hover:bg-muted transition flex flex-col items-center justify-center gap-2 font-medium">
-               <Package className="h-6 w-6 text-muted-foreground" />
-               {cat}
-             </button>
-           ))}
+          <div className="flex-1 flex flex-col min-h-0">
+            <Tabs defaultValue="all" className="w-full h-full flex flex-col">
+              <TabsList className="grid w-full grid-cols-4 bg-muted/30">
+                <TabsTrigger value="all">Tudo</TabsTrigger>
+                <TabsTrigger value="phones">Aparelhos</TabsTrigger>
+                <TabsTrigger value="acc">Acessórios</TabsTrigger>
+                <TabsTrigger value="services">Serviços</TabsTrigger>
+              </TabsList>
+              <ScrollArea className="flex-1 mt-4">
+                <TabsContent value="all" className="m-0">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
+                    {['Smartphones', 'Acessórios', 'Peças', 'Serviços', 'Películas', 'Cabos', 'Fones', 'Carregadores'].map(cat => (
+                      <button key={cat} className="h-28 rounded-2xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition flex flex-col items-center justify-center gap-2 font-medium group">
+                        <div className="h-10 w-10 rounded-full bg-muted group-hover:bg-primary/10 grid place-items-center transition"><Package className="h-5 w-5 text-muted-foreground group-hover:text-primary" /></div>
+                        <span className="text-sm">{cat}</span>
+                      </button>
+                    ))}
+                  </div>
+                </TabsContent>
+              </ScrollArea>
+            </Tabs>
          </div>
        </div>
  
@@ -160,8 +301,18 @@
              <span>{subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
            </div>
            <div className="flex items-center justify-between text-sm">
-             <span className="text-muted-foreground">Desconto</span>
-             <span className="text-success font-medium">- R$ 0,00</span>
+              <button 
+                onClick={() => {
+                  const val = prompt("Valor do desconto (R$):", "0");
+                  if (val) setDiscountValue(parseFloat(val));
+                }}
+                className="text-muted-foreground hover:text-primary underline underline-offset-4 decoration-dotted transition"
+              >
+                Aplicar Desconto
+              </button>
+              <span className="text-success font-medium">
+                - {discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </span>
            </div>
            <div className="flex items-center justify-between text-xl font-black pt-2">
              <span>Total</span>
@@ -191,16 +342,24 @@
  
            <button 
              disabled={cart.length === 0 || !paymentMethod}
+              onClick={() => setIsCheckoutModalOpen(true)}
              className="w-full h-14 bg-gradient-primary text-white rounded-xl font-bold text-lg shadow-glow hover:opacity-95 transition disabled:opacity-50 disabled:shadow-none"
            >
              Finalizar Venda
            </button>
  
-           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <button 
+              onClick={() => setIsCustomerModalOpen(true)}
+              className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary transition py-1"
+            >
              <User className="h-3 w-3" />
-             Cliente Final (Consumidor)
+              {selectedCustomer ? (
+                <span className="font-bold text-primary">{selectedCustomer.name}</span>
+              ) : (
+                "Identificar Cliente (Opcional)"
+              )}
              <ChevronRight className="h-3 w-3" />
-           </div>
+            </button>
          </div>
        </div>
      </div>
