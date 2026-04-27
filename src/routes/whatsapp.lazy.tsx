@@ -143,7 +143,7 @@ function WhatsAppPage() {
               </div>
             </div>
 
-            <div className="bg-primary rounded-2xl p-6 shadow-lg shadow-primary/20 flex flex-col justify-between group hover:scale-[1.02] transition-all duration-300 cursor-pointer" onClick={handleCreate}>
+            <div className="bg-primary rounded-2xl p-6 shadow-lg shadow-primary/20 flex flex-col justify-between group transition-all duration-300">
               <div className="flex items-center justify-between mb-4">
                 <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center text-white">
                   <Icons.Plus className="h-6 w-6" />
