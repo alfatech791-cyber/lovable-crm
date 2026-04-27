@@ -1,5 +1,5 @@
  import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
- import { Sparkles, Mail, Lock, ArrowRight, MessageSquare, Users, Zap, CheckCircle2, Eye, EyeOff } from "lucide-react";
+ import { Sparkles, Mail, Lock, ArrowRight, MessageSquare, Users, Zap } from "lucide-react";
  import { useState } from "react";
 
 export const Route = createFileRoute("/login")({
@@ -15,162 +15,113 @@ export const Route = createFileRoute("/login")({
  function Login() {
    const navigate = useNavigate();
    const [loading, setLoading] = useState(false);
-   const [showPassword, setShowPassword] = useState(false);
  
    const handle = (e: React.FormEvent) => {
      e.preventDefault();
      setLoading(true);
-     setTimeout(() => navigate({ to: "/" }), 800);
+     setTimeout(() => navigate({ to: "/" }), 600);
    };
  
    return (
-     <div className="min-h-screen flex items-center justify-center bg-[#F8F9FC] p-4 lg:p-8">
-       <div className="w-full max-w-[1100px] grid lg:grid-cols-2 bg-white rounded-[32px] overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.08)]">
-         
-         {/* Left Side: Illustration & Benefits */}
-         <div className="hidden lg:flex flex-col bg-[#6366F1] text-white p-12 relative overflow-hidden">
-           {/* Background Decorations */}
-           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
-           <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full -ml-32 -mb-32 blur-3xl" />
-           
-           <div className="relative z-10 flex flex-col h-full">
-             <Link to="/" className="flex items-center gap-2.5 mb-16">
-               <div className="h-9 w-9 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center">
-                 <Sparkles className="h-5 w-5 text-white" strokeWidth={2.5} />
-               </div>
-               <span className="font-display font-bold text-xl tracking-tight">ConectaCRM</span>
-             </Link>
+     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
+       {/* Left side */}
+       <div className="flex flex-col justify-center px-6 sm:px-12 lg:px-20 py-12">
+         <Link to="/" className="flex items-center gap-2.5 mb-12">
+           <div className="h-10 w-10 rounded-xl bg-gradient-primary grid place-items-center shadow-glow">
+             <Sparkles className="h-5 w-5 text-white" strokeWidth={2.5} />
+           </div>
+           <span className="font-display font-bold text-xl tracking-tight">ConectaCRM</span>
+         </Link>
  
-             <div className="mt-auto space-y-8">
-               <div>
-                 <h2 className="text-4xl font-bold font-display leading-[1.2] tracking-tight">
-                   Otimize seu fluxo de trabalho em minutos.
-                 </h2>
-                 <p className="text-white/80 mt-4 text-lg max-w-md">
-                   A plataforma completa para gerenciar leads, automações e vendas em um só lugar.
-                 </p>
-               </div>
+         <div className="max-w-sm w-full">
+           <h1 className="text-3xl font-bold font-display tracking-tight">Bem-vindo de volta 👋</h1>
+           <p className="text-sm text-muted-foreground mt-2">
+             Entre na sua conta para continuar gerenciando seus leads.
+           </p>
  
-               <div className="space-y-4">
-                 {[
-                   "Gestão de leads inteligente",
-                   "Automação de processos",
-                   "Dashboard em tempo real",
-                   "Suporte especializado"
-                 ].map((benefit) => (
-                   <div key={benefit} className="flex items-center gap-3">
-                     <div className="h-5 w-5 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                       <CheckCircle2 className="h-3 w-3 text-white" />
-                     </div>
-                     <span className="text-sm font-medium text-white/90">{benefit}</span>
-                   </div>
-                 ))}
-               </div>
- 
-               <div className="pt-8 border-t border-white/10 flex items-center gap-4">
-                 <div className="flex -space-x-3">
-                   {[1, 2, 3].map((i) => (
-                     <div key={i} className="h-10 w-10 rounded-full border-2 border-[#6366F1] bg-white/10 overflow-hidden">
-                       <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="User" />
-                     </div>
-                   ))}
-                 </div>
-                 <p className="text-xs text-white/70">
-                   <span className="text-white font-bold">+12k</span> empresas confiam na nossa plataforma.
-                 </p>
+           <form onSubmit={handle} className="mt-8 space-y-4">
+             <div>
+               <label className="text-[12.5px] font-medium text-foreground/80">E-mail</label>
+               <div className="relative mt-1.5">
+                 <Mail className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                 <input type="email" defaultValue="renato@conectacrm.com" className="w-full h-11 pl-10 pr-3 rounded-xl bg-muted/50 border border-border focus:bg-card focus:border-ring outline-none text-sm transition" />
                </div>
              </div>
+             <div>
+               <div className="flex items-center justify-between">
+                 <label className="text-[12.5px] font-medium text-foreground/80">Senha</label>
+                 <a className="text-[11.5px] text-primary hover:text-primary-glow font-medium cursor-pointer">Esqueci a senha</a>
+               </div>
+               <div className="relative mt-1.5">
+                 <Lock className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                 <input type="password" defaultValue="demo1234" className="w-full h-11 pl-10 pr-3 rounded-xl bg-muted/50 border border-border focus:bg-card focus:border-ring outline-none text-sm transition" />
+               </div>
+             </div>
+ 
+             <label className="flex items-center gap-2 text-[12.5px] text-foreground/80">
+               <input type="checkbox" className="h-4 w-4 rounded border-border accent-primary" defaultChecked />
+               Manter-me conectado
+             </label>
+ 
+             <button type="submit" disabled={loading} className="w-full h-11 rounded-xl bg-gradient-primary text-primary-foreground font-medium text-sm shadow-elegant hover:opacity-95 inline-flex items-center justify-center gap-2 transition disabled:opacity-70">
+               {loading ? "Entrando..." : <>Entrar <ArrowRight className="h-4 w-4" /></>}
+             </button>
+           </form>
+ 
+           <div className="mt-6 text-center text-[12.5px] text-muted-foreground">
+             Não tem uma conta? <a className="text-primary font-semibold hover:text-primary-glow cursor-pointer">Criar conta grátis</a>
            </div>
+ 
+           <p className="mt-8 text-[11px] text-muted-foreground text-center">
+             🔒 Auth real será ativado quando você habilitar o Lovable Cloud.
+           </p>
          </div>
+       </div>
  
-         {/* Right Side: Login Form */}
-         <div className="flex flex-col justify-center p-8 lg:p-16">
-           <div className="lg:hidden flex justify-center mb-8">
-              <Link to="/" className="flex items-center gap-2.5">
-               <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
-                 <Sparkles className="h-5 w-5 text-white" strokeWidth={2.5} />
-               </div>
-               <span className="font-display font-bold text-xl tracking-tight">ConectaCRM</span>
-             </Link>
+       {/* Right side — branded panel */}
+       <div className="hidden lg:flex relative overflow-hidden bg-sidebar text-white">
+         <div className="absolute inset-0 bg-gradient-primary opacity-90" />
+         <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
+         <div className="absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
+ 
+         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+           <div className="inline-flex items-center gap-2 self-start text-xs font-semibold bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5">
+             <Sparkles className="h-3.5 w-3.5" /> Novo: IA Conecta disponível
            </div>
  
-           <div className="max-w-md mx-auto w-full">
-             <div className="mb-10 text-center lg:text-left">
-               <h1 className="text-3xl font-bold font-display text-[#111827]">Boas-vindas! 👋</h1>
-               <p className="text-[#6B7280] mt-2">
-                 Por favor, insira seus dados para acessar sua conta.
-               </p>
-             </div>
+           <div className="space-y-6 max-w-md">
+             <h2 className="text-4xl font-bold font-display tracking-tight leading-[1.1]">
+               Centralize WhatsApp, Instagram e seu funil em um só lugar.
+             </h2>
+             <p className="text-white/80 text-base leading-relaxed">
+               Mais de 12 mil empresas usam o ConectaCRM para responder rápido,
+               vender mais e nunca perder um lead.
+             </p>
  
-             <form onSubmit={handle} className="space-y-5">
-               <div>
-                 <label className="text-sm font-semibold text-[#374151] mb-2 block">E-mail corporativo</label>
-                 <div className="relative group">
-                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] group-focus-within:text-primary transition-colors">
-                     <Mail className="h-5 w-5" />
+             <div className="grid grid-cols-3 gap-3">
+               {[
+                 { icon: MessageSquare, label: "Inbox unificado" },
+                 { icon: Users, label: "Funil visual" },
+                 { icon: Zap, label: "Automações" },
+               ].map((f) => {
+                 const Icon = f.icon;
+                 return (
+                   <div key={f.label} className="rounded-xl bg-white/10 backdrop-blur-sm border border-white/15 p-3">
+                     <Icon className="h-5 w-5 mb-2" />
+                     <div className="text-xs font-semibold leading-tight">{f.label}</div>
                    </div>
-                   <input 
-                     type="email" 
-                     placeholder="exemplo@empresa.com"
-                     defaultValue="renato@conectacrm.com" 
-                     className="w-full h-12 pl-12 pr-4 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm" 
-                   />
-                 </div>
-               </div>
- 
-               <div>
-                 <div className="flex items-center justify-between mb-2">
-                   <label className="text-sm font-semibold text-[#374151]">Senha</label>
-                   <button type="button" className="text-sm text-primary font-bold hover:underline">Esqueceu a senha?</button>
-                 </div>
-                 <div className="relative group">
-                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] group-focus-within:text-primary transition-colors">
-                     <Lock className="h-5 w-5" />
-                   </div>
-                   <input 
-                     type={showPassword ? "text" : "password"} 
-                     placeholder="••••••••"
-                     defaultValue="demo1234" 
-                     className="w-full h-12 pl-12 pr-12 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm" 
-                   />
-                   <button 
-                     type="button"
-                     onClick={() => setShowPassword(!showPassword)}
-                     className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#6B7280] transition-colors"
-                   >
-                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                   </button>
-                 </div>
-               </div>
- 
-               <div className="flex items-center gap-3 py-2">
-                 <input 
-                   type="checkbox" 
-                   id="remember"
-                   className="h-5 w-5 rounded-md border-[#E5E7EB] text-primary focus:ring-primary transition-colors" 
-                   defaultChecked 
-                 />
-                 <label htmlFor="remember" className="text-sm text-[#4B5563] select-none cursor-pointer">Manter-me conectado por 30 dias</label>
-               </div>
- 
-               <button 
-                 type="submit" 
-                 disabled={loading} 
-                 className="w-full h-12 rounded-xl bg-primary text-white font-bold text-base shadow-lg shadow-primary/20 hover:bg-primary/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
-               >
-                 {loading ? (
-                   <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                 ) : (
-                   <>Entrar na plataforma <ArrowRight className="h-5 w-5" /></>
-                 )}
-               </button>
-             </form>
- 
-             <div className="mt-8 pt-8 border-t border-[#F3F4F6] text-center">
-               <p className="text-sm text-[#6B7280]">
-                 Ainda não tem acesso? <button className="text-primary font-bold hover:underline">Solicite uma demonstração</button>
-               </p>
+                 );
+               })}
              </div>
+           </div>
+ 
+           <div className="flex items-center gap-3 text-sm text-white/85">
+             <div className="flex -space-x-2">
+               {["JM","CE","BC","RS"].map((i, k) => (
+                 <div key={k} className="h-8 w-8 rounded-full bg-white/20 border-2 border-white/40 grid place-items-center text-[10px] font-bold">{i}</div>
+               ))}
+             </div>
+             <span>+ 12.000 empresas confiam no ConectaCRM</span>
            </div>
          </div>
        </div>
