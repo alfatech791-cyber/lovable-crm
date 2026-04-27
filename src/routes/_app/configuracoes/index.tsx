@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
- import { useState, useEffect } from "react";
+  import { useState, useEffect, useCallback } from "react";
  import { evolution, Instance } from "@/lib/evolution";
  import { QrCodeModal } from "@/components/whatsapp/QrCodeModal";
  import { MessageSquare, RefreshCw, LogOut, Power, Trash2, Smartphone } from "lucide-react";
@@ -15,35 +15,43 @@ export default function Configuracoes() {
    const [instances, setInstances] = useState<Instance[]>([]);
    const [loading, setLoading] = useState(true);
    const [showQrModal, setShowQrModal] = useState(false);
-   const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
- 
-   const fetchInstances = async () => {
+    const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
+    const [isCreating, setIsCreating] = useState(false);
+    const fetchInstances = useCallback(async () => {
      try {
        setLoading(true);
        const data = await evolution.getInstances();
        setInstances(data);
      } catch (err) {
        console.error(err);
+        toast.error("Erro ao carregar instâncias do WhatsApp");
      } finally {
        setLoading(false);
      }
-   };
+    }, []);
  
    useEffect(() => {
      fetchInstances();
    }, []);
  
     const handleCreateInstance = async () => {
-      const name = `instancia_${Math.floor(Math.random() * 1000)}`;
+      if (isCreating) return;
+      
+      setIsCreating(true);
+      // Gerar um nome baseado no timestamp para garantir unicidade
+      const name = `whatsapp_${Date.now()}`;
       const webhookUrl = import.meta.env.VITE_WEBHOOK_URL || "";
       
       try {
         await evolution.createInstance(name, webhookUrl);
         setSelectedInstance(name);
         setShowQrModal(true);
-        fetchInstances();
+        await fetchInstances();
       } catch (err) {
-        toast.error("Erro ao criar instância");
+        console.error(err);
+        toast.error("Erro ao criar nova instância de WhatsApp");
+      } finally {
+        setIsCreating(false);
       }
     };
  
