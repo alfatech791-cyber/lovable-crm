@@ -114,5 +114,6 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
         </button>
       </div>
     </aside>
+    </>
   );
 }
