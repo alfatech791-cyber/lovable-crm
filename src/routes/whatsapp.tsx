@@ -22,7 +22,7 @@ export const Route = createFileRoute("/whatsapp")({
   component: WhatsAppPage,
 });
 
-function WhatsAppPage() {
+export function WhatsAppPage() {
   const [instances, setInstances] = useState<Instance[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
