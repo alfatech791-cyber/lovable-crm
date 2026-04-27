@@ -16,7 +16,7 @@ export default function Estoque() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate({ to: "/estoque/lista" })}>
+        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate({ to: "/estoque/atual" })}>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Produtos</CardTitle>
             <List className="h-4 w-4 text-muted-foreground" />
@@ -27,7 +27,7 @@ export default function Estoque() {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate({ to: "/estoque/ruptura" })}>
+        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate({ to: "/estoque/atual" })}>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Crítico</CardTitle>
             <AlertTriangle className="h-4 w-4 text-destructive" />
@@ -69,7 +69,7 @@ export default function Estoque() {
             </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-2">
-            <Button variant="outline" className="justify-start" onClick={() => navigate({ to: "/estoque/lista" })}>Lista Completa de Produtos</Button>
+            <Button variant="outline" className="justify-start" onClick={() => navigate({ to: "/estoque/atual" })}>Lista Completa de Produtos</Button>
             <Button variant="outline" className="justify-start">Entrada de Mercadoria</Button>
             <Button variant="outline" className="justify-start">Ajuste de Estoque</Button>
           </CardContent>
@@ -82,7 +82,7 @@ export default function Estoque() {
             </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-2">
-            <Button variant="outline" className="justify-start" onClick={() => navigate({ to: "/estoque/ruptura" })}>Produtos com Baixo Estoque</Button>
+            <Button variant="outline" className="justify-start" onClick={() => navigate({ to: "/estoque/atual" })}>Produtos com Baixo Estoque</Button>
             <Button variant="outline" className="justify-start">Valor Total em Estoque</Button>
             <Button variant="outline" className="justify-start">Curva ABC de Produtos</Button>
           </CardContent>
