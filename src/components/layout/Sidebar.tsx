@@ -12,15 +12,6 @@ export function AppSidebar() {
   const filteredItems = sidebarItems.filter((item: any) => {
     const permissionMap: Record<string, keyof UserPermissions> = {
       "/": "dashboard",
-      "/leads": "crm",
-      "/funil": "crm",
-      "/atendimento": "crm",
-      "/whatsapp": "crm",
-      "/agentes": "crm",
-      "/produtos": "estoque",
-      "/instagram": "crm",
-      "/automacao": "crm",
-      "/equipe": "configuracoes",
       "/vendas": "vendas",
       "/clientes": "clientes",
       "/pdv": "pdv",
@@ -31,7 +22,6 @@ export function AppSidebar() {
       "/fiscal": "fiscal",
       "/relatorios": "relatorios",
       "/configuracoes": "configuracoes",
-      "/equipe": "configuracoes",
     };
 
     const permissionKey = permissionMap[item.url];
