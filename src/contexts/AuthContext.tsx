@@ -2,70 +2,32 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 
 export type Role = "admin" | "employee";
 
-export interface UserPermissions {
-  leads: boolean;
-  funnel: boolean;
-  chat: boolean;
-  whatsapp: boolean;
-  instagram: boolean;
-  automation: boolean;
-  team: boolean;
-  reports: boolean;
-  settings: boolean;
-  products: boolean;
-  dashboard: boolean;
-}
+import { AppPermissions, DEFAULT_ADMIN_PERMISSIONS, DEFAULT_EMPLOYEE_PERMISSIONS } from "@/types/permissions";
 
-export const DEFAULT_EMPLOYEE_PERMISSIONS: UserPermissions = {
-  dashboard: true,
-  leads: true,
-  funnel: true,
-  chat: true,
-  whatsapp: true,
-  instagram: false,
-  automation: false,
-  team: false,
-  reports: false,
-  settings: false,
-  products: true,
-};
-
-export const ADMIN_PERMISSIONS: UserPermissions = {
-  dashboard: true,
-  leads: true,
-  funnel: true,
-  chat: true,
-  whatsapp: true,
-  instagram: true,
-  automation: true,
-  team: true,
-  reports: true,
-  settings: true,
-  products: true,
-};
+export type { AppPermissions as UserPermissions };
 
 interface AuthContextType {
   user: {
     name: string;
     role: Role;
-    permissions: UserPermissions;
+    permissions: AppPermissions;
   };
   setRole: (role: Role) => void;
-  updatePermissions: (perms: Partial<UserPermissions>) => void;
+  updatePermissions: (perms: Partial<AppPermissions>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRoleState] = useState<Role>("admin");
-  const [permissions, setPermissions] = useState<UserPermissions>(ADMIN_PERMISSIONS);
+  const [permissions, setPermissions] = useState<AppPermissions>(DEFAULT_ADMIN_PERMISSIONS);
 
   const setRole = (newRole: Role) => {
     setRoleState(newRole);
-    setPermissions(newRole === "admin" ? ADMIN_PERMISSIONS : DEFAULT_EMPLOYEE_PERMISSIONS);
+    setPermissions(newRole === "admin" ? DEFAULT_ADMIN_PERMISSIONS : DEFAULT_EMPLOYEE_PERMISSIONS);
   };
 
-  const updatePermissions = (perms: Partial<UserPermissions>) => {
+  const updatePermissions = (perms: Partial<AppPermissions>) => {
     setPermissions((prev) => ({ ...prev, ...perms }));
   };
 
