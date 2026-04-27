@@ -53,12 +53,14 @@ import { Route as EstoqueEtiquetasRouteImport } from './routes/estoque.etiquetas
 import { Route as EstoqueComprasRouteImport } from './routes/estoque.compras'
 import { Route as EstoqueAtualRouteImport } from './routes/estoque.atual'
 import { Route as AppRelatoriosIndexRouteImport } from './routes/_app/relatorios/index'
+import { Route as AppMarketingIndexRouteImport } from './routes/_app/marketing/index'
 import { Route as AppConfiguracoesIndexRouteImport } from './routes/_app/configuracoes/index'
 import { Route as AppClientesIndexRouteImport } from './routes/_app/clientes/index'
 import { Route as AppOperacaoTransportadoresRouteImport } from './routes/_app/operacao/transportadores'
 import { Route as AppOperacaoTiposProdutosRouteImport } from './routes/_app/operacao/tipos-produtos'
 import { Route as AppOperacaoServicosRouteImport } from './routes/_app/operacao/servicos'
 import { Route as AppOperacaoMaquininhasRouteImport } from './routes/_app/operacao/maquininhas'
+import { Route as AppConfiguracoesParametrosRouteImport } from './routes/_app/configuracoes/parametros'
 
 const WhatsappRoute = WhatsappRouteImport.update({
   id: '/whatsapp',
@@ -280,6 +282,11 @@ const AppRelatoriosIndexRoute = AppRelatoriosIndexRouteImport.update({
   path: '/relatorios/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppMarketingIndexRoute = AppMarketingIndexRouteImport.update({
+  id: '/_app/marketing/',
+  path: '/marketing/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppConfiguracoesIndexRoute = AppConfiguracoesIndexRouteImport.update({
   id: '/_app/configuracoes/',
   path: '/configuracoes/',
@@ -312,6 +319,12 @@ const AppOperacaoMaquininhasRoute = AppOperacaoMaquininhasRouteImport.update({
   path: '/operacao/maquininhas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppConfiguracoesParametrosRoute =
+  AppConfiguracoesParametrosRouteImport.update({
+    id: '/_app/configuracoes/parametros',
+    path: '/configuracoes/parametros',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -357,12 +370,14 @@ export interface FileRoutesByFullPath {
   '/vendas/historico': typeof VendasHistoricoRoute
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
+  '/configuracoes/parametros': typeof AppConfiguracoesParametrosRoute
   '/operacao/maquininhas': typeof AppOperacaoMaquininhasRoute
   '/operacao/servicos': typeof AppOperacaoServicosRoute
   '/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
   '/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
   '/clientes/': typeof AppClientesIndexRoute
   '/configuracoes/': typeof AppConfiguracoesIndexRoute
+  '/marketing/': typeof AppMarketingIndexRoute
   '/relatorios/': typeof AppRelatoriosIndexRoute
 }
 export interface FileRoutesByTo {
@@ -409,10 +424,12 @@ export interface FileRoutesByTo {
   '/vendas/historico': typeof VendasHistoricoRoute
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
+  '/configuracoes/parametros': typeof AppConfiguracoesParametrosRoute
   '/operacao/maquininhas': typeof AppOperacaoMaquininhasRoute
   '/operacao/servicos': typeof AppOperacaoServicosRoute
   '/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
   '/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
+  '/marketing': typeof AppMarketingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -459,12 +476,14 @@ export interface FileRoutesById {
   '/vendas/historico': typeof VendasHistoricoRoute
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
+  '/_app/configuracoes/parametros': typeof AppConfiguracoesParametrosRoute
   '/_app/operacao/maquininhas': typeof AppOperacaoMaquininhasRoute
   '/_app/operacao/servicos': typeof AppOperacaoServicosRoute
   '/_app/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
   '/_app/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
   '/_app/clientes/': typeof AppClientesIndexRoute
   '/_app/configuracoes/': typeof AppConfiguracoesIndexRoute
+  '/_app/marketing/': typeof AppMarketingIndexRoute
   '/_app/relatorios/': typeof AppRelatoriosIndexRoute
 }
 export interface FileRouteTypes {
@@ -513,12 +532,14 @@ export interface FileRouteTypes {
     | '/vendas/historico'
     | '/vendas/orcamentos'
     | '/vendas/simulador'
+    | '/configuracoes/parametros'
     | '/operacao/maquininhas'
     | '/operacao/servicos'
     | '/operacao/tipos-produtos'
     | '/operacao/transportadores'
     | '/clientes/'
     | '/configuracoes/'
+    | '/marketing/'
     | '/relatorios/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -565,10 +586,12 @@ export interface FileRouteTypes {
     | '/vendas/historico'
     | '/vendas/orcamentos'
     | '/vendas/simulador'
+    | '/configuracoes/parametros'
     | '/operacao/maquininhas'
     | '/operacao/servicos'
     | '/operacao/tipos-produtos'
     | '/operacao/transportadores'
+    | '/marketing'
   id:
     | '__root__'
     | '/'
@@ -614,12 +637,14 @@ export interface FileRouteTypes {
     | '/vendas/historico'
     | '/vendas/orcamentos'
     | '/vendas/simulador'
+    | '/_app/configuracoes/parametros'
     | '/_app/operacao/maquininhas'
     | '/_app/operacao/servicos'
     | '/_app/operacao/tipos-produtos'
     | '/_app/operacao/transportadores'
     | '/_app/clientes/'
     | '/_app/configuracoes/'
+    | '/_app/marketing/'
     | '/_app/relatorios/'
   fileRoutesById: FileRoutesById
 }
@@ -645,12 +670,14 @@ export interface RootRouteChildren {
   ServicosRoute: typeof ServicosRouteWithChildren
   VendasRoute: typeof VendasRouteWithChildren
   WhatsappRoute: typeof WhatsappRoute
+  AppConfiguracoesParametrosRoute: typeof AppConfiguracoesParametrosRoute
   AppOperacaoMaquininhasRoute: typeof AppOperacaoMaquininhasRoute
   AppOperacaoServicosRoute: typeof AppOperacaoServicosRoute
   AppOperacaoTiposProdutosRoute: typeof AppOperacaoTiposProdutosRoute
   AppOperacaoTransportadoresRoute: typeof AppOperacaoTransportadoresRoute
   AppClientesIndexRoute: typeof AppClientesIndexRoute
   AppConfiguracoesIndexRoute: typeof AppConfiguracoesIndexRoute
+  AppMarketingIndexRoute: typeof AppMarketingIndexRoute
   AppRelatoriosIndexRoute: typeof AppRelatoriosIndexRoute
 }
 
@@ -964,6 +991,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRelatoriosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/marketing/': {
+      id: '/_app/marketing/'
+      path: '/marketing'
+      fullPath: '/marketing/'
+      preLoaderRoute: typeof AppMarketingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/configuracoes/': {
       id: '/_app/configuracoes/'
       path: '/configuracoes'
@@ -1004,6 +1038,13 @@ declare module '@tanstack/react-router' {
       path: '/operacao/maquininhas'
       fullPath: '/operacao/maquininhas'
       preLoaderRoute: typeof AppOperacaoMaquininhasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/configuracoes/parametros': {
+      id: '/_app/configuracoes/parametros'
+      path: '/configuracoes/parametros'
+      fullPath: '/configuracoes/parametros'
+      preLoaderRoute: typeof AppConfiguracoesParametrosRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1113,12 +1154,14 @@ const rootRouteChildren: RootRouteChildren = {
   ServicosRoute: ServicosRouteWithChildren,
   VendasRoute: VendasRouteWithChildren,
   WhatsappRoute: WhatsappRoute,
+  AppConfiguracoesParametrosRoute: AppConfiguracoesParametrosRoute,
   AppOperacaoMaquininhasRoute: AppOperacaoMaquininhasRoute,
   AppOperacaoServicosRoute: AppOperacaoServicosRoute,
   AppOperacaoTiposProdutosRoute: AppOperacaoTiposProdutosRoute,
   AppOperacaoTransportadoresRoute: AppOperacaoTransportadoresRoute,
   AppClientesIndexRoute: AppClientesIndexRoute,
   AppConfiguracoesIndexRoute: AppConfiguracoesIndexRoute,
+  AppMarketingIndexRoute: AppMarketingIndexRoute,
   AppRelatoriosIndexRoute: AppRelatoriosIndexRoute,
 }
 export const routeTree = rootRouteImport
