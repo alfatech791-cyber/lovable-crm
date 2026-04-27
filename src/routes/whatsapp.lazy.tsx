@@ -1,24 +1,8 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import {
-  MessageSquare,
-  Plus,
-  RefreshCw,
-  Trash2,
-  QrCode,
-  CheckCircle2,
-  AlertCircle,
-  Phone,
-  User,
-  ShieldCheck,
-  Info,
-  Search,
-  MoreVertical,
-  LogOut,
-  Smartphone,
-} from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import * as Icons from "lucide-react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { evolution, type Instance } from "@/lib/evolution";
 import { toast } from "sonner";
 import { QrCodeModal } from "@/components/whatsapp/QrCodeModal";
@@ -34,7 +18,7 @@ function WhatsAppPage() {
   const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const fetchInstances = async () => {
+  const fetchInstances = useCallback(async () => {
     try {
       setLoading(true);
       const data = await evolution.getInstances();
@@ -45,7 +29,7 @@ function WhatsAppPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchInstances();
@@ -113,58 +97,78 @@ function WhatsAppPage() {
         <Topbar title="Gestão de WhatsApp" subtitle="Hub de conexões via Evolution API" />
 
         <main className="flex-1 overflow-y-auto p-4 lg:p-8 space-y-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-card rounded-2xl p-5 border border-border shadow-sm flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                <Smartphone className="h-6 w-6" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm flex flex-col justify-between group hover:border-primary/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <Icons.Smartphone className="h-6 w-6" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50">Geral</span>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Total de Instâncias</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
+                <p className="text-2xl font-black tabular-nums">{stats.total}</p>
+                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-tight">Total de Instâncias</p>
               </div>
             </div>
 
-            <div className="bg-card rounded-2xl p-5 border border-border shadow-sm flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center text-success">
-                <CheckCircle2 className="h-6 w-6" />
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm flex flex-col justify-between group hover:border-success/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-12 w-12 rounded-2xl bg-success/10 flex items-center justify-center text-success group-hover:scale-110 transition-transform">
+                  <Icons.CheckCircle2 className="h-6 w-6" />
+                </div>
+                <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Conectadas</p>
-                <p className="text-2xl font-bold">{stats.connected}</p>
+                <p className="text-2xl font-black tabular-nums text-success">{stats.connected}</p>
+                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-tight">Conectadas Agora</p>
               </div>
             </div>
 
-            <div className="bg-card rounded-2xl p-5 border border-border shadow-sm flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-warning/10 flex items-center justify-center text-warning">
-                <AlertCircle className="h-6 w-6" />
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm flex flex-col justify-between group hover:border-warning/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-12 w-12 rounded-2xl bg-warning/10 flex items-center justify-center text-warning group-hover:scale-110 transition-transform">
+                  <Icons.AlertCircle className="h-6 w-6" />
+                </div>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Desconectadas</p>
-                <p className="text-2xl font-bold">{stats.disconnected}</p>
+                <p className="text-2xl font-black tabular-nums text-warning">{stats.disconnected}</p>
+                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-tight">Aguardando Conexão</p>
+              </div>
+            </div>
+
+            <div className="bg-primary rounded-2xl p-6 shadow-lg shadow-primary/20 flex flex-col justify-between group hover:scale-[1.02] transition-all duration-300 cursor-pointer" onClick={handleCreate}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center text-white">
+                  <Icons.Plus className="h-6 w-6" />
+                </div>
+              </div>
+              <div>
+                <p className="text-lg font-black text-white leading-tight">Nova Instância</p>
+                <p className="text-[11px] font-bold text-white/70 uppercase tracking-tight">Criar canal agora</p>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-card p-4 rounded-2xl border border-border shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-card p-4 rounded-2xl border border-border shadow-elegant">
             <div className="relative w-full sm:w-96">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Icons.Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Buscar por nome ou número..."
-                className="w-full h-10 pl-10 pr-4 rounded-xl bg-muted/50 border-none text-sm focus:ring-2 focus:ring-primary/20 transition"
+                placeholder="Pesquisar instâncias ou números..."
+                className="w-full h-11 pl-11 pr-4 rounded-xl bg-muted/60 border border-transparent focus:border-primary/20 focus:bg-card outline-none text-sm transition"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button
-                onClick={fetchInstances}
-                className="h-10 px-4 rounded-xl border border-border hover:bg-muted transition flex items-center gap-2 text-sm font-medium"
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-                <span className="hidden sm:inline">Sincronizar</span>
-              </button>
+                <button
+                  onClick={fetchInstances}
+                  className="h-11 px-5 rounded-xl border border-border hover:bg-muted transition-all flex items-center gap-2 text-sm font-bold"
+                >
+                  <Icons.RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                  <span className="hidden sm:inline">Atualizar Lista</span>
+                </button>
 
               <button
                 onClick={handleCreate}
