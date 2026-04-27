@@ -42,12 +42,16 @@ function Dashboard() {
         subtitle: "Resumo de transações financeiras",
         icon: ShoppingBag,
         color: "text-success bg-success/10",
-        items: [
-          { id: "1", title: "Marcos Oliveira", desc: "iPhone 15 Pro Max 256GB", meta: "R$ 7.899,00", time: "14:20", badge: "Confirmado" },
-          { id: "2", title: "Ana Beatriz", desc: "Capa Silicone + Película 3D", meta: "R$ 209,80", time: "13:15", badge: "Confirmado" },
-          { id: "3", title: "Cláudio Sampaio", desc: "Samsung Galaxy S24 Ultra", meta: "R$ 6.599,00", time: "11:05", badge: "Confirmado" },
-          { id: "4", title: "Julia Martins", desc: "Carregador 20W Apple", meta: "R$ 199,00", time: "09:45", badge: "Confirmado" },
-        ]
+         items: [
+           { id: "1", title: "Marcos Oliveira", desc: "iPhone 15 Pro Max 256GB", meta: "R$ 7.899,00", time: "14:20", badge: "Confirmado" },
+           { id: "2", title: "Ana Beatriz", desc: "Capa Silicone + Película 3D", meta: "R$ 209,80", time: "13:15", badge: "Confirmado" },
+           { id: "3", title: "Cláudio Sampaio", desc: "Samsung Galaxy S24 Ultra", meta: "R$ 6.599,00", time: "11:05", badge: "Confirmado" },
+           { id: "4", title: "Julia Martins", desc: "Carregador 20W Apple", meta: "R$ 199,00", time: "09:45", badge: "Confirmado" },
+           { id: "5", title: "Roberto Alves", desc: "iPad Air M2 128GB", meta: "R$ 5.499,00", time: "09:10", badge: "Confirmado" },
+           { id: "6", title: "Carla Souza", desc: "Apple Watch Series 9", meta: "R$ 3.299,00", time: "08:45", badge: "Confirmado" },
+           { id: "7", title: "Bruno Lima", desc: "AirPods Pro 2", meta: "R$ 1.899,00", time: "08:20", badge: "Confirmado" },
+           { id: "8", title: "Luciana Dias", desc: "MacBook Air M2", meta: "R$ 8.999,00", time: "08:05", badge: "Confirmado" },
+         ]
       });
     } else if (l.includes("os")) {
       setModalContent({
