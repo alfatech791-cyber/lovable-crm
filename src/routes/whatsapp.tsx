@@ -1,8 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import { MessageSquare, Plus, RefreshCw, Power, Trash2, QrCode, CheckCircle2, AlertCircle } from "lucide-react";
-import { useState, useEffect } from "react";
+import { 
+  MessageSquare, Plus, RefreshCw, Power, Trash2, QrCode, 
+  CheckCircle2, AlertCircle, Phone, User, Settings2,
+  ShieldCheck, Info, Search, Filter, MoreVertical,
+  ExternalLink, LogOut, Smartphone
+} from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
 import { evolution, type Instance } from "@/lib/evolution";
 import { toast } from "sonner";
 import { QrCodeModal } from "@/components/whatsapp/QrCodeModal";
@@ -22,6 +27,7 @@ function WhatsAppPage() {
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchInstances = async () => {
     try {
@@ -40,6 +46,19 @@ function WhatsAppPage() {
     fetchInstances();
   }, []);
 
+  const filteredInstances = useMemo(() => {
+    return instances.filter(inst => 
+      inst.instanceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      inst.owner?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [instances, searchQuery]);
+
+  const stats = useMemo(() => ({
+    total: instances.length,
+    connected: instances.filter(i => i.status === "open").length,
+    disconnected: instances.filter(i => i.status !== "open").length,
+  }), [instances]);
+
   const handleCreate = async () => {
     const name = prompt("Nome da nova instância (ex: Suporte_01):");
     if (!name) return;
@@ -56,25 +75,91 @@ function WhatsAppPage() {
     }
   };
 
+  const handleLogout = async (name: string) => {
+    if (!confirm(`Deseja realmente desconectar a instância ${name}?`)) return;
+    try {
+      await evolution.logoutInstance(name);
+      toast.success("Instância desconectada!");
+      fetchInstances();
+    } catch (err) {
+      toast.error("Erro ao desconectar.");
+    }
+  };
+
+  const handleDelete = async (name: string) => {
+    if (!confirm(`Deseja realmente EXCLUIR permanentemente a instância ${name}?`)) return;
+    try {
+      await evolution.deleteInstance(name);
+      toast.success("Instância excluída!");
+      fetchInstances();
+    } catch (err) {
+      toast.error("Erro ao excluir.");
+    }
+  };
+
   return (
-    <div className="min-h-screen flex w-full bg-background">
+    <div className="min-h-screen flex w-full bg-[#f8fafc]">
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Conexões WhatsApp" subtitle="Gerencie seus números via Evolution API" />
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold font-display">Instâncias Ativas</h2>
-            <div className="flex gap-2">
+        <Topbar title="Gestão de WhatsApp" subtitle="Hub de conexões via Evolution API" />
+        
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8 space-y-8">
+          {/* Stats Overview */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-card rounded-2xl p-5 border border-border shadow-sm flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <Smartphone className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Total de Instâncias</p>
+                <p className="text-2xl font-bold">{stats.total}</p>
+              </div>
+            </div>
+            <div className="bg-card rounded-2xl p-5 border border-border shadow-sm flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center text-success">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Conectadas</p>
+                <p className="text-2xl font-bold">{stats.connected}</p>
+              </div>
+            </div>
+            <div className="bg-card rounded-2xl p-5 border border-border shadow-sm flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-warning/10 flex items-center justify-center text-warning">
+                <AlertCircle className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium">Desconectadas</p>
+                <p className="text-2xl font-bold">{stats.disconnected}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-card p-4 rounded-2xl border border-border shadow-sm">
+            <div className="relative w-full sm:w-96">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input 
+                type="text"
+                placeholder="Buscar por nome ou número..."
+                className="w-full h-10 pl-10 pr-4 rounded-xl bg-muted/50 border-none text-sm focus:ring-2 focus:ring-primary/20 transition"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <button 
                 onClick={fetchInstances}
-                className="h-9 px-3 rounded-xl border border-border hover:bg-muted transition flex items-center gap-2 text-sm"
+                className="h-10 px-4 rounded-xl border border-border hover:bg-muted transition flex items-center gap-2 text-sm font-medium"
               >
-                <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Atualizar
+                <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> 
+                <span className="hidden sm:inline">Sincronizar</span>
               </button>
               <button 
                 onClick={handleCreate}
                 disabled={isCreating}
-                className="h-9 px-4 rounded-xl bg-gradient-primary text-white text-sm font-semibold shadow-elegant hover:opacity-95 transition flex items-center gap-2"
+                className="flex-1 sm:flex-none h-10 px-6 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 <Plus className="h-4 w-4" /> Nova Conexão
               </button>
@@ -82,77 +167,97 @@ function WhatsAppPage() {
           </div>
 
           {loading && instances.length === 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-48 rounded-2xl bg-muted/30 animate-pulse border border-border" />
+                <div key={i} className="h-56 rounded-3xl bg-card animate-pulse border border-border" />
               ))}
             </div>
-          ) : instances.length === 0 ? (
-            <div className="rounded-2xl bg-card border border-border shadow-card p-12 text-center">
-              <div className="h-14 w-14 rounded-2xl bg-muted grid place-items-center mx-auto mb-4">
-                <MessageSquare className="h-6 w-6 text-muted-foreground" />
+          ) : filteredInstances.length === 0 ? (
+            <div className="rounded-3xl bg-card border border-border shadow-sm p-16 text-center max-w-2xl mx-auto">
+              <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
+                <MessageSquare className="h-10 w-10 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold">Nenhuma conexão encontrada</h3>
-              <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
-                Conecte seu primeiro número do WhatsApp usando a Evolution API para começar a receber leads.
+              <h3 className="text-2xl font-bold">Inicie sua operação</h3>
+              <p className="text-muted-foreground mt-3 max-w-sm mx-auto leading-relaxed">
+                Conecte múltiplas contas do WhatsApp para automatizar seu CRM e gerenciar leads em escala.
               </p>
               <button 
                 onClick={handleCreate}
-                className="mt-6 h-10 px-6 rounded-xl bg-primary text-primary-foreground text-sm font-semibold transition"
+                className="mt-8 h-12 px-8 rounded-xl bg-primary text-primary-foreground font-bold hover:shadow-xl hover:shadow-primary/20 transition-all"
               >
-                Configurar Evolution API
+                Configurar Agora
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {instances.map((inst) => (
-                <div key={inst.instanceId} className="rounded-2xl bg-card border border-border p-5 shadow-card hover:shadow-elegant transition-all">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 rounded-xl bg-muted overflow-hidden grid place-items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredInstances.map((inst) => (
+                <div 
+                  key={inst.instanceId} 
+                  className="group relative rounded-3xl bg-card border border-border p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="relative h-16 w-16 rounded-2xl bg-muted overflow-hidden flex items-center justify-center ring-4 ring-muted">
                         {inst.profilePictureUrl ? (
                           <img src={inst.profilePictureUrl} alt={inst.instanceName} className="h-full w-full object-cover" />
                         ) : (
-                          <MessageSquare className="h-6 w-6 text-muted-foreground" />
+                          <User className="h-8 w-8 text-muted-foreground/50" />
                         )}
+                        <div className={`absolute bottom-0 right-0 h-4 w-4 border-2 border-card rounded-full ${inst.status === "open" ? "bg-success" : "bg-warning"}`} />
                       </div>
                       <div>
-                        <h4 className="font-bold text-sm leading-tight">{inst.instanceName}</h4>
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <span className={`h-2 w-2 rounded-full ${inst.status === "open" ? "bg-success" : "bg-warning"}`} />
-                          <span className="text-[11px] font-medium text-muted-foreground uppercase">
-                            {inst.status === "open" ? "Conectado" : "Desconectado"}
-                          </span>
-                        </div>
+                        <h4 className="font-bold text-lg leading-tight">{inst.instanceName}</h4>
+                        <p className="text-xs font-medium text-muted-foreground mt-1 flex items-center gap-1">
+                          {inst.status === "open" ? (
+                            <><CheckCircle2 className="h-3 w-3 text-success" /> Ativo agora</>
+                          ) : (
+                            <><AlertCircle className="h-3 w-3 text-warning" /> Aguardando pareamento</>
+                          )}
+                        </p>
                       </div>
                     </div>
-                    <button className="h-8 w-8 grid place-items-center rounded-lg hover:bg-muted text-muted-foreground">
-                      <Settings2 className="h-4 w-4" />
-                    </button>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">Número:</span>
-                      <span className="font-medium">{inst.owner || "Não vinculado"}</span>
+                    
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-muted text-muted-foreground">
+                        <MoreVertical className="h-5 w-5" />
+                      </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 mt-5">
+                  <div className="space-y-4 mb-6">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-xs font-semibold text-muted-foreground">Número vinculado</span>
+                      </div>
+                      <span className="text-sm font-bold tabular-nums">
+                        {inst.owner ? `+${inst.owner.split('@')[0]}` : "Pendente"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
                     {inst.status !== "open" ? (
                       <button 
                         onClick={() => setSelectedInstance(inst.instanceName)}
-                        className="col-span-2 h-9 rounded-xl bg-primary/10 text-primary text-xs font-bold uppercase tracking-wide hover:bg-primary/20 transition flex items-center justify-center gap-2"
+                        className="flex-1 h-11 rounded-2xl bg-primary text-primary-foreground text-sm font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2"
                       >
-                        <QrCode className="h-4 w-4" /> Gerar QR Code
+                        <QrCode className="h-4 w-4" /> Conectar WhatsApp
                       </button>
                     ) : (
                       <>
-                        <button className="h-9 rounded-xl bg-muted text-foreground text-xs font-bold uppercase tracking-wide hover:bg-muted/80 transition flex items-center justify-center gap-2">
-                          <Power className="h-4 w-4" /> Sair
+                        <button 
+                          onClick={() => handleLogout(inst.instanceName)}
+                          className="flex-1 h-11 rounded-2xl bg-muted text-foreground text-sm font-bold hover:bg-muted/80 transition flex items-center justify-center gap-2"
+                        >
+                          <LogOut className="h-4 w-4" /> Desconectar
                         </button>
-                        <button className="h-9 rounded-xl bg-destructive/10 text-destructive text-xs font-bold uppercase tracking-wide hover:bg-destructive/20 transition flex items-center justify-center gap-2">
-                          <Trash2 className="h-4 w-4" /> Excluir
+                        <button 
+                          onClick={() => handleDelete(inst.instanceName)}
+                          className="h-11 w-11 rounded-2xl bg-destructive/10 text-destructive hover:bg-destructive/20 transition flex items-center justify-center"
+                          title="Excluir instância"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </>
                     )}
@@ -162,29 +267,37 @@ function WhatsAppPage() {
             </div>
           )}
 
-          {/* Guia de Configuração */}
-          <div className="mt-8 rounded-2xl bg-primary/5 border border-primary/10 p-6">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-primary mb-4 flex items-center gap-2">
-              <AlertCircle className="h-4 w-4" /> Configuração da API Evolution
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <div className="text-xs font-bold text-foreground/70">1. URL da API</div>
-                <div className="text-[11px] font-mono bg-card border border-border p-2 rounded truncate">
-                  {import.meta.env.VITE_EVOLUTION_API_URL || "Configurar no Lovable (Secrets)"}
+          {/* API Information */}
+          <div className="rounded-3xl bg-slate-900 text-white p-8 overflow-hidden relative group">
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+              <ShieldCheck className="h-32 w-32" />
+            </div>
+            
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+              <div className="max-w-md">
+                <div className="flex items-center gap-2 text-primary/80 mb-2">
+                  <Info className="h-4 w-4" />
+                  <span className="text-xs font-bold uppercase tracking-widest tracking-widest">Evolution API Status</span>
                 </div>
+                <h3 className="text-2xl font-bold mb-3">Infraestrutura Segura</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  Suas conexões são processadas via Evolution API em servidores criptografados, garantindo alta performance e estabilidade para automações.
+                </p>
               </div>
-              <div className="space-y-2">
-                <div className="text-xs font-bold text-foreground/70">2. Chave Global</div>
-                <div className="text-[11px] font-mono bg-card border border-border p-2 rounded">
-                  ••••••••••••••••••••••••
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm">
+                  <p className="text-[10px] uppercase font-bold text-slate-500 mb-1">API Endpoint</p>
+                  <p className="text-xs font-mono text-slate-300 truncate max-w-[180px]">
+                    {import.meta.env.VITE_EVOLUTION_API_URL || "API não configurada"}
+                  </p>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <div className="text-xs font-bold text-foreground/70">3. Status do Servidor</div>
-                <div className="flex items-center gap-2 mt-1">
-                  <CheckCircle2 className="h-4 w-4 text-success" />
-                  <span className="text-xs font-semibold text-success uppercase">Operacional</span>
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm">
+                  <p className="text-[10px] uppercase font-bold text-slate-500 mb-1">Status Global</p>
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
+                    <span className="text-xs font-bold text-success">OPERACIONAL</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -205,8 +318,3 @@ function WhatsAppPage() {
     </div>
   );
 }
-
-// Mocking some missing icons/components for simplicity
-const Settings2 = (props: any) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
-);
