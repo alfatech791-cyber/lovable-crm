@@ -14,11 +14,15 @@ export const Route = createFileRoute("/agentes")({
   component: AgentsPage,
 });
 
-const agents = [
-  { id: 1, name: "Renato Silva", role: "Administrador", status: "online", instances: ["Suporte_01", "Vendas_BR"], email: "renato@conectacrm.com" },
-  { id: 2, name: "Ana Clara", role: "Agente", status: "online", instances: ["Vendas_SP"], email: "ana.clara@conectacrm.com" },
-  { id: 3, name: "Carlos Eduardo", role: "Agente", status: "offline", instances: [], email: "carlos.edu@conectacrm.com" },
-];
+interface Agent {
+  id: number;
+  name: string;
+  role: string;
+  status: string;
+  instances: string[];
+  email: string;
+}
+const agents: Agent[] = [];
 
 function AgentsPage() {
   const handleTraining = () => {
@@ -75,6 +79,15 @@ function AgentsPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4">
+            {agents.length === 0 && (
+              <div className="rounded-2xl bg-card border border-border p-12 text-center shadow-card">
+                <div className="h-14 w-14 rounded-2xl bg-muted grid place-items-center mx-auto mb-4">
+                  <Headphones className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold">Nenhum agente cadastrado</h3>
+                <p className="text-sm text-muted-foreground mt-1">Sua equipe aparecerá aqui assim que você convidar o primeiro membro.</p>
+              </div>
+            )}
             {agents.map((agent) => (
               <div key={agent.id} className="rounded-2xl bg-card border border-border p-5 shadow-card hover:shadow-elegant transition-all flex items-center gap-6">
                 <div className="relative">
