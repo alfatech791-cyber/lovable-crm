@@ -59,7 +59,10 @@ import { Route as AppOperacaoTransportadoresRouteImport } from './routes/_app/op
 import { Route as AppOperacaoTiposProdutosRouteImport } from './routes/_app/operacao/tipos-produtos'
 import { Route as AppOperacaoServicosRouteImport } from './routes/_app/operacao/servicos'
 import { Route as AppOperacaoMaquininhasRouteImport } from './routes/_app/operacao/maquininhas'
+import { Route as AppFinanceiroContasReceberRouteImport } from './routes/_app/financeiro/contas-receber'
+import { Route as AppFinanceiroContasPagarRouteImport } from './routes/_app/financeiro/contas-pagar'
 import { Route as AppConfiguracoesParametrosRouteImport } from './routes/_app/configuracoes/parametros'
+import { Route as AppClientesNovoRouteImport } from './routes/_app/clientes/novo'
 
 const WhatsappRoute = WhatsappRouteImport.update({
   id: '/whatsapp',
@@ -313,12 +316,29 @@ const AppOperacaoMaquininhasRoute = AppOperacaoMaquininhasRouteImport.update({
   path: '/operacao/maquininhas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppFinanceiroContasReceberRoute =
+  AppFinanceiroContasReceberRouteImport.update({
+    id: '/_app/financeiro/contas-receber',
+    path: '/financeiro/contas-receber',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AppFinanceiroContasPagarRoute =
+  AppFinanceiroContasPagarRouteImport.update({
+    id: '/_app/financeiro/contas-pagar',
+    path: '/financeiro/contas-pagar',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AppConfiguracoesParametrosRoute =
   AppConfiguracoesParametrosRouteImport.update({
     id: '/_app/configuracoes/parametros',
     path: '/configuracoes/parametros',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AppClientesNovoRoute = AppClientesNovoRouteImport.update({
+  id: '/_app/clientes/novo',
+  path: '/clientes/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -364,7 +384,10 @@ export interface FileRoutesByFullPath {
   '/vendas/historico': typeof VendasHistoricoRoute
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
+  '/clientes/novo': typeof AppClientesNovoRoute
   '/configuracoes/parametros': typeof AppConfiguracoesParametrosRoute
+  '/financeiro/contas-pagar': typeof AppFinanceiroContasPagarRoute
+  '/financeiro/contas-receber': typeof AppFinanceiroContasReceberRoute
   '/operacao/maquininhas': typeof AppOperacaoMaquininhasRoute
   '/operacao/servicos': typeof AppOperacaoServicosRoute
   '/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
@@ -417,7 +440,10 @@ export interface FileRoutesByTo {
   '/vendas/historico': typeof VendasHistoricoRoute
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
+  '/clientes/novo': typeof AppClientesNovoRoute
   '/configuracoes/parametros': typeof AppConfiguracoesParametrosRoute
+  '/financeiro/contas-pagar': typeof AppFinanceiroContasPagarRoute
+  '/financeiro/contas-receber': typeof AppFinanceiroContasReceberRoute
   '/operacao/maquininhas': typeof AppOperacaoMaquininhasRoute
   '/operacao/servicos': typeof AppOperacaoServicosRoute
   '/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
@@ -469,7 +495,10 @@ export interface FileRoutesById {
   '/vendas/historico': typeof VendasHistoricoRoute
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
+  '/_app/clientes/novo': typeof AppClientesNovoRoute
   '/_app/configuracoes/parametros': typeof AppConfiguracoesParametrosRoute
+  '/_app/financeiro/contas-pagar': typeof AppFinanceiroContasPagarRoute
+  '/_app/financeiro/contas-receber': typeof AppFinanceiroContasReceberRoute
   '/_app/operacao/maquininhas': typeof AppOperacaoMaquininhasRoute
   '/_app/operacao/servicos': typeof AppOperacaoServicosRoute
   '/_app/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
@@ -524,7 +553,10 @@ export interface FileRouteTypes {
     | '/vendas/historico'
     | '/vendas/orcamentos'
     | '/vendas/simulador'
+    | '/clientes/novo'
     | '/configuracoes/parametros'
+    | '/financeiro/contas-pagar'
+    | '/financeiro/contas-receber'
     | '/operacao/maquininhas'
     | '/operacao/servicos'
     | '/operacao/tipos-produtos'
@@ -577,7 +609,10 @@ export interface FileRouteTypes {
     | '/vendas/historico'
     | '/vendas/orcamentos'
     | '/vendas/simulador'
+    | '/clientes/novo'
     | '/configuracoes/parametros'
+    | '/financeiro/contas-pagar'
+    | '/financeiro/contas-receber'
     | '/operacao/maquininhas'
     | '/operacao/servicos'
     | '/operacao/tipos-produtos'
@@ -628,7 +663,10 @@ export interface FileRouteTypes {
     | '/vendas/historico'
     | '/vendas/orcamentos'
     | '/vendas/simulador'
+    | '/_app/clientes/novo'
     | '/_app/configuracoes/parametros'
+    | '/_app/financeiro/contas-pagar'
+    | '/_app/financeiro/contas-receber'
     | '/_app/operacao/maquininhas'
     | '/_app/operacao/servicos'
     | '/_app/operacao/tipos-produtos'
@@ -660,7 +698,10 @@ export interface RootRouteChildren {
   ServicosRoute: typeof ServicosRouteWithChildren
   VendasRoute: typeof VendasRouteWithChildren
   WhatsappRoute: typeof WhatsappRoute
+  AppClientesNovoRoute: typeof AppClientesNovoRoute
   AppConfiguracoesParametrosRoute: typeof AppConfiguracoesParametrosRoute
+  AppFinanceiroContasPagarRoute: typeof AppFinanceiroContasPagarRoute
+  AppFinanceiroContasReceberRoute: typeof AppFinanceiroContasReceberRoute
   AppOperacaoMaquininhasRoute: typeof AppOperacaoMaquininhasRoute
   AppOperacaoServicosRoute: typeof AppOperacaoServicosRoute
   AppOperacaoTiposProdutosRoute: typeof AppOperacaoTiposProdutosRoute
@@ -1022,11 +1063,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOperacaoMaquininhasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/financeiro/contas-receber': {
+      id: '/_app/financeiro/contas-receber'
+      path: '/financeiro/contas-receber'
+      fullPath: '/financeiro/contas-receber'
+      preLoaderRoute: typeof AppFinanceiroContasReceberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/financeiro/contas-pagar': {
+      id: '/_app/financeiro/contas-pagar'
+      path: '/financeiro/contas-pagar'
+      fullPath: '/financeiro/contas-pagar'
+      preLoaderRoute: typeof AppFinanceiroContasPagarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/configuracoes/parametros': {
       id: '/_app/configuracoes/parametros'
       path: '/configuracoes/parametros'
       fullPath: '/configuracoes/parametros'
       preLoaderRoute: typeof AppConfiguracoesParametrosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/clientes/novo': {
+      id: '/_app/clientes/novo'
+      path: '/clientes/novo'
+      fullPath: '/clientes/novo'
+      preLoaderRoute: typeof AppClientesNovoRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1136,7 +1198,10 @@ const rootRouteChildren: RootRouteChildren = {
   ServicosRoute: ServicosRouteWithChildren,
   VendasRoute: VendasRouteWithChildren,
   WhatsappRoute: WhatsappRoute,
+  AppClientesNovoRoute: AppClientesNovoRoute,
   AppConfiguracoesParametrosRoute: AppConfiguracoesParametrosRoute,
+  AppFinanceiroContasPagarRoute: AppFinanceiroContasPagarRoute,
+  AppFinanceiroContasReceberRoute: AppFinanceiroContasReceberRoute,
   AppOperacaoMaquininhasRoute: AppOperacaoMaquininhasRoute,
   AppOperacaoServicosRoute: AppOperacaoServicosRoute,
   AppOperacaoTiposProdutosRoute: AppOperacaoTiposProdutosRoute,
