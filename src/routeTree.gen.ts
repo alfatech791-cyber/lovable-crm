@@ -52,6 +52,7 @@ import { Route as EstoqueMovimentacoesRouteImport } from './routes/estoque.movim
 import { Route as EstoqueEtiquetasRouteImport } from './routes/estoque.etiquetas'
 import { Route as EstoqueComprasRouteImport } from './routes/estoque.compras'
 import { Route as EstoqueAtualRouteImport } from './routes/estoque.atual'
+import { Route as AppOperacaoTiposProdutosRouteImport } from './routes/_app/operacao/tipos-produtos'
 
 const WhatsappRoute = WhatsappRouteImport.update({
   id: '/whatsapp',
@@ -268,6 +269,12 @@ const EstoqueAtualRoute = EstoqueAtualRouteImport.update({
   path: '/atual',
   getParentRoute: () => EstoqueRoute,
 } as any)
+const AppOperacaoTiposProdutosRoute =
+  AppOperacaoTiposProdutosRouteImport.update({
+    id: '/_app/operacao/tipos-produtos',
+    path: '/operacao/tipos-produtos',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -313,6 +320,7 @@ export interface FileRoutesByFullPath {
   '/vendas/historico': typeof VendasHistoricoRoute
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
+  '/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -358,6 +366,7 @@ export interface FileRoutesByTo {
   '/vendas/historico': typeof VendasHistoricoRoute
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
+  '/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -404,6 +413,7 @@ export interface FileRoutesById {
   '/vendas/historico': typeof VendasHistoricoRoute
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
+  '/_app/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -451,6 +461,7 @@ export interface FileRouteTypes {
     | '/vendas/historico'
     | '/vendas/orcamentos'
     | '/vendas/simulador'
+    | '/operacao/tipos-produtos'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -496,6 +507,7 @@ export interface FileRouteTypes {
     | '/vendas/historico'
     | '/vendas/orcamentos'
     | '/vendas/simulador'
+    | '/operacao/tipos-produtos'
   id:
     | '__root__'
     | '/'
@@ -541,6 +553,7 @@ export interface FileRouteTypes {
     | '/vendas/historico'
     | '/vendas/orcamentos'
     | '/vendas/simulador'
+    | '/_app/operacao/tipos-produtos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -565,6 +578,7 @@ export interface RootRouteChildren {
   ServicosRoute: typeof ServicosRouteWithChildren
   VendasRoute: typeof VendasRouteWithChildren
   WhatsappRoute: typeof WhatsappRoute
+  AppOperacaoTiposProdutosRoute: typeof AppOperacaoTiposProdutosRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -870,6 +884,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EstoqueAtualRouteImport
       parentRoute: typeof EstoqueRoute
     }
+    '/_app/operacao/tipos-produtos': {
+      id: '/_app/operacao/tipos-produtos'
+      path: '/operacao/tipos-produtos'
+      fullPath: '/operacao/tipos-produtos'
+      preLoaderRoute: typeof AppOperacaoTiposProdutosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -977,6 +998,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicosRoute: ServicosRouteWithChildren,
   VendasRoute: VendasRouteWithChildren,
   WhatsappRoute: WhatsappRoute,
+  AppOperacaoTiposProdutosRoute: AppOperacaoTiposProdutosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
