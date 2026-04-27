@@ -53,42 +53,74 @@ function Dashboard() {
            { id: "8", title: "Luciana Dias", desc: "MacBook Air M2", meta: "R$ 8.999,00", time: "08:05", badge: "Confirmado" },
          ]
       });
-    } else if (l.includes("os")) {
-      setModalContent({
-        title: "Ordens de Serviço",
-        subtitle: "Serviços em andamento e pendentes",
-        icon: Wrench,
-        color: "text-warning bg-warning/10",
-        items: [
-          { id: "OS1", title: "João Silva", desc: "iPhone 13 - Troca de Tela", meta: "Urgente", time: "Aguardando", badge: "Em análise" },
-          { id: "OS2", title: "Maria Oliveira", desc: "MacBook Pro - Limpeza", meta: "Normal", time: "Pendente", badge: "Aguardando" },
-          { id: "OS3", title: "Pedro Santos", desc: "S22 - Conector Carga", meta: "Alta", time: "Pronto", badge: "Concluído" },
-        ]
-      });
-    } else if (l.includes("estoque")) {
-      setModalContent({
-        title: "Alertas de Estoque",
-        subtitle: "Produtos que precisam de reposição",
-        icon: Box,
-        color: "text-destructive bg-destructive/10",
-        items: [
-          { id: "P1", title: "iPhone 15 Pro Max", desc: "Estoque: 2 unidades", meta: "Mín: 5", time: "Smartphones", badge: "Crítico" },
-          { id: "P2", title: "Carregador MagSafe", desc: "Estoque: 1 unidade", meta: "Mín: 10", time: "Acessórios", badge: "Repor" },
-          { id: "P3", title: "Cabo USB-C 2m", desc: "Estoque: 0 unidades", meta: "Mín: 15", time: "Cabos", badge: "Esgotado" },
-        ]
-      });
-    } else if (l.includes("leads")) {
-      setModalContent({
-        title: "Novos Leads",
-        subtitle: "Interessados captados hoje",
-        icon: Users,
-        color: "text-info bg-info/10",
-        items: [
-          { id: "L1", title: "Arthur Mendes", desc: "Interesse: MacBook Air M2", meta: "WhatsApp", time: "10 min", badge: "Novo" },
-          { id: "L2", title: "Julia Rosa", desc: "Interesse: iPhone 15", meta: "Instagram", time: "45 min", badge: "Novo" },
-          { id: "L3", title: "Fernando Paz", desc: "Interesse: Manutenção", meta: "Facebook", time: "2h", badge: "Atendimento" },
-        ]
-      });
+     } else if (l.includes("os")) {
+       setModalContent({
+         title: "Ordens de Serviço",
+         subtitle: "Serviços em andamento e pendentes",
+         icon: Wrench,
+         color: "text-warning bg-warning/10",
+         items: [
+           { id: "OS1", title: "João Silva", desc: "iPhone 13 - Troca de Tela", meta: "Urgente", time: "14:20", badge: "Em análise" },
+           { id: "OS2", title: "Maria Oliveira", desc: "MacBook Pro - Limpeza", meta: "Normal", time: "13:45", badge: "Aguardando" },
+           { id: "OS3", title: "Pedro Santos", desc: "Samsung S22 - Carga", meta: "Alta", time: "12:10", badge: "Concluído" },
+           { id: "OS4", title: "Ana Paula", desc: "iPhone 14 - Bateria", meta: "Normal", time: "11:30", badge: "Em análise" },
+           { id: "OS5", title: "Carlos Lima", desc: "iPad Air - Tela", meta: "Alta", time: "10:15", badge: "Aguardando" },
+           { id: "OS6", title: "Roberto Dias", desc: "Watch S9 - Sensor", meta: "Normal", time: "09:40", badge: "Em análise" },
+           { id: "OS7", title: "Juliana M.", desc: "S23 Ultra - Software", meta: "Normal", time: "09:15", badge: "Concluído" },
+           { id: "OS8", title: "Marcos V.", desc: "MacBook Air - Teclado", meta: "Urgente", time: "08:50", badge: "Aguardando" },
+           { id: "OS9", title: "Sueli F.", desc: "iPhone 11 - Carcaça", meta: "Normal", time: "08:30", badge: "Em análise" },
+           { id: "OS10", title: "Ricardo T.", desc: "Moto G54 - Audio", meta: "Normal", time: "08:15", badge: "Concluído" },
+           { id: "OS11", title: "Patrícia L.", desc: "iPhone 12 - FaceID", meta: "Alta", time: "08:00", badge: "Aguardando" },
+           { id: "OS12", title: "Felipe G.", desc: "Notebook Dell - RAM", meta: "Normal", time: "07:45", badge: "Em análise" },
+           { id: "OS13", title: "Sandra R.", desc: "iPhone XR - Botão", meta: "Normal", time: "07:30", badge: "Concluído" },
+           { id: "OS14", title: "Tiago S.", desc: "Xiaomi 13 - Câmera", meta: "Normal", time: "07:15", badge: "Aguardando" },
+         ]
+       });
+     } else if (l.includes("estoque")) {
+       setModalContent({
+         title: "Alertas de Estoque",
+         subtitle: "Produtos que precisam de reposição",
+         icon: Box,
+         color: "text-destructive bg-destructive/10",
+         items: [
+           { id: "P1", title: "iPhone 15 Pro Max", desc: "Estoque: 2 unidades", meta: "Mín: 5", time: "Smartphones", badge: "Crítico" },
+           { id: "P2", title: "Carregador MagSafe", desc: "Estoque: 1 unidade", meta: "Mín: 10", time: "Acessórios", badge: "Repor" },
+           { id: "P3", title: "Cabo USB-C 2m", desc: "Estoque: 0 unidades", meta: "Mín: 15", time: "Cabos", badge: "Esgotado" },
+         ]
+       });
+     } else if (l.includes("leads")) {
+       setModalContent({
+         title: "Novos Leads",
+         subtitle: "Interessados captados hoje",
+         icon: Users,
+         color: "text-info bg-info/10",
+         items: [
+           { id: "L1", title: "Arthur Mendes", desc: "Interesse: MacBook Air M2", meta: "WhatsApp", time: "10 min", badge: "Novo" },
+           { id: "L2", title: "Julia Rosa", desc: "Interesse: iPhone 15", meta: "Instagram", time: "45 min", badge: "Novo" },
+           { id: "L3", title: "Fernando Paz", desc: "Interesse: Manutenção", meta: "Facebook", time: "2h", badge: "Atendimento" },
+           { id: "L4", title: "Beatriz Costa", desc: "Interesse: Acessórios", meta: "Instagram", time: "3h", badge: "Novo" },
+           { id: "L5", title: "Marcos Pereira", desc: "Interesse: Upgrade", meta: "Google", time: "4h", badge: "Novo" },
+           { id: "L6", title: "Clara Nunes", desc: "Interesse: iPhone 13", meta: "WhatsApp", time: "5h", badge: "Atendimento" },
+           { id: "L7", title: "Fábio Júnior", desc: "Interesse: MacBook Pro", meta: "Instagram", time: "6h", badge: "Novo" },
+           { id: "L8", title: "Luana M.", desc: "Interesse: Apple Watch", meta: "WhatsApp", time: "7h", badge: "Novo" },
+           { id: "L9", title: "Gabriel S.", desc: "Interesse: iPad Pro", meta: "Facebook", time: "8h", badge: "Atendimento" },
+           { id: "L10", title: "Renata F.", desc: "Interesse: Troca", meta: "Google", time: "9h", badge: "Novo" },
+           { id: "L11", title: "Igor B.", desc: "Interesse: iPhone 14", meta: "WhatsApp", time: "10h", badge: "Novo" },
+           { id: "L12", title: "Amanda K.", desc: "Interesse: Películas", meta: "Instagram", time: "11h", badge: "Novo" },
+           { id: "L13", title: "Vitor J.", desc: "Interesse: MacBook Air", meta: "Google", time: "12h", badge: "Atendimento" },
+           { id: "L14", title: "Paula O.", desc: "Interesse: iPhone 15", meta: "WhatsApp", time: "13h", badge: "Novo" },
+           { id: "L15", title: "Henrique C.", desc: "Interesse: Acessórios", meta: "Instagram", time: "14h", badge: "Novo" },
+           { id: "L16", title: "Giovanna L.", desc: "Interesse: iPad Air", meta: "Facebook", time: "15h", badge: "Novo" },
+           { id: "L17", title: "Rodrigo P.", desc: "Interesse: Manutenção", meta: "WhatsApp", time: "16h", badge: "Atendimento" },
+           { id: "L18", title: "Larissa M.", desc: "Interesse: iPhone 12", meta: "Instagram", time: "17h", badge: "Novo" },
+           { id: "L19", title: "Daniel W.", desc: "Interesse: MacBook Pro", meta: "Google", time: "18h", badge: "Novo" },
+           { id: "L20", title: "Sofia R.", desc: "Interesse: Apple Watch", meta: "WhatsApp", time: "19h", badge: "Novo" },
+           { id: "L21", title: "Mateus H.", desc: "Interesse: iPhone 15 Pro", meta: "Instagram", time: "20h", badge: "Novo" },
+           { id: "L22", title: "Carolina B.", desc: "Interesse: AirPods", meta: "Facebook", time: "21h", badge: "Atendimento" },
+           { id: "L23", title: "Thiago A.", desc: "Interesse: iPad Mini", meta: "WhatsApp", time: "22h", badge: "Novo" },
+           { id: "L24", title: "Bruna S.", desc: "Interesse: iPhone 14 Pro", meta: "Instagram", time: "23h", badge: "Novo" },
+         ]
+       });
     } else {
       setModalContent({
         title: label,
