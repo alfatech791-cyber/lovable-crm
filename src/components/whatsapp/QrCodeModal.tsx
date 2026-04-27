@@ -13,7 +13,7 @@ export function QrCodeModal({ instanceName, onClose, onSuccess }: QrCodeModalPro
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<string>("connecting");
+  const [status, setStatus] = useState<string>("idle");
 
   const fetchQrCode = async () => {
     try {
