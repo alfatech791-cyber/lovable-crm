@@ -20,8 +20,9 @@ export function AppSidebar() {
       "/crm": "crm",
       "/financeiro": "financeiro",
       "/fiscal": "fiscal",
-      "/relatorios": "relatorios",
-      "/configuracoes": "configuracoes",
+       "/relatorios": "relatorios",
+       "/operacao": "configuracoes",
+       "/configuracoes": "configuracoes",
     };
 
     const permissionKey = permissionMap[item.url];

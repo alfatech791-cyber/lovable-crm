@@ -54,15 +54,28 @@ export const sidebarItems = [
      ]
    },
    { title: "Relatórios", url: "/relatorios", icon: "BarChart3" as const },
-  {
-    title: "Configurações",
-    url: "/configuracoes",
-    icon: "Settings" as const,
-    children: [
-      { title: "Equipe", url: "/equipe" },
-      { title: "Geral", url: "/configuracoes" },
-    ]
-  },
+   { 
+     title: "Operação", 
+     url: "/operacao", 
+     icon: "Settings2" as const,
+     children: [
+       { title: "Tipos de Produtos", url: "/operacao/tipos-produtos" },
+       { title: "Transportadores", url: "/operacao/transportadores" },
+       { title: "Maquininhas POS", url: "/operacao/maquininhas" },
+       { title: "Serviços", url: "/servicos/lista" },
+       { title: "Modelos Etiquetas", url: "/estoque/etiquetas" },
+     ]
+   },
+   {
+     title: "Configurações",
+     url: "/configuracoes",
+     icon: "Settings" as const,
+     children: [
+       { title: "Equipe", url: "/equipe" },
+       { title: "Geral", url: "/configuracoes" },
+       { title: "Parâmetros", url: "/configuracoes/parametros" },
+     ]
+   },
 ] as const;
 
  export interface ServiceOrder {
