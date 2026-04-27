@@ -1,14 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import {
-  LayoutDashboard, Users, Filter, MessageCircle, MessageSquare,
-  Instagram, Workflow, UsersRound, BarChart3, Settings, Sparkles,
-  Headphones, ChevronRight,
-} from "lucide-react";
-
-const iconMap = {
-  LayoutDashboard, Users, Filter, MessageCircle, MessageSquare,
-  Instagram, Workflow, UsersRound, BarChart3, Settings,
-};
+import * as Icons from "lucide-react";
+import { Sparkles, ChevronRight } from "lucide-react";
 
 import { sidebarItems } from "@/lib/mock";
 
@@ -28,8 +20,8 @@ export function AppSidebar() {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        {sidebarItems.map((item) => {
-          const Icon = iconMap[item.icon];
+        {sidebarItems.map((item: any) => {
+          const Icon = (Icons as any)[item.icon] || Icons.HelpCircle;
           const active = location.pathname === item.url;
           return (
             <Link
@@ -77,8 +69,8 @@ export function AppSidebar() {
           </button>
         </div>
 
-        <Link to="/configuracoes" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-white transition">
-          <Headphones className="h-[18px] w-[18px]" />
+        <Link to="/configuracoes" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-white transition group">
+          <Icons.Headphones className="h-[18px] w-[18px]" />
           <div className="leading-tight">
             <div className="text-[13px] font-medium">Central de Ajuda</div>
             <div className="text-[11px] text-sidebar-foreground/50">Tutoriais e suporte</div>

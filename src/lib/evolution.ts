@@ -61,6 +61,15 @@ export const evolution = {
     return res.json();
   },
 
+  async getInstanceConnection(instanceName: string) {
+    const res = await fetch(`${API_URL}/instance/connectionState/${instanceName}`, {
+      headers: {
+        "apikey": API_KEY,
+      },
+    });
+    return res.json();
+  },
+
   async deleteInstance(instanceName: string) {
     const res = await fetch(`${API_URL}/instance/delete/${instanceName}`, {
       method: "DELETE",

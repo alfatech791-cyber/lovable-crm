@@ -4,6 +4,8 @@ export const sidebarItems = [
   { title: "Funil de Vendas", url: "/funil", icon: "Filter" as const },
   { title: "Atendimento", url: "/atendimento", icon: "MessageCircle" as const },
   { title: "WhatsApp", url: "/whatsapp", icon: "MessageSquare" as const },
+  { title: "Agentes", url: "/agentes", icon: "Headphones" as const },
+  { title: "Produtos", url: "/produtos", icon: "ShoppingBag" as const },
   { title: "Instagram", url: "/instagram", icon: "Instagram" as const },
   { title: "Automação", url: "/automacao", icon: "Workflow" as const },
   { title: "Equipe", url: "/equipe", icon: "UsersRound" as const },
