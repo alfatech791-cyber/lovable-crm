@@ -11,9 +11,10 @@ export const Route = createFileRoute("/relatorios")({
 });
 
 function ReportsPage() {
-  const { user } = useAuth();
+  const { profile } = useAuth();
+  const isAdmin = profile?.role === 'admin' || !profile;
 
-  if (!user.permissions.relatorios) {
+  if (!isAdmin) {
     return (
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />

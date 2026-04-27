@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
 
 export type Role = "admin" | "employee";
 
@@ -7,32 +9,51 @@ import { AppPermissions, DEFAULT_ADMIN_PERMISSIONS, DEFAULT_EMPLOYEE_PERMISSIONS
 export type { AppPermissions as UserPermissions };
 
 interface AuthContextType {
-  user: {
-    name: string;
-    role: Role;
-    permissions: AppPermissions;
-  };
-  setRole: (role: Role) => void;
-  updatePermissions: (perms: Partial<AppPermissions>) => void;
+  session: any;
+  user: User | null;
+  profile: any;
+  loading: boolean;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [role, setRoleState] = useState<Role>("admin");
-  const [permissions, setPermissions] = useState<AppPermissions>(DEFAULT_ADMIN_PERMISSIONS);
+  const [session, setSession] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const setRole = (newRole: Role) => {
-    setRoleState(newRole);
-    setPermissions(newRole === "admin" ? DEFAULT_ADMIN_PERMISSIONS : DEFAULT_EMPLOYEE_PERMISSIONS);
-  };
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) fetchProfile(session.user.id);
+      setLoading(false);
+    });
 
-  const updatePermissions = (perms: Partial<AppPermissions>) => {
-    setPermissions((prev) => ({ ...prev, ...perms }));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) fetchProfile(session.user.id);
+      else setProfile(null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function fetchProfile(userId: string) {
+    const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+    if (data) setProfile(data);
+  }
+
+  const logout = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user: { name: "Admin", role, permissions }, setRole, updatePermissions }}>
+    <AuthContext.Provider value={{ session, user, profile, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );

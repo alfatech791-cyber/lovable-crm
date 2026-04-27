@@ -1,13 +1,13 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import * as Icons from "lucide-react";
 import { Sparkles, ChevronRight } from "lucide-react";
-import { useAuth, UserPermissions } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 import { sidebarItems } from "@/lib/mock";
 
 export function AppSidebar() {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const filteredItems = sidebarItems;
 
@@ -89,13 +89,16 @@ export function AppSidebar() {
           </button>
         </div>
 
-        <Link to="/configuracoes" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-white transition group">
-          <Icons.Headphones className="h-[18px] w-[18px]" />
-          <div className="leading-tight">
-            <div className="text-[13px] font-medium">Central de Ajuda</div>
-            <div className="text-[11px] text-sidebar-foreground/50">Tutoriais e suporte</div>
+        <button 
+          onClick={logout}
+          className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition group"
+        >
+          <Icons.LogOut className="h-[18px] w-[18px]" />
+          <div className="leading-tight text-left">
+            <div className="text-[13px] font-medium">Sair da Conta</div>
+            <div className="text-[11px] opacity-60">Encerrar sessão</div>
           </div>
-        </Link>
+        </button>
       </div>
     </aside>
   );
