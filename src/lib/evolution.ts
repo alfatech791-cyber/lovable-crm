@@ -81,9 +81,6 @@ export const evolution = {
      });
      return res.json();
    },
-    });
-    return res.json();
-  },
 
   async getQrCode(instanceName: string) {
     const res = await fetch(`${API_URL}/instance/connect/${instanceName}`, {
