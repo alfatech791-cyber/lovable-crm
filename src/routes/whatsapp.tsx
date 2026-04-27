@@ -5,6 +5,7 @@ import { MessageSquare, Plus, RefreshCw, Power, Trash2, QrCode, CheckCircle2, Al
 import { useState, useEffect } from "react";
 import { evolution, type Instance } from "@/lib/evolution";
 import { toast } from "sonner";
+import { QrCodeModal } from "@/components/whatsapp/QrCodeModal";
 
 export const Route = createFileRoute("/whatsapp")({
   head: () => ({
@@ -20,6 +21,7 @@ function WhatsAppPage() {
   const [instances, setInstances] = useState<Instance[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+  const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
 
   const fetchInstances = async () => {
     try {
@@ -138,7 +140,10 @@ function WhatsAppPage() {
 
                   <div className="grid grid-cols-2 gap-2 mt-5">
                     {inst.status !== "open" ? (
-                      <button className="col-span-2 h-9 rounded-xl bg-primary/10 text-primary text-xs font-bold uppercase tracking-wide hover:bg-primary/20 transition flex items-center justify-center gap-2">
+                      <button 
+                        onClick={() => setSelectedInstance(inst.instanceName)}
+                        className="col-span-2 h-9 rounded-xl bg-primary/10 text-primary text-xs font-bold uppercase tracking-wide hover:bg-primary/20 transition flex items-center justify-center gap-2"
+                      >
                         <QrCode className="h-4 w-4" /> Gerar QR Code
                       </button>
                     ) : (
@@ -185,6 +190,17 @@ function WhatsAppPage() {
             </div>
           </div>
         </main>
+
+        {selectedInstance && (
+          <QrCodeModal 
+            instanceName={selectedInstance} 
+            onClose={() => setSelectedInstance(null)} 
+            onSuccess={() => {
+              setSelectedInstance(null);
+              fetchInstances();
+            }}
+          />
+        )}
       </div>
     </div>
   );
