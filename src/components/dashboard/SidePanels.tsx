@@ -1,8 +1,10 @@
-import { agenda, automations, tasks } from "@/lib/mock";
-import { ArrowRight, Send, CheckCircle2, MessageSquare, Zap, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+ import { agenda, automations, tasks } from "@/lib/mock";
+ import { ArrowRight, Send, CheckCircle2, MessageSquare, Zap, ChevronLeft, ChevronRight } from "lucide-react";
+ import { useState } from "react";
+ import { useNavigate } from "@tanstack/react-router";
 
 export function TasksCard() {
+   const navigate = useNavigate();
   return (
     <div className="rounded-2xl bg-card border border-border p-5 shadow-card">
       <h3 className="text-[15px] font-semibold mb-3">Tarefas do dia</h3>
@@ -15,9 +17,12 @@ export function TasksCard() {
           </li>
         ))}
       </ul>
-      <button className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition">
-        Ver todas as tarefas <ArrowRight className="h-3.5 w-3.5" />
-      </button>
+       <button 
+         onClick={() => navigate({ to: "/agendamentos" })}
+         className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition"
+       >
+         Ver todas as tarefas <ArrowRight className="h-3.5 w-3.5" />
+       </button>
     </div>
   );
 }
