@@ -10,7 +10,75 @@ import { Topbar } from "@/components/layout/Topbar";
  import { SalesChart } from "@/components/dashboard/SalesChart";
  import { 
    BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, 
-   PieChart as RePieChart, Pie
+   PieChart as RePieChart, Pie, AreaChart, Area
+           {/* Recent Detailed Reports Table */}
+           <div className="bg-white border border-border rounded-2xl shadow-card overflow-hidden">
+             <div className="p-6 border-b border-border flex items-center justify-between">
+               <div>
+                 <h3 className="text-lg font-bold">Relatórios Detalhados</h3>
+                 <p className="text-sm text-muted-foreground font-medium">Histórico de exportações e métricas consolidadas</p>
+               </div>
+               <button className="h-9 px-4 rounded-xl border border-border text-xs font-bold hover:bg-muted transition-colors">
+                 Configurar Colunas
+               </button>
+             </div>
+             <div className="overflow-x-auto">
+               <table className="w-full text-left">
+                 <thead className="bg-slate-50 border-b border-border">
+                   <tr>
+                     <th className="px-6 py-4 text-xs font-black text-muted-foreground uppercase tracking-wider">Nome do Relatório</th>
+                     <th className="px-6 py-4 text-xs font-black text-muted-foreground uppercase tracking-wider">Período</th>
+                     <th className="px-6 py-4 text-xs font-black text-muted-foreground uppercase tracking-wider">Tipo</th>
+                     <th className="px-6 py-4 text-xs font-black text-muted-foreground uppercase tracking-wider">Gerado em</th>
+                     <th className="px-6 py-4 text-xs font-black text-muted-foreground uppercase tracking-wider">Status</th>
+                     <th className="px-6 py-4 text-right pr-8"></th>
+                   </tr>
+                 </thead>
+                 <tbody className="divide-y divide-border">
+                   {[
+                     { name: "Performance de Vendas Q1", period: "Jan - Mar 2024", type: "Vendas", date: "Ontem às 14:30", status: "Concluído" },
+                     { name: "Origem e Atribuição de Leads", period: "Últimos 30 dias", type: "Marketing", date: "15 Abr 2024", status: "Concluído" },
+                     { name: "DRE Simplificado Mensal", period: "Março 2024", type: "Financeiro", date: "02 Abr 2024", status: "Concluído" },
+                     { name: "Taxa de Churn e Retenção", period: "Últimos 12 meses", type: "Sucesso", date: "28 Mar 2024", status: "Pendente" },
+                   ].map((item, i) => (
+                     <tr key={i} className="hover:bg-slate-50 transition-colors group">
+                       <td className="px-6 py-4">
+                         <div className="flex items-center gap-3">
+                           <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                             <Download className="h-4 w-4 text-primary" />
+                           </div>
+                           <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{item.name}</span>
+                         </div>
+                       </td>
+                       <td className="px-6 py-4 text-sm text-muted-foreground font-medium">{item.period}</td>
+                       <td className="px-6 py-4">
+                         <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-muted text-muted-foreground uppercase">
+                           {item.type}
+                         </span>
+                       </td>
+                       <td className="px-6 py-4 text-sm text-muted-foreground">{item.date}</td>
+                       <td className="px-6 py-4">
+                         <div className="flex items-center gap-1.5">
+                           <div className={`h-1.5 w-1.5 rounded-full ${item.status === "Concluído" ? "bg-success" : "bg-warning"}`} />
+                           <span className={`text-[13px] font-bold ${item.status === "Concluído" ? "text-success" : "text-warning"}`}>
+                             {item.status}
+                           </span>
+                         </div>
+                       </td>
+                       <td className="px-6 py-4 text-right pr-8">
+                         <button className="h-8 w-8 rounded-lg hover:bg-muted grid place-items-center text-muted-foreground hover:text-foreground transition-colors">
+                           <MoreHorizontal className="h-4 w-4" />
+                         </button>
+                       </td>
+                     </tr>
+                   ))}
+                 </tbody>
+               </table>
+             </div>
+             <div className="p-4 bg-slate-50 border-t border-border flex items-center justify-center">
+               <button className="text-xs font-bold text-primary hover:underline">Ver todo o histórico de relatórios</button>
+             </div>
+           </div>
  } from "recharts";
  import { funnelData, originData, topPerformers } from "@/lib/mock";
 import { useAuth } from "@/contexts/AuthContext";
