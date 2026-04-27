@@ -1,12 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PagePlaceholder } from "@/components/layout/PagePlaceholder";
 
-export const Route = createFileRoute("/estoque")({
-  component: () => (
-    <PagePlaceholder 
-      title="Compras / Estoque" 
-      subtitle="Gestão de Inventário e Fornecedores"
-      description="Controle o estoque de aparelhos novos e usados por IMEI, modelos, cores e capacidades (GB). Gerencie ordens de compra e etiquetas."
-    />
-  ),
-});
+ import { AppSidebar } from "@/components/layout/Sidebar";
+ import { Topbar } from "@/components/layout/Topbar";
+ import { StockList } from "@/components/estoque/StockList";
+ 
+ export const Route = createFileRoute("/estoque")({
+   component: StockPage,
+ });
+ 
+ function StockPage() {
+   return (
+     <div className="min-h-screen flex w-full bg-background">
+       <AppSidebar />
+       <div className="flex-1 flex flex-col min-w-0">
+         <Topbar title="Estoque" subtitle="Gestão de Inventário" />
+         <main className="flex-1 overflow-y-auto p-6">
+           <StockList />
+         </main>
+       </div>
+     </div>
+   );
+ }
