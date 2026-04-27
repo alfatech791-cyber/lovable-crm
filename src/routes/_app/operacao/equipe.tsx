@@ -1,7 +1,7 @@
 import { Topbar } from "@/components/layout/Topbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Search, MoreHorizontal, Mail, Phone, Shield } from "lucide-react";
+import { UserPlus, Search, MoreHorizontal, Shield } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 

@@ -1,8 +1,7 @@
 import { Topbar } from "@/components/layout/Topbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
-import { Settings2, Users, Package, CreditCard, Truck, ListChecks, Tags } from "lucide-react";
+import { Users, Package, CreditCard, Truck, ListChecks, Tags } from "lucide-react";
 
 const operacaoCards = [
   { title: "Tipos de Produtos", desc: "Categorias e variações", icon: Package, href: "/operacao/tipos-produtos" },
