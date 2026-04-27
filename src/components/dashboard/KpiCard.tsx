@@ -1,12 +1,13 @@
 import * as Icons from "lucide-react";
 
-type Tone = "info" | "success" | "warning" | "primary";
-const toneStyles: Record<Tone, string> = {
-  info: "bg-info/10 text-info",
-  success: "bg-success/10 text-success",
-  warning: "bg-warning/15 text-[oklch(0.55_0.15_75)]",
-  primary: "bg-primary/10 text-primary",
-};
+ type Tone = "info" | "success" | "warning" | "primary" | "destructive";
+ const toneStyles: Record<Tone, string> = {
+   info: "bg-info/10 text-info",
+   success: "bg-success/10 text-success",
+   warning: "bg-warning/15 text-[oklch(0.55_0.15_75)]",
+   primary: "bg-primary/10 text-primary",
+   destructive: "bg-destructive/10 text-destructive",
+ };
 
 export function KpiCard({
   label, value, trend, sub, icon, tone,
