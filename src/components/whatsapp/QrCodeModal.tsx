@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { evolution } from "@/lib/evolution";
-import { X, RefreshCw, AlertCircle, CheckCircle2 } from "lucide-react";
+import { X, RefreshCw, AlertCircle, CheckCircle2, ShieldCheck, Smartphone, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 interface QrCodeModalProps {
@@ -66,47 +66,100 @@ export function QrCodeModal({ instanceName, onClose, onSuccess }: QrCodeModalPro
           </button>
         </div>
 
-        <div className="p-8 text-center">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-10 space-y-4">
-              <RefreshCw className="h-10 w-10 text-primary animate-spin" />
-              <p className="text-sm text-muted-foreground">Gerando QR Code...</p>
-            </div>
-          ) : error ? (
-            <div className="flex flex-col items-center justify-center py-10 space-y-4">
-              <AlertCircle className="h-10 w-10 text-destructive" />
-              <p className="text-sm font-medium">{error}</p>
-              <button onClick={fetchQrCode} className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
-                Tentar novamente
-              </button>
-            </div>
-          ) : status === "open" ? (
-            <div className="flex flex-col items-center justify-center py-10 space-y-4">
-              <div className="h-16 w-16 rounded-full bg-success/20 grid place-items-center">
-                <CheckCircle2 className="h-10 w-10 text-success" />
-              </div>
-              <h4 className="text-lg font-bold">Conectado!</h4>
-              <p className="text-sm text-muted-foreground">Sua instância está ativa e pronta para uso.</p>
-            </div>
-          ) : (
+        <div className="flex flex-col md:flex-row min-h-[400px]">
+          {/* Instruções Lateral */}
+          <div className="flex-1 p-8 bg-muted/20 border-r border-border hidden md:flex flex-col justify-center">
             <div className="space-y-6">
-              <div className="bg-white p-4 rounded-2xl inline-block shadow-card border border-border">
-                {qrCode && <img src={qrCode} alt="WhatsApp QR Code" className="h-64 w-64" />}
+              <div className="flex items-start gap-4">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Smartphone className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold">Passo 1</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">Abra o WhatsApp no seu celular e toque no menu ou configurações.</p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <p className="text-sm font-semibold">Escaneie o código no seu WhatsApp</p>
-                <ol className="text-xs text-muted-foreground text-left space-y-1 max-w-[240px] mx-auto list-decimal pl-4">
-                  <li>Abra o WhatsApp no seu celular</li>
-                  <li>Toque em Dispositivos Conectados</li>
-                  <li>Toque em Conectar um Dispositivo</li>
-                  <li>Aponte seu celular para esta tela</li>
-                </ol>
+              <div className="flex items-start gap-4">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Zap className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold">Passo 2</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">Selecione "Dispositivos Conectados" e depois "Conectar um dispositivo".</p>
+                </div>
               </div>
-              <button onClick={fetchQrCode} className="inline-flex items-center gap-2 text-xs text-primary font-bold hover:underline">
-                <RefreshCw className="h-3.5 w-3.5" /> Atualizar QR Code
-              </button>
+              <div className="flex items-start gap-4">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold">Configuração Automática</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">Webhooks e disparadores já estão sendo configurados automaticamente para esta instância.</p>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
+
+          {/* QR Code Área */}
+          <div className="flex-1 p-8 flex flex-col items-center justify-center bg-card">
+            {loading ? (
+              <div className="flex flex-col items-center space-y-4">
+                <div className="relative">
+                  <div className="h-32 w-32 rounded-3xl border-4 border-primary/20 border-t-primary animate-spin" />
+                  <RefreshCw className="absolute inset-0 m-auto h-8 w-8 text-primary/40" />
+                </div>
+                <p className="text-sm font-bold text-primary animate-pulse">Preparando conexão...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center space-y-4">
+                <div className="h-16 w-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
+                  <AlertCircle className="h-8 w-8 text-destructive" />
+                </div>
+                <p className="text-sm font-bold text-destructive">{error}</p>
+                <button 
+                  onClick={fetchQrCode} 
+                  className="h-10 px-6 rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all"
+                >
+                  Tentar Novamente
+                </button>
+              </div>
+            ) : status === "open" ? (
+              <div className="text-center space-y-4 animate-in zoom-in-90">
+                <div className="h-20 w-20 bg-success/10 rounded-full flex items-center justify-center mx-auto">
+                  <CheckCircle2 className="h-12 w-12 text-success" />
+                </div>
+                <h4 className="text-xl font-black">Conectado!</h4>
+                <p className="text-sm text-muted-foreground">O ambiente já está 100% configurado para uso.</p>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center space-y-6 w-full animate-in fade-in slide-in-from-bottom-4">
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-primary to-primary-glow rounded-[2rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
+                  <div className="relative bg-white p-4 rounded-[1.5rem] shadow-2xl border border-border">
+                    {qrCode ? (
+                      <img src={qrCode} alt="WhatsApp QR Code" className="h-48 w-48 lg:h-56 lg:w-56" />
+                    ) : (
+                      <div className="h-48 w-48 flex items-center justify-center bg-muted/50 rounded-xl">
+                        <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="text-center">
+                  <p className="text-xs font-black uppercase tracking-widest text-primary mb-1">Aguardando Leitura</p>
+                  <p className="text-[11px] text-muted-foreground font-medium">O código expira em breve</p>
+                </div>
+
+                <button 
+                  onClick={fetchQrCode} 
+                  className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <RefreshCw className="h-3 w-3" /> Atualizar agora
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="px-6 py-4 bg-muted/30 border-t border-border flex justify-end">
