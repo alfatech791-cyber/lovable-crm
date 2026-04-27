@@ -41,7 +41,8 @@ export function QrCodeModal({ instanceName, onClose, onSuccess }: QrCodeModalPro
     const interval = setInterval(async () => {
       try {
         const state = await evolution.getInstanceConnection(instanceName);
-        if (state.instance?.state === "open") {
+        const currentState = state.instance?.state || state.state;
+        if (currentState === "open") {
           setStatus("open");
           clearInterval(interval);
           toast.success("WhatsApp conectado com sucesso!");
