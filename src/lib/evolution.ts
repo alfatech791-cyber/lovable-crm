@@ -3,8 +3,8 @@
  * Documentação: https://doc.evolution-api.com/
  */
 
-const API_URL = import.meta.env.VITE_EVOLUTION_API_URL || "";
-const API_KEY = import.meta.env.VITE_EVOLUTION_API_KEY || "";
+const API_URL = (import.meta as any).env.VITE_EVOLUTION_API_URL || "";
+const API_KEY = (import.meta as any).env.VITE_EVOLUTION_API_KEY || "";
 
 export interface Instance {
   instanceName: string;
@@ -22,7 +22,11 @@ export const evolution = {
         "apikey": API_KEY,
       },
     });
-    if (!res.ok) throw new Error("Falha ao buscar instâncias da Evolution API");
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Evolution API Error (fetchInstances):", res.status, errorText);
+      throw new Error(`Falha ao buscar instâncias: ${res.status}`);
+    }
     return res.json() as Promise<Instance[]>;
   },
 
