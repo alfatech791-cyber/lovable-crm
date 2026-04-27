@@ -1,14 +1,59 @@
 export const sidebarItems = [
-  { title: "Painel", url: "/", icon: "LayoutDashboard" as const },
-  { title: "Vendas", url: "/vendas", icon: "ShoppingBag" as const },
-  { title: "Clientes", url: "/clientes", icon: "Users" as const },
-  { title: "Caixa (PDV)", url: "/pdv", icon: "Calculator" as const },
-  { title: "Estoque", url: "/estoque", icon: "Box" as const },
-  { title: "Serviços (OS)", url: "/servicos", icon: "Wrench" as const },
-  { title: "CRM / Leads", url: "/crm", icon: "Zap" as const },
-  { title: "Financeiro", url: "/financeiro", icon: "DollarSign" as const },
-  { title: "Fiscal", url: "/fiscal", icon: "FileSpreadsheet" as const },
-  { title: "Relatórios", url: "/relatorios", icon: "BarChart3" as const },
+   { title: "Início", url: "/", icon: "Home" as const },
+   { 
+     title: "Vendas", 
+     url: "/vendas", 
+     icon: "ShoppingBag" as const,
+     children: [
+       { title: "PDV (Caixa)", url: "/pdv" },
+       { title: "Orçamentos", url: "/vendas/orcamentos" },
+       { title: "Histórico", url: "/vendas/historico" },
+       { title: "Consulta Estoque", url: "/vendas/consulta-estoque" },
+       { title: "Calculadora Aparelhos", url: "/vendas/calculadora" },
+       { title: "Simulador Cartão", url: "/vendas/simulador" },
+       { title: "Delivery", url: "/vendas/delivery" },
+       { title: "Garantias", url: "/vendas/garantias" },
+     ]
+   },
+   { title: "Clientes", url: "/clientes", icon: "Users" as const },
+   { 
+     title: "Estoque", 
+     url: "/estoque", 
+     icon: "Box" as const,
+     children: [
+       { title: "Estoque Atual", url: "/estoque/atual" },
+       { title: "Ordens de Compra", url: "/estoque/compras" },
+       { title: "Produtos Vendidos", url: "/estoque/vendidos" },
+       { title: "Movimentações", url: "/estoque/movimentacoes" },
+       { title: "Etiquetas", url: "/estoque/etiquetas" },
+     ]
+   },
+   { 
+     title: "Ordem de Serviço", 
+     url: "/servicos", 
+     icon: "Wrench" as const,
+     children: [
+       { title: "Dashboard OS", url: "/servicos/dashboard" },
+       { title: "Nova OS", url: "/servicos/nova" },
+       { title: "Técnicos", url: "/servicos/tecnicos" },
+       { title: "Checklists", url: "/servicos/checklists" },
+       { title: "Termos Garantia", url: "/servicos/termos" },
+     ]
+   },
+   { title: "CRM Conecta", url: "/crm", icon: "MessageSquare" as const },
+   { 
+     title: "Financeiro", 
+     url: "/financeiro", 
+     icon: "DollarSign" as const,
+     children: [
+       { title: "Caixa/Bancos", url: "/financeiro/caixa" },
+       { title: "Fornecedores", url: "/financeiro/fornecedores" },
+       { title: "Plano de Contas", url: "/financeiro/plano-contas" },
+       { title: "DRE", url: "/financeiro/dre" },
+       { title: "Maquininhas POS", url: "/financeiro/maquininhas" },
+     ]
+   },
+   { title: "Relatórios", url: "/relatorios", icon: "BarChart3" as const },
   {
     title: "Configurações",
     url: "/configuracoes",
