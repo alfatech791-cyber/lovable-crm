@@ -68,7 +68,7 @@ const WhatsappRoute = WhatsappRouteImport.update({
   id: '/whatsapp',
   path: '/whatsapp',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/whatsapp.lazy').then((d) => d.Route))
 const VendasRoute = VendasRouteImport.update({
   id: '/vendas',
   path: '/vendas',
