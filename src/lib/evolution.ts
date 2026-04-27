@@ -82,14 +82,22 @@ export const evolution = {
      return res.json();
    },
 
-  async getQrCode(instanceName: string) {
-    const res = await fetch(`${API_URL}/instance/connect/${instanceName}`, {
-      headers: {
-        "apikey": API_KEY,
-      },
-    });
-    return res.json();
-  },
+   async getQrCode(instanceName: string) {
+     try {
+       console.log(`Buscando QR Code para: ${instanceName}`);
+       const res = await fetch(`${API_URL}/instance/connect/${instanceName}`, {
+         headers: {
+           "apikey": API_KEY,
+         },
+       });
+       const data = await res.json();
+       console.log("Resposta getQrCode:", data);
+       return data;
+     } catch (error) {
+       console.error("Erro em getQrCode:", error);
+       throw error;
+     }
+   },
 
   async logoutInstance(instanceName: string) {
     const res = await fetch(`${API_URL}/instance/logout/${instanceName}`, {
