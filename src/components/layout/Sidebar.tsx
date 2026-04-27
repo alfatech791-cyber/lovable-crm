@@ -69,8 +69,8 @@ export function AppSidebar() {
           </button>
         </div>
 
-        <Link to="/configuracoes" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-white transition">
-          <Headphones className="h-[18px] w-[18px]" />
+        <Link to="/configuracoes" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-white transition group">
+          <Icons.Headphones className="h-[18px] w-[18px]" />
           <div className="leading-tight">
             <div className="text-[13px] font-medium">Central de Ajuda</div>
             <div className="text-[11px] text-sidebar-foreground/50">Tutoriais e suporte</div>
