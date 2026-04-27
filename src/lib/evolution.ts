@@ -22,7 +22,11 @@ export const evolution = {
         "apikey": API_KEY,
       },
     });
-    if (!res.ok) throw new Error("Falha ao buscar instâncias da Evolution API");
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Evolution API Error (fetchInstances):", res.status, errorText);
+      throw new Error(`Falha ao buscar instâncias: ${res.status}`);
+    }
     return res.json() as Promise<Instance[]>;
   },
 
