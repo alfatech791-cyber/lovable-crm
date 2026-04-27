@@ -4,7 +4,8 @@ import { Topbar } from "@/components/layout/Topbar";
  import { 
    BarChart3, TrendingUp, Users, DollarSign, Calendar, Download, 
    Filter, ArrowUpRight, Shield, PieChart, Target, Zap, 
-   ArrowDownRight, ChevronRight, MoreHorizontal, UserCheck
+   ArrowDownRight, ChevronRight, MoreHorizontal, UserCheck, Sparkles,
+   Lightbulb, AlertCircle
  } from "lucide-react";
  import { SalesChart } from "@/components/dashboard/SalesChart";
  import { 
@@ -79,6 +80,31 @@ function ReportsPage() {
              </div>
            </div>
  
+           {/* AI Insights Section */}
+           <div className="bg-gradient-to-r from-primary/5 via-primary/[0.02] to-transparent border border-primary/10 rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center gap-6">
+             <div className="h-16 w-16 rounded-2xl bg-primary shadow-glow flex items-center justify-center shrink-0">
+               <Sparkles className="h-8 w-8 text-white animate-pulse" />
+             </div>
+             <div className="flex-1 text-center md:text-left">
+               <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+                 <h3 className="text-lg font-bold text-primary">ConectaAI: Insights Estratégicos</h3>
+                 <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Novo</span>
+               </div>
+               <p className="text-[15px] text-muted-foreground font-medium max-w-2xl leading-relaxed">
+                 Seu faturamento cresceu <span className="text-foreground font-bold">12.5%</span> este mês, impulsionado principalmente pelo canal <span className="text-foreground font-bold">Google Ads</span>. 
+                 Dica: O ticket médio dos leads do Instagram é <span className="text-success font-bold">15% maior</span>. Considere realocar parte do orçamento.
+               </p>
+             </div>
+             <div className="flex flex-col gap-2 min-w-[180px]">
+               <div className="flex items-center gap-2 text-xs font-bold text-success bg-success/10 px-3 py-2 rounded-xl border border-success/20">
+                 <Lightbulb className="h-3.5 w-3.5" /> Oportunidade Identificada
+               </div>
+               <div className="flex items-center gap-2 text-xs font-bold text-warning bg-warning/10 px-3 py-2 rounded-xl border border-warning/20">
+                 <AlertCircle className="h-3.5 w-3.5" /> Gargalo no Funil (Negoc.)
+               </div>
+             </div>
+           </div>
+
            {/* Main Stats Cards */}
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
              {[
