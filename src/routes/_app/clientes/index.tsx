@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, UserPlus, Filter, MoreHorizontal, Phone, Mail, MapPin } from "lucide-react";
+  import { Search, UserPlus, Filter, MoreHorizontal, Phone, Mail, MapPin, Eye, Edit, Trash2 } from "lucide-react";
+  import { useNavigate } from "@tanstack/react-router";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +19,9 @@ const mockClientes = [
   { id: 3, name: "Pedro Santos", email: "pedro@email.com", phone: "(11) 96666-5555", city: "Curitiba", status: "Inativo", lastOrder: "10/01/2024" },
 ];
 
-function ClientesPage() {
+  function ClientesPage() {
+    const navigate = useNavigate();
+
   return (
     <div className="flex h-screen flex-col bg-background">
       <Header title="Gestão de Clientes" />
@@ -33,7 +36,7 @@ function ClientesPage() {
               <Button variant="outline" size="sm" className="gap-2">
                 <Filter className="h-4 w-4" /> Filtros
               </Button>
-              <Button size="sm" className="gap-2 bg-primary">
+              <Button size="sm" className="gap-2 bg-primary" onClick={() => navigate({ to: "/clientes/novo" })}>
                 <UserPlus className="h-4 w-4" /> Novo Cliente
               </Button>
             </div>
@@ -80,10 +83,10 @@ function ClientesPage() {
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Ver Detalhes</DropdownMenuItem>
-                            <DropdownMenuItem>Editar</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">Excluir</DropdownMenuItem>
+                          <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> Ver Detalhes</DropdownMenuItem>
+                            <DropdownMenuItem className="gap-2"><Edit className="h-4 w-4" /> Editar</DropdownMenuItem>
+                            <DropdownMenuItem className="gap-2 text-destructive"><Trash2 className="h-4 w-4" /> Excluir</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

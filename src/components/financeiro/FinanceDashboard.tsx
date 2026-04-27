@@ -1,6 +1,9 @@
- import { DollarSign, ArrowUpRight, ArrowDownRight, Wallet, Building2, Receipt } from "lucide-react";
+  import { DollarSign, ArrowUpRight, ArrowDownRight, Wallet, Building2, Receipt, ArrowRight } from "lucide-react";
+  import { useNavigate } from "@tanstack/react-router";
  
  export function FinanceDashboard() {
+    const navigate = useNavigate();
+
    return (
      <div className="space-y-6">
        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -38,10 +41,18 @@
        </div>
  
        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-         <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
-           <h3 className="font-bold mb-4 flex items-center gap-2">
-             <Wallet className="h-4 w-4 text-primary" /> Contas e Bancos
-           </h3>
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-card flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold flex items-center gap-2">
+                <Wallet className="h-4 w-4 text-primary" /> Contas e Bancos
+              </h3>
+              <button 
+                onClick={() => navigate({ to: "/financeiro/caixa" })}
+                className="text-xs font-medium text-primary hover:underline flex items-center gap-1"
+              >
+                Ver Tudo <ArrowRight className="h-3 w-3" />
+              </button>
+            </div>
            <div className="space-y-4">
              {[
                { name: "Caixa Loja", type: "Dinheiro", balance: "R$ 1.250,00", icon: Wallet },
@@ -64,10 +75,28 @@
            </div>
          </div>
  
-         <div className="bg-card border border-border rounded-2xl p-6 shadow-card">
-           <h3 className="font-bold mb-4 flex items-center gap-2">
-             <Receipt className="h-4 w-4 text-primary" /> Últimas Movimentações
-           </h3>
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-card flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold flex items-center gap-2">
+                <Receipt className="h-4 w-4 text-primary" /> Contas a Pagar/Receber
+              </h3>
+            </div>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <button 
+                onClick={() => navigate({ to: "/financeiro/contas-receber" })}
+                className="p-4 rounded-xl border border-blue-100 bg-blue-50/50 hover:bg-blue-50 transition text-left"
+              >
+                <div className="text-xs font-bold text-blue-600 uppercase mb-1">A Receber</div>
+                <div className="text-lg font-black text-blue-700">R$ 5.700,00</div>
+              </button>
+              <button 
+                onClick={() => navigate({ to: "/financeiro/contas-pagar" })}
+                className="p-4 rounded-xl border border-red-100 bg-red-50/50 hover:bg-red-50 transition text-left"
+              >
+                <div className="text-xs font-bold text-red-600 uppercase mb-1">A Pagar</div>
+                <div className="text-lg font-black text-red-700">R$ 2.500,00</div>
+              </button>
+            </div>
            <div className="space-y-4">
              {[
                { desc: "Venda iPhone 13 #V123", cat: "Receita Vendas", value: "+ R$ 4.200,00", type: "in" },
