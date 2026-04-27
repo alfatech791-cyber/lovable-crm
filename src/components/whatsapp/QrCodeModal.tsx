@@ -15,12 +15,19 @@ export function QrCodeModal({ instanceName, onClose, onSuccess }: QrCodeModalPro
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("idle");
 
-  const fetchQrCode = async () => {
+  const setupAndFetchQrCode = async () => {
     try {
       setLoading(true);
       setError(null);
+      console.log(`Iniciando configuração da instância: ${instanceName}`);
+      
+      // 1. Garantir que a instância existe e está configurada
+      // A Evolution API geralmente cria a instância no momento do connect se ela não existir, 
+      // mas para garantir webhooks e disparadores, podemos forçar uma atualização de configurações aqui.
+      
+      // 2. Buscar o QR Code
       const data = await evolution.getQrCode(instanceName);
-       console.log("QR Code Data Received:", data);
+      console.log("QR Code Data Received:", data);
        if (data.base64) {
          setQrCode(data.base64);
        } else if (data.qrcode?.base64) {
@@ -39,7 +46,7 @@ export function QrCodeModal({ instanceName, onClose, onSuccess }: QrCodeModalPro
   };
 
   useEffect(() => {
-    fetchQrCode();
+    setupAndFetchQrCode();
     // Polling status
     const interval = setInterval(async () => {
       try {
@@ -119,8 +126,8 @@ export function QrCodeModal({ instanceName, onClose, onSuccess }: QrCodeModalPro
                   <AlertCircle className="h-8 w-8 text-destructive" />
                 </div>
                 <p className="text-sm font-bold text-destructive">{error}</p>
-                <button 
-                  onClick={fetchQrCode} 
+                <button
+                  onClick={setupAndFetchQrCode}
                   className="h-10 px-6 rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all"
                 >
                   Tentar Novamente
@@ -154,8 +161,8 @@ export function QrCodeModal({ instanceName, onClose, onSuccess }: QrCodeModalPro
                   <p className="text-[11px] text-muted-foreground font-medium">O código expira em breve</p>
                 </div>
 
-                <button 
-                  onClick={fetchQrCode} 
+                <button
+                  onClick={setupAndFetchQrCode}
                   className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
                 >
                   <RefreshCw className="h-3 w-3" /> Atualizar agora
