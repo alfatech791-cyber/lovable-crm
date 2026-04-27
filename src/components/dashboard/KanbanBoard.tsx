@@ -95,7 +95,7 @@ export function KanbanBoard() {
                     <div className="text-[13px] font-bold text-foreground truncate max-w-[85%] group-hover/card:text-primary transition">
                       {lead.name}
                     </div>
-                    {sourceIcon(lead.source)}
+                    {sourceIcon((lead as any).source)}
                   </div>
                   <p className="text-[11.5px] text-muted-foreground line-clamp-2 leading-tight mb-3">
                     {lead.snippet}
@@ -107,7 +107,7 @@ export function KanbanBoard() {
                         {lead.name.slice(0, 2)}
                       </div>
                       <div className="text-[10px] text-muted-foreground">
-                        {lead.time || (lead as any).date}
+                        {(lead as any).time || (lead as any).date}
                       </div>
                     </div>
                     {(lead as any).task === "Sem Tarefas" ? (
