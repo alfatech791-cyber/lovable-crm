@@ -79,26 +79,26 @@ export const Route = createFileRoute("/login")({
        </div>
  
        {/* Right side — branded panel with image */}
-       <div className="hidden lg:flex relative overflow-hidden bg-[#F8F9FC] p-8">
-         <div className="relative w-full h-full rounded-[24px] overflow-hidden shadow-2xl border border-white/20">
-           <img 
-             src="https://cvbgrjauqjawrsyknhyj.supabase.co/storage/v1/object/public/files/uploads/d16nTzdSTqQPXL29dCvm2A8Zeql1/1777331682200-abhrt-ChatGPT_Image_27_de_abr._de_2026__16_50_081.png" 
-             alt="ConectaCRM Dashboard"
-             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-           />
-           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+       <div className="hidden lg:flex relative overflow-hidden bg-sidebar p-8">
+         <div className="relative w-full h-full flex items-center justify-center">
+           <div className="w-full h-full rounded-[20px] overflow-hidden shadow-2xl bg-[#0F172A] border border-white/10">
+             <img 
+               src="https://cvbgrjauqjawrsyknhyj.supabase.co/storage/v1/object/public/files/uploads/d16nTzdSTqQPXL29dCvm2A8Zeql1/1777331682200-abhrt-ChatGPT_Image_27_de_abr._de_2026__16_50_081.png" 
+               alt="ConectaCRM Dashboard"
+               className="w-full h-full object-contain"
+             />
+           </div>
            
-           <div className="absolute bottom-0 left-0 right-0 p-10 text-white">
-             <div className="space-y-4 max-w-sm">
-               <div className="inline-flex items-center gap-2 text-xs font-bold bg-white/20 backdrop-blur-md rounded-full px-4 py-2 border border-white/30 uppercase tracking-wider">
-                 <Sparkles className="h-4 w-4 text-yellow-400" /> Novas Funcionalidades
+           {/* Floating Info Badge */}
+           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[85%] bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-2xl">
+             <div className="flex items-center gap-4">
+               <div className="h-12 w-12 rounded-xl bg-gradient-primary flex items-center justify-center shrink-0 shadow-lg">
+                 <Sparkles className="h-6 w-6 text-white" />
                </div>
-               <h2 className="text-3xl font-bold font-display tracking-tight leading-tight">
-                 A plataforma que escala seu negócio.
-               </h2>
-               <p className="text-white/90 text-sm leading-relaxed font-medium">
-                 Gestão completa de leads, vendas e automações com a melhor experiência visual do mercado.
-               </p>
+               <div>
+                 <h3 className="text-white font-bold text-lg leading-tight">Interface Inteligente</h3>
+                 <p className="text-white/70 text-xs font-medium">Visualização completa do seu funil e métricas em tempo real.</p>
+               </div>
              </div>
            </div>
          </div>
