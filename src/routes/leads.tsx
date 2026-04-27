@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PagePlaceholder } from "@/components/layout/PagePlaceholder";
+import { LeadsTable } from "@/components/leads/LeadsTable";
 
 export const Route = createFileRoute("/leads")({
-  head: () => ({ meta: [{ title: "Leads — ConectaCRM" }, { name: "description", content: "Todos os contatos do seu CRM" }] }),
-  component: () => <PagePlaceholder title="Leads" subtitle="Todos os contatos do seu CRM" />,
+  head: () => ({ 
+    meta: [
+      { title: "Leads — ConectaCRM" }, 
+      { name: "description", content: "Gestão unificada de contatos e histórico" }
+    ] 
+  }),
+  component: LeadsTable,
 });
