@@ -21,8 +21,17 @@ export function AppSidebar() {
       "/instagram": "crm",
       "/automacao": "crm",
       "/equipe": "configuracoes",
+      "/vendas": "vendas",
+      "/clientes": "clientes",
+      "/pdv": "pdv",
+      "/estoque": "estoque",
+      "/servicos": "servicos",
+      "/crm": "crm",
+      "/financeiro": "financeiro",
+      "/fiscal": "fiscal",
       "/relatorios": "relatorios",
       "/configuracoes": "configuracoes",
+      "/equipe": "configuracoes",
     };
 
     const permissionKey = permissionMap[item.url];
@@ -46,21 +55,42 @@ export function AppSidebar() {
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {filteredItems.map((item: any) => {
           const Icon = (Icons as any)[item.icon] || Icons.HelpCircle;
-          const active = location.pathname === item.url;
+          const active = location.pathname === item.url || (item.children?.some((child: any) => location.pathname === child.url));
+          
           return (
-            <Link
-              key={item.url}
-              to={item.url}
-              className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all
-                ${active
-                  ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-glow"
-                  : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-white"
-                }`}
-            >
-              <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.4 : 2} />
-              <span>{item.title}</span>
-              {active && <ChevronRight className="h-4 w-4 ml-auto opacity-80" />}
-            </Link>
+            <div key={item.url} className="space-y-1">
+              <Link
+                to={item.url}
+                className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all
+                  ${active
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-glow"
+                    : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-white"
+                  }`}
+              >
+                <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.4 : 2} />
+                <span>{item.title}</span>
+                {active && !item.children && <ChevronRight className="h-4 w-4 ml-auto opacity-80" />}
+                {item.children && <Icons.ChevronDown className={`h-3.5 w-3.5 ml-auto transition-transform ${active ? "rotate-180" : ""}`} />}
+              </Link>
+              
+              {item.children && active && (
+                <div className="ml-9 space-y-1 border-l border-sidebar-border/50 pl-2 py-1">
+                  {item.children.map((child: any) => (
+                    <Link
+                      key={child.url}
+                      to={child.url}
+                      className={`block rounded-md px-3 py-1.5 text-[12.5px] transition-colors
+                        ${location.pathname === child.url 
+                          ? "text-white font-medium bg-white/10" 
+                          : "text-sidebar-foreground/60 hover:text-white hover:bg-white/5"
+                        }`}
+                    >
+                      {child.title}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           );
         })}
       </nav>
