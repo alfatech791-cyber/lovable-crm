@@ -41,7 +41,7 @@ export const sidebarItems = [
        { title: "Termos Garantia", url: "/servicos/termos" },
      ]
    },
-   { title: "CRM Conecta", url: "/crm", icon: "MessageSquare" as const },
+    { title: "Gestão WhatsApp", url: "/whatsapp", icon: "MessageSquare" as const },
    { 
      title: "Financeiro", 
      url: "/financeiro", 
