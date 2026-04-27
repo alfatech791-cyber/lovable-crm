@@ -78,28 +78,53 @@ export const Route = createFileRoute("/login")({
          </div>
        </div>
  
-       {/* Right side — branded panel with image */}
-       <div className="hidden lg:flex relative overflow-hidden bg-sidebar p-8">
-         <div className="relative w-full h-full flex items-center justify-center">
-           <div className="w-full h-full rounded-[20px] overflow-hidden shadow-2xl bg-[#0F172A] border border-white/10">
-             <img 
-               src="https://cvbgrjauqjawrsyknhyj.supabase.co/storage/v1/object/public/files/uploads/d16nTzdSTqQPXL29dCvm2A8Zeql1/1777331682200-abhrt-ChatGPT_Image_27_de_abr._de_2026__16_50_081.png" 
-               alt="ConectaCRM Dashboard"
-               className="w-full h-full object-contain"
-             />
-           </div>
-           
-           {/* Floating Info Badge */}
-           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[85%] bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-2xl">
-             <div className="flex items-center gap-4">
-               <div className="h-12 w-12 rounded-xl bg-gradient-primary flex items-center justify-center shrink-0 shadow-lg">
-                 <Sparkles className="h-6 w-6 text-white" />
-               </div>
-               <div>
-                 <h3 className="text-white font-bold text-lg leading-tight">Interface Inteligente</h3>
-                 <p className="text-white/70 text-xs font-medium">Visualização completa do seu funil e métricas em tempo real.</p>
+       {/* Right side — branded panel with image and new messaging */}
+       <div className="hidden lg:flex relative overflow-hidden bg-[#0A0C10] p-10">
+         {/* Animated background elements */}
+         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] -mr-64 -mt-64" />
+         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] -ml-64 -mb-64" />
+         
+         <div className="relative z-10 w-full h-full flex flex-col">
+           {/* Header Tag */}
+           <div className="flex justify-between items-start mb-8">
+             <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-4 py-2">
+               <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+               <span className="text-[11px] font-bold text-white/80 uppercase tracking-widest">Plataforma Ativa</span>
+             </div>
+             <div className="flex -space-x-3">
+               {[1, 2, 3, 4].map((i) => (
+                 <div key={i} className="h-9 w-9 rounded-full border-2 border-[#0A0C10] bg-white/10 flex items-center justify-center overflow-hidden">
+                   <img src={`https://i.pravatar.cc/100?img=${i+20}`} alt="User" className="w-full h-full object-cover" />
+                 </div>
+               ))}
+               <div className="h-9 w-9 rounded-full border-2 border-[#0A0C10] bg-primary flex items-center justify-center text-[10px] font-bold text-white">
+                 +12k
                </div>
              </div>
+           </div>
+ 
+           {/* Main Image Container with Perspective */}
+           <div className="flex-1 relative group mt-4">
+             <div className="absolute inset-0 bg-primary/20 blur-[80px] rounded-full scale-75 opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
+             <div className="relative h-full rounded-[32px] overflow-hidden border border-white/10 shadow-[0_0_80px_-15px_rgba(var(--primary),0.3)] bg-[#0F172A]">
+               <img 
+                 src="https://cvbgrjauqjawrsyknhyj.supabase.co/storage/v1/object/public/files/uploads/d16nTzdSTqQPXL29dCvm2A8Zeql1/1777331682200-abhrt-ChatGPT_Image_27_de_abr._de_2026__16_50_081.png" 
+                 alt="ConectaCRM Dashboard"
+                 className="w-full h-full object-cover object-top opacity-90 group-hover:scale-105 transition-transform duration-1000"
+               />
+               <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-transparent to-transparent" />
+             </div>
+           </div>
+ 
+           {/* Footer Text Content */}
+           <div className="mt-10 space-y-4">
+             <h2 className="text-4xl xl:text-5xl font-bold font-display text-white leading-[1.1] tracking-tight">
+               Conecte seus leads, <br />
+               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-glow">feche mais vendas.</span>
+             </h2>
+             <p className="text-white/60 text-lg max-w-lg leading-relaxed">
+               Aumente sua produtividade com um ecossistema completo de gestão comercial e automações inteligentes.
+             </p>
            </div>
          </div>
        </div>
