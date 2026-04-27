@@ -20,8 +20,8 @@ export function QrCodeModal({ instanceName, onClose, onSuccess }: QrCodeModalPro
       setLoading(true);
       setError(null);
       const data = await evolution.getQrCode(instanceName);
-      if (data.base64) {
-        setQrCode(data.base64);
+       if (data.base64 || data.qrcode?.base64) {
+         setQrCode(data.base64 || data.qrcode.base64);
       } else if (data.code === "ALREADY_CONNECTED") {
         setStatus("open");
         onSuccess();

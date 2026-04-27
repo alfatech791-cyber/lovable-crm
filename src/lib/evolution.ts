@@ -28,25 +28,37 @@ export const evolution = {
 
    async createInstance(instanceName: string, webhookUrl?: string) {
      const res = await fetch(`${API_URL}/instance/create`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": API_KEY,
-      },
+       method: "POST",
+       headers: {
+         "Content-Type": "application/json",
+         "apikey": API_KEY,
+       },
        body: JSON.stringify({
          instanceName,
-         token: "", // Gerado automaticamente se vazio
+         token: "",
          qrcode: true,
+         webhook: webhookUrl || "",
+         webhook_by_events: false,
+         events: [
+           "MESSAGES_UPSERT",
+           "MESSAGES_UPDATE",
+           "MESSAGES_DELETE",
+           "SEND_MESSAGE",
+           "CONTACTS_UPSERT",
+           "CONTACTS_UPDATE",
+           "PRESENCE_UPDATE",
+           "CHATS_UPSERT",
+           "CHATS_UPDATE",
+           "CHATS_DELETE",
+           "GROUPS_UPSERT",
+           "GROUPS_UPDATE",
+           "GROUP_PARTICIPANTS_UPDATE",
+           "CONNECTION_UPDATE",
+           "CALL"
+         ]
        }),
      });
-     const data = await res.json();
-     
-     // Se houver webhookUrl, configurar agora
-     if (webhookUrl && data.instance?.instanceName) {
-       await this.setWebhook(data.instance.instanceName, webhookUrl);
-     }
-     
-     return data;
+     return res.json();
    },
  
    async setWebhook(instanceName: string, url: string) {
@@ -82,14 +94,22 @@ export const evolution = {
      return res.json();
    },
 
-  async getQrCode(instanceName: string) {
-    const res = await fetch(`${API_URL}/instance/connect/${instanceName}`, {
-      headers: {
-        "apikey": API_KEY,
-      },
-    });
-    return res.json();
-  },
+   async getQrCode(instanceName: string) {
+     try {
+       console.log(`Buscando QR Code para: ${instanceName}`);
+       const res = await fetch(`${API_URL}/instance/connect/${instanceName}`, {
+         headers: {
+           "apikey": API_KEY,
+         },
+       });
+       const data = await res.json();
+       console.log("Resposta getQrCode:", data);
+       return data;
+     } catch (error) {
+       console.error("Erro em getQrCode:", error);
+       throw error;
+     }
+   },
 
   async logoutInstance(instanceName: string) {
     const res = await fetch(`${API_URL}/instance/logout/${instanceName}`, {
