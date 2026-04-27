@@ -78,50 +78,26 @@ export const Route = createFileRoute("/login")({
          </div>
        </div>
  
-       {/* Right side — branded panel */}
-       <div className="hidden lg:flex relative overflow-hidden bg-sidebar text-white">
-         <div className="absolute inset-0 bg-gradient-primary opacity-90" />
-         <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-         <div className="absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
- 
-         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
-           <div className="inline-flex items-center gap-2 self-start text-xs font-semibold bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5">
-             <Sparkles className="h-3.5 w-3.5" /> Novo: IA Conecta disponível
-           </div>
- 
-           <div className="space-y-6 max-w-md">
-             <h2 className="text-4xl font-bold font-display tracking-tight leading-[1.1]">
-               Centralize WhatsApp, Instagram e seu funil em um só lugar.
+       {/* Right side — branded panel with image */}
+       <div className="hidden lg:flex relative overflow-hidden bg-sidebar">
+         <img 
+           src="https://cvbgrjauqjawrsyknhyj.supabase.co/storage/v1/object/public/files/uploads/d16nTzdSTqQPXL29dCvm2A8Zeql1/1777331682200-abhrt-ChatGPT_Image_27_de_abr._de_2026__16_50_081.png" 
+           alt="ConectaCRM Dashboard"
+           className="absolute inset-0 w-full h-full object-cover opacity-80"
+         />
+         <div className="absolute inset-0 bg-gradient-to-t from-sidebar via-sidebar/20 to-transparent" />
+         
+         <div className="relative z-10 flex flex-col justify-end p-12 w-full h-full text-white">
+           <div className="space-y-4 max-w-md">
+             <div className="inline-flex items-center gap-2 text-xs font-semibold bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 self-start">
+               <Sparkles className="h-3.5 w-3.5" /> Novo: IA Conecta disponível
+             </div>
+             <h2 className="text-3xl font-bold font-display tracking-tight leading-tight">
+               Aumente suas vendas com gestão inteligente.
              </h2>
-             <p className="text-white/80 text-base leading-relaxed">
-               Mais de 12 mil empresas usam o ConectaCRM para responder rápido,
-               vender mais e nunca perder um lead.
+             <p className="text-white/80 text-sm leading-relaxed">
+               Centralize seu atendimento e nunca mais perca um lead por falta de resposta.
              </p>
- 
-             <div className="grid grid-cols-3 gap-3">
-               {[
-                 { icon: MessageSquare, label: "Inbox unificado" },
-                 { icon: Users, label: "Funil visual" },
-                 { icon: Zap, label: "Automações" },
-               ].map((f) => {
-                 const Icon = f.icon;
-                 return (
-                   <div key={f.label} className="rounded-xl bg-white/10 backdrop-blur-sm border border-white/15 p-3">
-                     <Icon className="h-5 w-5 mb-2" />
-                     <div className="text-xs font-semibold leading-tight">{f.label}</div>
-                   </div>
-                 );
-               })}
-             </div>
-           </div>
- 
-           <div className="flex items-center gap-3 text-sm text-white/85">
-             <div className="flex -space-x-2">
-               {["JM","CE","BC","RS"].map((i, k) => (
-                 <div key={k} className="h-8 w-8 rounded-full bg-white/20 border-2 border-white/40 grid place-items-center text-[10px] font-bold">{i}</div>
-               ))}
-             </div>
-             <span>+ 12.000 empresas confiam no ConectaCRM</span>
            </div>
          </div>
        </div>
