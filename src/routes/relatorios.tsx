@@ -8,9 +8,14 @@ import { Topbar } from "@/components/layout/Topbar";
    Lightbulb, AlertCircle
  } from "lucide-react";
  import { SalesChart } from "@/components/dashboard/SalesChart";
- import { 
-   BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, 
-   PieChart as RePieChart, Pie, AreaChart, Area
+  import { 
+    BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, 
+    PieChart as RePieChart, Pie, AreaChart, Area
+  } from "recharts";
+               </div>
+             </div>
+           </div>
+
            {/* Recent Detailed Reports Table */}
            <div className="bg-white border border-border rounded-2xl shadow-card overflow-hidden">
              <div className="p-6 border-b border-border flex items-center justify-between">
@@ -79,7 +84,6 @@ import { Topbar } from "@/components/layout/Topbar";
                <button className="text-xs font-bold text-primary hover:underline">Ver todo o histórico de relatórios</button>
              </div>
            </div>
- } from "recharts";
  import { funnelData, originData, topPerformers } from "@/lib/mock";
 import { useAuth } from "@/contexts/AuthContext";
 
