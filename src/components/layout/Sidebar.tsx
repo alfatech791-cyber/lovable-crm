@@ -1,14 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import {
-  LayoutDashboard, Users, Filter, MessageCircle, MessageSquare,
-  Instagram, Workflow, UsersRound, BarChart3, Settings, Sparkles,
-  Headphones, ChevronRight,
-} from "lucide-react";
-
-const iconMap = {
-  LayoutDashboard, Users, Filter, MessageCircle, MessageSquare,
-  Instagram, Workflow, UsersRound, BarChart3, Settings,
-};
+import * as Icons from "lucide-react";
+import { Sparkles, ChevronRight } from "lucide-react";
 
 import { sidebarItems } from "@/lib/mock";
 
@@ -28,8 +20,8 @@ export function AppSidebar() {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        {sidebarItems.map((item) => {
-          const Icon = iconMap[item.icon];
+        {sidebarItems.map((item: any) => {
+          const Icon = (Icons as any)[item.icon] || Icons.HelpCircle;
           const active = location.pathname === item.url;
           return (
             <Link
