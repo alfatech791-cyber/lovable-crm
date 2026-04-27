@@ -1,8 +1,10 @@
-import { agenda, automations, tasks } from "@/lib/mock";
-import { ArrowRight, Send, CheckCircle2, MessageSquare, Zap, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+ import { agenda, automations, tasks } from "@/lib/mock";
+ import { ArrowRight, Send, CheckCircle2, MessageSquare, Zap, ChevronLeft, ChevronRight } from "lucide-react";
+ import { useState } from "react";
+ import { useNavigate } from "@tanstack/react-router";
 
 export function TasksCard() {
+   const navigate = useNavigate();
   return (
     <div className="rounded-2xl bg-card border border-border p-5 shadow-card">
       <h3 className="text-[15px] font-semibold mb-3">Tarefas do dia</h3>
@@ -15,14 +17,18 @@ export function TasksCard() {
           </li>
         ))}
       </ul>
-      <button className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition">
-        Ver todas as tarefas <ArrowRight className="h-3.5 w-3.5" />
-      </button>
+       <button 
+         onClick={() => navigate({ to: "/agendamentos" })}
+         className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition"
+       >
+         Ver todas as tarefas <ArrowRight className="h-3.5 w-3.5" />
+       </button>
     </div>
   );
 }
 
-export function AutomationsCard() {
+ export function AutomationsCard() {
+   const navigate = useNavigate();
   return (
     <div className="rounded-2xl bg-card border border-border p-5 shadow-card">
       <div className="flex items-center justify-between mb-3">
@@ -46,14 +52,18 @@ export function AutomationsCard() {
           </li>
         ))}
       </ul>
-      <button className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition">
-        Ver todas as automações <ArrowRight className="h-3.5 w-3.5" />
-      </button>
+       <button 
+         onClick={() => navigate({ to: "/automacao" })}
+         className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition"
+       >
+         Ver todas as automações <ArrowRight className="h-3.5 w-3.5" />
+       </button>
     </div>
   );
 }
 
-export function AgendaCard() {
+ export function AgendaCard() {
+   const navigate = useNavigate();
   const [m] = useState(new Date(2026, 4, 24));
   const days = ["D","S","T","Q","Q","S","S"];
   const monthName = m.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
@@ -92,15 +102,19 @@ export function AgendaCard() {
             </li>
           ))}
         </ul>
-        <button className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition">
-          Ver agenda completa <ArrowRight className="h-3.5 w-3.5" />
-        </button>
+         <button 
+           onClick={() => navigate({ to: "/agendamentos" })}
+           className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition"
+         >
+           Ver agenda completa <ArrowRight className="h-3.5 w-3.5" />
+         </button>
       </div>
     </div>
   );
 }
 
-export function DispatchCard() {
+ export function DispatchCard() {
+   const navigate = useNavigate();
   const items = [
     { icon: Send, label: "Total de mensagens", value: "256", color: "var(--color-primary)" },
     { icon: CheckCircle2, label: "Entregues", value: "238", sub: "(93%)", color: "var(--color-success)" },
@@ -123,9 +137,12 @@ export function DispatchCard() {
           );
         })}
       </div>
-      <button className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition">
-        Ver relatórios completos <ArrowRight className="h-3.5 w-3.5" />
-      </button>
+       <button 
+         onClick={() => navigate({ to: "/relatorios" })}
+         className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition"
+       >
+         Ver relatórios completos <ArrowRight className="h-3.5 w-3.5" />
+       </button>
     </div>
   );
 }

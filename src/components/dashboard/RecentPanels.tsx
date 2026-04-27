@@ -52,10 +52,19 @@ const etapaStyle = (e: string) => {
   }
 };
 
-export function RecentLeads() {
+ export function RecentLeads() {
+   const navigate = useNavigate();
   return (
     <div className="rounded-2xl bg-card border border-border p-5 shadow-card">
-      <h3 className="text-[15px] font-semibold mb-3">Leads recentes</h3>
+       <div className="flex items-center justify-between mb-3">
+         <h3 className="text-[15px] font-semibold">Leads recentes</h3>
+         <button 
+           onClick={() => navigate({ to: "/leads" })}
+           className="text-xs font-medium text-primary hover:underline flex items-center gap-1"
+         >
+           Ver todos <ArrowRight className="h-3 w-3" />
+         </button>
+       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-[12.5px]">
           <thead>

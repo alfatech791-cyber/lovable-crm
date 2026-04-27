@@ -1,6 +1,7 @@
-import { messages } from "@/lib/mock";
-import { ArrowRight, Filter, MoreHorizontal } from "lucide-react";
-import { useState } from "react";
+ import { messages } from "@/lib/mock";
+ import { ArrowRight, Filter, MoreHorizontal } from "lucide-react";
+ import { useState } from "react";
+ import { useNavigate } from "@tanstack/react-router";
 
 const channelDot = (c: string) => c === "whatsapp" ? "bg-success" : "bg-[oklch(0.65_0.2_330)]";
 const tabs = [
@@ -9,8 +10,10 @@ const tabs = [
   { key: "ig", label: "Instagram", count: 10 },
 ];
 
-export function MessagesPanel() {
-  const [tab, setTab] = useState("todas");
+ export function MessagesPanel() {
+   const [tab, setTab] = useState("todas");
+   const navigate = useNavigate();
+ 
   return (
     <div className="rounded-2xl bg-card border border-border shadow-card overflow-hidden flex flex-col h-full">
       <div className="px-5 pt-5 pb-3 flex items-center justify-between">
@@ -56,11 +59,14 @@ export function MessagesPanel() {
           </li>
         ))}
       </ul>
-      <div className="p-3 border-t border-border">
-        <button className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition">
-          Ver todas as conversas <ArrowRight className="h-3.5 w-3.5" />
-        </button>
-      </div>
+       <div className="p-3 border-t border-border">
+         <button 
+           onClick={() => navigate({ to: "/atendimento" })}
+           className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition"
+         >
+           Ver todas as conversas <ArrowRight className="h-3.5 w-3.5" />
+         </button>
+       </div>
     </div>
   );
 }
