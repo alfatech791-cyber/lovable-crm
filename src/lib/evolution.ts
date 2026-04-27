@@ -26,18 +26,61 @@ export const evolution = {
     return res.json() as Promise<Instance[]>;
   },
 
-  async createInstance(instanceName: string) {
-    const res = await fetch(`${API_URL}/instance/create`, {
+   async createInstance(instanceName: string, webhookUrl?: string) {
+     const res = await fetch(`${API_URL}/instance/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "apikey": API_KEY,
       },
-      body: JSON.stringify({
-        instanceName,
-        token: "", // Gerado automaticamente se vazio
-        qrcode: true,
-      }),
+       body: JSON.stringify({
+         instanceName,
+         token: "", // Gerado automaticamente se vazio
+         qrcode: true,
+       }),
+     });
+     const data = await res.json();
+     
+     // Se houver webhookUrl, configurar agora
+     if (webhookUrl && data.instance?.instanceName) {
+       await this.setWebhook(data.instance.instanceName, webhookUrl);
+     }
+     
+     return data;
+   },
+ 
+   async setWebhook(instanceName: string, url: string) {
+     const res = await fetch(`${API_URL}/webhook/set/${instanceName}`, {
+       method: "POST",
+       headers: {
+         "Content-Type": "application/json",
+         "apikey": API_KEY,
+       },
+       body: JSON.stringify({
+         enabled: true,
+         url: url,
+         webhook_by_events: false,
+         events: [
+           "MESSAGES_UPSERT",
+           "MESSAGES_UPDATE",
+           "MESSAGES_DELETE",
+           "SEND_MESSAGE",
+           "CONTACTS_UPSERT",
+           "CONTACTS_UPDATE",
+           "PRESENCE_UPDATE",
+           "CHATS_UPSERT",
+           "CHATS_UPDATE",
+           "CHATS_DELETE",
+           "GROUPS_UPSERT",
+           "GROUPS_UPDATE",
+           "GROUP_PARTICIPANTS_UPDATE",
+           "CONNECTION_UPDATE",
+           "CALL"
+         ]
+       }),
+     });
+     return res.json();
+   },
     });
     return res.json();
   },
