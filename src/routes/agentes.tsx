@@ -24,7 +24,11 @@ interface Agent {
 }
 const agents: Agent[] = [];
 
+import { useState } from "react";
+
 function AgentsPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const handleTraining = () => {
     toast.success("Treinamento de Vendas de Celulares atualizado!", {
       description: "Agentes agora operam com o cérebro DeepSeek focado em conversão de smartphones.",
@@ -34,9 +38,9 @@ function AgentsPage() {
 
   return (
     <div className="min-h-screen flex w-full bg-background">
-      <AppSidebar />
+      <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Agentes de Atendimento" subtitle="Gerencie sua equipe e conexões" />
+        <Topbar title="Agentes de Atendimento" subtitle="Gerencie sua equipe e conexões" toggleSidebar={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="space-y-6 mb-8">
             <div className="flex items-center justify-between">
