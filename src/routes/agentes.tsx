@@ -79,6 +79,15 @@ function AgentsPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4">
+            {agents.length === 0 && (
+              <div className="rounded-2xl bg-card border border-border p-12 text-center shadow-card">
+                <div className="h-14 w-14 rounded-2xl bg-muted grid place-items-center mx-auto mb-4">
+                  <Headphones className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold">Nenhum agente cadastrado</h3>
+                <p className="text-sm text-muted-foreground mt-1">Sua equipe aparecerá aqui assim que você convidar o primeiro membro.</p>
+              </div>
+            )}
             {agents.map((agent) => (
               <div key={agent.id} className="rounded-2xl bg-card border border-border p-5 shadow-card hover:shadow-elegant transition-all flex items-center gap-6">
                 <div className="relative">

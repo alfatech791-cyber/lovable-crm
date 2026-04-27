@@ -45,6 +45,15 @@ function ProductsPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            {products.length === 0 && (
+              <div className="col-span-full rounded-2xl bg-card border border-border p-12 text-center shadow-card">
+                <div className="h-14 w-14 rounded-2xl bg-muted grid place-items-center mx-auto mb-4">
+                  <ShoppingBag className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold">Nenhum produto encontrado</h3>
+                <p className="text-sm text-muted-foreground mt-1">Cadastre seus produtos ou serviços para começar a vender pelo CRM.</p>
+              </div>
+            )}
             {products.map((product) => (
               <div key={product.id} className="rounded-2xl bg-card border border-border overflow-hidden shadow-card hover:shadow-elegant transition-all group">
                 <div className="h-40 bg-muted grid place-items-center relative">
