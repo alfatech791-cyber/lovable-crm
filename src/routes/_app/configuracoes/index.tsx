@@ -33,17 +33,19 @@ export default function Configuracoes() {
      fetchInstances();
    }, []);
  
-   const handleCreateInstance = async () => {
-     const name = `instancia_${Math.floor(Math.random() * 1000)}`;
-     try {
-       await evolution.createInstance(name);
-       setSelectedInstance(name);
-       setShowQrModal(true);
-       fetchInstances();
-     } catch (err) {
-       toast.error("Erro ao criar instância");
-     }
-   };
+    const handleCreateInstance = async () => {
+      const name = `instancia_${Math.floor(Math.random() * 1000)}`;
+      const webhookUrl = import.meta.env.VITE_WEBHOOK_URL || "";
+      
+      try {
+        await evolution.createInstance(name, webhookUrl);
+        setSelectedInstance(name);
+        setShowQrModal(true);
+        fetchInstances();
+      } catch (err) {
+        toast.error("Erro ao criar instância");
+      }
+    };
  
    const handleDisconnect = async (name: string) => {
      try {
