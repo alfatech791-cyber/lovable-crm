@@ -256,6 +256,21 @@ export interface Automation {
    { id: "6", name: "Xiaomi Redmi Note 13", category: "Smartphones", price: 1599.00, stock: 8, imei: "356789123456782" },
  ];
  
+  export const funnelData = [
+    { name: "Leads", value: 1000, color: "var(--color-primary)" },
+    { name: "Qualificados", value: 650, color: "var(--color-info)" },
+    { name: "Proposta", value: 420, color: "var(--color-warning)" },
+    { name: "Negociação", value: 280, color: "oklch(0.65 0.2 330)" },
+    { name: "Fechados", value: 150, color: "var(--color-success)" },
+  ];
+
+  export const topPerformers = [
+    { name: "Renato Machado", sales: 45, revenue: "R$ 68.450", avatar: "RM", trend: "+12%" },
+    { name: "Ana Kessia", sales: 38, revenue: "R$ 52.320", avatar: "AK", trend: "+8%" },
+    { name: "Carlos Peixoto", sales: 32, revenue: "R$ 44.150", avatar: "CP", trend: "+5%" },
+    { name: "Beatriz Silva", sales: 28, revenue: "R$ 38.900", avatar: "BS", trend: "-2%" },
+  ];
+
  export const kpis = [
    { label: "Vendas do Dia", value: "R$ 12.450", trend: "+12%", sub: "8 vendas hoje", icon: "ShoppingBag", tone: "success" },
    { label: "OS Abertas", value: "14", trend: "+2", sub: "Aguardando peças: 3", icon: "Wrench", tone: "warning" },
