@@ -1,24 +1,8 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import {
-  MessageSquare,
-  Plus,
-  RefreshCw,
-  Trash2,
-  QrCode,
-  CheckCircle2,
-  AlertCircle,
-  Phone,
-  User,
-  ShieldCheck,
-  Info,
-  Search,
-  MoreVertical,
-  LogOut,
-  Smartphone,
-} from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import * as Icons from "lucide-react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { evolution, type Instance } from "@/lib/evolution";
 import { toast } from "sonner";
 import { QrCodeModal } from "@/components/whatsapp/QrCodeModal";
@@ -34,7 +18,7 @@ function WhatsAppPage() {
   const [selectedInstance, setSelectedInstance] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const fetchInstances = async () => {
+  const fetchInstances = useCallback(async () => {
     try {
       setLoading(true);
       const data = await evolution.getInstances();
@@ -45,7 +29,7 @@ function WhatsAppPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchInstances();
@@ -113,65 +97,85 @@ function WhatsAppPage() {
         <Topbar title="Gestão de WhatsApp" subtitle="Hub de conexões via Evolution API" />
 
         <main className="flex-1 overflow-y-auto p-4 lg:p-8 space-y-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-card rounded-2xl p-5 border border-border shadow-sm flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                <Smartphone className="h-6 w-6" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm flex flex-col justify-between group hover:border-primary/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <Icons.Smartphone className="h-6 w-6" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50">Geral</span>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Total de Instâncias</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
+                <p className="text-2xl font-black tabular-nums">{stats.total}</p>
+                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-tight">Total de Instâncias</p>
               </div>
             </div>
 
-            <div className="bg-card rounded-2xl p-5 border border-border shadow-sm flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center text-success">
-                <CheckCircle2 className="h-6 w-6" />
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm flex flex-col justify-between group hover:border-success/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-12 w-12 rounded-2xl bg-success/10 flex items-center justify-center text-success group-hover:scale-110 transition-transform">
+                  <Icons.CheckCircle2 className="h-6 w-6" />
+                </div>
+                <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Conectadas</p>
-                <p className="text-2xl font-bold">{stats.connected}</p>
+                <p className="text-2xl font-black tabular-nums text-success">{stats.connected}</p>
+                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-tight">Conectadas Agora</p>
               </div>
             </div>
 
-            <div className="bg-card rounded-2xl p-5 border border-border shadow-sm flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-warning/10 flex items-center justify-center text-warning">
-                <AlertCircle className="h-6 w-6" />
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm flex flex-col justify-between group hover:border-warning/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-12 w-12 rounded-2xl bg-warning/10 flex items-center justify-center text-warning group-hover:scale-110 transition-transform">
+                  <Icons.AlertCircle className="h-6 w-6" />
+                </div>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Desconectadas</p>
-                <p className="text-2xl font-bold">{stats.disconnected}</p>
+                <p className="text-2xl font-black tabular-nums text-warning">{stats.disconnected}</p>
+                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-tight">Aguardando Conexão</p>
+              </div>
+            </div>
+
+            <div className="bg-primary rounded-2xl p-6 shadow-lg shadow-primary/20 flex flex-col justify-between group hover:scale-[1.02] transition-all duration-300 cursor-pointer" onClick={handleCreate}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center text-white">
+                  <Icons.Plus className="h-6 w-6" />
+                </div>
+              </div>
+              <div>
+                <p className="text-lg font-black text-white leading-tight">Nova Instância</p>
+                <p className="text-[11px] font-bold text-white/70 uppercase tracking-tight">Criar canal agora</p>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-card p-4 rounded-2xl border border-border shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-card p-4 rounded-2xl border border-border shadow-elegant">
             <div className="relative w-full sm:w-96">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Icons.Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Buscar por nome ou número..."
-                className="w-full h-10 pl-10 pr-4 rounded-xl bg-muted/50 border-none text-sm focus:ring-2 focus:ring-primary/20 transition"
+                placeholder="Pesquisar instâncias ou números..."
+                className="w-full h-11 pl-11 pr-4 rounded-xl bg-muted/60 border border-transparent focus:border-primary/20 focus:bg-card outline-none text-sm transition"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button
-                onClick={fetchInstances}
-                className="h-10 px-4 rounded-xl border border-border hover:bg-muted transition flex items-center gap-2 text-sm font-medium"
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-                <span className="hidden sm:inline">Sincronizar</span>
-              </button>
+                <button
+                  onClick={fetchInstances}
+                  className="h-11 px-5 rounded-xl border border-border hover:bg-muted transition-all flex items-center gap-2 text-sm font-bold"
+                >
+                  <Icons.RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                  <span className="hidden sm:inline">Atualizar Lista</span>
+                </button>
 
               <button
                 onClick={handleCreate}
                 disabled={isCreating}
                 className="flex-1 sm:flex-none h-10 px-6 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
-                <Plus className="h-4 w-4" /> Nova Conexão
+                <Icons.Plus className="h-4 w-4" /> Nova Conexão
               </button>
             </div>
           </div>
@@ -185,7 +189,7 @@ function WhatsAppPage() {
           ) : filteredInstances.length === 0 ? (
             <div className="rounded-3xl bg-card border border-border shadow-sm p-16 text-center max-w-2xl mx-auto">
               <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
-                <MessageSquare className="h-10 w-10 text-muted-foreground" />
+                <Icons.MessageSquare className="h-10 w-10 text-muted-foreground" />
               </div>
               <h3 className="text-2xl font-bold">Inicie sua operação</h3>
               <p className="text-muted-foreground mt-3 max-w-sm mx-auto leading-relaxed">
@@ -201,39 +205,37 @@ function WhatsAppPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredInstances.map((inst) => (
-                <div
-                  key={inst.instanceId}
-                  className="group relative rounded-3xl bg-card border border-border p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                >
+                <div key={inst.instanceId} className="group relative rounded-3xl bg-card border border-border p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                  <div className={`absolute top-0 left-0 w-full h-1.5 ${inst.status === "open" ? "bg-success" : "bg-warning"}`} />
                   <div className="flex items-start justify-between mb-6">
                     <div className="flex items-center gap-4">
                       <div className="relative h-16 w-16 rounded-2xl bg-muted overflow-hidden flex items-center justify-center ring-4 ring-muted">
                         {inst.profilePictureUrl ? (
                           <img src={inst.profilePictureUrl} alt={inst.instanceName} className="h-full w-full object-cover" />
                         ) : (
-                          <User className="h-8 w-8 text-muted-foreground/50" />
+                          <Icons.User className="h-8 w-8 text-muted-foreground/50" />
                         )}
-                        <div className={`absolute bottom-0 right-0 h-4 w-4 border-2 border-card rounded-full ${inst.status === "open" ? "bg-success" : "bg-warning"}`} />
+                        <div className={`absolute bottom-0 right-0 h-4 w-4 border-2 border-card rounded-full shadow-sm ${inst.status === "open" ? "bg-success" : "bg-warning animate-pulse"}`} />
                       </div>
                       <div>
                         <h4 className="font-bold text-lg leading-tight">{inst.instanceName}</h4>
                         <p className="text-xs font-medium text-muted-foreground mt-1 flex items-center gap-1">
                           {inst.status === "open" ? (
-                            <>
-                              <CheckCircle2 className="h-3 w-3 text-success" /> Ativo agora
-                            </>
+                            <div className="flex items-center gap-1">
+                              <Icons.CheckCircle2 className="h-3 w-3 text-success" /> Ativo agora
+                            </div>
                           ) : (
-                            <>
-                              <AlertCircle className="h-3 w-3 text-warning" /> Aguardando pareamento
-                            </>
+                            <div className="flex items-center gap-1">
+                              <Icons.AlertCircle className="h-3 w-3 text-warning" /> Aguardando pareamento
+                            </div>
                           )}
                         </p>
                       </div>
                     </div>
 
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-muted text-muted-foreground">
-                        <MoreVertical className="h-5 w-5" />
+                      <button className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-muted text-muted-foreground transition-colors">
+                        <Icons.MoreVertical className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
@@ -241,7 +243,7 @@ function WhatsAppPage() {
                   <div className="space-y-4 mb-6">
                     <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
                       <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <Icons.Phone className="h-4 w-4 text-muted-foreground" />
                         <span className="text-xs font-semibold text-muted-foreground">Número vinculado</span>
                       </div>
                       <span className="text-sm font-bold tabular-nums">
@@ -256,7 +258,7 @@ function WhatsAppPage() {
                         onClick={() => setSelectedInstance(inst.instanceName)}
                         className="flex-1 h-11 rounded-2xl bg-primary text-primary-foreground text-sm font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2"
                       >
-                        <QrCode className="h-4 w-4" /> Conectar WhatsApp
+                        <Icons.QrCode className="h-4 w-4" /> Conectar WhatsApp
                       </button>
                     ) : (
                       <>
@@ -264,14 +266,14 @@ function WhatsAppPage() {
                           onClick={() => handleLogout(inst.instanceName)}
                           className="flex-1 h-11 rounded-2xl bg-muted text-foreground text-sm font-bold hover:bg-muted/80 transition flex items-center justify-center gap-2"
                         >
-                          <LogOut className="h-4 w-4" /> Desconectar
+                          <Icons.LogOut className="h-4 w-4" /> Desconectar
                         </button>
                         <button
                           onClick={() => handleDelete(inst.instanceName)}
                           className="h-11 w-11 rounded-2xl bg-destructive/10 text-destructive hover:bg-destructive/20 transition flex items-center justify-center"
                           title="Excluir instância"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Icons.Trash2 className="h-4 w-4" />
                         </button>
                       </>
                     )}
@@ -283,13 +285,13 @@ function WhatsAppPage() {
 
           <div className="rounded-3xl bg-slate-900 text-white p-8 overflow-hidden relative group">
             <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
-              <ShieldCheck className="h-32 w-32" />
+              <Icons.ShieldCheck className="h-32 w-32" />
             </div>
 
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
               <div className="max-w-md">
                 <div className="flex items-center gap-2 text-primary/80 mb-2">
-                  <Info className="h-4 w-4" />
+                  <Icons.Info className="h-4 w-4" />
                   <span className="text-xs font-bold uppercase tracking-widest">Evolution API Status</span>
                 </div>
                 <h3 className="text-2xl font-bold mb-3">Infraestrutura Segura</h3>
