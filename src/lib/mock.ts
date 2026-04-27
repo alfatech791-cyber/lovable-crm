@@ -37,15 +37,65 @@ export const channelSeries = Array.from({ length: 14 }, (_, i) => ({
   insta: 0,
 }));
 
-export const funnelStages = [
+export interface Lead {
+  name: string;
+  avatar: string;
+  channel: string;
+  time: string;
+  won?: boolean;
+}
+
+export interface FunnelStage {
+  key: string;
+  label: string;
+  color: string;
+  count: number;
+  total: string;
+  leads: Lead[];
+}
+
+export const funnelStages: FunnelStage[] = [
   { key: "novo", label: "Novo Contato", color: "var(--color-info)", count: 0, total: "R$ 0", leads: [] },
   { key: "atendimento", label: "Em Atendimento", color: "var(--color-warning)", count: 0, total: "R$ 0", leads: [] },
   { key: "proposta", label: "Proposta", color: "var(--color-primary)", count: 0, total: "R$ 0", leads: [] },
   { key: "fechado", label: "Fechado", color: "var(--color-success)", count: 0, total: "R$ 0", leads: [] },
 ];
 
-export const messages = [];
-export const tasks = [];
-export const agenda = [];
-export const automations = [];
-export const recentLeads = [];
+export interface Message {
+  name: string;
+  time: string;
+  text: string;
+  channel: string;
+  unread: number;
+}
+export const messages: Message[] = [];
+
+export interface Task {
+  text: string;
+  count: number;
+  done: boolean;
+}
+export const tasks: Task[] = [];
+
+export interface AgendaItem {
+  time: string;
+  title: string;
+}
+export const agenda: AgendaItem[] = [];
+
+export interface Automation {
+  name: string;
+  next: string;
+  count: number;
+  status: string;
+}
+export const automations: Automation[] = [];
+
+export interface RecentLead {
+  name: string;
+  origin: string;
+  responsavel: string;
+  etapa: string;
+  time: string;
+}
+export const recentLeads: RecentLead[] = [];
