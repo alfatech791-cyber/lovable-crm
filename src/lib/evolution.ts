@@ -3,8 +3,8 @@
  * Documentação: https://doc.evolution-api.com/
  */
 
-const API_URL = (import.meta as any).env.VITE_EVOLUTION_API_URL || "";
-const API_KEY = (import.meta as any).env.VITE_EVOLUTION_API_KEY || "";
+const API_URL = (import.meta as any).env.EVOLUTION_API_URL || (import.meta as any).env.VITE_EVOLUTION_API_URL || "";
+const API_KEY = (import.meta as any).env.EVOLUTION_API_KEY || (import.meta as any).env.VITE_EVOLUTION_API_KEY || "";
 
 export interface Instance {
   instanceName: string;
