@@ -65,15 +65,23 @@ export const sidebarItems = [
   },
 ] as const;
 
-export const kpis = [
-  { label: "Leads do dia", value: "0", trend: "0%", sub: "Aguardando leads", icon: "Users", tone: "info" },
-  { label: "Conversões", value: "0", trend: "0%", sub: "Taxa: 0%", icon: "TrendingUp", tone: "success" },
-  { label: "Mensagens recebidas", value: "0", trend: "0%", sub: "Nenhuma pendente", icon: "MessageSquare", tone: "primary" },
-  { label: "Vendas fechadas", value: "R$ 0", trend: "0%", sub: "Este mês", icon: "DollarSign", tone: "success" },
-  { label: "Taxa de resposta", value: "0%", trend: "0%", sub: "Sem dados", icon: "Activity", tone: "warning" },
-  { label: "Agendamentos", value: "0", trend: "0%", sub: "Este mês", icon: "Calendar", tone: "primary" },
-] as const;
-
+ export interface ServiceOrder {
+   id: string;
+   customer: string;
+   device: string;
+   problem: string;
+   status: "Aguardando" | "Em Análise" | "Aprovado" | "Pronto" | "Entregue";
+   priority: "Baixa" | "Média" | "Alta" | "Urgente";
+   date: string;
+   value?: number;
+ }
+ 
+ export const serviceOrders: ServiceOrder[] = [
+   { id: "OS1001", customer: "João Silva", device: "iPhone 13", problem: "Troca de Tela", status: "Em Análise", priority: "Alta", date: "2024-03-25" },
+   { id: "OS1002", customer: "Maria Oliveira", device: "Samsung S22", problem: "Conector de Carga", status: "Aguardando", priority: "Média", date: "2024-03-26" },
+   { id: "OS1003", customer: "Pedro Santos", device: "Motorola G54", problem: "Não Liga", status: "Pronto", priority: "Baixa", date: "2024-03-24", value: 350 },
+ ];
+ 
 export const salesData = Array.from({ length: 30 }, (_, i) => ({
   day: String(i + 1).padStart(2, "0"),
   value: 0
