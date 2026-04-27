@@ -1,8 +1,22 @@
-import { Bell, MessageCircle, Plus, Search, ChevronDown } from "lucide-react";
+import { Bell, MessageCircle, Plus, Search, ChevronDown, ArrowLeft } from "lucide-react";
+import { useNavigate, useLocation } from "@tanstack/react-router";
 
 export function Topbar({ title, subtitle }: { title: string; subtitle?: string }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === "/";
+
   return (
     <header className="h-[68px] shrink-0 bg-card border-b border-border flex items-center gap-4 px-6">
+      {!isHome && (
+        <button 
+          onClick={() => navigate({ to: ".." })}
+          className="mr-2 p-2 rounded-xl hover:bg-muted text-muted-foreground transition-colors group"
+          title="Voltar"
+        >
+          <ArrowLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
+        </button>
+      )}
       <button className="lg:hidden p-2 rounded-md hover:bg-muted">
         <span className="block w-5 h-0.5 bg-foreground mb-1" />
         <span className="block w-5 h-0.5 bg-foreground mb-1" />
