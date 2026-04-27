@@ -116,9 +116,17 @@ export default function Configuracoes() {
                      Conecte seu WhatsApp para enviar notificações e gerenciar atendimentos.
                    </CardDescription>
                  </div>
-                 <Button onClick={handleCreateInstance} className="bg-[#25D366] hover:bg-[#128C7E] text-white">
-                   <Power className="mr-2 h-4 w-4" />
-                   Nova Conexão
+                  <Button 
+                    onClick={handleCreateInstance} 
+                    disabled={isCreating}
+                    className="bg-[#25D366] hover:bg-[#128C7E] text-white"
+                  >
+                    {isCreating ? (
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Power className="mr-2 h-4 w-4" />
+                    )}
+                    {isCreating ? "Criando..." : "Nova Conexão"}
                  </Button>
                </CardHeader>
                <CardContent>
