@@ -130,6 +130,102 @@ export type Database = {
         }
         Relationships: []
       }
+      customers: {
+        Row: {
+          address_city: string | null
+          address_complement: string | null
+          address_neighborhood: string | null
+          address_number: string | null
+          address_state: string | null
+          address_street: string | null
+          address_zip: string | null
+          created_at: string | null
+          document: string | null
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_zip?: string | null
+          created_at?: string | null
+          document?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address_city?: string | null
+          address_complement?: string | null
+          address_neighborhood?: string | null
+          address_number?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_zip?: string | null
+          created_at?: string | null
+          document?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      finance_transactions: {
+        Row: {
+          amount: number
+          category: string | null
+          created_at: string | null
+          description: string
+          due_date: string | null
+          id: string
+          payment_date: string | null
+          status: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category?: string | null
+          created_at?: string | null
+          description: string
+          due_date?: string | null
+          id?: string
+          payment_date?: string | null
+          status?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string | null
+          created_at?: string | null
+          description?: string
+          due_date?: string | null
+          id?: string
+          payment_date?: string | null
+          status?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       funnel_stages: {
         Row: {
           color: string | null
@@ -298,6 +394,54 @@ export type Database = {
           },
         ]
       }
+      products: {
+        Row: {
+          category: string | null
+          cost_price: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          min_stock: number | null
+          name: string
+          price: number | null
+          sku: string | null
+          stock_quantity: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          cost_price?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          min_stock?: number | null
+          name: string
+          price?: number | null
+          sku?: string | null
+          stock_quantity?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          cost_price?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          min_stock?: number | null
+          name?: string
+          price?: number | null
+          sku?: string | null
+          stock_quantity?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -333,6 +477,100 @@ export type Database = {
           usage_limit?: number | null
         }
         Relationships: []
+      }
+      sales_orders: {
+        Row: {
+          created_at: string | null
+          customer_id: string | null
+          discount_amount: number | null
+          id: string
+          notes: string | null
+          payment_method: string | null
+          status: string | null
+          total_amount: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id?: string | null
+          discount_amount?: number | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string | null
+          discount_amount?: number | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_orders: {
+        Row: {
+          created_at: string | null
+          customer_id: string
+          equipment: string | null
+          estimated_cost: number | null
+          id: string
+          problem_description: string | null
+          status: string | null
+          technical_notes: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id: string
+          equipment?: string | null
+          estimated_cost?: number | null
+          id?: string
+          problem_description?: string | null
+          status?: string | null
+          technical_notes?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string
+          equipment?: string | null
+          estimated_cost?: number | null
+          id?: string
+          problem_description?: string | null
+          status?: string | null
+          technical_notes?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tasks: {
         Row: {
@@ -380,6 +618,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      whatsapp_instances: {
+        Row: {
+          created_at: string | null
+          id: string
+          instance_name: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          instance_name: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          instance_name?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
