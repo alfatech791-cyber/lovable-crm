@@ -11,6 +11,7 @@ import { MessagesPanel } from "@/components/dashboard/MessagesPanel";
 import { TasksCard, AutomationsCard, AgendaCard, DispatchCard } from "@/components/dashboard/SidePanels";
 import { RecentService, RecentLeads } from "@/components/dashboard/RecentPanels";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import { useState } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -23,11 +24,17 @@ export const Route = createFileRoute("/")({
 });
 
 function Dashboard() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="min-h-screen flex w-full bg-background">
-      <AppSidebar />
+      <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Olá, Renato! 👋" subtitle="Aqui está o resumo do seu negócio hoje." />
+        <Topbar 
+          title="Olá, Renato! 👋" 
+          subtitle="Aqui está o resumo do seu negócio hoje." 
+          toggleSidebar={() => setSidebarOpen(true)}
+        />
         <main className="flex-1 overflow-y-auto p-6">
           <QuickActions />
           <div className="space-y-5 mt-5">
