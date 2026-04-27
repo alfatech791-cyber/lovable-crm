@@ -1,83 +1,76 @@
 export const sidebarItems = [
-    { title: "Início", url: "/", icon: "Home" as const },
-    { title: "Agendamentos", url: "/agendamentos", icon: "Calendar" as const },
-   { 
-     title: "Vendas", 
-     url: "/vendas", 
-     icon: "ShoppingBag" as const,
-     children: [
-       { title: "PDV (Caixa)", url: "/pdv" },
-       { title: "Orçamentos", url: "/vendas/orcamentos" },
-       { title: "Histórico", url: "/vendas/historico" },
-       { title: "Consulta Estoque", url: "/vendas/consulta-estoque" },
-       { title: "Calculadora Aparelhos", url: "/vendas/calculadora" },
-       { title: "Simulador Cartão", url: "/vendas/simulador" },
-       { title: "Delivery", url: "/vendas/delivery" },
-       { title: "Garantias", url: "/vendas/garantias" },
-     ]
-   },
-   { title: "Clientes", url: "/clientes", icon: "Users" as const },
-   { 
-     title: "Estoque", 
-     url: "/estoque", 
-     icon: "Box" as const,
-     children: [
-       { title: "Estoque Atual", url: "/estoque/atual" },
-       { title: "Ordens de Compra", url: "/estoque/compras" },
-       { title: "Produtos Vendidos", url: "/estoque/vendidos" },
-       { title: "Movimentações", url: "/estoque/movimentacoes" },
-       { title: "Etiquetas", url: "/estoque/etiquetas" },
-     ]
-   },
-   { 
-     title: "Ordem de Serviço", 
-     url: "/servicos", 
-     icon: "Wrench" as const,
-     children: [
-       { title: "Dashboard OS", url: "/servicos/dashboard" },
-       { title: "Nova OS", url: "/servicos/nova" },
-       { title: "Técnicos", url: "/servicos/tecnicos" },
-       { title: "Checklists", url: "/servicos/checklists" },
-       { title: "Termos Garantia", url: "/servicos/termos" },
-     ]
-   },
-    { title: "Gestão WhatsApp", url: "/whatsapp", icon: "MessageSquare" as const },
-   { 
-     title: "Financeiro", 
-     url: "/financeiro", 
-     icon: "DollarSign" as const,
-     children: [
-       { title: "Caixa/Bancos", url: "/financeiro/caixa" },
-       { title: "Fornecedores", url: "/financeiro/fornecedores" },
-       { title: "Plano de Contas", url: "/financeiro/plano-contas" },
-       { title: "DRE", url: "/financeiro/dre" },
-       { title: "Maquininhas POS", url: "/financeiro/maquininhas" },
-     ]
-   },
-   { title: "Relatórios", url: "/relatorios", icon: "BarChart3" as const },
-   { 
-     title: "Operação", 
-     url: "/operacao", 
-     icon: "Settings2" as const,
-     children: [
-       { title: "Tipos de Produtos", url: "/operacao/tipos-produtos" },
-       { title: "Transportadores", url: "/operacao/transportadores" },
-       { title: "Maquininhas POS", url: "/operacao/maquininhas" },
-       { title: "Serviços", url: "/servicos/lista" },
-       { title: "Modelos Etiquetas", url: "/estoque/etiquetas" },
-     ]
-   },
-   {
-     title: "Configurações",
-     url: "/configuracoes",
-     icon: "Settings" as const,
-     children: [
-       { title: "Equipe", url: "/equipe" },
-       { title: "Geral", url: "/configuracoes" },
-       { title: "Parâmetros", url: "/configuracoes/parametros" },
-     ]
-   },
-] as const;
+  { type: "header", title: "Painel Principal" },
+  { title: "Dashboard", url: "/", icon: "LayoutDashboard" as const },
+  { title: "Relatórios", url: "/relatorios", icon: "BarChart3" as const },
+
+  { type: "header", title: "Atendimento & CRM" },
+  { title: "WhatsApp", url: "/whatsapp", icon: "MessageSquare" as const },
+  { title: "Instagram", url: "/instagram", icon: "Instagram" as const },
+  { title: "CRM Leads", url: "/leads", icon: "UserPlus" as const },
+  { title: "Funil de Vendas", url: "/funil", icon: "Trello" as const },
+  { title: "Automações", url: "/automacao", icon: "Zap" as const },
+
+  { type: "header", title: "Operação Comercial" },
+  {
+    title: "Vendas & PDV",
+    url: "/vendas",
+    icon: "ShoppingBag" as const,
+    children: [
+      { title: "Frente de Caixa (PDV)", url: "/pdv" },
+      { title: "Orçamentos", url: "/vendas/orcamentos" },
+      { title: "Histórico de Vendas", url: "/vendas/historico" },
+      { title: "Simulador de Taxas", url: "/vendas/simulador" },
+      { title: "Gestão Delivery", url: "/vendas/delivery" },
+    ]
+  },
+  {
+    title: "Serviços & OS",
+    url: "/servicos",
+    icon: "Wrench" as const,
+    children: [
+      { title: "Dashboard OS", url: "/servicos/dashboard" },
+      { title: "Nova Ordem", url: "/servicos/nova" },
+      { title: "Técnicos", url: "/servicos/tecnicos" },
+      { title: "Checklists", url: "/servicos/checklists" },
+    ]
+  },
+  { title: "Agendamentos", url: "/agendamentos", icon: "Calendar" as const },
+  { title: "Base de Clientes", url: "/clientes", icon: "Users" as const },
+
+  { type: "header", title: "Logística & Estoque" },
+  {
+    title: "Estoque",
+    url: "/estoque",
+    icon: "Box" as const,
+    children: [
+      { title: "Estoque Atual", url: "/estoque/atual" },
+      { title: "Entrada de NF/Compras", url: "/estoque/compras" },
+      { title: "Produtos Vendidos", url: "/estoque/vendidos" },
+      { title: "Movimentações", url: "/estoque/movimentacoes" },
+      { title: "Gerador de Etiquetas", url: "/estoque/etiquetas" },
+    ]
+  },
+  { title: "Catálogo Produtos", url: "/produtos", icon: "Package" as const },
+
+  { type: "header", title: "Controladoria" },
+  {
+    title: "Financeiro",
+    url: "/financeiro",
+    icon: "DollarSign" as const,
+    children: [
+      { title: "Fluxo de Caixa", url: "/financeiro/caixa" },
+      { title: "Contas a Pagar", url: "/financeiro/contas-pagar" },
+      { title: "Contas a Receber", url: "/financeiro/contas-receber" },
+      { title: "Fornecedores", url: "/financeiro/fornecedores" },
+      { title: "DRE Gerencial", url: "/financeiro/dre" },
+    ]
+  },
+  { title: "Fiscal (NF-e/NFC-e)", url: "/fiscal", icon: "FileText" as const },
+
+  { type: "header", title: "Configurações" },
+  { title: "Equipe", url: "/equipe", icon: "ShieldCheck" as const },
+  { title: "Parametrização", url: "/configuracoes", icon: "Settings" as const },
+] as any;
 
  export interface ServiceOrder {
    id: string;

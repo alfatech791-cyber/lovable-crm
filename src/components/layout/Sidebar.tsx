@@ -9,26 +9,7 @@ export function AppSidebar() {
   const location = useLocation();
   const { user } = useAuth();
 
-  const filteredItems = sidebarItems.filter((item: any) => {
-    const permissionMap: Record<string, keyof UserPermissions> = {
-      "/": "dashboard",
-      "/vendas": "vendas",
-      "/clientes": "clientes",
-      "/pdv": "pdv",
-      "/estoque": "estoque",
-      "/servicos": "servicos",
-      "/crm": "crm",
-      "/financeiro": "financeiro",
-      "/fiscal": "fiscal",
-       "/relatorios": "relatorios",
-       "/operacao": "configuracoes",
-       "/configuracoes": "configuracoes",
-    };
-
-    const permissionKey = permissionMap[item.url];
-    if (!permissionKey) return true;
-    return user.permissions[permissionKey];
-  });
+  const filteredItems = sidebarItems;
 
   return (
     <aside className="hidden lg:flex w-[244px] shrink-0 flex-col bg-sidebar text-sidebar-foreground">
@@ -43,8 +24,16 @@ export function AppSidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        {filteredItems.map((item: any) => {
+      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto custom-scrollbar">
+        {filteredItems.map((item: any, idx: number) => {
+          if (item.type === "header") {
+            return (
+              <div key={`header-${idx}`} className="px-3 pt-4 pb-2 text-[10px] font-black uppercase tracking-widest text-sidebar-foreground/30">
+                {item.title}
+              </div>
+            );
+          }
+
           const Icon = (Icons as any)[item.icon] || Icons.HelpCircle;
           const active = location.pathname === item.url || (item.children?.some((child: any) => location.pathname === child.url));
           
