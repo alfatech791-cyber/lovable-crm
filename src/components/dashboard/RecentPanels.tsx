@@ -1,6 +1,10 @@
 import { messages, recentLeads } from "@/lib/mock";
+import { useNavigate } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
 
 export function RecentService() {
+  const navigate = useNavigate();
+
   return (
     <div className="rounded-2xl bg-card border border-border p-5 shadow-card">
       <h3 className="text-[15px] font-semibold mb-3">Atendimentos recentes</h3>
@@ -29,6 +33,12 @@ export function RecentService() {
           </li>
         ))}
       </ul>
+      <button 
+        onClick={() => navigate({ to: "/atendimento" })}
+        className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition"
+      >
+        Ir para Atendimento <ArrowRight className="h-3.5 w-3.5" />
+      </button>
     </div>
   );
 }
