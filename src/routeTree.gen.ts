@@ -55,6 +55,7 @@ import { Route as EstoqueAtualRouteImport } from './routes/estoque.atual'
 import { Route as AppConfiguracoesIndexRouteImport } from './routes/_app/configuracoes/index'
 import { Route as AppOperacaoTransportadoresRouteImport } from './routes/_app/operacao/transportadores'
 import { Route as AppOperacaoTiposProdutosRouteImport } from './routes/_app/operacao/tipos-produtos'
+import { Route as AppOperacaoServicosRouteImport } from './routes/_app/operacao/servicos'
 import { Route as AppOperacaoMaquininhasRouteImport } from './routes/_app/operacao/maquininhas'
 
 const WhatsappRoute = WhatsappRouteImport.update({
@@ -289,6 +290,11 @@ const AppOperacaoTiposProdutosRoute =
     path: '/operacao/tipos-produtos',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AppOperacaoServicosRoute = AppOperacaoServicosRouteImport.update({
+  id: '/_app/operacao/servicos',
+  path: '/operacao/servicos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppOperacaoMaquininhasRoute = AppOperacaoMaquininhasRouteImport.update({
   id: '/_app/operacao/maquininhas',
   path: '/operacao/maquininhas',
@@ -340,6 +346,7 @@ export interface FileRoutesByFullPath {
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
   '/operacao/maquininhas': typeof AppOperacaoMaquininhasRoute
+  '/operacao/servicos': typeof AppOperacaoServicosRoute
   '/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
   '/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
   '/configuracoes/': typeof AppConfiguracoesIndexRoute
@@ -389,6 +396,7 @@ export interface FileRoutesByTo {
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
   '/operacao/maquininhas': typeof AppOperacaoMaquininhasRoute
+  '/operacao/servicos': typeof AppOperacaoServicosRoute
   '/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
   '/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
 }
@@ -438,6 +446,7 @@ export interface FileRoutesById {
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
   '/_app/operacao/maquininhas': typeof AppOperacaoMaquininhasRoute
+  '/_app/operacao/servicos': typeof AppOperacaoServicosRoute
   '/_app/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
   '/_app/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
   '/_app/configuracoes/': typeof AppConfiguracoesIndexRoute
@@ -489,6 +498,7 @@ export interface FileRouteTypes {
     | '/vendas/orcamentos'
     | '/vendas/simulador'
     | '/operacao/maquininhas'
+    | '/operacao/servicos'
     | '/operacao/tipos-produtos'
     | '/operacao/transportadores'
     | '/configuracoes/'
@@ -538,6 +548,7 @@ export interface FileRouteTypes {
     | '/vendas/orcamentos'
     | '/vendas/simulador'
     | '/operacao/maquininhas'
+    | '/operacao/servicos'
     | '/operacao/tipos-produtos'
     | '/operacao/transportadores'
   id:
@@ -586,6 +597,7 @@ export interface FileRouteTypes {
     | '/vendas/orcamentos'
     | '/vendas/simulador'
     | '/_app/operacao/maquininhas'
+    | '/_app/operacao/servicos'
     | '/_app/operacao/tipos-produtos'
     | '/_app/operacao/transportadores'
     | '/_app/configuracoes/'
@@ -614,6 +626,7 @@ export interface RootRouteChildren {
   VendasRoute: typeof VendasRouteWithChildren
   WhatsappRoute: typeof WhatsappRoute
   AppOperacaoMaquininhasRoute: typeof AppOperacaoMaquininhasRoute
+  AppOperacaoServicosRoute: typeof AppOperacaoServicosRoute
   AppOperacaoTiposProdutosRoute: typeof AppOperacaoTiposProdutosRoute
   AppOperacaoTransportadoresRoute: typeof AppOperacaoTransportadoresRoute
   AppConfiguracoesIndexRoute: typeof AppConfiguracoesIndexRoute
@@ -943,6 +956,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOperacaoTiposProdutosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/operacao/servicos': {
+      id: '/_app/operacao/servicos'
+      path: '/operacao/servicos'
+      fullPath: '/operacao/servicos'
+      preLoaderRoute: typeof AppOperacaoServicosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/operacao/maquininhas': {
       id: '/_app/operacao/maquininhas'
       path: '/operacao/maquininhas'
@@ -1058,6 +1078,7 @@ const rootRouteChildren: RootRouteChildren = {
   VendasRoute: VendasRouteWithChildren,
   WhatsappRoute: WhatsappRoute,
   AppOperacaoMaquininhasRoute: AppOperacaoMaquininhasRoute,
+  AppOperacaoServicosRoute: AppOperacaoServicosRoute,
   AppOperacaoTiposProdutosRoute: AppOperacaoTiposProdutosRoute,
   AppOperacaoTransportadoresRoute: AppOperacaoTransportadoresRoute,
   AppConfiguracoesIndexRoute: AppConfiguracoesIndexRoute,
