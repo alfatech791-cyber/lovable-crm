@@ -205,10 +205,8 @@ function WhatsAppPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredInstances.map((inst) => (
-                <div
-                  key={inst.instanceId}
-                  className="group relative rounded-3xl bg-card border border-border p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                >
+                <div key={inst.instanceId} className="group relative rounded-3xl bg-card border border-border p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                  <div className={`absolute top-0 left-0 w-full h-1.5 ${inst.status === "open" ? "bg-success" : "bg-warning"}`} />
                   <div className="flex items-start justify-between mb-6">
                     <div className="flex items-center gap-4">
                       <div className="relative h-16 w-16 rounded-2xl bg-muted overflow-hidden flex items-center justify-center ring-4 ring-muted">
@@ -217,7 +215,7 @@ function WhatsAppPage() {
                         ) : (
                           <Icons.User className="h-8 w-8 text-muted-foreground/50" />
                         )}
-                        <div className={`absolute bottom-0 right-0 h-4 w-4 border-2 border-card rounded-full ${inst.status === "open" ? "bg-success" : "bg-warning"}`} />
+                        <div className={`absolute bottom-0 right-0 h-4 w-4 border-2 border-card rounded-full shadow-sm ${inst.status === "open" ? "bg-success" : "bg-warning animate-pulse"}`} />
                       </div>
                       <div>
                         <h4 className="font-bold text-lg leading-tight">{inst.instanceName}</h4>
