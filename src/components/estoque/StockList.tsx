@@ -1,7 +1,13 @@
- import { Package, Search, Plus, Filter, MoreHorizontal, ArrowUpDown, AlertTriangle } from "lucide-react";
+ import { useState } from "react";
+ import { Package, Search, Plus, Filter, MoreHorizontal, ArrowUpDown, AlertTriangle, Edit, Trash2, History } from "lucide-react";
  import { products } from "@/lib/mock";
+ import { ProductForm } from "./ProductForm";
+ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
  
  export function StockList() {
+   const [isAddOpen, setIsAddOpen] = useState(false);
+   const [editingProduct, setEditingProduct] = useState<any>(null);
+
    return (
      <div className="space-y-6">
        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -21,7 +27,7 @@
            <button className="h-10 px-4 rounded-xl border border-border bg-card text-sm font-medium hover:bg-muted transition">
              Exportar CSV
            </button>
-           <button className="h-10 px-5 rounded-xl bg-gradient-primary text-white flex items-center gap-2 text-sm font-bold shadow-glow hover:opacity-95 transition">
+            <button onClick={() => setIsAddOpen(true)} className="h-10 px-5 rounded-xl bg-gradient-primary text-white flex items-center gap-2 text-sm font-bold shadow-glow hover:opacity-95 transition">
              <Plus className="h-4 w-4" /> Novo Produto
            </button>
          </div>
@@ -74,9 +80,24 @@
                      </span>
                    </td>
                    <td className="px-6 py-4">
-                     <button className="p-2 rounded-lg hover:bg-muted transition">
-                       <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                     </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="p-2 rounded-lg hover:bg-muted transition">
+                            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuItem onClick={() => setEditingProduct(product)} className="gap-2">
+                            <Edit className="h-4 w-4" /> Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="gap-2">
+                            <History className="h-4 w-4" /> Movimentação
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="gap-2 text-destructive focus:text-destructive">
+                            <Trash2 className="h-4 w-4" /> Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                    </td>
                  </tr>
                ))}
@@ -84,6 +105,13 @@
            </table>
          </div>
        </div>
+
+       <ProductForm open={isAddOpen} onOpenChange={setIsAddOpen} />
+       <ProductForm 
+         open={!!editingProduct} 
+         onOpenChange={(open) => !open && setEditingProduct(null)} 
+         product={editingProduct} 
+       />
      </div>
    );
  }
