@@ -139,7 +139,10 @@ export default function Configuracoes() {
                            <div>
                              <div className="flex items-center gap-2">
                                <p className="font-bold">{instance.instanceName}</p>
-                               <Badge variant={instance.status === 'open' ? "success" : "secondary"} className="text-[10px] uppercase font-bold">
+                               <Badge 
+                                 variant={instance.status === 'open' ? "default" : "secondary"} 
+                                 className={`text-[10px] uppercase font-bold ${instance.status === 'open' ? "bg-success hover:bg-success/80" : ""}`}
+                               >
                                  {instance.status === 'open' ? 'Conectado' : 'Desconectado'}
                                </Badge>
                              </div>
