@@ -10,6 +10,7 @@ import { Funnel } from "@/components/dashboard/Funnel";
 import { MessagesPanel } from "@/components/dashboard/MessagesPanel";
 import { TasksCard, AutomationsCard, AgendaCard, DispatchCard } from "@/components/dashboard/SidePanels";
 import { RecentService, RecentLeads } from "@/components/dashboard/RecentPanels";
+import { QuickActions } from "@/components/dashboard/QuickActions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,7 +28,9 @@ function Dashboard() {
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar title="Olá, Renato! 👋" subtitle="Aqui está o resumo do seu negócio hoje." />
-        <main className="flex-1 overflow-y-auto p-6 space-y-5">
+        <main className="flex-1 overflow-y-auto p-6">
+          <QuickActions />
+          <div className="space-y-5">
           {/* KPIs + Messages 2-col layout */}
           <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-5">
             <div className="space-y-5">
