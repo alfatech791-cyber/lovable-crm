@@ -31,37 +31,38 @@ function Dashboard() {
         <main className="flex-1 overflow-y-auto p-6">
           <QuickActions />
           <div className="space-y-5 mt-5">
-          {/* KPIs + Messages 2-col layout */}
-          <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-5">
-            <div className="space-y-5">
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 gap-3">
-                {kpis.map((k) => <KpiCard key={k.label} {...k} />)}
+            {/* KPIs + Messages 2-col layout */}
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-5">
+              <div className="space-y-5">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 gap-3">
+                  {kpis.map((k) => <KpiCard key={k.label} {...k} />)}
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                  <div className="lg:col-span-1"><SalesChart /></div>
+                  <div className="lg:col-span-1"><OriginDonut /></div>
+                  <div className="lg:col-span-1"><ChannelMini /></div>
+                </div>
+                <Funnel />
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                <div className="lg:col-span-1"><SalesChart /></div>
-                <div className="lg:col-span-1"><OriginDonut /></div>
-                <div className="lg:col-span-1"><ChannelMini /></div>
+              <div className="xl:row-span-1">
+                <MessagesPanel />
               </div>
-              <Funnel />
             </div>
-            <div className="xl:row-span-1">
-              <MessagesPanel />
-            </div>
-          </div>
 
-          {/* Lower grid */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-            <div className="space-y-5 xl:col-span-2">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                <RecentService />
-                <TasksCard />
+            {/* Lower grid */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+              <div className="space-y-5 xl:col-span-2">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                  <RecentService />
+                  <TasksCard />
+                </div>
+                <RecentLeads />
+                <AutomationsCard />
               </div>
-              <RecentLeads />
-              <AutomationsCard />
-            </div>
-            <div className="space-y-5">
-              <AgendaCard />
-              <DispatchCard />
+              <div className="space-y-5">
+                <AgendaCard />
+                <DispatchCard />
+              </div>
             </div>
           </div>
         </main>
