@@ -1,11 +1,36 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import * as Icons from "lucide-react";
 import { Sparkles, ChevronRight } from "lucide-react";
+import { useAuth, UserPermissions } from "@/contexts/AuthContext";
 
 import { sidebarItems } from "@/lib/mock";
 
 export function AppSidebar() {
   const location = useLocation();
+  const { user } = useAuth();
+
+  const filteredItems = sidebarItems.filter((item: any) => {
+    // Map item keys to permission keys
+    const permissionMap: Record<string, keyof UserPermissions> = {
+      "/": "dashboard",
+      "/leads": "leads",
+      "/funil": "funnel",
+      "/atendimento": "chat",
+      "/whatsapp": "whatsapp",
+      "/agentes": "team",
+      "/produtos": "products",
+      "/instagram": "instagram",
+      "/automacao": "automation",
+      "/equipe": "team",
+      "/relatorios": "reports",
+      "/configuracoes": "settings",
+    };
+
+    const permissionKey = permissionMap[item.url];
+    if (!permissionKey) return true;
+    return user.permissions[permissionKey];
+  });
+
   return (
     <aside className="hidden lg:flex w-[244px] shrink-0 flex-col bg-sidebar text-sidebar-foreground">
       {/* Brand */}
@@ -20,7 +45,7 @@ export function AppSidebar() {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        {sidebarItems.map((item: any) => {
+        {filteredItems.map((item: any) => {
           const Icon = (Icons as any)[item.icon] || Icons.HelpCircle;
           const active = location.pathname === item.url;
           return (

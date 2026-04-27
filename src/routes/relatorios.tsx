@@ -1,8 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import { BarChart3, TrendingUp, Users, DollarSign, Calendar, Download, Filter, ArrowUpRight } from "lucide-react";
+import { BarChart3, TrendingUp, Users, DollarSign, Calendar, Download, Filter, ArrowUpRight, Shield } from "lucide-react";
 import { SalesChart } from "@/components/dashboard/SalesChart";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/relatorios")({
   head: () => ({ meta: [{ title: "Relatórios — ConectaCRM" }, { name: "description", content: "Métricas avançadas de vendas" }] }),
@@ -10,6 +11,30 @@ export const Route = createFileRoute("/relatorios")({
 });
 
 function ReportsPage() {
+  const { user } = useAuth();
+
+  if (!user.permissions.reports) {
+    return (
+      <div className="min-h-screen flex w-full bg-background">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Topbar title="Acesso Negado" subtitle="Você não tem permissão para ver esta página" />
+          <main className="flex-1 flex items-center justify-center p-6 text-center">
+            <div className="max-w-md">
+              <div className="h-20 w-20 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-6">
+                <Shield className="h-10 w-10" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Página Restrita</h2>
+              <p className="text-muted-foreground mb-8">O seu nível de acesso não permite visualizar relatórios avançados.</p>
+              <Link to="/" className="inline-flex h-11 px-6 items-center justify-center rounded-xl bg-primary text-white font-bold text-sm shadow-glow">
+                Voltar ao Início
+              </Link>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen flex w-full bg-background">
       <AppSidebar />
