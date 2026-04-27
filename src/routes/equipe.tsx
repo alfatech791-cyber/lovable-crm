@@ -22,7 +22,7 @@ function EquipePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user, setRole } = useAuth();
 
-  if (!user.permissions.team) {
+  if (!user.permissions.configuracoes) {
     return (
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />

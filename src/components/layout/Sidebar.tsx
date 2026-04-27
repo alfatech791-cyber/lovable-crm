@@ -10,20 +10,19 @@ export function AppSidebar() {
   const { user } = useAuth();
 
   const filteredItems = sidebarItems.filter((item: any) => {
-    // Map item keys to permission keys
     const permissionMap: Record<string, keyof UserPermissions> = {
       "/": "dashboard",
-      "/leads": "leads",
-      "/funil": "funnel",
-      "/atendimento": "chat",
-      "/whatsapp": "whatsapp",
-      "/agentes": "team",
-      "/produtos": "products",
-      "/instagram": "instagram",
-      "/automacao": "automation",
-      "/equipe": "team",
-      "/relatorios": "reports",
-      "/configuracoes": "settings",
+      "/leads": "crm",
+      "/funil": "crm",
+      "/atendimento": "crm",
+      "/whatsapp": "crm",
+      "/agentes": "crm",
+      "/produtos": "estoque",
+      "/instagram": "crm",
+      "/automacao": "crm",
+      "/equipe": "configuracoes",
+      "/relatorios": "relatorios",
+      "/configuracoes": "configuracoes",
     };
 
     const permissionKey = permissionMap[item.url];
