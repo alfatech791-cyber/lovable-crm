@@ -143,11 +143,39 @@ export interface Automation {
 }
 export const automations: Automation[] = [];
 
-export interface RecentLead {
-  name: string;
-  origin: string;
-  responsavel: string;
-  etapa: string;
-  time: string;
-}
-export const recentLeads: RecentLead[] = [];
+ export interface RecentLead {
+   name: string;
+   origin: string;
+   responsavel: string;
+   etapa: string;
+   time: string;
+ }
+ export const recentLeads: RecentLead[] = [];
+ 
+ export interface Product {
+   id: string;
+   name: string;
+   category: string;
+   price: number;
+   stock: number;
+   imei?: string;
+   image?: string;
+ }
+ 
+ export const products: Product[] = [
+   { id: "1", name: "iPhone 15 Pro Max 256GB", category: "Smartphones", price: 7899.00, stock: 5, imei: "356789123456789" },
+   { id: "2", name: "Samsung Galaxy S24 Ultra", category: "Smartphones", price: 6599.00, stock: 3, imei: "356789123456781" },
+   { id: "3", name: "Capa Silicone iPhone 15", category: "Acessórios", price: 149.90, stock: 25 },
+   { id: "4", name: "Carregador 20W USB-C Apple", category: "Acessórios", price: 199.00, stock: 15 },
+   { id: "5", name: "Película de Vidro 3D", category: "Acessórios", price: 59.90, stock: 50 },
+   { id: "6", name: "Xiaomi Redmi Note 13", category: "Smartphones", price: 1599.00, stock: 8, imei: "356789123456782" },
+ ];
+ 
+ export const kpis = [
+   { label: "Vendas do Dia", value: "R$ 12.450", trend: "+12%", sub: "8 vendas hoje", icon: "ShoppingBag", tone: "success" },
+   { label: "OS Abertas", value: "14", trend: "+2", sub: "Aguardando peças: 3", icon: "Wrench", tone: "warning" },
+   { label: "Estoque Baixo", value: "3", trend: "-1", sub: "Produtos p/ reposição", icon: "Box", tone: "destructive" },
+   { label: "Faturamento Mês", value: "R$ 145.800", trend: "+8%", sub: "Meta: 85%", icon: "DollarSign", tone: "primary" },
+   { label: "Novos Leads", value: "24", trend: "+5", sub: "Via Instagram/Whats", icon: "Users", tone: "info" },
+   { label: "Tickets Médio", value: "R$ 1.550", trend: "+3%", sub: "Média por venda", icon: "TrendingUp", tone: "success" },
+ ] as const;
