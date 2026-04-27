@@ -19,10 +19,16 @@ export function Topbar({ title, subtitle }: { title: string; subtitle?: string }
 
       <div className="flex-1 max-w-xl mx-auto relative">
         <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <input
-          placeholder="Buscar leads, contatos, conversas..."
-          className="w-full h-10 pl-10 pr-16 rounded-xl bg-muted/60 border border-transparent focus:border-ring focus:bg-card outline-none text-sm placeholder:text-muted-foreground transition"
-        />
+        <div className="group relative">
+          <input
+            placeholder="Buscar IMEI, Modelo ou Lead..."
+            className="w-full h-11 pl-10 pr-24 rounded-2xl bg-muted/60 border border-transparent focus:border-ring focus:bg-card outline-none text-sm placeholder:text-muted-foreground transition shadow-sm group-hover:bg-muted/80"
+          />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+             <span className="hidden sm:inline-flex px-1.5 py-0.5 rounded border border-border bg-card text-[9px] font-bold text-muted-foreground uppercase">IMEI</span>
+             <kbd className="text-[10px] font-medium text-muted-foreground bg-card border border-border rounded px-1.5 py-0.5">⌘K</kbd>
+          </div>
+        </div>
         <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-muted-foreground bg-card border border-border rounded px-1.5 py-0.5">
           ⌘ K
         </kbd>
