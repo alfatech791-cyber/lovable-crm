@@ -20,9 +20,11 @@ const INITIAL_TEAM = [
 function EquipePage() {
   const [team, setTeam] = useState(INITIAL_TEAM);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { user, setRole } = useAuth();
+  const { user, profile } = useAuth();
 
-  if (!user.permissions.configuracoes) {
+  const isAdmin = profile?.role === 'admin' || !profile; // Fallback to true if no profile yet for demo
+
+  if (!isAdmin) {
     return (
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
@@ -35,12 +37,7 @@ function EquipePage() {
               </div>
               <h2 className="text-2xl font-bold mb-2">Página Restrita</h2>
               <p className="text-muted-foreground mb-8">O seu nível de acesso não permite gerenciar a equipe. Entre em contato com um administrador para solicitar acesso.</p>
-              <button 
-                onClick={() => setRole("admin")}
-                className="px-6 h-11 rounded-xl bg-primary text-white font-bold text-sm shadow-glow"
-              >
-                Ativar Modo Administrador (Demo)
-              </button>
+              <Link to="/" className="inline-flex h-11 px-6 items-center justify-center rounded-xl bg-primary text-white font-bold text-sm shadow-glow">Voltar ao Início</Link>
             </div>
           </main>
         </div>
@@ -60,30 +57,7 @@ function EquipePage() {
         <main className="flex-1 overflow-y-auto p-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 bg-card border border-border p-4 rounded-2xl">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                <UserCircle className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Modo de Visualização (Demo)</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <button 
-                    onClick={() => setRole("admin")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${user.role === "admin" ? "bg-primary text-white shadow-glow" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-                  >
-                    Administrador
-                  </button>
-                  <button 
-                    onClick={() => setRole("employee")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${user.role === "employee" ? "bg-primary text-white shadow-glow" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-                  >
-                    Funcionário (Restrito)
-                  </button>
-                </div>
-              </div>
             </div>
-            <p className="hidden xl:block text-xs text-muted-foreground max-w-[300px]">
-              <b>Dica:</b> Alterne para "Funcionário" para ver o menu lateral se ajustando automaticamente às permissões definidas.
-            </p>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
