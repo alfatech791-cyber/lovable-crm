@@ -10,13 +10,17 @@
    destructive: "bg-destructive/10 text-destructive",
  };
 
- export function KpiCard({
-   label, value, trend, sub, icon, tone,
- }: { label: string; value: string; trend: string; sub: string; icon: string; tone: string }) {
+  export function KpiCard({
+    label, value, trend, sub, icon, tone, onClick
+  }: { label: string; value: string; trend: string; sub: string; icon: string; tone: string; onClick?: () => void }) {
    const Icon = (Icons as any)[icon] ?? Icons.Activity;
    const navigate = useNavigate();
  
    const handleClick = () => {
+     if (onClick) {
+       onClick();
+       return;
+     }
      const l = label.toLowerCase();
      if (l.includes("vendas") || l.includes("faturamento") || l.includes("ticket")) {
        navigate({ to: "/vendas/historico" as any });
