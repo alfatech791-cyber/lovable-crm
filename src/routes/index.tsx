@@ -100,11 +100,10 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen flex w-full bg-background">
-      {modalContent && (
-        (() => {
-          const ModalIcon = modalContent.icon;
-          return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {modalContent && (() => {
+        const ModalIcon = modalContent.icon;
+        return (
+         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setModalContent(null)} />
           <div className="relative w-full max-w-xl bg-card border border-border rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-border flex items-center justify-between bg-muted/30">
@@ -161,8 +160,9 @@ function Dashboard() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+         </div>
+        );
+      })()}
 
       <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-w-0">
