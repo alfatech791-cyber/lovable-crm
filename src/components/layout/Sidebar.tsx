@@ -14,7 +14,7 @@ export function AppSidebar() {
     const permissionMap: Record<string, keyof UserPermissions> = {
       "/": "dashboard",
       "/leads": "leads",
-      "/funil": "funil",
+      "/funil": "funnel",
       "/atendimento": "chat",
       "/whatsapp": "whatsapp",
       "/agentes": "team",
