@@ -1,4 +1,15 @@
- import { Search, Filter, Download, MoreHorizontal, ShoppingBag, Eye, Printer, Calendar } from "lucide-react";
+ import { Search, Filter, Download, MoreHorizontal, ShoppingBag, Eye, Printer, Calendar, ArrowUpRight, ArrowDownRight, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+ import { Badge } from "@/components/ui/badge";
+ import { Button } from "@/components/ui/button";
+ import { Input } from "@/components/ui/input";
+ import { 
+   DropdownMenu, 
+   DropdownMenuContent, 
+   DropdownMenuItem, 
+   DropdownMenuTrigger,
+   DropdownMenuSeparator
+ } from "@/components/ui/dropdown-menu";
  
  const mockSales = [
    { id: "V1001", customer: "João Silva", date: "2024-03-27 14:30", total: 7899.00, method: "Cartão de Crédito", status: "Concluída", items: 1 },
@@ -10,6 +21,55 @@
  export function SalesHistory() {
    return (
      <div className="space-y-6">
+       {/* Resumo de Vendas */}
+       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+         <Card>
+           <CardContent className="p-6">
+             <div className="flex items-center justify-between space-y-0 pb-2">
+               <p className="text-sm font-medium">Vendas Hoje</p>
+               <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+             </div>
+             <div className="flex items-baseline gap-2">
+               <div className="text-2xl font-bold">R$ 8.048,90</div>
+               <span className="text-xs font-medium text-success flex items-center gap-1">
+                 <ArrowUpRight className="h-3 w-3" /> +12%
+               </span>
+             </div>
+             <p className="text-xs text-muted-foreground mt-1">2 vendas concluídas</p>
+           </CardContent>
+         </Card>
+         <Card>
+           <CardContent className="p-6">
+             <div className="flex items-center justify-between space-y-0 pb-2">
+               <p className="text-sm font-medium">Ticket Médio</p>
+               <div className="h-4 w-4 text-muted-foreground flex items-center justify-center font-bold text-[10px]">R$</div>
+             </div>
+             <div className="text-2xl font-bold">R$ 4.024,45</div>
+             <p className="text-xs text-muted-foreground mt-1">Baseado em 30 dias</p>
+           </CardContent>
+         </Card>
+         <Card>
+           <CardContent className="p-6">
+             <div className="flex items-center justify-between space-y-0 pb-2">
+               <p className="text-sm font-medium">Vendas Canceladas</p>
+               <XCircle className="h-4 w-4 text-destructive" />
+             </div>
+             <div className="text-2xl font-bold text-destructive">1</div>
+             <p className="text-xs text-muted-foreground mt-1">Últimos 7 dias</p>
+           </CardContent>
+         </Card>
+         <Card>
+           <CardContent className="p-6">
+             <div className="flex items-center justify-between space-y-0 pb-2">
+               <p className="text-sm font-medium">Aguardando Pagamento</p>
+               <AlertCircle className="h-4 w-4 text-warning" />
+             </div>
+             <div className="text-2xl font-bold text-warning">R$ 1.250,00</div>
+             <p className="text-xs text-muted-foreground mt-1">3 orçamentos pendentes</p>
+           </CardContent>
+         </Card>
+       </div>
+ 
        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
          <div className="flex items-center gap-3">
            <div className="relative flex-1 md:w-80">
@@ -71,18 +131,27 @@
                    <td className="px-6 py-4">
                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${
                        sale.status === 'Concluída' 
-                         ? 'bg-green-50 text-green-700 border-green-200' 
-                         : 'bg-red-50 text-red-700 border-red-200'
+                          ? 'bg-success/10 text-success border-success/20' 
+                          : 'bg-destructive/10 text-destructive border-destructive/20'
                      }`}>
+                       {sale.status === 'Concluída' ? <CheckCircle2 className="inline h-3 w-3 mr-1" /> : <XCircle className="inline h-3 w-3 mr-1" />}
                        {sale.status.toUpperCase()}
                      </span>
                    </td>
                    <td className="px-6 py-4 text-right">
-                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                       <button className="p-1.5 rounded-lg hover:bg-primary/10 hover:text-primary transition"><Eye className="h-4 w-4" /></button>
-                       <button className="p-1.5 rounded-lg hover:bg-primary/10 hover:text-primary transition"><Printer className="h-4 w-4" /></button>
-                       <button className="p-1.5 rounded-lg hover:bg-muted transition"><MoreHorizontal className="h-4 w-4" /></button>
-                     </div>
+                     <DropdownMenu>
+                       <DropdownMenuTrigger asChild>
+                         <Button variant="ghost" size="icon" className="h-8 w-8">
+                           <MoreHorizontal className="h-4 w-4" />
+                         </Button>
+                       </DropdownMenuTrigger>
+                       <DropdownMenuContent align="end">
+                         <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> Ver Detalhes</DropdownMenuItem>
+                         <DropdownMenuItem className="gap-2"><Printer className="h-4 w-4" /> Imprimir Comprovante</DropdownMenuItem>
+                         <DropdownMenuSeparator />
+                         <DropdownMenuItem className="gap-2 text-destructive"><XCircle className="h-4 w-4" /> Cancelar Venda</DropdownMenuItem>
+                       </DropdownMenuContent>
+                     </DropdownMenu>
                    </td>
                  </tr>
                ))}
