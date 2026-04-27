@@ -86,22 +86,8 @@ export function AppSidebar() {
         })}
       </nav>
 
-      {/* Plan card */}
+      {/* Info card */}
       <div className="px-3 pb-3 space-y-3">
-        <div className="rounded-xl bg-sidebar-accent/60 border border-sidebar-border p-3.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-sidebar-foreground/80">Plano Empresarial 🏆</span>
-          </div>
-          <div className="mt-2 flex items-end justify-between">
-            <span className="text-[11px] text-sidebar-foreground/60">Uso atual</span>
-            <span className="text-[11px] font-semibold text-white">78%</span>
-          </div>
-          <div className="mt-1.5 h-1.5 rounded-full bg-sidebar-border overflow-hidden">
-            <div className="h-full rounded-full bg-gradient-primary" style={{ width: "78%" }} />
-          </div>
-          <div className="mt-2 text-[11px] text-sidebar-foreground/55">Renova em 15 dias</div>
-        </div>
-
         <div className="rounded-xl bg-gradient-sidebar-cta p-3.5 text-white shadow-elegant">
           <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider">
             <Sparkles className="h-3.5 w-3.5" /> Novo: IA Conecta
