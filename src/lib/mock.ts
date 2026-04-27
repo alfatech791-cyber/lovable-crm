@@ -201,3 +201,4 @@ export const automations: Automation[] = [];
    { label: "Novos Leads", value: "24", trend: "+5", sub: "Via Instagram/Whats", icon: "Users", tone: "info" },
    { label: "Tickets Médio", value: "R$ 1.550", trend: "+3%", sub: "Média por venda", icon: "TrendingUp", tone: "success" },
  ] as const;
+
