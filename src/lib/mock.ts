@@ -1,5 +1,6 @@
 export const sidebarItems = [
-   { title: "Início", url: "/", icon: "Home" as const },
+    { title: "Início", url: "/", icon: "Home" as const },
+    { title: "Agendamentos", url: "/agendamentos", icon: "Calendar" as const },
    { 
      title: "Vendas", 
      url: "/vendas", 

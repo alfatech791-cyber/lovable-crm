@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, ShoppingCart, History, FileText, Calculator, Truck, ShieldCheck, Receipt } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 
 export default function Vendas() {
   const navigate = useNavigate();
@@ -10,13 +10,13 @@ export default function Vendas() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold tracking-tight">Vendas</h1>
-        <Button onClick={() => navigate("/vendas/pdv")} className="flex items-center gap-2">
+        <Button onClick={() => navigate({ to: "/pdv" })} className="flex items-center gap-2">
           <Plus className="h-4 w-4" /> Nova Venda (PDV)
         </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate("/vendas/pdv")}>
+        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate({ to: "/pdv" })}>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">PDV</CardTitle>
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
@@ -27,7 +27,7 @@ export default function Vendas() {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate("/vendas/historico")}>
+        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate({ to: "/vendas/historico" })}>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Histórico</CardTitle>
             <History className="h-4 w-4 text-muted-foreground" />
@@ -38,7 +38,7 @@ export default function Vendas() {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate("/vendas/orcamentos")}>
+        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate({ to: "/vendas/orcamentos" })}>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Orçamentos</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
