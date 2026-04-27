@@ -10,14 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WhatsappRouteImport } from './routes/whatsapp'
+import { Route as VendasRouteImport } from './routes/vendas'
+import { Route as ServicosRouteImport } from './routes/servicos'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as ProdutosRouteImport } from './routes/produtos'
+import { Route as PdvRouteImport } from './routes/pdv'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LeadsRouteImport } from './routes/leads'
 import { Route as InstagramRouteImport } from './routes/instagram'
 import { Route as FunilRouteImport } from './routes/funil'
+import { Route as FiscalRouteImport } from './routes/fiscal'
+import { Route as FinanceiroRouteImport } from './routes/financeiro'
+import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as EquipeRouteImport } from './routes/equipe'
+import { Route as CrmRouteImport } from './routes/crm'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
+import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as AutomacaoRouteImport } from './routes/automacao'
 import { Route as AtendimentoRouteImport } from './routes/atendimento'
 import { Route as AgentesRouteImport } from './routes/agentes'
@@ -28,6 +36,16 @@ const WhatsappRoute = WhatsappRouteImport.update({
   path: '/whatsapp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VendasRoute = VendasRouteImport.update({
+  id: '/vendas',
+  path: '/vendas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicosRoute = ServicosRouteImport.update({
+  id: '/servicos',
+  path: '/servicos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RelatoriosRoute = RelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
@@ -36,6 +54,11 @@ const RelatoriosRoute = RelatoriosRouteImport.update({
 const ProdutosRoute = ProdutosRouteImport.update({
   id: '/produtos',
   path: '/produtos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PdvRoute = PdvRouteImport.update({
+  id: '/pdv',
+  path: '/pdv',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -58,14 +81,39 @@ const FunilRoute = FunilRouteImport.update({
   path: '/funil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FiscalRoute = FiscalRouteImport.update({
+  id: '/fiscal',
+  path: '/fiscal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinanceiroRoute = FinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EstoqueRoute = EstoqueRouteImport.update({
+  id: '/estoque',
+  path: '/estoque',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EquipeRoute = EquipeRouteImport.update({
   id: '/equipe',
   path: '/equipe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CrmRoute = CrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
   id: '/configuracoes',
   path: '/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientesRoute = ClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AutomacaoRoute = AutomacaoRouteImport.update({
@@ -94,14 +142,22 @@ export interface FileRoutesByFullPath {
   '/agentes': typeof AgentesRoute
   '/atendimento': typeof AtendimentoRoute
   '/automacao': typeof AutomacaoRoute
+  '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/crm': typeof CrmRoute
   '/equipe': typeof EquipeRoute
+  '/estoque': typeof EstoqueRoute
+  '/financeiro': typeof FinanceiroRoute
+  '/fiscal': typeof FiscalRoute
   '/funil': typeof FunilRoute
   '/instagram': typeof InstagramRoute
   '/leads': typeof LeadsRoute
   '/login': typeof LoginRoute
+  '/pdv': typeof PdvRoute
   '/produtos': typeof ProdutosRoute
   '/relatorios': typeof RelatoriosRoute
+  '/servicos': typeof ServicosRoute
+  '/vendas': typeof VendasRoute
   '/whatsapp': typeof WhatsappRoute
 }
 export interface FileRoutesByTo {
@@ -109,14 +165,22 @@ export interface FileRoutesByTo {
   '/agentes': typeof AgentesRoute
   '/atendimento': typeof AtendimentoRoute
   '/automacao': typeof AutomacaoRoute
+  '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/crm': typeof CrmRoute
   '/equipe': typeof EquipeRoute
+  '/estoque': typeof EstoqueRoute
+  '/financeiro': typeof FinanceiroRoute
+  '/fiscal': typeof FiscalRoute
   '/funil': typeof FunilRoute
   '/instagram': typeof InstagramRoute
   '/leads': typeof LeadsRoute
   '/login': typeof LoginRoute
+  '/pdv': typeof PdvRoute
   '/produtos': typeof ProdutosRoute
   '/relatorios': typeof RelatoriosRoute
+  '/servicos': typeof ServicosRoute
+  '/vendas': typeof VendasRoute
   '/whatsapp': typeof WhatsappRoute
 }
 export interface FileRoutesById {
@@ -125,14 +189,22 @@ export interface FileRoutesById {
   '/agentes': typeof AgentesRoute
   '/atendimento': typeof AtendimentoRoute
   '/automacao': typeof AutomacaoRoute
+  '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/crm': typeof CrmRoute
   '/equipe': typeof EquipeRoute
+  '/estoque': typeof EstoqueRoute
+  '/financeiro': typeof FinanceiroRoute
+  '/fiscal': typeof FiscalRoute
   '/funil': typeof FunilRoute
   '/instagram': typeof InstagramRoute
   '/leads': typeof LeadsRoute
   '/login': typeof LoginRoute
+  '/pdv': typeof PdvRoute
   '/produtos': typeof ProdutosRoute
   '/relatorios': typeof RelatoriosRoute
+  '/servicos': typeof ServicosRoute
+  '/vendas': typeof VendasRoute
   '/whatsapp': typeof WhatsappRoute
 }
 export interface FileRouteTypes {
@@ -142,14 +214,22 @@ export interface FileRouteTypes {
     | '/agentes'
     | '/atendimento'
     | '/automacao'
+    | '/clientes'
     | '/configuracoes'
+    | '/crm'
     | '/equipe'
+    | '/estoque'
+    | '/financeiro'
+    | '/fiscal'
     | '/funil'
     | '/instagram'
     | '/leads'
     | '/login'
+    | '/pdv'
     | '/produtos'
     | '/relatorios'
+    | '/servicos'
+    | '/vendas'
     | '/whatsapp'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -157,14 +237,22 @@ export interface FileRouteTypes {
     | '/agentes'
     | '/atendimento'
     | '/automacao'
+    | '/clientes'
     | '/configuracoes'
+    | '/crm'
     | '/equipe'
+    | '/estoque'
+    | '/financeiro'
+    | '/fiscal'
     | '/funil'
     | '/instagram'
     | '/leads'
     | '/login'
+    | '/pdv'
     | '/produtos'
     | '/relatorios'
+    | '/servicos'
+    | '/vendas'
     | '/whatsapp'
   id:
     | '__root__'
@@ -172,14 +260,22 @@ export interface FileRouteTypes {
     | '/agentes'
     | '/atendimento'
     | '/automacao'
+    | '/clientes'
     | '/configuracoes'
+    | '/crm'
     | '/equipe'
+    | '/estoque'
+    | '/financeiro'
+    | '/fiscal'
     | '/funil'
     | '/instagram'
     | '/leads'
     | '/login'
+    | '/pdv'
     | '/produtos'
     | '/relatorios'
+    | '/servicos'
+    | '/vendas'
     | '/whatsapp'
   fileRoutesById: FileRoutesById
 }
@@ -188,14 +284,22 @@ export interface RootRouteChildren {
   AgentesRoute: typeof AgentesRoute
   AtendimentoRoute: typeof AtendimentoRoute
   AutomacaoRoute: typeof AutomacaoRoute
+  ClientesRoute: typeof ClientesRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
+  CrmRoute: typeof CrmRoute
   EquipeRoute: typeof EquipeRoute
+  EstoqueRoute: typeof EstoqueRoute
+  FinanceiroRoute: typeof FinanceiroRoute
+  FiscalRoute: typeof FiscalRoute
   FunilRoute: typeof FunilRoute
   InstagramRoute: typeof InstagramRoute
   LeadsRoute: typeof LeadsRoute
   LoginRoute: typeof LoginRoute
+  PdvRoute: typeof PdvRoute
   ProdutosRoute: typeof ProdutosRoute
   RelatoriosRoute: typeof RelatoriosRoute
+  ServicosRoute: typeof ServicosRoute
+  VendasRoute: typeof VendasRoute
   WhatsappRoute: typeof WhatsappRoute
 }
 
@@ -206,6 +310,20 @@ declare module '@tanstack/react-router' {
       path: '/whatsapp'
       fullPath: '/whatsapp'
       preLoaderRoute: typeof WhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vendas': {
+      id: '/vendas'
+      path: '/vendas'
+      fullPath: '/vendas'
+      preLoaderRoute: typeof VendasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/servicos': {
+      id: '/servicos'
+      path: '/servicos'
+      fullPath: '/servicos'
+      preLoaderRoute: typeof ServicosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/relatorios': {
@@ -220,6 +338,13 @@ declare module '@tanstack/react-router' {
       path: '/produtos'
       fullPath: '/produtos'
       preLoaderRoute: typeof ProdutosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pdv': {
+      id: '/pdv'
+      path: '/pdv'
+      fullPath: '/pdv'
+      preLoaderRoute: typeof PdvRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -250,6 +375,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FunilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fiscal': {
+      id: '/fiscal'
+      path: '/fiscal'
+      fullPath: '/fiscal'
+      preLoaderRoute: typeof FiscalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/financeiro': {
+      id: '/financeiro'
+      path: '/financeiro'
+      fullPath: '/financeiro'
+      preLoaderRoute: typeof FinanceiroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/estoque': {
+      id: '/estoque'
+      path: '/estoque'
+      fullPath: '/estoque'
+      preLoaderRoute: typeof EstoqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/equipe': {
       id: '/equipe'
       path: '/equipe'
@@ -257,11 +403,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EquipeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/crm': {
+      id: '/crm'
+      path: '/crm'
+      fullPath: '/crm'
+      preLoaderRoute: typeof CrmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/configuracoes': {
       id: '/configuracoes'
       path: '/configuracoes'
       fullPath: '/configuracoes'
       preLoaderRoute: typeof ConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clientes': {
+      id: '/clientes'
+      path: '/clientes'
+      fullPath: '/clientes'
+      preLoaderRoute: typeof ClientesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/automacao': {
@@ -300,14 +460,22 @@ const rootRouteChildren: RootRouteChildren = {
   AgentesRoute: AgentesRoute,
   AtendimentoRoute: AtendimentoRoute,
   AutomacaoRoute: AutomacaoRoute,
+  ClientesRoute: ClientesRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
+  CrmRoute: CrmRoute,
   EquipeRoute: EquipeRoute,
+  EstoqueRoute: EstoqueRoute,
+  FinanceiroRoute: FinanceiroRoute,
+  FiscalRoute: FiscalRoute,
   FunilRoute: FunilRoute,
   InstagramRoute: InstagramRoute,
   LeadsRoute: LeadsRoute,
   LoginRoute: LoginRoute,
+  PdvRoute: PdvRoute,
   ProdutosRoute: ProdutosRoute,
   RelatoriosRoute: RelatoriosRoute,
+  ServicosRoute: ServicosRoute,
+  VendasRoute: VendasRoute,
   WhatsappRoute: WhatsappRoute,
 }
 export const routeTree = rootRouteImport
