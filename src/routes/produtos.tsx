@@ -13,12 +13,14 @@ export const Route = createFileRoute("/produtos")({
   component: ProductsPage,
 });
 
-const products = [
-  { id: 1, name: "Plano Individual", price: "R$ 97,00", stock: "Infinito", category: "Planos" },
-  { id: 2, name: "Plano Business", price: "R$ 197,00", stock: "Infinito", category: "Planos" },
-  { id: 3, name: "Plano Enterprise", price: "R$ 497,00", stock: "Infinito", category: "Planos" },
-  { id: 4, name: "Mentoria VIP", price: "R$ 1.200,00", stock: "5 unidades", category: "Serviços" },
-];
+interface Product {
+  id: number;
+  name: string;
+  price: string;
+  stock: string;
+  category: string;
+}
+const products: Product[] = [];
 
 function ProductsPage() {
   return (

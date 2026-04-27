@@ -14,11 +14,15 @@ export const Route = createFileRoute("/agentes")({
   component: AgentsPage,
 });
 
-const agents = [
-  { id: 1, name: "Renato Silva", role: "Administrador", status: "online", instances: ["Suporte_01", "Vendas_BR"], email: "renato@conectacrm.com" },
-  { id: 2, name: "Ana Clara", role: "Agente", status: "online", instances: ["Vendas_SP"], email: "ana.clara@conectacrm.com" },
-  { id: 3, name: "Carlos Eduardo", role: "Agente", status: "offline", instances: [], email: "carlos.edu@conectacrm.com" },
-];
+interface Agent {
+  id: number;
+  name: string;
+  role: string;
+  status: string;
+  instances: string[];
+  email: string;
+}
+const agents: Agent[] = [];
 
 function AgentsPage() {
   const handleTraining = () => {
