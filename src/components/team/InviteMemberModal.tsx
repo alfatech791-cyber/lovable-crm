@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { X, Shield, Mail, User, Check, AlertCircle } from "lucide-react";
-import { UserPermissions, DEFAULT_EMPLOYEE_PERMISSIONS } from "@/contexts/AuthContext";
+import { UserPermissions } from "@/contexts/AuthContext";
+import { DEFAULT_EMPLOYEE_PERMISSIONS } from "@/types/permissions";
 
 interface InviteMemberModalProps {
   isOpen: boolean;
@@ -34,17 +35,18 @@ export function InviteMemberModal({ isOpen, onClose, onInvite }: InviteMemberMod
   };
 
   const permissionLabels: Record<keyof UserPermissions, string> = {
-    dashboard: "Painel Principal",
-    leads: "Gestão de Leads",
-    funnel: "Funil de Vendas",
-    chat: "Atendimento Geral",
-    whatsapp: "WhatsApp",
-    instagram: "Instagram",
-    automation: "Automações",
-    team: "Gestão de Equipe",
-    reports: "Relatórios & KPIs",
-    settings: "Configurações",
-    products: "Catálogo de Produtos"
+    dashboard: "Dashboard",
+    vendas: "Módulo Vendas",
+    clientes: "Módulo Clientes",
+    pdv: "Caixa / PDV",
+    orcamentos: "Orçamentos",
+    estoque: "Compras / Estoque",
+    servicos: "Ordem de Serviço",
+    financeiro: "Financeiro",
+    fiscal: "Gestão Fiscal",
+    relatorios: "Relatórios",
+    crm: "CRM / Pipeline",
+    configuracoes: "Configurações",
   };
 
   return (

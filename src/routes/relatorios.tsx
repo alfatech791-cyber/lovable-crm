@@ -13,7 +13,7 @@ export const Route = createFileRoute("/relatorios")({
 function ReportsPage() {
   const { user } = useAuth();
 
-  if (!user.permissions.reports) {
+  if (!user.permissions.relatorios) {
     return (
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />

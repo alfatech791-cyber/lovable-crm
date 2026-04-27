@@ -1,16 +1,23 @@
 export const sidebarItems = [
   { title: "Painel", url: "/", icon: "LayoutDashboard" as const },
-  { title: "Leads", url: "/leads", icon: "Users" as const },
-  { title: "Funil de Vendas", url: "/funil", icon: "Filter" as const },
-  { title: "Atendimento", url: "/atendimento", icon: "MessageCircle" as const },
-  { title: "WhatsApp", url: "/whatsapp", icon: "MessageSquare" as const },
-  { title: "Agentes", url: "/agentes", icon: "Headphones" as const },
-  { title: "Produtos", url: "/produtos", icon: "ShoppingBag" as const },
-  { title: "Instagram", url: "/instagram", icon: "Instagram" as const },
-  { title: "Automação", url: "/automacao", icon: "Workflow" as const },
-  { title: "Equipe", url: "/equipe", icon: "UsersRound" as const },
+  { title: "Vendas", url: "/vendas", icon: "ShoppingBag" as const },
+  { title: "Clientes", url: "/clientes", icon: "Users" as const },
+  { title: "Caixa (PDV)", url: "/pdv", icon: "Calculator" as const },
+  { title: "Estoque", url: "/estoque", icon: "Box" as const },
+  { title: "Serviços (OS)", url: "/servicos", icon: "Wrench" as const },
+  { title: "CRM / Leads", url: "/crm", icon: "Zap" as const },
+  { title: "Financeiro", url: "/financeiro", icon: "DollarSign" as const },
+  { title: "Fiscal", url: "/fiscal", icon: "FileSpreadsheet" as const },
   { title: "Relatórios", url: "/relatorios", icon: "BarChart3" as const },
-  { title: "Configurações", url: "/configuracoes", icon: "Settings" as const },
+  {
+    title: "Configurações",
+    url: "/configuracoes",
+    icon: "Settings" as const,
+    children: [
+      { title: "Equipe", url: "/equipe" },
+      { title: "Geral", url: "/configuracoes" },
+    ]
+  },
 ] as const;
 
 export const kpis = [
