@@ -100,7 +100,6 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen flex w-full bg-background">
-      {/* KPI Details Modal */}
       {modalContent && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setModalContent(null)} />
@@ -172,10 +171,8 @@ function Dashboard() {
         <main className="flex-1 overflow-y-auto p-6">
           <QuickActions />
           <div className="space-y-5 mt-5">
-            {/* Main Content Area */}
             <div className="flex flex-col xl:flex-row gap-5">
               <div className="flex-1 flex flex-col gap-5 min-w-0">
-                {/* KPIs */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 2xl:grid-cols-6 gap-3">
                   {kpis.map((k) => (
                     <KpiCard 
@@ -186,7 +183,6 @@ function Dashboard() {
                   ))}
                 </div>
 
-                {/* Charts and Funnel */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-5">
                   <SalesChart />
                   <OriginDonut />
@@ -195,7 +191,6 @@ function Dashboard() {
 
                 <Funnel />
 
-                {/* Recent Items Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                   <RecentService />
                   <TasksCard />
@@ -205,7 +200,6 @@ function Dashboard() {
                 <AutomationsCard />
               </div>
 
-              {/* Right Sidebar - Message Panel & Secondary Panels */}
               <div className="w-full xl:w-[360px] shrink-0 flex flex-col gap-5">
                 <div className="xl:sticky xl:top-20">
                   <MessagesPanel />
@@ -214,7 +208,6 @@ function Dashboard() {
                   <AgendaCard />
                   <DispatchCard />
                 </div>
-                {/* On smaller screens, these show at the end */}
                 <div className="xl:hidden grid grid-cols-1 md:grid-cols-2 gap-5">
                   <AgendaCard />
                   <DispatchCard />
