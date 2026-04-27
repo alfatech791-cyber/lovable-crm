@@ -9,7 +9,7 @@
  export default function NewOSPage() {
    return (
      <div className="flex flex-col h-full bg-background">
-       <PageHeader title="Nova Ordem de Serviço" />
+       <Topbar title="Nova Ordem de Serviço" />
        <main className="flex-1 overflow-y-auto p-6">
          <div className="max-w-4xl mx-auto space-y-6">
            <Card className="p-6 border-border/50 shadow-card">
