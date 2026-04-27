@@ -79,25 +79,27 @@ export const Route = createFileRoute("/login")({
        </div>
  
        {/* Right side — branded panel with image */}
-       <div className="hidden lg:flex relative overflow-hidden bg-sidebar">
-         <img 
-           src="https://cvbgrjauqjawrsyknhyj.supabase.co/storage/v1/object/public/files/uploads/d16nTzdSTqQPXL29dCvm2A8Zeql1/1777331682200-abhrt-ChatGPT_Image_27_de_abr._de_2026__16_50_081.png" 
-           alt="ConectaCRM Dashboard"
-           className="absolute inset-0 w-full h-full object-cover opacity-80"
-         />
-         <div className="absolute inset-0 bg-gradient-to-t from-sidebar via-sidebar/20 to-transparent" />
-         
-         <div className="relative z-10 flex flex-col justify-end p-12 w-full h-full text-white">
-           <div className="space-y-4 max-w-md">
-             <div className="inline-flex items-center gap-2 text-xs font-semibold bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5 self-start">
-               <Sparkles className="h-3.5 w-3.5" /> Novo: IA Conecta disponível
+       <div className="hidden lg:flex relative overflow-hidden bg-[#F8F9FC] p-8">
+         <div className="relative w-full h-full rounded-[24px] overflow-hidden shadow-2xl border border-white/20">
+           <img 
+             src="https://cvbgrjauqjawrsyknhyj.supabase.co/storage/v1/object/public/files/uploads/d16nTzdSTqQPXL29dCvm2A8Zeql1/1777331682200-abhrt-ChatGPT_Image_27_de_abr._de_2026__16_50_081.png" 
+             alt="ConectaCRM Dashboard"
+             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+           />
+           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+           
+           <div className="absolute bottom-0 left-0 right-0 p-10 text-white">
+             <div className="space-y-4 max-w-sm">
+               <div className="inline-flex items-center gap-2 text-xs font-bold bg-white/20 backdrop-blur-md rounded-full px-4 py-2 border border-white/30 uppercase tracking-wider">
+                 <Sparkles className="h-4 w-4 text-yellow-400" /> Novas Funcionalidades
+               </div>
+               <h2 className="text-3xl font-bold font-display tracking-tight leading-tight">
+                 A plataforma que escala seu negócio.
+               </h2>
+               <p className="text-white/90 text-sm leading-relaxed font-medium">
+                 Gestão completa de leads, vendas e automações com a melhor experiência visual do mercado.
+               </p>
              </div>
-             <h2 className="text-3xl font-bold font-display tracking-tight leading-tight">
-               Aumente suas vendas com gestão inteligente.
-             </h2>
-             <p className="text-white/80 text-sm leading-relaxed">
-               Centralize seu atendimento e nunca mais perca um lead por falta de resposta.
-             </p>
            </div>
          </div>
        </div>
