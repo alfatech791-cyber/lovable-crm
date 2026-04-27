@@ -22,6 +22,32 @@ function EquipePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user, setRole } = useAuth();
 
+  if (!user.permissions.team) {
+    return (
+      <div className="min-h-screen flex w-full bg-background">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Topbar title="Acesso Negado" subtitle="Você não tem permissão para ver esta página" />
+          <main className="flex-1 flex items-center justify-center p-6 text-center">
+            <div className="max-w-md">
+              <div className="h-20 w-20 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-6">
+                <Shield className="h-10 w-10" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Página Restrita</h2>
+              <p className="text-muted-foreground mb-8">O seu nível de acesso não permite gerenciar a equipe. Entre em contato com um administrador para solicitar acesso.</p>
+              <button 
+                onClick={() => setRole("admin")}
+                className="px-6 h-11 rounded-xl bg-primary text-white font-bold text-sm shadow-glow"
+              >
+                Ativar Modo Administrador (Demo)
+              </button>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   const handleInvite = (newMember: any) => {
     setTeam(prev => [...prev, { ...newMember, id: Date.now() }]);
   };
