@@ -8,10 +8,11 @@ import { OriginDonut } from "@/components/dashboard/OriginDonut";
 import { ChannelMini } from "@/components/dashboard/ChannelMini";
 import { Funnel } from "@/components/dashboard/Funnel";
 import { MessagesPanel } from "@/components/dashboard/MessagesPanel";
-import { TasksCard, AutomationsCard, AgendaCard, DispatchCard } from "@/components/dashboard/SidePanels";
-import { RecentService, RecentLeads } from "@/components/dashboard/RecentPanels";
-import { QuickActions } from "@/components/dashboard/QuickActions";
-import { useState } from "react";
+ import { TasksCard, AutomationsCard, AgendaCard, DispatchCard } from "@/components/dashboard/SidePanels";
+ import { RecentService, RecentLeads } from "@/components/dashboard/RecentPanels";
+ import { QuickActions } from "@/components/dashboard/QuickActions";
+ import { useState } from "react";
+ import { X, ShoppingBag, Clock, User } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
