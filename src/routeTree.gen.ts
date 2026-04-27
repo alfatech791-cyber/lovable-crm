@@ -52,6 +52,7 @@ import { Route as EstoqueMovimentacoesRouteImport } from './routes/estoque.movim
 import { Route as EstoqueEtiquetasRouteImport } from './routes/estoque.etiquetas'
 import { Route as EstoqueComprasRouteImport } from './routes/estoque.compras'
 import { Route as EstoqueAtualRouteImport } from './routes/estoque.atual'
+import { Route as AppOperacaoTransportadoresRouteImport } from './routes/_app/operacao/transportadores'
 import { Route as AppOperacaoTiposProdutosRouteImport } from './routes/_app/operacao/tipos-produtos'
 
 const WhatsappRoute = WhatsappRouteImport.update({
@@ -269,6 +270,12 @@ const EstoqueAtualRoute = EstoqueAtualRouteImport.update({
   path: '/atual',
   getParentRoute: () => EstoqueRoute,
 } as any)
+const AppOperacaoTransportadoresRoute =
+  AppOperacaoTransportadoresRouteImport.update({
+    id: '/_app/operacao/transportadores',
+    path: '/operacao/transportadores',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AppOperacaoTiposProdutosRoute =
   AppOperacaoTiposProdutosRouteImport.update({
     id: '/_app/operacao/tipos-produtos',
@@ -321,6 +328,7 @@ export interface FileRoutesByFullPath {
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
   '/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
+  '/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -367,6 +375,7 @@ export interface FileRoutesByTo {
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
   '/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
+  '/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -414,6 +423,7 @@ export interface FileRoutesById {
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
   '/_app/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
+  '/_app/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -462,6 +472,7 @@ export interface FileRouteTypes {
     | '/vendas/orcamentos'
     | '/vendas/simulador'
     | '/operacao/tipos-produtos'
+    | '/operacao/transportadores'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -508,6 +519,7 @@ export interface FileRouteTypes {
     | '/vendas/orcamentos'
     | '/vendas/simulador'
     | '/operacao/tipos-produtos'
+    | '/operacao/transportadores'
   id:
     | '__root__'
     | '/'
@@ -554,6 +566,7 @@ export interface FileRouteTypes {
     | '/vendas/orcamentos'
     | '/vendas/simulador'
     | '/_app/operacao/tipos-produtos'
+    | '/_app/operacao/transportadores'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -579,6 +592,7 @@ export interface RootRouteChildren {
   VendasRoute: typeof VendasRouteWithChildren
   WhatsappRoute: typeof WhatsappRoute
   AppOperacaoTiposProdutosRoute: typeof AppOperacaoTiposProdutosRoute
+  AppOperacaoTransportadoresRoute: typeof AppOperacaoTransportadoresRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -884,6 +898,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EstoqueAtualRouteImport
       parentRoute: typeof EstoqueRoute
     }
+    '/_app/operacao/transportadores': {
+      id: '/_app/operacao/transportadores'
+      path: '/operacao/transportadores'
+      fullPath: '/operacao/transportadores'
+      preLoaderRoute: typeof AppOperacaoTransportadoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/operacao/tipos-produtos': {
       id: '/_app/operacao/tipos-produtos'
       path: '/operacao/tipos-produtos'
@@ -999,6 +1020,7 @@ const rootRouteChildren: RootRouteChildren = {
   VendasRoute: VendasRouteWithChildren,
   WhatsappRoute: WhatsappRoute,
   AppOperacaoTiposProdutosRoute: AppOperacaoTiposProdutosRoute,
+  AppOperacaoTransportadoresRoute: AppOperacaoTransportadoresRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
