@@ -2,10 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { 
-  MessageSquare, Plus, RefreshCw, Power, Trash2, QrCode, 
-  CheckCircle2, AlertCircle, Phone, User, Settings2,
-  ShieldCheck, Info, Search, Filter, MoreVertical,
-  ExternalLink, LogOut, Smartphone
+  MessageSquare, Plus, RefreshCw, Trash2, QrCode, 
+  CheckCircle2, AlertCircle, Phone, User,
+  ShieldCheck, Info, Search, MoreVertical,
+  LogOut, Smartphone
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { evolution, type Instance } from "@/lib/evolution";
