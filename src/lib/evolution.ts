@@ -124,6 +124,16 @@ export const evolution = {
      return res.json();
    },
 
+   async getWebhook(instanceName: string) {
+     try {
+       const res = await fetch(`${API_URL}/webhook/find/${instanceName}`);
+       if (!res.ok) return null;
+       return await res.json();
+     } catch {
+       return null;
+     }
+   },
+
    async getQrCode(instanceName: string) {
      try {
        console.log(`Buscando QR Code para: ${instanceName}`);
