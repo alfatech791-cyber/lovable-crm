@@ -8,6 +8,7 @@ export const sidebarItems = [
     title: "CRM",
     url: "/crm",
     icon: "Sparkles" as const,
+    flyout: true,
     children: [
       { title: "Visão Geral", url: "/crm" },
       { title: "Leads", url: "/leads" },
