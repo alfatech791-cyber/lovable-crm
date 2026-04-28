@@ -208,7 +208,6 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                   </section>
                 </div>
               </div>
-              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-border/50">
                 {/* Coluna de Preços */}
@@ -390,8 +389,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                 <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider flex items-center gap-2">
                   <Info className="h-3 w-3" /> Descrição Adicional
                 </Label>
-                <textarea className="w-full bg-muted/20 border border-sidebar-border rounded-xl p-3 text-xs outline-none focus:ring-1 focus:ring-primary/20 min-h-[80px]" placeholder="Ex: Saúde da bateria 100%, sem riscos na tela, acompanha caixa original..." />
-              </div>
+                <textarea className="w-full bg-muted/20 border border-border rounded-xl p-3 text-xs outline-none focus:ring-1 focus:ring-primary/20 min-h-[80px]" placeholder="Ex: Saúde da bateria 100%, sem riscos na tela, acompanha caixa original..." />
               </div>
 
               <div className="pt-10 border-t border-border/50 space-y-8">
