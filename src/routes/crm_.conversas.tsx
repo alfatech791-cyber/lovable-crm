@@ -812,7 +812,13 @@ function ConversasPage() {
                   <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
                     <MessageSquare className="h-4 w-4 text-primary" />
                   </div>
-                  <h3 className="text-base font-bold tracking-tight">Conversas</h3>
+                  <div className="flex flex-col">
+                    <h3 className="text-base font-bold tracking-tight">Conversas</h3>
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <span className={`h-1 w-1 rounded-full ${syncing ? "bg-amber-400 animate-pulse" : "bg-emerald-400"}`} />
+                      Sincronização automática ativa
+                    </span>
+                  </div>
                   {totalUnread > 0 && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary text-primary-foreground shadow-sm shadow-primary/20">
                       {totalUnread}
