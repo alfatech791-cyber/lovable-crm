@@ -9,7 +9,7 @@ export function RecentService() {
     <div className="rounded-2xl bg-card border border-border p-5 shadow-card">
       <h3 className="text-[15px] font-semibold mb-3">Atendimentos recentes</h3>
       <ul className="space-y-2">
-        {messages.slice(0, 2).map((m) => (
+        {messages.length > 0 ? messages.slice(0, 2).map((m) => (
           <li key={m.name} className="flex items-start gap-3 rounded-xl border border-border p-3">
             <div className="relative shrink-0">
               <div className="h-10 w-10 rounded-full bg-gradient-primary grid place-items-center text-white text-xs font-semibold">
@@ -31,7 +31,9 @@ export function RecentService() {
               <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-[10px] font-semibold text-primary-foreground grid place-items-center">{m.unread}</span>
             )}
           </li>
-        ))}
+        )) : (
+          <li className="text-center py-8 text-xs text-muted-foreground italic border border-dashed border-border rounded-xl">Sem atendimentos recentes</li>
+        )}
       </ul>
       <button 
         onClick={() => navigate({ to: "/atendimento" })}
@@ -77,7 +79,7 @@ const etapaStyle = (e: string) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {recentLeads.map((l) => (
+            {recentLeads.length > 0 ? recentLeads.map((l) => (
               <tr key={l.name} className="hover:bg-muted/40 transition">
                 <td className="py-2.5 font-medium">{l.name}</td>
                 <td className="py-2.5">
@@ -99,7 +101,11 @@ const etapaStyle = (e: string) => {
                 </td>
                 <td className="py-2.5 text-right text-muted-foreground">{l.time}</td>
               </tr>
-            ))}
+            )) : (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-xs text-muted-foreground italic">Sem leads captados recentemente</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

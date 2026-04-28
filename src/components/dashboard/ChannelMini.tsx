@@ -32,8 +32,8 @@ export function ChannelMini() {
     <div className="rounded-2xl bg-card border border-border p-5 shadow-card">
       <h3 className="text-[15px] font-semibold">Atendimentos por canal</h3>
       <div className="divide-y divide-border">
-        <Row label="WhatsApp" value="192" trend="18%" color="var(--color-success)" dataKey="whats" gradId="gW" />
-        <Row label="Instagram" value="64" trend="12%" color="oklch(0.65 0.2 330)" dataKey="insta" gradId="gI" />
+        <Row label="WhatsApp" value="0" trend="0%" color="var(--color-success)" dataKey="whats" gradId="gW" />
+        <Row label="Instagram" value="0" trend="0%" color="oklch(0.65 0.2 330)" dataKey="insta" gradId="gI" />
       </div>
       <button className="w-full mt-2 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:text-primary-glow border border-border rounded-lg py-2 hover:bg-muted transition">
         Ver todos os canais <ArrowRight className="h-3.5 w-3.5" />

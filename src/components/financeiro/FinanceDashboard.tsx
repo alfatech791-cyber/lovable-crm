@@ -15,22 +15,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
-const data = [
-  { name: 'Jan', receitas: 32000, despesas: 18000 },
-  { name: 'Fev', receitas: 38000, despesas: 22000 },
-  { name: 'Mar', receitas: 42850, despesas: 18230 },
-  { name: 'Abr', receitas: 45000, despesas: 21000 },
-  { name: 'Mai', receitas: 48000, despesas: 24000 },
-  { name: 'Jun', receitas: 52000, despesas: 26000 },
-];
-
-const despesasPorCategoria = [
-  { name: 'Produtos', value: 12000, color: '#3b82f6' },
-  { name: 'Aluguel', value: 3500, color: '#f59e0b' },
-  { name: 'Salários', value: 8000, color: '#10b981' },
-  { name: 'Marketing', value: 1500, color: '#8b5cf6' },
-  { name: 'Outros', value: 1230, color: '#ef4444' },
-];
+  const data: { name: string; receitas: number; despesas: number }[] = [];
+  
+  const despesasPorCategoria: { name: string; value: number; color: string }[] = [];
 
 export function FinanceDashboard() {
   const navigate = useNavigate();
@@ -64,7 +51,7 @@ export function FinanceDashboard() {
             <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Receitas (Mês)</div>
             <div className="text-3xl font-black mt-1 flex items-baseline gap-1 text-slate-900">
               <span className="text-sm font-bold text-muted-foreground">R$</span>
-              42.850,00
+                0,00
             </div>
           </CardContent>
         </Card>
@@ -80,7 +67,7 @@ export function FinanceDashboard() {
             <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Despesas (Mês)</div>
             <div className="text-3xl font-black mt-1 flex items-baseline gap-1 text-slate-900">
               <span className="text-sm font-bold text-muted-foreground">R$</span>
-              18.230,00
+                0,00
             </div>
           </CardContent>
         </Card>
@@ -96,7 +83,7 @@ export function FinanceDashboard() {
             <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Saldo Projetado</div>
             <div className="text-3xl font-black mt-1 text-blue-600 flex items-baseline gap-1">
               <span className="text-sm font-bold">R$</span>
-              24.620,00
+                0,00
             </div>
           </CardContent>
         </Card>
@@ -185,25 +172,27 @@ export function FinanceDashboard() {
                     cursor={{ fill: 'transparent' }}
                     contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontWeight: 'bold', fontSize: '12px' }}
                   />
-                  <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={16}>
-                    {despesasPorCategoria.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
+                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={16}>
+                      {despesasPorCategoria.length > 0 && despesasPorCategoria.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="space-y-3">
-              {despesasPorCategoria.map((cat, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }}></div>
-                    <span className="text-xs font-bold text-muted-foreground">{cat.name}</span>
+              <div className="space-y-3">
+                {despesasPorCategoria.length > 0 ? despesasPorCategoria.map((cat, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }}></div>
+                      <span className="text-xs font-bold text-muted-foreground">{cat.name}</span>
+                    </div>
+                    <span className="text-xs font-black text-slate-900">R$ {cat.value.toLocaleString('pt-BR')}</span>
                   </div>
-                  <span className="text-xs font-black text-slate-900">R$ {cat.value.toLocaleString('pt-BR')}</span>
-                </div>
-              ))}
-            </div>
+                )) : (
+                  <div className="text-center text-xs text-muted-foreground py-4 italic">Sem categorias registradas</div>
+                )}
+              </div>
           </CardContent>
         </Card>
       </div>
@@ -221,26 +210,11 @@ export function FinanceDashboard() {
               Ver Tudo <ArrowRight className="h-3 w-3" />
             </button>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {[
-              { name: "Caixa Loja", type: "Dinheiro", balance: "R$ 1.250,00", icon: Wallet },
-              { name: "Banco Itaú", type: "Corrente", balance: "R$ 12.800,00", icon: Building2 },
-              { name: "Nubank", type: "Corrente", balance: "R$ 8.420,00", icon: Building2 },
-            ].map(account => (
-              <div key={account.name} className="flex items-center justify-between p-3 rounded-xl border border-transparent hover:border-slate-100 hover:bg-slate-50/50 transition cursor-pointer group">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-slate-100 group-hover:bg-white transition grid place-items-center">
-                    <account.icon className="h-4.5 w-4.5 text-slate-500" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-black text-slate-900">{account.name}</div>
-                    <div className="text-[10px] font-black text-muted-foreground uppercase tracking-tight">{account.type}</div>
-                  </div>
-                </div>
-                <div className="text-sm font-black text-slate-800">{account.balance}</div>
+            <CardContent className="space-y-4">
+              <div className="text-center text-xs text-muted-foreground py-8 italic border border-dashed border-slate-100 rounded-xl">
+                Nenhuma conta cadastrada
               </div>
-            ))}
-          </CardContent>
+            </CardContent>
         </Card>
 
         <Card className="border-border shadow-sm flex flex-col rounded-2xl">
@@ -259,7 +233,7 @@ export function FinanceDashboard() {
                   <span>A Receber</span>
                   <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition" />
                 </div>
-                <div className="text-lg font-black text-blue-700">R$ 5.700,00</div>
+                <div className="text-lg font-black text-blue-700">R$ 0,00</div>
               </button>
               <button 
                 onClick={() => navigate({ to: "/financeiro/contas-pagar" })}
@@ -269,29 +243,13 @@ export function FinanceDashboard() {
                   <span>A Pagar</span>
                   <ArrowDownRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition" />
                 </div>
-                <div className="text-lg font-black text-red-700">R$ 2.500,00</div>
+                <div className="text-lg font-black text-red-700">R$ 0,00</div>
               </button>
             </div>
             <div className="space-y-4">
-              {[
-                { desc: "Venda iPhone 13 #V123", cat: "Receita Vendas", value: "+ R$ 4.200,00", type: "in", date: "Hoje" },
-                { desc: "Fornecedor Apple Parts", cat: "Compras", value: "- R$ 2.150,00", type: "out", date: "Ontem" },
-                { desc: "Aluguel Loja", cat: "Custo Fixo", value: "- R$ 1.500,00", type: "out", date: "25 Mar" },
-              ].map((move, i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-transparent hover:border-slate-100 hover:bg-slate-50/50 transition">
-                  <div>
-                    <div className="text-sm font-black text-slate-900">{move.desc}</div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">{move.cat}</span>
-                      <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                      <span className="text-[10px] font-bold text-muted-foreground">{move.date}</span>
-                    </div>
-                  </div>
-                  <div className={`text-sm font-black ${move.type === 'in' ? 'text-green-600' : 'text-red-600'}`}>
-                    {move.value}
-                  </div>
-                </div>
-              ))}
+              <div className="text-center text-xs text-muted-foreground py-8 italic border border-dashed border-slate-100 rounded-xl">
+                Nenhum lançamento recente
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -12,13 +12,7 @@ export const Route = createFileRoute("/financeiro/caixa")({
 
 function FinanceCaixaPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const transactions = [
-    { id: 1, type: "Entrada", desc: "Venda iPhone 13 #1024", value: 4500.00, date: "27 Mar, 14:20", category: "Vendas", status: "Confirmado", account: "Banco Itaú" },
-    { id: 2, type: "Saída", desc: "Pagamento Fornecedor Apple Parts", value: 1200.00, date: "27 Mar, 11:15", category: "Compras", status: "Confirmado", account: "Nubank" },
-    { id: 3, type: "Entrada", desc: "OS #1005 - Troca de Tela", value: 350.00, date: "27 Mar, 09:30", category: "Serviços", status: "Confirmado", account: "Caixa Loja" },
-    { id: 4, type: "Saída", desc: "Aluguel da Loja - Março", value: 2500.00, date: "26 Mar, 10:00", category: "Custo Fixo", status: "Confirmado", account: "Banco Itaú" },
-    { id: 5, type: "Entrada", desc: "Venda Samsung S23 #1025", value: 3200.00, date: "26 Mar, 08:45", category: "Vendas", status: "Pendente", account: "Maquininha" },
-  ];
+  const transactions: any[] = [];
 
   return (
     <div className="min-h-screen flex w-full bg-background">
@@ -35,7 +29,7 @@ function FinanceCaixaPage() {
                 <span className="text-[10px] font-black text-green-600 uppercase tracking-tighter bg-green-50 px-2 py-1 rounded-full">Hoje</span>
               </div>
               <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Entradas</div>
-              <div className="text-xl font-black text-slate-900 mt-1">R$ 4.850,00</div>
+              <div className="text-xl font-black text-slate-900 mt-1">R$ 0,00</div>
             </Card>
             <Card className="p-5 border-none bg-gradient-to-br from-red-500/10 to-transparent shadow-sm border border-red-100 rounded-2xl">
               <div className="flex justify-between items-start mb-2">
@@ -45,7 +39,7 @@ function FinanceCaixaPage() {
                 <span className="text-[10px] font-black text-red-600 uppercase tracking-tighter bg-red-50 px-2 py-1 rounded-full">Hoje</span>
               </div>
               <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Saídas</div>
-              <div className="text-xl font-black text-slate-900 mt-1">R$ 1.200,00</div>
+              <div className="text-xl font-black text-slate-900 mt-1">R$ 0,00</div>
             </Card>
             <Card className="p-5 border-border shadow-sm rounded-2xl">
               <div className="flex justify-between items-start mb-2">
@@ -54,7 +48,7 @@ function FinanceCaixaPage() {
                 </div>
               </div>
               <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Saldo Atual</div>
-              <div className="text-xl font-black text-slate-900 mt-1">R$ 124.580,00</div>
+              <div className="text-xl font-black text-slate-900 mt-1">R$ 0,00</div>
             </Card>
             <Card className="p-5 border-border shadow-sm bg-slate-900 text-white rounded-2xl">
               <div className="flex justify-between items-start mb-2">
@@ -63,7 +57,7 @@ function FinanceCaixaPage() {
                 </div>
               </div>
               <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Previsto (Mês)</div>
-              <div className="text-xl font-black mt-1 text-white">R$ +18.420,00</div>
+              <div className="text-xl font-black mt-1 text-white">R$ 0,00</div>
             </Card>
           </div>
 
@@ -101,7 +95,7 @@ function FinanceCaixaPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {transactions.map(t => (
+                {transactions.length > 0 ? transactions.map(t => (
                   <tr key={t.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-6 py-4 text-xs font-bold text-slate-500">{t.date}</td>
                     <td className="px-6 py-4">
@@ -130,7 +124,13 @@ function FinanceCaixaPage() {
                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all text-slate-400 hover:text-slate-600"><MoreHorizontal className="h-4 w-4" /></Button>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-sm text-muted-foreground italic">
+                      Nenhuma transação encontrada no período
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </Card>

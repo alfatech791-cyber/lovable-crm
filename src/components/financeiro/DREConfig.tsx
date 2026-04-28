@@ -7,16 +7,16 @@ import { Button } from "@/components/ui/button";
 
 export function DREConfig() {
   const dreData = [
-    { label: "Receita Bruta de Vendas", value: 85000, type: "revenue" },
-    { label: "(-) Impostos sobre Vendas", value: 3500, type: "expense" },
-    { label: "Receita Líquida", value: 81500, type: "total" },
-    { label: "(-) CPV (Custo de Produtos Vendidos)", value: 52000, type: "expense" },
-    { label: "Lucro Bruto", value: 29500, type: "total" },
-    { label: "(-) Despesas Operacionais", value: 12000, type: "expense" },
-    { label: "(-) Despesas Administrativas", value: 4500, type: "expense" },
-    { label: "EBITDA / LAJIDA", value: 13000, type: "total" },
-    { label: "(-) Depreciação e Amortização", value: 1200, type: "expense" },
-    { label: "Lucro Líquido do Exercício", value: 11800, type: "final" },
+    { label: "Receita Bruta de Vendas", value: 0, type: "revenue" },
+    { label: "(-) Impostos sobre Vendas", value: 0, type: "expense" },
+    { label: "Receita Líquida", value: 0, type: "total" },
+    { label: "(-) CPV (Custo de Produtos Vendidos)", value: 0, type: "expense" },
+    { label: "Lucro Bruto", value: 0, type: "total" },
+    { label: "(-) Despesas Operacionais", value: 0, type: "expense" },
+    { label: "(-) Despesas Administrativas", value: 0, type: "expense" },
+    { label: "EBITDA / LAJIDA", value: 0, type: "total" },
+    { label: "(-) Depreciação e Amortização", value: 0, type: "expense" },
+    { label: "Lucro Líquido do Exercício", value: 0, type: "final" },
   ];
 
   return (
@@ -39,23 +39,23 @@ export function DREConfig() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="p-5 border-border shadow-sm rounded-2xl">
           <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Receita Bruta</div>
-          <div className="text-2xl font-black text-green-600">R$ 85.000,00</div>
-          <div className="mt-2 text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full inline-block">+12% vs ideal</div>
+          <div className="text-2xl font-black text-green-600">R$ 0,00</div>
+          <div className="mt-2 text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full inline-block">Aguardando dados</div>
         </Card>
         <Card className="p-5 border-border shadow-sm rounded-2xl">
           <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Margem Bruta</div>
-          <div className="text-2xl font-black text-slate-900">34.7%</div>
-          <div className="mt-2 text-[10px] font-bold text-slate-400">Ponto de equilíbrio atingido</div>
+          <div className="text-2xl font-black text-slate-900">0,0%</div>
+          <div className="mt-2 text-[10px] font-bold text-slate-400">Aguardando dados</div>
         </Card>
         <Card className="p-5 border-border shadow-sm rounded-2xl">
           <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Despesas Fixas</div>
-          <div className="text-2xl font-black text-red-600">R$ 16.500,00</div>
-          <div className="mt-2 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full inline-block">19.4% da receita</div>
+          <div className="text-2xl font-black text-red-600">R$ 0,00</div>
+          <div className="mt-2 text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full inline-block">0,0% da receita</div>
         </Card>
         <Card className="p-5 border-none shadow-lg bg-slate-900 text-white rounded-2xl">
           <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Lucro Líquido</div>
-          <div className="text-2xl font-black">R$ 11.800,00</div>
-          <div className="mt-2 text-[10px] font-bold text-blue-400">Margem Líquida: 13.9%</div>
+          <div className="text-2xl font-black">R$ 0,00</div>
+          <div className="mt-2 text-[10px] font-bold text-blue-400">Margem Líquida: 0,0%</div>
         </Card>
       </div>
 
@@ -100,7 +100,7 @@ export function DREConfig() {
                     {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(item.value)}
                   </TableCell>
                   <TableCell className="px-6 py-3.5 text-right text-xs font-bold text-slate-400">
-                    {((item.value / 85000) * 100).toFixed(1)}%
+                    0,0%
                   </TableCell>
                   <TableCell className="px-6 py-3.5 text-right">
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-600 rounded-lg">
