@@ -31,10 +31,16 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const phone: string = String(body.phone ?? "").replace(/\D/g, "");
     const text: string = String(body.text ?? "").trim();
+    const kind: string = String(body.kind ?? "text"); // text | audio | sticker | image
+    const media: string | null = body.media ? String(body.media) : null; // base64 (sem prefixo) OU URL
+    const mimetype: string | null = body.mimetype ? String(body.mimetype) : null;
+    const fileName: string | null = body.fileName ? String(body.fileName) : null;
     const contactName: string | null = body.contactName ?? null;
     const stopBot: boolean = !!body.stopBot;
 
-    if (!phone || !text) return json({ error: "phone and text required" }, 400);
+    if (!phone) return json({ error: "phone required" }, 400);
+    if (kind === "text" && !text) return json({ error: "text required" }, 400);
+    if (kind !== "text" && !media) return json({ error: "media required" }, 400);
 
     const { data: settings } = await supabase
       .from("bot_settings")
@@ -49,13 +55,39 @@ serve(async (req) => {
     let sendOk = false;
     let sendError: string | null = null;
     if (instance && evoUrl && evoKey) {
-      const sendRes = await fetch(`${evoUrl}/message/sendText/${instance}`, {
-        method: "POST",
-        headers: { apikey: evoKey, "Content-Type": "application/json" },
-        body: JSON.stringify({ number: phone, text }),
-      });
-      sendOk = sendRes.ok;
-      if (!sendRes.ok) sendError = `${sendRes.status}: ${await sendRes.text()}`;
+      let endpoint = "";
+      let payload: Record<string, unknown> = { number: phone };
+
+      if (kind === "text") {
+        endpoint = `${evoUrl}/message/sendText/${instance}`;
+        payload.text = text;
+      } else if (kind === "audio") {
+        endpoint = `${evoUrl}/message/sendWhatsAppAudio/${instance}`;
+        payload.audio = media; // base64 ou URL
+        payload.encoding = true;
+      } else if (kind === "sticker") {
+        endpoint = `${evoUrl}/message/sendSticker/${instance}`;
+        payload.sticker = media;
+      } else if (kind === "image") {
+        endpoint = `${evoUrl}/message/sendMedia/${instance}`;
+        payload.mediatype = "image";
+        payload.media = media;
+        payload.mimetype = mimetype ?? "image/png";
+        if (fileName) payload.fileName = fileName;
+        if (text) payload.caption = text;
+      } else {
+        sendError = `kind inválido: ${kind}`;
+      }
+
+      if (endpoint) {
+        const sendRes = await fetch(endpoint, {
+          method: "POST",
+          headers: { apikey: evoKey, "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        sendOk = sendRes.ok;
+        if (!sendRes.ok) sendError = `${sendRes.status}: ${await sendRes.text()}`;
+      }
     } else {
       sendError = "Evolution não configurada (instância/URL/KEY)";
     }
@@ -69,9 +101,12 @@ serve(async (req) => {
       .maybeSingle();
 
     const transcript: any[] = (conv?.transcript as any[]) ?? [];
+    const placeholder =
+      kind === "audio" ? "🎤 Áudio" : kind === "sticker" ? "🟦 Figurinha" : kind === "image" ? "🖼️ Imagem" : text;
     transcript.push({
       role: "agent",
-      content: text,
+      kind,
+      content: text || placeholder,
       at: new Date().toISOString(),
       sent: sendOk,
     });
