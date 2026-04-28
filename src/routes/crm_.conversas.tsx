@@ -174,6 +174,7 @@ function ConversasPage() {
   const [recording, setRecording] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
   const [stickerOpen, setStickerOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"all" | "bot" | "manual" | "unread">("all");
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const recordTimerRef = useRef<number | null>(null);
