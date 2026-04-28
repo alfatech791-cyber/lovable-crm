@@ -438,7 +438,7 @@ function ConversasPage() {
         existing = (existingRows ?? []) as any as Conversation[];
       }
 
-      if (!instance) {
+      if (!instance) { setLoading(false); setSyncing(false); syncLockRef.current = false;
         if (showToast) toast.error("Conecte ou selecione sua instância do WhatsApp primeiro.");
         return;
       }
