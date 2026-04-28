@@ -240,25 +240,50 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                      <DollarSign className="h-3.5 w-3.5" /> Precificação e Venda
                    </h5>
-                   <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda Final</Label>
-                      <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-primary text-primary-foreground font-black text-[10px] rounded-l-xl shadow-glow">R$</div>
-                         <Input id="price" type="number" defaultValue={product?.price || ""} className="bg-card h-12 border-primary/20 focus:ring-4 focus:ring-primary/5 text-lg font-black text-primary transition-all pl-12" />
+                    <div className="grid gap-4">
+                      <div className="grid gap-2">
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda (Varejo)</Label>
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-primary text-primary-foreground font-black text-[10px] rounded-l-xl shadow-glow">R$</div>
+                          <Input id="price" type="number" defaultValue={product?.price || ""} className="bg-card h-12 border-primary/20 focus:ring-4 focus:ring-primary/5 text-lg font-black text-primary transition-all pl-12" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-1.5">
+                          <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda (Atacado)</Label>
+                          <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-bold text-[8px] rounded-l-lg border border-r-0 border-border">R$</div>
+                            <Input type="number" className="bg-card h-9 border-border text-xs font-bold pl-10" />
+                          </div>
+                        </div>
+                        <div className="grid gap-1.5">
+                          <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Custo (Compra)</Label>
+                          <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-bold text-[8px] rounded-l-lg border border-r-0 border-border">R$</div>
+                            <Input type="number" className="bg-card h-9 border-border text-xs font-bold pl-10" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-1.5">
+                          <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Lucro Bruto (%)</Label>
+                          <Input type="number" placeholder="45.00" className="bg-card h-9 border-border text-xs font-bold" />
+                        </div>
+                        <div className="grid gap-1.5">
+                          <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Markup (%)</Label>
+                          <Input type="number" placeholder="81.82" className="bg-card h-9 border-border text-xs font-bold" />
+                        </div>
+                      </div>
+                      <div className="pt-2">
+                         <div className="flex items-center justify-between p-3 rounded-xl bg-primary/10 border border-primary/20">
+                            <div className="space-y-0.5">
+                               <span className="text-[9px] font-black uppercase text-primary block">Lucro Estimado</span>
+                               <span className="text-sm font-black text-primary">R$ 0,00</span>
+                            </div>
+                            <Percent className="h-4 w-4 text-primary/40" />
+                         </div>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="grid gap-1.5">
-                        <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço Atacado</Label>
-                        <Input type="number" className="bg-card h-9 border-border text-xs font-bold" />
-                      </div>
-                      <div className="grid gap-1.5">
-                        <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Custo Médio</Label>
-                        <Input type="number" className="bg-card h-9 border-border text-xs font-bold" />
-                      </div>
-                    </div>
-                   </div>
                  </section>
 
                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
