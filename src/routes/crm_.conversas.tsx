@@ -500,13 +500,15 @@ function ConversasPage() {
       }
 
       const rows = await Promise.all(
-        chats.slice(0, 100).map(async (chat) => {
+        chats.slice(0, 50).map(async (chat) => {
           const phone = getContactPhone(chat);
           if (!phone) return null;
           const isGroup = String(chat.remoteJid ?? "").endsWith("@g.us");
 
           const ex = byPhone.get(phone);
-          const raw = await evolution.findMessages(instance, chat.remoteJid!);
+          // Só busca o histórico completo se for a conversa selecionada ou se não tivermos transcript
+          const shouldFetchFull = chat.remoteJid === selected?.remote_jid || !ex?.transcript?.length;
+          const raw = shouldFetchFull ? await evolution.findMessages(instance, chat.remoteJid!) : [];
           const transcript = normalizeTranscript(asArray<any>(raw));
           const fallbackTranscript = normalizeTranscript(chat.lastMessage ? [chat.lastMessage] : []);
           const mergedTranscript = transcript.length > 0 ? transcript : (ex?.transcript ?? fallbackTranscript); mergedTranscript.sort((a, b) => +new Date(a.at || 0) - +new Date(b.at || 0));
