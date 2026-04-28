@@ -854,7 +854,8 @@ function ConversasPage() {
               ) : (
                 filtered.map((c) => {
                   const last = c.transcript?.[c.transcript.length - 1];
-                  const initials = (c.contact_name ?? c.contact_phone)
+                  const displayName = c.contact_name ?? c.contact_phone;
+                  const initials = displayName
                     .split(" ")
                     .map((s) => s[0])
                     .join("")
@@ -872,13 +873,28 @@ function ConversasPage() {
                       {selectedId === c.id && (
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
                       )}
-                      <div className="h-11 w-11 shrink-0 rounded-full bg-gradient-to-br from-primary to-primary/60 grid place-items-center text-white font-bold text-sm">
-                        {initials || "?"}
+                      <div className="relative shrink-0">
+                        <Avatar className="h-11 w-11">
+                          {c.profile_pic_url ? (
+                            <AvatarImage src={c.profile_pic_url} alt={displayName} />
+                          ) : null}
+                          <AvatarFallback className="bg-gradient-to-br from-primary to-primary/60 text-white font-bold text-sm">
+                            {c.is_group ? <Users className="h-5 w-5" /> : initials || "?"}
+                          </AvatarFallback>
+                        </Avatar>
+                        {c.is_group && (
+                          <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-primary text-primary-foreground grid place-items-center border-2 border-card">
+                            <Users className="h-2.5 w-2.5" />
+                          </span>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <span className={`text-sm truncate ${unread > 0 ? "font-bold" : "font-semibold"}`}>
-                            {c.contact_name ?? c.contact_phone}
+                          <span className={`text-sm truncate flex items-center gap-1 ${unread > 0 ? "font-bold" : "font-semibold"}`}>
+                            {displayName}
+                            {c.is_group && (
+                              <span className="text-[9px] font-bold px-1 py-px rounded bg-muted text-muted-foreground">GRUPO</span>
+                            )}
                           </span>
                           <span className="text-[10px] text-muted-foreground shrink-0">
                             {formatDistanceToNow(new Date(c.last_message_at), { addSuffix: false, locale: ptBR })}
