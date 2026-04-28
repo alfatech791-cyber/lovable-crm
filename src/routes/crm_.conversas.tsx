@@ -863,33 +863,47 @@ function ConversasPage() {
                 ) : (
                   selected.transcript.map((m, i) => {
                     const isUser = m.role === "user";
-                    const isBot = m.role === "assistant" && m.kind !== "audio" && m.kind !== "sticker"
-                      ? true
-                      : m.role === "assistant";
+                    const prev = selected.transcript[i - 1];
+                    const showDate =
+                      !prev ||
+                      (m.at && prev.at && new Date(m.at).toDateString() !== new Date(prev.at).toDateString());
                     return (
-                      <div key={i} className={`flex gap-2 ${isUser ? "justify-start" : "justify-end"}`}>
+                      <div key={i}>
+                        {showDate && m.at && (
+                          <div className="flex justify-center my-4">
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                              {formatDateLabel(m.at)}
+                            </span>
+                          </div>
+                        )}
+                        <div className={`flex gap-2 ${isUser ? "justify-start" : "justify-end"}`}>
                         {isUser && (
                           <div className="h-7 w-7 rounded-full bg-muted grid place-items-center shrink-0">
                             <User className="h-3.5 w-3.5" />
                           </div>
                         )}
                         <div
-                          className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm ${
+                          className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm shadow-sm ${
                             isUser
                               ? "bg-muted rounded-bl-sm"
                               : "bg-primary text-primary-foreground rounded-br-sm"
-                          } ${m.kind === "sticker" ? "text-3xl bg-transparent !px-1 !py-0" : ""}`}
+                          } ${m.kind === "sticker" ? "text-3xl bg-transparent shadow-none !px-1 !py-0" : ""}`}
                         >
                           {m.kind === "audio" ? (
                             <span className="flex items-center gap-2">
-                              <Mic className="h-4 w-4" /> Áudio enviado
+                              <Mic className="h-4 w-4" /> Áudio
                             </span>
                           ) : m.kind === "image" ? (
                             <span className="flex items-center gap-2">
                               <ImageIcon className="h-4 w-4" /> {m.content || "Imagem"}
                             </span>
                           ) : (
-                            m.content
+                            <span className="whitespace-pre-wrap break-words">{m.content}</span>
+                          )}
+                          {m.at && m.kind !== "sticker" && (
+                            <div className={`text-[9px] mt-1 opacity-70 ${isUser ? "text-muted-foreground" : "text-primary-foreground"}`}>
+                              {format(new Date(m.at), "HH:mm")}
+                            </div>
                           )}
                         </div>
                         {!isUser && (
@@ -897,6 +911,7 @@ function ConversasPage() {
                             <Bot className="h-3.5 w-3.5" />
                           </div>
                         )}
+                        </div>
                       </div>
                     );
                   })
