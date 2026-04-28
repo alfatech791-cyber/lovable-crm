@@ -21,8 +21,10 @@ import {
   Image as ImageIcon,
   Trash2,
   X,
+  Users,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow, format, isToday, isYesterday, isThisWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -53,6 +55,8 @@ type Conversation = {
   messages_count: number;
   last_message_at: string;
   transcript: Msg[];
+  profile_pic_url: string | null;
+  is_group: boolean;
 };
 
 type EvolutionChat = {
@@ -65,6 +69,9 @@ type EvolutionChat = {
   lastMessageTime?: number | string;
   conversationTimestamp?: number | string;
   lastMessage?: any;
+  profilePicUrl?: string;
+  profilePictureUrl?: string;
+  subject?: string;
 };
 
 const STICKERS = [
@@ -418,9 +425,7 @@ function ConversasPage() {
       ensureWebhook(instance);
 
       const rawChats = await evolution.findChats(instance);
-      const chats = asArray<EvolutionChat>(rawChats).filter(
-        (c) => !!c?.remoteJid && !String(c.remoteJid).endsWith("@g.us")
-      );
+      const chats = asArray<EvolutionChat>(rawChats).filter((c) => !!c?.remoteJid);
       if (chats.length === 0) {
         if (showToast) toast.info("Nenhuma conversa na instância.");
         return;
@@ -432,6 +437,7 @@ function ConversasPage() {
         .map((chat) => {
           const phone = getContactPhone(chat);
           if (!phone) return null;
+          const isGroup = String(chat.remoteJid ?? "").endsWith("@g.us");
 
           const existingConversation = byPhone.get(phone);
           const previewTranscript = existingConversation?.transcript?.length
@@ -442,6 +448,7 @@ function ConversasPage() {
             id: existingConversation?.id ?? `${instance}:${phone}`,
             contact_phone: phone,
             contact_name:
+              chat.subject ??
               chat.name ??
               chat.pushName ??
               chat.profileName ??
@@ -454,6 +461,12 @@ function ConversasPage() {
             last_message_at:
               previewTranscript[previewTranscript.length - 1]?.at ??
               normTs(chat.updatedAt ?? chat.lastMessageTime ?? chat.conversationTimestamp ?? chat.lastMessage?.messageTimestamp),
+            profile_pic_url:
+              chat.profilePicUrl ??
+              chat.profilePictureUrl ??
+              existingConversation?.profile_pic_url ??
+              null,
+            is_group: isGroup,
           } satisfies Conversation;
         })
         .filter((row): row is Conversation => !!row);
@@ -467,6 +480,7 @@ function ConversasPage() {
         chats.slice(0, 30).map(async (chat) => {
           const phone = getContactPhone(chat);
           if (!phone) return null;
+          const isGroup = String(chat.remoteJid ?? "").endsWith("@g.us");
 
           const ex = byPhone.get(phone);
           const raw = await evolution.findMessages(instance, chat.remoteJid!);
@@ -477,20 +491,45 @@ function ConversasPage() {
             mergedTranscript[mergedTranscript.length - 1]?.at ??
             normTs(chat.updatedAt ?? chat.lastMessageTime ?? chat.conversationTimestamp ?? chat.lastMessage?.messageTimestamp);
 
+          let picUrl =
+            chat.profilePicUrl ??
+            chat.profilePictureUrl ??
+            ex?.profile_pic_url ??
+            null;
+          let displayName =
+            chat.subject ??
+            chat.name ??
+            chat.pushName ??
+            chat.profileName ??
+            chat.lastMessage?.pushName ??
+            ex?.contact_name ??
+            null;
+
+          // Para grupos, busca nome e foto via group/findGroupInfos quando faltar
+          if (isGroup && (!picUrl || !displayName)) {
+            const info = await evolution.findGroupInfo(instance, chat.remoteJid!);
+            if (info) {
+              displayName = displayName ?? info?.subject ?? info?.name ?? null;
+              picUrl = picUrl ?? info?.pictureUrl ?? info?.profilePicUrl ?? null;
+            }
+          }
+
+          // Para contatos individuais, busca a foto de perfil quando faltar
+          if (!isGroup && !picUrl) {
+            const number = String(chat.remoteJid ?? "").split("@")[0];
+            picUrl = await evolution.fetchProfilePictureUrl(instance, number);
+          }
+
           return {
             id: ex?.id ?? `${instance}:${phone}`,
             contact_phone: phone,
-            contact_name:
-              chat.name ??
-              chat.pushName ??
-              chat.profileName ??
-              chat.lastMessage?.pushName ??
-              ex?.contact_name ??
-              null,
+            contact_name: displayName,
             transcript: mergedTranscript,
             status: ex?.status ?? "active",
             messages_count: mergedTranscript.length,
             last_message_at: lastAt,
+            profile_pic_url: picUrl,
+            is_group: isGroup,
           } satisfies Conversation;
         })
       );
@@ -815,7 +854,8 @@ function ConversasPage() {
               ) : (
                 filtered.map((c) => {
                   const last = c.transcript?.[c.transcript.length - 1];
-                  const initials = (c.contact_name ?? c.contact_phone)
+                  const displayName = c.contact_name ?? c.contact_phone;
+                  const initials = displayName
                     .split(" ")
                     .map((s) => s[0])
                     .join("")
@@ -833,13 +873,28 @@ function ConversasPage() {
                       {selectedId === c.id && (
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
                       )}
-                      <div className="h-11 w-11 shrink-0 rounded-full bg-gradient-to-br from-primary to-primary/60 grid place-items-center text-white font-bold text-sm">
-                        {initials || "?"}
+                      <div className="relative shrink-0">
+                        <Avatar className="h-11 w-11">
+                          {c.profile_pic_url ? (
+                            <AvatarImage src={c.profile_pic_url} alt={displayName} />
+                          ) : null}
+                          <AvatarFallback className="bg-gradient-to-br from-primary to-primary/60 text-white font-bold text-sm">
+                            {c.is_group ? <Users className="h-5 w-5" /> : initials || "?"}
+                          </AvatarFallback>
+                        </Avatar>
+                        {c.is_group && (
+                          <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-primary text-primary-foreground grid place-items-center border-2 border-card">
+                            <Users className="h-2.5 w-2.5" />
+                          </span>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <span className={`text-sm truncate ${unread > 0 ? "font-bold" : "font-semibold"}`}>
-                            {c.contact_name ?? c.contact_phone}
+                          <span className={`text-sm truncate flex items-center gap-1 ${unread > 0 ? "font-bold" : "font-semibold"}`}>
+                            {displayName}
+                            {c.is_group && (
+                              <span className="text-[9px] font-bold px-1 py-px rounded bg-muted text-muted-foreground">GRUPO</span>
+                            )}
                           </span>
                           <span className="text-[10px] text-muted-foreground shrink-0">
                             {formatDistanceToNow(new Date(c.last_message_at), { addSuffix: false, locale: ptBR })}
@@ -878,11 +933,21 @@ function ConversasPage() {
             <div className="flex-1 flex flex-col bg-card/20 min-w-0">
               <div className="h-[68px] px-6 border-b border-border flex items-center justify-between bg-card">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary/60 grid place-items-center font-bold text-sm text-white shrink-0">
-                    {(selected.contact_name ?? selected.contact_phone).slice(0, 2).toUpperCase()}
-                  </div>
+                  <Avatar className="h-10 w-10 shrink-0">
+                    {selected.profile_pic_url ? (
+                      <AvatarImage src={selected.profile_pic_url} alt={selected.contact_name ?? selected.contact_phone} />
+                    ) : null}
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-primary/60 font-bold text-sm text-white">
+                      {selected.is_group ? <Users className="h-5 w-5" /> : (selected.contact_name ?? selected.contact_phone).slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
                   <div className="min-w-0">
-                    <h2 className="font-bold text-sm truncate">{selected.contact_name ?? selected.contact_phone}</h2>
+                    <h2 className="font-bold text-sm truncate flex items-center gap-1.5">
+                      {selected.contact_name ?? selected.contact_phone}
+                      {selected.is_group && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-muted text-muted-foreground">GRUPO</span>
+                      )}
+                    </h2>
                     <p className="text-[10px] text-muted-foreground">
                       {selected.contact_phone} · {selected.messages_count} mensagens
                     </p>

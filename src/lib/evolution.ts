@@ -155,6 +155,33 @@ export const evolution = {
     return parseResponse(res);
   },
 
+  async fetchProfilePictureUrl(instanceName: string, number: string) {
+    try {
+      const res = await fetch(`${API_URL}/chat/fetchProfilePictureUrl/${instanceName}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ number }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return (data?.profilePictureUrl ?? data?.url ?? null) as string | null;
+    } catch {
+      return null;
+    }
+  },
+
+  async findGroupInfo(instanceName: string, groupJid: string) {
+    try {
+      const res = await fetch(
+        `${API_URL}/group/findGroupInfos/${instanceName}?groupJid=${encodeURIComponent(groupJid)}`,
+      );
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  },
+
   async findMessages(instanceName: string, remoteJid: string) {
     const res = await fetch(`${API_URL}/chat/findMessages/${instanceName}`, {
       method: "POST",
