@@ -18,6 +18,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { evolution } from "@/lib/evolution";
 
 type Msg = { role: "user" | "assistant" | "agent"; content: string; at?: string; sent?: boolean };
 type Conversation = {
@@ -30,6 +31,67 @@ type Conversation = {
   transcript: Msg[];
 };
 
+type EvolutionChat = {
+  id?: string;
+  remoteJid?: string;
+  name?: string;
+  pushName?: string;
+  profileName?: string;
+  unreadCount?: number;
+  lastMessageTime?: number | string;
+  conversationTimestamp?: number | string;
+  messages?: unknown[];
+};
+
+const asArray = <T,>(value: unknown): T[] => {
+  if (Array.isArray(value)) return value as T[];
+  if (value && typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    const nested = [obj.data, obj.chats, obj.messages, obj.result].find(Array.isArray);
+    if (Array.isArray(nested)) return nested as T[];
+  }
+  return [];
+};
+
+const getMessageText = (message: any) =>
+  message?.message?.conversation ??
+  message?.message?.extendedTextMessage?.text ??
+  message?.message?.imageMessage?.caption ??
+  message?.message?.videoMessage?.caption ??
+  message?.text ??
+  message?.body ??
+  "";
+
+const normalizeTimestamp = (value: unknown) => {
+  if (typeof value === "number") {
+    return new Date(value > 1e12 ? value : value * 1000).toISOString();
+  }
+  if (typeof value === "string" && value.trim()) {
+    const asNumber = Number(value);
+    if (!Number.isNaN(asNumber)) {
+      return new Date(asNumber > 1e12 ? asNumber : asNumber * 1000).toISOString();
+    }
+    const asDate = new Date(value);
+    if (!Number.isNaN(asDate.getTime())) return asDate.toISOString();
+  }
+  return new Date().toISOString();
+};
+
+const normalizeTranscript = (messages: any[]): Msg[] =>
+  messages
+    .map((message) => {
+      const content = String(getMessageText(message) ?? "").trim();
+      if (!content) return null;
+      const fromMe = !!(message?.key?.fromMe ?? message?.fromMe);
+      return {
+        role: fromMe ? (message?.status === "ERROR" ? "agent" : "assistant") : "user",
+        content,
+        at: normalizeTimestamp(message?.messageTimestamp ?? message?.timestamp ?? message?.createdAt),
+        sent: fromMe ? message?.status !== "ERROR" : undefined,
+      } satisfies Msg;
+    })
+    .filter(Boolean) as Msg[];
+
 export function UnifiedChat() {
   const { user } = useAuth();
   const [items, setItems] = useState<Conversation[]>([]);
@@ -39,22 +101,102 @@ export function UnifiedChat() {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [filter, setFilter] = useState<"all" | "active" | "handed_off">("all");
+  const [syncing, setSyncing] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const load = async () => {
     if (!user?.id) return;
-    const { data, error } = await supabase
-      .from("bot_conversations")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("last_message_at", { ascending: false });
-    if (error) {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("bot_conversations")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("last_message_at", { ascending: false });
+
+      if (error) throw error;
+
+      const list = (data ?? []) as any as Conversation[];
+      setItems(list);
+      setSelectedId((cur) => cur ?? list[0]?.id ?? null);
+    } catch {
       toast.error("Erro ao carregar conversas");
+    } finally {
+      setLoading(false);
     }
-    const list = (data ?? []) as any as Conversation[];
-    setItems(list);
-    setSelectedId((cur) => cur ?? list[0]?.id ?? null);
-    setLoading(false);
+  };
+
+  const syncFromWhatsApp = async (showToast = false) => {
+    if (!user?.id || syncing) return;
+
+    setSyncing(true);
+    try {
+      const [{ data: settings, error: settingsError }, { data: existing, error: existingError }] = await Promise.all([
+        supabase.from("bot_settings").select("whatsapp_instance").eq("user_id", user.id).maybeSingle(),
+        supabase.from("bot_conversations").select("*").eq("user_id", user.id),
+      ]);
+
+      if (settingsError) throw settingsError;
+      if (existingError) throw existingError;
+
+      const instanceName = settings?.whatsapp_instance;
+      if (!instanceName) {
+        if (showToast) toast.error("Selecione a instância do WhatsApp em CRM > Bot.");
+        return;
+      }
+
+      const rawChats = await evolution.findChats(instanceName);
+      const chats = asArray<EvolutionChat>(rawChats)
+        .filter((chat) => !!chat?.remoteJid && !String(chat.remoteJid).endsWith("@g.us"));
+
+      if (chats.length === 0) {
+        if (showToast) toast.info("Nenhuma conversa encontrada na instância.");
+        return;
+      }
+
+      const existingByPhone = new Map(
+        ((existing ?? []) as any as Conversation[]).map((conversation) => [conversation.contact_phone, conversation])
+      );
+
+      const rows = await Promise.all(
+        chats.slice(0, 30).map(async (chat) => {
+          const phone = String(chat.remoteJid).split("@")[0];
+          const remoteJid = chat.remoteJid!;
+          const existingConversation = existingByPhone.get(phone);
+          const rawMessages = await evolution.findMessages(instanceName, remoteJid);
+          const transcript = normalizeTranscript(asArray<any>(rawMessages));
+          const lastAt = transcript[transcript.length - 1]?.at
+            ?? normalizeTimestamp(chat.lastMessageTime ?? chat.conversationTimestamp);
+
+          return {
+            id: existingConversation?.id,
+            user_id: user.id,
+            contact_phone: phone,
+            contact_name: chat.name ?? chat.pushName ?? chat.profileName ?? existingConversation?.contact_name ?? null,
+            transcript,
+            status: existingConversation?.status ?? "active",
+            messages_count: transcript.length,
+            last_message_at: lastAt,
+          };
+        })
+      );
+
+      const validRows = rows.filter((row) => row.transcript.length > 0);
+      if (validRows.length > 0) {
+        const { error: upsertError } = await supabase
+          .from("bot_conversations")
+          .upsert(validRows, { onConflict: "user_id,contact_phone" });
+
+        if (upsertError) throw upsertError;
+      }
+
+      await load();
+      if (showToast) toast.success("Conversas sincronizadas com o WhatsApp.");
+    } catch (error: any) {
+      toast.error(error?.message ?? "Não foi possível sincronizar as conversas do WhatsApp.");
+    } finally {
+      setSyncing(false);
+    }
   };
 
   useEffect(() => {
@@ -82,6 +224,14 @@ export function UnifiedChat() {
       supabase.removeChannel(ch);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const timer = setTimeout(() => {
+      syncFromWhatsApp(false);
+    }, 250);
+    return () => clearTimeout(timer);
   }, [user?.id]);
 
   const filtered = useMemo(
@@ -179,10 +329,10 @@ export function UnifiedChat() {
                 ))}
               </div>
               <button
-                onClick={load}
+                onClick={() => syncFromWhatsApp(true)}
                 className="w-full py-1.5 text-[11px] font-bold rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 transition flex items-center justify-center gap-1.5"
               >
-                <RefreshCw className="h-3 w-3" /> Atualizar
+                <RefreshCw className={`h-3 w-3 ${syncing ? "animate-spin" : ""}`} /> {syncing ? "Sincronizando..." : "Atualizar"}
               </button>
             </div>
 
