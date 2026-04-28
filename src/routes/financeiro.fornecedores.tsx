@@ -12,12 +12,7 @@
 
  function FinanceFornecedoresPage() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-   const suppliers = [
-      { id: 1, name: "Mega Distribuidora S.A", category: "Peças & Telas", contact: "(11) 98888-7777", email: "comercial@mega.com", city: "São Paulo, SP" },
-      { id: 2, name: "Apple Brasil", category: "Aparelhos", contact: "0800-761-0880", email: "apple@apple.com", city: "Curitiba, PR" },
-      { id: 3, name: "Tech Solutions", category: "Acessórios", contact: "(21) 3333-2222", email: "vendas@tech.com.br", city: "Rio de Janeiro, RJ" },
-      { id: 4, name: "Global Electronics", category: "Importados", contact: "(31) 4444-5555", email: "global@electronics.com", city: "Belo Horizonte, MG" },
-   ];
+  const suppliers: any[] = [];
 
    return (
      <div className="min-h-screen flex w-full bg-background">
@@ -46,7 +41,7 @@
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-             {suppliers.map(s => (
+              {suppliers.length > 0 ? suppliers.map(s => (
                 <Card key={s.id} className="p-0 border-border shadow-sm hover:shadow-md transition-all group overflow-hidden rounded-2xl flex flex-col">
                   <div className="p-5 flex-1">
                     <div className="flex items-start justify-between mb-4">
@@ -73,7 +68,7 @@
                       <div className="flex items-center gap-3 text-xs font-bold text-slate-500">
                         <MapPin className="h-3.5 w-3.5 text-slate-400" /> {s.city}
                       </div>
-                   </div>
+                    </div>
                   </div>
                   
                   <div className="px-5 py-4 bg-slate-50/50 border-t border-slate-100 flex gap-2 group-hover:bg-slate-50 transition-colors">
@@ -84,9 +79,13 @@
                       <ExternalLink className="h-3.5 w-3.5 text-slate-500" />
                     </Button>
                   </div>
-               </Card>
-             ))}
-           </div>
+                </Card>
+              )) : (
+                <div className="col-span-full py-16 text-center text-sm text-muted-foreground italic border border-dashed border-slate-200 rounded-2xl">
+                  Nenhum fornecedor cadastrado
+                </div>
+              )}
+            </div>
          </main>
        </div>
      </div>
