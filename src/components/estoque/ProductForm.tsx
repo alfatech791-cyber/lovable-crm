@@ -27,16 +27,16 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl p-0 overflow-hidden border-sidebar-border bg-background backdrop-blur-xl max-h-[90vh] flex flex-col shadow-elegant">
-        <DialogHeader>
-          <div className="flex items-center gap-4 p-6 pb-4 bg-muted/20">
+        <DialogHeader className="p-6 pb-4 bg-muted/20">
+          <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-glow shrink-0">
               {product ? <History className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
             </div>
             <div className="space-y-0.5">
               <DialogTitle className="text-2xl font-black tracking-tight">{product ? "Editar Registro" : "Novo Cadastro"}</DialogTitle>
               <DialogDescription className="text-xs font-medium text-muted-foreground flex items-center gap-2">
-                 {product ? "Atualização de estoque e metadados" : "Preencha os dados técnicos para visibilidade global"}
-                 <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[9px] uppercase font-bold py-0 h-4">Beta IA</Badge>
+                 {product ? "Atualização de estoque e metadados" : "Todos os dados concentrados em uma única página"}
+                 <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[9px] uppercase font-bold py-0 h-4">Fluxo Unificado</Badge>
               </DialogDescription>
             </div>
           </div>
