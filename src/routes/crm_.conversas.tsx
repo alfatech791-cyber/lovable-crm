@@ -61,8 +61,10 @@ type EvolutionChat = {
   name?: string;
   pushName?: string;
   profileName?: string;
+  updatedAt?: string;
   lastMessageTime?: number | string;
   conversationTimestamp?: number | string;
+  lastMessage?: any;
 };
 
 const STICKERS = [
@@ -74,10 +76,29 @@ const asArray = <T,>(value: unknown): T[] => {
   if (Array.isArray(value)) return value as T[];
   if (value && typeof value === "object") {
     const obj = value as Record<string, unknown>;
-    const nested = [obj.data, obj.chats, obj.messages, obj.result].find(Array.isArray);
+    const nested = [
+      obj.data,
+      obj.chats,
+      obj.records,
+      obj.result,
+      obj.messages,
+      (obj.messages as Record<string, unknown> | undefined)?.records,
+    ].find(Array.isArray);
     if (Array.isArray(nested)) return nested as T[];
   }
   return [];
+};
+
+const getContactPhone = (value: any) => {
+  const raw =
+    value?.lastMessage?.key?.remoteJidAlt ??
+    value?.lastMessage?.key?.remoteJid ??
+    value?.key?.remoteJidAlt ??
+    value?.key?.remoteJid ??
+    value?.remoteJid ??
+    "";
+
+  return String(raw).split("@")[0].replace(/\D/g, "");
 };
 
 const getMessageText = (m: any) =>
@@ -221,7 +242,17 @@ function ConversasPage() {
   };
 
   const resolveInstance = async () => {
-    if (!user?.id) return null;
+    if (!user?.id) {
+      const remoteInstances = await evolution.getInstances();
+      const statusPriority = ["open", "connected", "active", "online", "connecting"];
+      const remoteCandidate =
+        remoteInstances.find((instance) => statusPriority.includes(String(instance.status ?? "").toLowerCase()))?.instanceName ??
+        remoteInstances[0]?.instanceName ??
+        null;
+
+      setResolvedInstance(remoteCandidate);
+      return remoteCandidate;
+    }
 
     const [{ data: settings, error: settingsError }, { data: savedInstances, error: instancesError }] = await Promise.all([
       supabase.from("bot_settings").select("whatsapp_instance").eq("user_id", user.id).maybeSingle(),
@@ -272,8 +303,7 @@ function ConversasPage() {
     if (authLoading) return;
     if (!user?.id) {
       setLoading(false);
-      setItems([]);
-      setSelectedId(null);
+      setLoadError(null);
       return;
     }
 
@@ -301,17 +331,22 @@ function ConversasPage() {
   };
 
   const syncFromWhatsApp = async (showToast = false) => {
-    if (!user?.id || syncLockRef.current) return;
+    if (syncLockRef.current) return;
     syncLockRef.current = true;
     setSyncing(true);
     try {
       const instance = await resolveInstance();
-      const { data: existing, error: existingError } = await supabase
-        .from("bot_conversations")
-        .select("*")
-        .eq("user_id", user.id);
+      let existing: Conversation[] = [];
 
-      if (existingError) throw existingError;
+      if (user?.id) {
+        const { data: existingRows, error: existingError } = await supabase
+          .from("bot_conversations")
+          .select("*")
+          .eq("user_id", user.id);
+
+        if (existingError) throw existingError;
+        existing = (existingRows ?? []) as any as Conversation[];
+      }
 
       if (!instance) {
         if (showToast) toast.error("Conecte ou selecione sua instância do WhatsApp primeiro.");
@@ -327,38 +362,55 @@ function ConversasPage() {
         return;
       }
       const byPhone = new Map(
-        ((existing ?? []) as any as Conversation[]).map((c) => [c.contact_phone, c])
+        existing.map((c) => [c.contact_phone, c])
       );
       const rows = await Promise.all(
         chats.slice(0, 30).map(async (chat) => {
-          const phone = String(chat.remoteJid).split("@")[0];
+          const phone = getContactPhone(chat);
+          if (!phone) return null;
+
           const ex = byPhone.get(phone);
           const raw = await evolution.findMessages(instance, chat.remoteJid!);
           const transcript = normalizeTranscript(asArray<any>(raw));
+          const fallbackTranscript = normalizeTranscript(chat.lastMessage ? [chat.lastMessage] : []);
+          const mergedTranscript = transcript.length > 0 ? transcript : ex?.transcript ?? fallbackTranscript;
           const lastAt =
-            transcript[transcript.length - 1]?.at ??
-            normTs(chat.lastMessageTime ?? chat.conversationTimestamp);
+            mergedTranscript[mergedTranscript.length - 1]?.at ??
+            normTs(chat.updatedAt ?? chat.lastMessageTime ?? chat.conversationTimestamp ?? chat.lastMessage?.messageTimestamp);
+
           return {
-            id: ex?.id,
-            user_id: user.id,
+            id: user?.id ? ex?.id : ex?.id ?? `${instance}:${phone}`,
+            ...(user?.id ? { user_id: user.id } : {}),
             contact_phone: phone,
-            contact_name: chat.name ?? chat.pushName ?? chat.profileName ?? ex?.contact_name ?? null,
-            transcript,
+            contact_name:
+              chat.name ??
+              chat.pushName ??
+              chat.profileName ??
+              chat.lastMessage?.pushName ??
+              ex?.contact_name ??
+              null,
+            transcript: mergedTranscript,
             status: ex?.status ?? "active",
-            messages_count: transcript.length,
+            messages_count: mergedTranscript.length,
             last_message_at: lastAt,
           };
         })
       );
-      const valid = rows.filter((r) => r.transcript.length > 0);
-      if (valid.length > 0) {
+      const valid = rows.filter((row): row is NonNullable<typeof row> => !!row && row.transcript.length > 0);
+      if (user?.id && valid.length > 0) {
         const { error: upsertError } = await supabase
           .from("bot_conversations")
           .upsert(valid, { onConflict: "user_id,contact_phone" });
         if (upsertError) throw upsertError;
       }
 
-      await load();
+      if (user?.id) {
+        await load();
+      } else {
+        applyConversations(valid, lastIncomingMessageRef.current.size > 0);
+        setLoading(false);
+      }
+
       if (showToast) toast.success("Conversas sincronizadas.");
     } catch (e: any) {
       console.error("Falha ao sincronizar WhatsApp", e);
@@ -372,36 +424,33 @@ function ConversasPage() {
   useEffect(() => {
     if (authLoading) return;
 
-    if (!user?.id) {
-      setLoading(false);
-      return;
-    }
-
     load();
-    const ch = supabase
-      .channel("conv:bot_conversations:" + user.id)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "bot_conversations", filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          if (payload.eventType === "DELETE") {
-            setItems((prev) => prev.filter((c) => c.id !== (payload.old as any).id));
-            return;
-          }
+    const ch = user?.id
+      ? supabase
+          .channel("conv:bot_conversations:" + user.id)
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "bot_conversations", filter: `user_id=eq.${user.id}` },
+            (payload) => {
+              if (payload.eventType === "DELETE") {
+                setItems((prev) => prev.filter((c) => c.id !== (payload.old as any).id));
+                return;
+              }
 
-          const row = payload.new as any as Conversation;
-          setItems((prev) => {
-            const next = [row, ...prev.filter((c) => c.id !== row.id)];
-            next.sort((a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at));
-            return next;
-          });
+              const row = payload.new as any as Conversation;
+              setItems((prev) => {
+                const next = [row, ...prev.filter((c) => c.id !== row.id)];
+                next.sort((a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at));
+                return next;
+              });
 
-          maybeNotifyIncoming(row);
-        }
-      )
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") readyForNotificationsRef.current = true;
-      });
+              maybeNotifyIncoming(row);
+            }
+          )
+          .subscribe((status) => {
+            if (status === "SUBSCRIBED") readyForNotificationsRef.current = true;
+          })
+      : null;
 
     const initialTimer = window.setTimeout(() => {
       syncFromWhatsApp(false);
@@ -419,7 +468,7 @@ function ConversasPage() {
       clearTimeout(initialTimer);
       clearInterval(poller);
       readyForNotificationsRef.current = false;
-      supabase.removeChannel(ch);
+      if (ch) supabase.removeChannel(ch);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, authLoading]);
