@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Smartphone, Package, Tag, DollarSign, Layers, Hash, Info, History, CheckCircle2, Plus, Box, ShieldCheck, Palette, Cpu, Upload, Image as ImageIcon, X } from "lucide-react";
+import { Smartphone, Package, Tag, DollarSign, Layers, Hash, Info, History, CheckCircle2, Plus, Box, ShieldCheck, Palette, Cpu, Upload, Image as ImageIcon, X, Truck, FileText, Globe, ShoppingBag, Percent, BarChart3, Settings2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
@@ -60,6 +60,12 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                 className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full gap-2 px-1 transition-all"
               >
                 <Smartphone className="h-4 w-4" /> Ficha Técnica
+              </TabsTrigger>
+              <TabsTrigger 
+                value="fiscal" 
+                className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full gap-2 px-1 transition-all"
+              >
+                <FileText className="h-4 w-4" /> Fiscal & E-commerce
               </TabsTrigger>
             </TabsList>
           </div>
