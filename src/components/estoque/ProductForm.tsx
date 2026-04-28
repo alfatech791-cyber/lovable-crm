@@ -64,5 +64,197 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
             </TabsList>
           </div>
 
+          <div className="p-6">
+            <TabsContent value="general" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="grid gap-2">
+                    <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
+                      <Tag className="h-3.5 w-3.5" /> Nome do Produto
+                    </Label>
+                    <Input id="name" defaultValue={product?.name} placeholder="Ex: iPhone 15 Pro Max 256GB" className="bg-muted/30 h-11 border-sidebar-border focus:ring-1 focus:ring-primary/20" />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Categoria</Label>
+                      <Select defaultValue={product?.category || "Acessórios"} onValueChange={(v) => setIsSmartphone(v === "Smartphones")}>
+                        <SelectTrigger className="bg-muted/30 h-11 border-sidebar-border focus:ring-1 focus:ring-primary/20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Smartphones">Smartphones</SelectItem>
+                          <SelectItem value="Tablets">Tablets</SelectItem>
+                          <SelectItem value="Acessórios">Acessórios</SelectItem>
+                          <SelectItem value="Peças">Peças</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Marca</Label>
+                      <Select defaultValue="apple">
+                        <SelectTrigger className="bg-muted/30 h-11 border-sidebar-border focus:ring-1 focus:ring-primary/20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="apple">Apple</SelectItem>
+                          <SelectItem value="samsung">Samsung</SelectItem>
+                          <SelectItem value="xiaomi">Xiaomi</SelectItem>
+                          <SelectItem value="outros">Outros</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
+                    <Box className="h-3.5 w-3.5" /> Imagem do Produto
+                  </Label>
+                  <div className="border-2 border-dashed border-sidebar-border/50 rounded-2xl h-32 flex flex-col items-center justify-center gap-2 hover:bg-muted/20 transition-colors cursor-pointer group">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                      <Upload className="h-5 w-5" />
+                    </div>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Carregar Foto</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 flex items-start gap-4">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-sm font-bold leading-none">Status do Registro</h4>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">Este produto será cadastrado na base global e ficará disponível para venda em todos os canais conectados.</p>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="stock" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="grid gap-2">
+                    <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
+                      <DollarSign className="h-3.5 w-3.5" /> Preço de Venda (R$)
+                    </Label>
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-primary">R$</span>
+                      <Input id="price" type="number" defaultValue={product?.price} className="bg-muted/30 h-12 pl-10 border-sidebar-border focus:ring-2 focus:ring-primary/20 text-lg font-bold" />
+                    </div>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Custo (Opcional)</Label>
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/50">R$</span>
+                      <Input type="number" className="bg-muted/30 h-12 pl-10 border-sidebar-border" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Qtd. em Estoque</Label>
+                      <Input id="stock" type="number" defaultValue={product?.stock} className="bg-muted/30 h-11 border-sidebar-border" />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Estoque Mínimo</Label>
+                      <Input id="min_stock" type="number" defaultValue={product?.min_stock || 2} className="bg-muted/30 h-11 border-sidebar-border" />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-muted/20 border border-sidebar-border/50">
+                    <div className="space-y-0.5">
+                      <Label className="text-sm font-bold">Controlar Validade?</Label>
+                      <p className="text-[10px] text-muted-foreground">Útil para peças e baterias</p>
+                    </div>
+                    <Switch />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="tech" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              {isSmartphone ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="grid gap-2">
+                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
+                        <Hash className="h-3.5 w-3.5" /> IMEI Principal
+                      </Label>
+                      <Input id="imei" defaultValue={product?.imei} placeholder="Ex: 356789123456789" className="bg-muted/30 h-11 border-sidebar-border font-mono text-xs tracking-widest" />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
+                        <Palette className="h-3.5 w-3.5" /> Cor do Aparelho
+                      </Label>
+                      <Select defaultValue="space-gray">
+                        <SelectTrigger className="bg-muted/30 h-11">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="space-gray">Cinza Espacial</SelectItem>
+                          <SelectItem value="silver">Prateado</SelectItem>
+                          <SelectItem value="gold">Dourado</SelectItem>
+                          <SelectItem value="blue">Azul Marinho</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="grid gap-2">
+                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
+                        <Cpu className="h-3.5 w-3.5" /> Capacidade / Memória
+                      </Label>
+                      <Select defaultValue="256gb">
+                        <SelectTrigger className="bg-muted/30 h-11">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="64gb">64GB</SelectItem>
+                          <SelectItem value="128gb">128GB</SelectItem>
+                          <SelectItem value="256gb">256GB</SelectItem>
+                          <SelectItem value="512gb">512GB</SelectItem>
+                          <SelectItem value="1tb">1TB</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center justify-between p-4 rounded-2xl bg-sidebar-primary/10 border border-sidebar-primary/20">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm font-bold flex items-center gap-2 text-primary">
+                          Aparelho Usado
+                        </Label>
+                        <p className="text-[10px] text-muted-foreground font-medium">Ativar para itens de vitrine ou seminovos</p>
+                      </div>
+                      <Switch />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center space-y-4 opacity-50">
+                  <div className="h-16 w-16 rounded-3xl bg-muted flex items-center justify-center">
+                    <Smartphone className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <div className="max-w-[280px]">
+                    <h4 className="font-bold text-sm">Ficha Técnica Simplificada</h4>
+                    <p className="text-xs text-muted-foreground mt-1">Detalhes avançados como IMEI e memória estão disponíveis apenas para a categoria de smartphones.</p>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+          </div>
+        </Tabs>
+
+        <DialogFooter className="p-6 pt-0 gap-2">
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl">Cancelar</Button>
+          <Button onClick={() => onOpenChange(false)} className="bg-gradient-primary shadow-glow gap-2 px-6 rounded-xl">
+            {product ? <CheckCircle2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+            {product ? "Salvar Alterações" : "Cadastrar Item"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
+}
 }
