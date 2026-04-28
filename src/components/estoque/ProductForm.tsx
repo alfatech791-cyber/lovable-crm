@@ -48,7 +48,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                 <div className="grid grid-cols-1 gap-6">
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                     <section className="lg:col-span-2 bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
+                      <section className="lg:col-span-8 bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
                        <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                          <Tag className="h-3 w-3" /> Identificação Básica
                        </h3>
@@ -203,10 +203,11 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                            </div>
                         </section>
                      </div>
-                   </div>
+                      </div>
+                    </div>
 
-                   {/* Gestão de Estoque, Preço e Localização */}
-                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-border/50">
+                    {/* Gestão de Estoque, Preço e Localização */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-border/50">
                  <section className="bg-primary/5 rounded-2xl border border-primary/10 p-5 space-y-5">
                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                      <DollarSign className="h-3.5 w-3.5" /> Precificação e Venda
