@@ -55,8 +55,8 @@ type Conversation = {
   messages_count: number;
   last_message_at: string;
   transcript: Msg[];
-  profile_pic_url?: string | null;
-  is_group?: boolean;
+  profile_pic_url: string | null;
+  is_group: boolean;
 };
 
 type EvolutionChat = {
