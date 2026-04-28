@@ -98,35 +98,7 @@ function LeadCard({ lead, isOverlay }: LeadCardProps) {
 }
 
 export function KanbanBoard() {
-  const [stages, setStages] = useState<KanbanStage[]>(() => {
-    return initialStages.map((stage, idx) => {
-      if (stage.leads.length === 0 && idx === 0) {
-        return {
-          ...stage,
-          count: 2,
-          leads: [
-            {
-              id: "lead-1",
-              name: "João Silva",
-              snippet: "Interessado no plano Pro. Entrou em contato via WhatsApp.",
-              source: "WhatsApp",
-              time: "10:30",
-              task: "Enviar proposta"
-            },
-            {
-              id: "lead-2",
-              name: "Maria Oliveira",
-              snippet: "Pergunta sobre integração com Shopify.",
-              source: "Instagram",
-              time: "11:45",
-              task: "Sem Tarefas"
-            }
-          ]
-        };
-      }
-      return stage;
-    });
-  });
+  const [stages, setStages] = useState<KanbanStage[]>(initialStages);
 
   const [activeLead, setActiveLead] = useState<KanbanLead | null>(null);
 
@@ -293,7 +265,7 @@ export function KanbanBoard() {
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <span className="text-muted-foreground">Sem tarefas atribuídas:</span>
-          <span className="font-bold text-destructive">55</span>
+          <span className="font-bold text-slate-400">0</span>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <span className="text-muted-foreground">Com tarefas atrasadas:</span>
