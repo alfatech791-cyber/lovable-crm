@@ -1,101 +1,141 @@
- import { createFileRoute } from "@tanstack/react-router";
+  import { createFileRoute } from "@tanstack/react-router";
+  import { useState } from "react";
  import { AppSidebar } from "@/components/layout/Sidebar";
- import { Topbar } from "@/components/layout/Topbar";
- import { Card } from "@/components/ui/card";
- import { Button } from "@/components/ui/button";
- import { Wallet, ArrowUpCircle, ArrowDownCircle, Search, Filter, MoreHorizontal } from "lucide-react";
+  import { Topbar } from "@/components/layout/Topbar";
+  import { Card } from "@/components/ui/card";
+  import { Button } from "@/components/ui/button";
+  import { Wallet, ArrowUpCircle, ArrowDownCircle, Search, Filter, MoreHorizontal, Plus, Download, Calendar, ArrowUpRight, ArrowDownLeft } from "lucide-react";
  
- export const Route = createFileRoute("/financeiro/caixa")({
-   component: FinanceCaixaPage,
- });
- 
- function FinanceCaixaPage() {
-   const transactions = [
-     { id: 1, type: "Entrada", desc: "Venda iPhone 13 #1024", value: 4500.00, date: "2024-03-27 14:20", category: "Vendas" },
-     { id: 2, type: "Saída", desc: "Pagamento Fornecedor X", value: 1200.00, date: "2024-03-27 11:15", category: "Compras" },
-     { id: 3, type: "Entrada", desc: "OS #1005 - Troca de Tela", value: 350.00, date: "2024-03-27 09:30", category: "Serviços" },
-   ];
- 
-   return (
-     <div className="min-h-screen flex w-full bg-background">
-       <AppSidebar />
-       <div className="flex-1 flex flex-col min-w-0">
-         <Topbar title="Caixa e Bancos" subtitle="Controle de Saldo" />
-         <main className="flex-1 overflow-y-auto p-6">
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-             <Card className="p-6 bg-gradient-to-br from-green-500 to-green-600 text-white border-none shadow-glow">
-               <div className="flex justify-between items-start mb-4">
-                 <div className="h-10 w-10 rounded-xl bg-white/20 grid place-items-center backdrop-blur-sm">
-                   <ArrowUpCircle className="h-6 w-6" />
-                 </div>
-                 <span className="text-xs font-bold opacity-80 uppercase tracking-wider">Entradas Hoje</span>
-               </div>
-               <div className="text-2xl font-black">R$ 4.850,00</div>
-             </Card>
-             <Card className="p-6 bg-gradient-to-br from-red-500 to-red-600 text-white border-none shadow-glow">
-               <div className="flex justify-between items-start mb-4">
-                 <div className="h-10 w-10 rounded-xl bg-white/20 grid place-items-center backdrop-blur-sm">
-                   <ArrowDownCircle className="h-6 w-6" />
-                 </div>
-                 <span className="text-xs font-bold opacity-80 uppercase tracking-wider">Saídas Hoje</span>
-               </div>
-               <div className="text-2xl font-black">R$ 1.200,00</div>
-             </Card>
-             <Card className="p-6 bg-card border-border shadow-sm">
-               <div className="flex justify-between items-start mb-4">
-                 <div className="h-10 w-10 rounded-xl bg-primary/10 grid place-items-center text-primary">
-                   <Wallet className="h-6 w-6" />
-                 </div>
-                 <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Saldo Total</span>
-               </div>
-               <div className="text-2xl font-black text-primary">R$ 124.580,00</div>
-             </Card>
-           </div>
-           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-             <div className="flex items-center gap-3">
-               <div className="relative flex-1 md:w-80">
-                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                 <input placeholder="Buscar lançamento..." className="w-full h-10 pl-9 pr-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20 transition" />
-               </div>
-               <Button variant="outline" className="h-10 rounded-xl border-border">
-                 <Filter className="h-4 w-4 mr-2" /> Filtros
-               </Button>
-             </div>
-             <div className="flex gap-2">
-               <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50">Registrar Saída</Button>
-               <Button className="bg-gradient-primary shadow-glow">Registrar Entrada</Button>
-             </div>
-           </div>
-           <Card className="border-border shadow-card overflow-hidden">
-             <table className="w-full text-left">
-               <thead>
-                 <tr className="border-b border-border bg-muted/30">
-                   <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Data / Hora</th>
-                   <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Descrição</th>
-                   <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Categoria</th>
-                   <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider text-right">Valor</th>
-                   <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Ações</th>
-                 </tr>
-               </thead>
-               <tbody className="divide-y divide-border">
-                 {transactions.map(t => (
-                   <tr key={t.id} className="hover:bg-muted/30 transition-colors">
-                     <td className="px-6 py-4 text-sm text-muted-foreground font-mono">{t.date}</td>
-                     <td className="px-6 py-4 font-medium text-sm">{t.desc}</td>
-                     <td className="px-6 py-4"><span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold border border-slate-200 uppercase">{t.category}</span></td>
-                     <td className={`px-6 py-4 text-right font-black text-sm ${t.type === 'Entrada' ? 'text-green-600' : 'text-red-600'}`}>
-                       {t.type === 'Entrada' ? '+' : '-'} R$ {t.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                     </td>
-                     <td className="px-6 py-4 text-right">
-                       <Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4 text-muted-foreground" /></Button>
-                     </td>
-                   </tr>
-                 ))}
-               </tbody>
-             </table>
-           </Card>
-         </main>
-       </div>
-     </div>
-   );
- }
+export const Route = createFileRoute("/financeiro/caixa")({
+  component: FinanceCaixaPage,
+});
+
+function FinanceCaixaPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const transactions = [
+    { id: 1, type: "Entrada", desc: "Venda iPhone 13 #1024", value: 4500.00, date: "27 Mar, 14:20", category: "Vendas", status: "Confirmado", account: "Banco Itaú" },
+    { id: 2, type: "Saída", desc: "Pagamento Fornecedor Apple Parts", value: 1200.00, date: "27 Mar, 11:15", category: "Compras", status: "Confirmado", account: "Nubank" },
+    { id: 3, type: "Entrada", desc: "OS #1005 - Troca de Tela", value: 350.00, date: "27 Mar, 09:30", category: "Serviços", status: "Confirmado", account: "Caixa Loja" },
+    { id: 4, type: "Saída", desc: "Aluguel da Loja - Março", value: 2500.00, date: "26 Mar, 10:00", category: "Custo Fixo", status: "Confirmado", account: "Banco Itaú" },
+    { id: 5, type: "Entrada", desc: "Venda Samsung S23 #1025", value: 3200.00, date: "26 Mar, 08:45", category: "Vendas", status: "Pendente", account: "Maquininha" },
+  ];
+
+  return (
+    <div className="min-h-screen flex w-full bg-background">
+      <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
+      <div className="flex-1 flex flex-col min-w-0">
+        <Topbar title="Caixa e Bancos" subtitle="Controle detalhado de entradas e saídas" toggleSidebar={() => setSidebarOpen(true)} />
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <Card className="p-5 border-none bg-gradient-to-br from-green-500/10 to-transparent shadow-sm border border-green-100 rounded-2xl">
+              <div className="flex justify-between items-start mb-2">
+                <div className="h-9 w-9 rounded-xl bg-green-500 text-white grid place-items-center shadow-lg shadow-green-200">
+                  <ArrowUpCircle className="h-5 w-5" />
+                </div>
+                <span className="text-[10px] font-black text-green-600 uppercase tracking-tighter bg-green-50 px-2 py-1 rounded-full">Hoje</span>
+              </div>
+              <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Entradas</div>
+              <div className="text-xl font-black text-slate-900 mt-1">R$ 4.850,00</div>
+            </Card>
+            <Card className="p-5 border-none bg-gradient-to-br from-red-500/10 to-transparent shadow-sm border border-red-100 rounded-2xl">
+              <div className="flex justify-between items-start mb-2">
+                <div className="h-9 w-9 rounded-xl bg-red-500 text-white grid place-items-center shadow-lg shadow-red-200">
+                  <ArrowDownCircle className="h-5 w-5" />
+                </div>
+                <span className="text-[10px] font-black text-red-600 uppercase tracking-tighter bg-red-50 px-2 py-1 rounded-full">Hoje</span>
+              </div>
+              <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Saídas</div>
+              <div className="text-xl font-black text-slate-900 mt-1">R$ 1.200,00</div>
+            </Card>
+            <Card className="p-5 border-border shadow-sm rounded-2xl">
+              <div className="flex justify-between items-start mb-2">
+                <div className="h-9 w-9 rounded-xl bg-blue-100 text-blue-600 grid place-items-center">
+                  <Wallet className="h-5 w-5" />
+                </div>
+              </div>
+              <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Saldo Atual</div>
+              <div className="text-xl font-black text-slate-900 mt-1">R$ 124.580,00</div>
+            </Card>
+            <Card className="p-5 border-border shadow-sm bg-slate-900 text-white rounded-2xl">
+              <div className="flex justify-between items-start mb-2">
+                <div className="h-9 w-9 rounded-xl bg-white/10 grid place-items-center">
+                  <Calendar className="h-5 w-5" />
+                </div>
+              </div>
+              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Previsto (Mês)</div>
+              <div className="text-xl font-black mt-1 text-white">R$ +18.420,00</div>
+            </Card>
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="relative flex-1 md:max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input placeholder="Buscar transação por descrição ou categoria..." className="w-full h-11 pl-10 pr-4 rounded-xl bg-card border border-slate-200 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 transition shadow-sm" />
+              </div>
+              <Button variant="outline" className="h-11 rounded-xl border-slate-200 font-bold px-5">
+                <Filter className="h-4 w-4 mr-2" /> Filtros
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="h-11 rounded-xl border-slate-200 font-bold px-5">
+                <Download className="h-4 w-4 mr-2" /> Exportar
+              </Button>
+              <Button className="h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-6 shadow-lg shadow-blue-200">
+                <Plus className="h-4 w-4 mr-2" /> Novo Lançamento
+              </Button>
+            </div>
+          </div>
+
+          <Card className="border-border shadow-sm overflow-hidden rounded-2xl">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/50">
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Data</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Descrição</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Conta / Banco</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Categoria</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Valor</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Status</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {transactions.map(t => (
+                  <tr key={t.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <td className="px-6 py-4 text-xs font-bold text-slate-500">{t.date}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${t.type === 'Entrada' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                          {t.type === 'Entrada' ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />}
+                        </div>
+                        <span className="font-bold text-sm text-slate-900">{t.desc}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-xs font-bold text-slate-600">{t.account}</td>
+                    <td className="px-6 py-4">
+                      <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-tight border border-slate-200">
+                        {t.category}
+                      </span>
+                    </td>
+                    <td className={`px-6 py-4 text-right font-black text-sm ${t.type === 'Entrada' ? 'text-green-600' : 'text-red-600'}`}>
+                      {t.type === 'Entrada' ? '+' : '-'} R$ {t.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase ${t.status === 'Confirmado' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                        {t.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all text-slate-400 hover:text-slate-600"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        </main>
+      </div>
+    </div>
+  );
+}
