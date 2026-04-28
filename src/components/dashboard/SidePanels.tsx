@@ -18,7 +18,7 @@ export function TasksCard() {
         ))}
       </ul>
        <button 
-         onClick={() => navigate({ to: "/agendamentos" })}
+        onClick={() => navigate({ to: "/_app/agendamentos/" as any })}
          className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition"
        >
          Ver todas as tarefas <ArrowRight className="h-3.5 w-3.5" />
@@ -103,7 +103,7 @@ export function TasksCard() {
           ))}
         </ul>
          <button 
-           onClick={() => navigate({ to: "/agendamentos" })}
+           onClick={() => navigate({ to: "/_app/agendamentos/" as any })}
            className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition"
          >
            Ver agenda completa <ArrowRight className="h-3.5 w-3.5" />

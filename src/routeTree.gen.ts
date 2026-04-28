@@ -55,6 +55,7 @@ import { Route as EstoqueAtualRouteImport } from './routes/estoque.atual'
 import { Route as AppRelatoriosIndexRouteImport } from './routes/_app/relatorios/index'
 import { Route as AppMarketingIndexRouteImport } from './routes/_app/marketing/index'
 import { Route as AppClientesIndexRouteImport } from './routes/_app/clientes/index'
+import { Route as AppAgendamentosIndexRouteImport } from './routes/_app/agendamentos/index'
 import { Route as AppOperacaoTransportadoresRouteImport } from './routes/_app/operacao/transportadores'
 import { Route as AppOperacaoTiposProdutosRouteImport } from './routes/_app/operacao/tipos-produtos'
 import { Route as AppOperacaoServicosRouteImport } from './routes/_app/operacao/servicos'
@@ -294,6 +295,11 @@ const AppClientesIndexRoute = AppClientesIndexRouteImport.update({
   path: '/clientes/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppAgendamentosIndexRoute = AppAgendamentosIndexRouteImport.update({
+  id: '/_app/agendamentos/',
+  path: '/agendamentos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppOperacaoTransportadoresRoute =
   AppOperacaoTransportadoresRouteImport.update({
     id: '/_app/operacao/transportadores',
@@ -392,6 +398,7 @@ export interface FileRoutesByFullPath {
   '/operacao/servicos': typeof AppOperacaoServicosRoute
   '/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
   '/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
+  '/agendamentos/': typeof AppAgendamentosIndexRoute
   '/clientes/': typeof AppClientesIndexRoute
   '/marketing/': typeof AppMarketingIndexRoute
   '/relatorios/': typeof AppRelatoriosIndexRoute
@@ -448,6 +455,7 @@ export interface FileRoutesByTo {
   '/operacao/servicos': typeof AppOperacaoServicosRoute
   '/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
   '/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
+  '/agendamentos': typeof AppAgendamentosIndexRoute
   '/marketing': typeof AppMarketingIndexRoute
 }
 export interface FileRoutesById {
@@ -503,6 +511,7 @@ export interface FileRoutesById {
   '/_app/operacao/servicos': typeof AppOperacaoServicosRoute
   '/_app/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
   '/_app/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
+  '/_app/agendamentos/': typeof AppAgendamentosIndexRoute
   '/_app/clientes/': typeof AppClientesIndexRoute
   '/_app/marketing/': typeof AppMarketingIndexRoute
   '/_app/relatorios/': typeof AppRelatoriosIndexRoute
@@ -561,6 +570,7 @@ export interface FileRouteTypes {
     | '/operacao/servicos'
     | '/operacao/tipos-produtos'
     | '/operacao/transportadores'
+    | '/agendamentos/'
     | '/clientes/'
     | '/marketing/'
     | '/relatorios/'
@@ -617,6 +627,7 @@ export interface FileRouteTypes {
     | '/operacao/servicos'
     | '/operacao/tipos-produtos'
     | '/operacao/transportadores'
+    | '/agendamentos'
     | '/marketing'
   id:
     | '__root__'
@@ -671,6 +682,7 @@ export interface FileRouteTypes {
     | '/_app/operacao/servicos'
     | '/_app/operacao/tipos-produtos'
     | '/_app/operacao/transportadores'
+    | '/_app/agendamentos/'
     | '/_app/clientes/'
     | '/_app/marketing/'
     | '/_app/relatorios/'
@@ -706,6 +718,7 @@ export interface RootRouteChildren {
   AppOperacaoServicosRoute: typeof AppOperacaoServicosRoute
   AppOperacaoTiposProdutosRoute: typeof AppOperacaoTiposProdutosRoute
   AppOperacaoTransportadoresRoute: typeof AppOperacaoTransportadoresRoute
+  AppAgendamentosIndexRoute: typeof AppAgendamentosIndexRoute
   AppClientesIndexRoute: typeof AppClientesIndexRoute
   AppMarketingIndexRoute: typeof AppMarketingIndexRoute
   AppRelatoriosIndexRoute: typeof AppRelatoriosIndexRoute
@@ -1035,6 +1048,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/agendamentos/': {
+      id: '/_app/agendamentos/'
+      path: '/agendamentos'
+      fullPath: '/agendamentos/'
+      preLoaderRoute: typeof AppAgendamentosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/operacao/transportadores': {
       id: '/_app/operacao/transportadores'
       path: '/operacao/transportadores'
@@ -1206,6 +1226,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppOperacaoServicosRoute: AppOperacaoServicosRoute,
   AppOperacaoTiposProdutosRoute: AppOperacaoTiposProdutosRoute,
   AppOperacaoTransportadoresRoute: AppOperacaoTransportadoresRoute,
+  AppAgendamentosIndexRoute: AppAgendamentosIndexRoute,
   AppClientesIndexRoute: AppClientesIndexRoute,
   AppMarketingIndexRoute: AppMarketingIndexRoute,
   AppRelatoriosIndexRoute: AppRelatoriosIndexRoute,

@@ -1,3 +1,5 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,13 +15,20 @@ const mockAgendamentos = [
   { id: 3, cliente: "Marcos Paulo", servico: "Reparo Placa", data: "2024-04-28", hora: "14:00", status: "Confirmado", tecnico: "Ricardo" },
 ];
 
-export default function AgendamentosPage() {
+export const Route = createFileRoute("/_app/agendamentos/")({
+  component: AgendamentosPage,
+});
+
+function AgendamentosPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex flex-col h-full bg-background">
-      <Topbar title="Agendamentos" />
-      <main className="flex-1 overflow-y-auto p-6">
+    <div className="min-h-screen flex w-full bg-background">
+      <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
+      <div className="flex-1 flex flex-col min-w-0">
+        <Topbar title="Agendamentos" toggleSidebar={() => setSidebarOpen(true)} />
+        <main className="flex-1 overflow-y-auto p-6">
         <div className="flex justify-between items-center mb-6">
           <div className="space-y-1">
             <h2 className="text-2xl font-bold tracking-tight">Agenda Técnica</h2>
@@ -110,7 +119,8 @@ export default function AgendamentosPage() {
             </Card>
           </div>
         </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
