@@ -14,7 +14,7 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/crm/bot")({
+export const Route = createFileRoute("/crm_/bot")({
   head: () => ({
     meta: [
       { title: "Bot de Atendimento — CRM" },
