@@ -18,12 +18,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
   const [filterCategory, setFilterCategory] = useState("all");
   const [viewTab, setViewTab] = useState("all");
 
-  const stats = useMemo(() => {
-    const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
-    const lowStock = products.filter(p => p.stock <= 3 && p.stock > 0).length;
-    const outOfStock = products.filter(p => p.stock === 0).length;
-    return { totalValue, lowStock, outOfStock, totalItems: products.length };
-  }, []);
+   const stats = useMemo(() => {
+     const totalValue = products.reduce((acc, p) => acc + (p.price * (p.stock || 0)), 0);
+     const lowStock = products.filter(p => (p.stock || 0) <= 3 && (p.stock || 0) > 0).length;
+     const outOfStock = products.filter(p => (p.stock || 0) === 0).length;
+     return { totalValue, lowStock, outOfStock, totalItems: products.length };
+   }, [products]);
 
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
@@ -31,8 +31,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
                            (product.imei?.includes(searchTerm));
       const matchesCategory = filterCategory === "all" || product.category === filterCategory;
       
-      if (viewTab === "low") return matchesSearch && matchesCategory && product.stock <= 3 && product.stock > 0;
-      if (viewTab === "out") return matchesSearch && matchesCategory && product.stock === 0;
+       if (viewTab === "low") return matchesSearch && matchesCategory && (product.stock || 0) <= 3 && (product.stock || 0) > 0;
+       if (viewTab === "out") return matchesSearch && matchesCategory && (product.stock || 0) === 0;
       
       return matchesSearch && matchesCategory;
     });
@@ -164,8 +164,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
                    </td>
                    <td className="px-6 py-4">
                      <div className="flex items-center gap-2">
-                       <span className={`text-sm font-bold ${product.stock <= 3 ? 'text-destructive' : ''}`}>{product.stock} un</span>
-                       {product.stock <= 3 && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}
+                       <span className={`text-sm font-bold ${(product.stock || 0) <= 3 ? 'text-destructive' : ''}`}>{product.stock || 0} un</span>
+                       {(product.stock || 0) <= 3 && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}
                      </div>
                    </td>
                    <td className="px-6 py-4">
@@ -174,8 +174,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
                      </span>
                    </td>
                    <td className="px-6 py-4">
-                     <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${product.stock > 0 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
-                       {product.stock > 0 ? 'EM ESTOQUE' : 'ESGOTADO'}
+                     <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${(product.stock || 0) > 0 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                       {(product.stock || 0) > 0 ? 'EM ESTOQUE' : 'ESGOTADO'}
                      </span>
                    </td>
                    <td className="px-6 py-4">
