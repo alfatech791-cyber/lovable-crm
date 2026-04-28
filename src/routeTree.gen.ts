@@ -52,7 +52,7 @@ import { Route as EstoqueMovimentacoesRouteImport } from './routes/estoque.movim
 import { Route as EstoqueEtiquetasRouteImport } from './routes/estoque.etiquetas'
 import { Route as EstoqueComprasRouteImport } from './routes/estoque.compras'
 import { Route as EstoqueAtualRouteImport } from './routes/estoque.atual'
-import { Route as CrmBotRouteImport } from './routes/crm.bot'
+import { Route as CrmBotRouteImport } from './routes/crm_.bot'
 import { Route as AppRelatoriosIndexRouteImport } from './routes/_app/relatorios/index'
 import { Route as AppMarketingIndexRouteImport } from './routes/_app/marketing/index'
 import { Route as AppClientesIndexRouteImport } from './routes/_app/clientes/index'
@@ -283,9 +283,9 @@ const EstoqueAtualRoute = EstoqueAtualRouteImport.update({
   getParentRoute: () => EstoqueRoute,
 } as any)
 const CrmBotRoute = CrmBotRouteImport.update({
-  id: '/bot',
-  path: '/bot',
-  getParentRoute: () => CrmRoute,
+  id: '/crm_/bot',
+  path: '/crm/bot',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppRelatoriosIndexRoute = AppRelatoriosIndexRouteImport.update({
   id: '/_app/relatorios/',
@@ -365,7 +365,7 @@ export interface FileRoutesByFullPath {
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
-  '/crm': typeof CrmRouteWithChildren
+  '/crm': typeof CrmRoute
   '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRouteWithChildren
   '/financeiro': typeof FinanceiroRouteWithChildren
@@ -424,7 +424,7 @@ export interface FileRoutesByTo {
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof AppClientesIndexRoute
   '/configuracoes': typeof ConfiguracoesRoute
-  '/crm': typeof CrmRouteWithChildren
+  '/crm': typeof CrmRoute
   '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRouteWithChildren
   '/financeiro': typeof FinanceiroRouteWithChildren
@@ -482,7 +482,7 @@ export interface FileRoutesById {
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
-  '/crm': typeof CrmRouteWithChildren
+  '/crm': typeof CrmRoute
   '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRouteWithChildren
   '/financeiro': typeof FinanceiroRouteWithChildren
@@ -497,7 +497,7 @@ export interface FileRoutesById {
   '/servicos': typeof ServicosRouteWithChildren
   '/vendas': typeof VendasRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
-  '/crm/bot': typeof CrmBotRoute
+  '/crm_/bot': typeof CrmBotRoute
   '/estoque/atual': typeof EstoqueAtualRoute
   '/estoque/compras': typeof EstoqueComprasRoute
   '/estoque/etiquetas': typeof EstoqueEtiquetasRoute
@@ -674,7 +674,7 @@ export interface FileRouteTypes {
     | '/servicos'
     | '/vendas'
     | '/whatsapp'
-    | '/crm/bot'
+    | '/crm_/bot'
     | '/estoque/atual'
     | '/estoque/compras'
     | '/estoque/etiquetas'
@@ -719,7 +719,7 @@ export interface RootRouteChildren {
   AutomacaoRoute: typeof AutomacaoRoute
   ClientesRoute: typeof ClientesRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
-  CrmRoute: typeof CrmRouteWithChildren
+  CrmRoute: typeof CrmRoute
   EquipeRoute: typeof EquipeRoute
   EstoqueRoute: typeof EstoqueRouteWithChildren
   FinanceiroRoute: typeof FinanceiroRouteWithChildren
@@ -734,6 +734,7 @@ export interface RootRouteChildren {
   ServicosRoute: typeof ServicosRouteWithChildren
   VendasRoute: typeof VendasRouteWithChildren
   WhatsappRoute: typeof WhatsappRoute
+  CrmBotRoute: typeof CrmBotRoute
   AppClientesNovoRoute: typeof AppClientesNovoRoute
   AppConfiguracoesParametrosRoute: typeof AppConfiguracoesParametrosRoute
   AppFinanceiroContasPagarRoute: typeof AppFinanceiroContasPagarRoute
@@ -1052,12 +1053,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EstoqueAtualRouteImport
       parentRoute: typeof EstoqueRoute
     }
-    '/crm/bot': {
-      id: '/crm/bot'
-      path: '/bot'
+    '/crm_/bot': {
+      id: '/crm_/bot'
+      path: '/crm/bot'
       fullPath: '/crm/bot'
       preLoaderRoute: typeof CrmBotRouteImport
-      parentRoute: typeof CrmRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_app/relatorios/': {
       id: '/_app/relatorios/'
@@ -1153,16 +1154,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface CrmRouteChildren {
-  CrmBotRoute: typeof CrmBotRoute
-}
-
-const CrmRouteChildren: CrmRouteChildren = {
-  CrmBotRoute: CrmBotRoute,
-}
-
-const CrmRouteWithChildren = CrmRoute._addFileChildren(CrmRouteChildren)
-
 interface EstoqueRouteChildren {
   EstoqueAtualRoute: typeof EstoqueAtualRoute
   EstoqueComprasRoute: typeof EstoqueComprasRoute
@@ -1252,7 +1243,7 @@ const rootRouteChildren: RootRouteChildren = {
   AutomacaoRoute: AutomacaoRoute,
   ClientesRoute: ClientesRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
-  CrmRoute: CrmRouteWithChildren,
+  CrmRoute: CrmRoute,
   EquipeRoute: EquipeRoute,
   EstoqueRoute: EstoqueRouteWithChildren,
   FinanceiroRoute: FinanceiroRouteWithChildren,
@@ -1267,6 +1258,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicosRoute: ServicosRouteWithChildren,
   VendasRoute: VendasRouteWithChildren,
   WhatsappRoute: WhatsappRoute,
+  CrmBotRoute: CrmBotRoute,
   AppClientesNovoRoute: AppClientesNovoRoute,
   AppConfiguracoesParametrosRoute: AppConfiguracoesParametrosRoute,
   AppFinanceiroContasPagarRoute: AppFinanceiroContasPagarRoute,
