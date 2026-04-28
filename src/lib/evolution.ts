@@ -24,7 +24,21 @@ export const evolution = {
       console.error("Evolution API Error (fetchInstances):", res.status, errorText);
       throw new Error(`Falha ao buscar instâncias: ${res.status}`);
     }
-    return res.json() as Promise<Instance[]>;
+    const raw = await res.json();
+    // A Evolution API pode retornar array direto OU { instances: [...] }
+    // e em v2 cada item vem como { instance: {...} } ou achatado.
+    const list: any[] = Array.isArray(raw) ? raw : Array.isArray(raw?.instances) ? raw.instances : [];
+    return list.map((item: any): Instance => {
+      const i = item.instance ?? item;
+      return {
+        instanceName: i.instanceName ?? i.name ?? i.instance_name ?? "sem-nome",
+        instanceId: i.instanceId ?? i.id ?? i.instance_id ?? String(i.instanceName ?? Math.random()),
+        status: (i.status ?? i.connectionStatus ?? i.state ?? "close") as Instance["status"],
+        owner: i.owner ?? i.ownerJid ?? i.number,
+        profileName: i.profileName,
+        profilePictureUrl: i.profilePictureUrl ?? i.profilePicUrl,
+      };
+    });
   },
 
    async createInstance(instanceName: string, webhookUrl?: string) {
