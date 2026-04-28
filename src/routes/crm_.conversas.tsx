@@ -773,31 +773,40 @@ function ConversasPage() {
         <Topbar title="Conversas" subtitle="Atenda WhatsApp em tempo real" />
         <div className="flex-1 flex overflow-hidden">
           {/* Sidebar conversas */}
-          <div className="w-[340px] border-r border-border flex flex-col bg-card/40">
-            <div className="p-3 border-b border-border space-y-2.5">
+          <div className="w-[380px] border-r border-border/40 flex flex-col bg-sidebar/30 backdrop-blur-xl">
+            <div className="p-4 border-b border-border/40 space-y-4">
               <div className="flex items-center justify-between px-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold">Inbox</h3>
+                <div className="flex items-center gap-2.5">
+                  <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <MessageSquare className="h-4 w-4 text-primary" />
+                  </div>
+                  <h3 className="text-base font-bold tracking-tight">Conversas</h3>
                   {totalUnread > 0 && (
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary text-primary-foreground shadow-sm shadow-primary/20">
                       {totalUnread}
                     </span>
                   )}
                 </div>
-                <span className="text-[10px] text-muted-foreground">
-                  {items.length} conversa{items.length === 1 ? "" : "s"}
-                </span>
+                <button 
+                  onClick={() => syncFromWhatsApp(true)}
+                  className="h-8 w-8 rounded-full hover:bg-muted/80 transition-colors flex items-center justify-center text-muted-foreground"
+                  title="Sincronizar"
+                >
+                  <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+                </button>
               </div>
-              <div className="relative">
-                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              
+              <div className="relative group">
+                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
                 <Input
                   placeholder="Buscar contato..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 h-9"
+                  className="pl-9 h-10 bg-background/50 border-border/40 focus-visible:ring-primary/20 transition-all rounded-xl"
                 />
               </div>
-              <div className="flex items-center gap-1">
+
+              <div className="flex items-center gap-1.5 p-1 bg-muted/40 rounded-xl">
                 {[
                   { id: "all", label: "Todas" },
                   { id: "unread", label: "Não lidas" },
@@ -807,25 +816,18 @@ function ConversasPage() {
                   <button
                     key={f.id}
                     onClick={() => setStatusFilter(f.id as typeof statusFilter)}
-                    className={`flex-1 text-[10px] font-bold py-1.5 rounded-lg transition ${
+                    className={`flex-1 text-[11px] font-semibold py-1.5 rounded-lg transition-all duration-200 ${
                       statusFilter === f.id
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                         ? "bg-background text-foreground shadow-sm"
+                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {f.label}
                   </button>
                 ))}
               </div>
-              <button
-                onClick={() => syncFromWhatsApp(true)}
-                className="w-full py-1.5 text-[11px] font-bold rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 transition flex items-center justify-center gap-1.5"
-              >
-                <RefreshCw className={`h-3 w-3 ${syncing ? "animate-spin" : ""}`} />
-                {syncing ? "Sincronizando..." : "Atualizar"}
-              </button>
             </div>
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto p-2 space-y-1">
               {loading ? (
                 <div className="h-full grid place-items-center">
                   <Loader2 className="h-5 w-5 animate-spin text-primary" />
@@ -863,65 +865,82 @@ function ConversasPage() {
                     .toUpperCase();
                   const unread = unreadCount(c);
                   return (
-                    <button
-                      key={c.id}
-                      onClick={() => setSelectedId(c.id)}
-                      className={`w-full flex items-start gap-3 p-3 border-b border-border/50 transition relative text-left ${
-                        selectedId === c.id ? "bg-primary/5" : "hover:bg-muted/30"
-                      }`}
-                    >
-                      {selectedId === c.id && (
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
-                      )}
-                      <div className="relative shrink-0">
-                        <Avatar className="h-11 w-11">
-                          {c.profile_pic_url ? (
-                            <AvatarImage src={c.profile_pic_url} alt={displayName} />
-                          ) : null}
-                          <AvatarFallback className="bg-gradient-to-br from-primary to-primary/60 text-white font-bold text-sm">
-                            {c.is_group ? <Users className="h-5 w-5" /> : initials || "?"}
-                          </AvatarFallback>
-                        </Avatar>
-                        {c.is_group && (
-                          <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-primary text-primary-foreground grid place-items-center border-2 border-card">
-                            <Users className="h-2.5 w-2.5" />
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className={`text-sm truncate flex items-center gap-1 ${unread > 0 ? "font-bold" : "font-semibold"}`}>
-                            {displayName}
-                            {c.is_group && (
-                              <span className="text-[9px] font-bold px-1 py-px rounded bg-muted text-muted-foreground">GRUPO</span>
-                            )}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground shrink-0">
-                            {formatDistanceToNow(new Date(c.last_message_at), { addSuffix: false, locale: ptBR })}
-                          </span>
+                  filtered.map((c) => {
+                    const last = c.transcript?.[c.transcript.length - 1];
+                    const displayName = c.contact_name ?? c.contact_phone;
+                    const initials = displayName
+                      .split(" ")
+                      .map((s) => s[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase();
+                    const unread = unreadCount(c);
+                    const isSelected = selectedId === c.id;
+
+                    return (
+                      <button
+                        key={c.id}
+                        onClick={() => setSelectedId(c.id)}
+                        className={`w-full flex items-center gap-3.5 p-3 rounded-2xl transition-all duration-300 relative text-left group ${
+                          isSelected 
+                            ? "bg-primary/[0.08] shadow-[0_4px_20px_-4px_rgba(var(--primary-rgb),0.1)] ring-1 ring-primary/20" 
+                            : "hover:bg-muted/50 border-transparent"
+                        }`}
+                      >
+                        <div className="relative shrink-0">
+                          <Avatar className={`h-12 w-12 transition-transform duration-500 ${isSelected ? "scale-105" : "group-hover:scale-105"}`}>
+                            {c.profile_pic_url ? (
+                              <AvatarImage src={c.profile_pic_url} alt={displayName} />
+                            ) : null}
+                            <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-white font-bold text-sm shadow-inner">
+                              {c.is_group ? <Users className="h-5 w-5" /> : initials || "?"}
+                            </AvatarFallback>
+                          </Avatar>
+                          {c.is_group && (
+                            <span className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground grid place-items-center border-2 border-background shadow-sm">
+                              <Users className="h-3 w-3" />
+                            </span>
+                          )}
+                          <div className={`absolute -left-1.5 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-full transition-all duration-300 ${isSelected ? "opacity-100" : "opacity-0 scale-y-0"}`} />
                         </div>
-                        <div className="flex items-center justify-between gap-2 mt-0.5">
-                          <p className={`text-xs truncate ${unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                            {last?.role === "assistant" || last?.role === "agent" ? "Você: " : ""}
-                            {last?.content ?? "—"}
-                          </p>
-                          <div className="flex items-center gap-1 shrink-0">
-                            {unread > 0 && (
-                              <span className="text-[10px] min-w-[18px] h-[18px] px-1 grid place-items-center rounded-full font-bold bg-primary text-primary-foreground">
-                                {unread > 99 ? "99+" : unread}
-                              </span>
-                            )}
-                            <span
-                              className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
-                                c.status === "handed_off" ? "bg-warning/15 text-warning" : "bg-success/15 text-success"
-                              }`}
-                            >
-                              {c.status === "handed_off" ? "MANUAL" : "BOT"}
+
+                        <div className="flex-1 min-w-0 py-0.5">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className={`text-sm truncate flex items-center gap-1.5 ${unread > 0 || isSelected ? "text-foreground font-bold" : "text-foreground/80 font-semibold"}`}>
+                              {displayName}
+                              {c.is_group && (
+                                <span className="text-[8px] font-black px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground/80 tracking-tighter uppercase">GP</span>
+                              )}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground/70 font-medium shrink-0">
+                              {formatDistanceToNow(new Date(c.last_message_at), { addSuffix: false, locale: ptBR })}
                             </span>
                           </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <p className={`text-xs truncate transition-colors ${unread > 0 ? "text-foreground font-semibold" : "text-muted-foreground/80"}`}>
+                              {last?.role === "assistant" || last?.role === "agent" ? (
+                                <span className="text-primary/70 font-medium mr-1">Você:</span>
+                              ) : ""}
+                              {last?.content ?? "—"}
+                            </p>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {unread > 0 && (
+                                <span className="text-[10px] min-w-[18px] h-[18px] px-1.5 grid place-items-center rounded-full font-black bg-primary text-primary-foreground animate-in zoom-in duration-300 shadow-sm shadow-primary/20">
+                                  {unread > 99 ? "99+" : unread}
+                                </span>
+                              )}
+                              <div 
+                                className={`h-2 w-2 rounded-full ring-4 ring-background ${
+                                  c.status === "handed_off" ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]" : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
+                                }`}
+                                title={c.status === "handed_off" ? "Manual" : "Bot Ativo"}
+                              />
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </button>
+                      </button>
+                    );
+                  })
                   );
                 })
               )}
@@ -965,61 +984,76 @@ function ConversasPage() {
                 </button>
               </div>
 
-              <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto space-y-3">
+              <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto space-y-4 bg-gradient-to-b from-transparent to-muted/10 scroll-smooth">
                 {(selected.transcript ?? []).length === 0 ? (
                   <div className="text-xs text-center text-muted-foreground py-10">Sem mensagens registradas.</div>
                 ) : (
                   [...selected.transcript].reverse().map((m, i, arr) => {
                     const isUser = m.role === "user";
-                    // Lista invertida: a "anterior" cronologicamente é a próxima do array
                     const older = arr[i + 1];
                     const showDate =
                       !older ||
                       (m.at && older.at && new Date(m.at).toDateString() !== new Date(older.at).toDateString());
                     return (
-                      <div key={i}>
+                      <div key={i} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                         {showDate && m.at && (
-                          <div className="flex justify-center my-4">
-                            <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                          <div className="flex justify-center my-8">
+                            <span className="text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-xl bg-muted/60 text-muted-foreground/80 border border-border/20 backdrop-blur-sm shadow-sm">
                               {formatDateLabel(m.at)}
                             </span>
                           </div>
                         )}
-                        <div className={`flex gap-2 ${isUser ? "justify-start" : "justify-end"}`}>
-                        {isUser && (
-                          <div className="h-7 w-7 rounded-full bg-muted grid place-items-center shrink-0">
-                            <User className="h-3.5 w-3.5" />
-                          </div>
-                        )}
-                        <div
-                          className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm shadow-sm ${
-                            isUser
-                              ? "bg-muted rounded-bl-sm"
-                              : "bg-primary text-primary-foreground rounded-br-sm"
-                          } ${m.kind === "sticker" ? "text-3xl bg-transparent shadow-none !px-1 !py-0" : ""}`}
-                        >
-                          {m.kind === "audio" ? (
-                            <span className="flex items-center gap-2">
-                              <Mic className="h-4 w-4" /> Áudio
-                            </span>
-                          ) : m.kind === "image" ? (
-                            <span className="flex items-center gap-2">
-                              <ImageIcon className="h-4 w-4" /> {m.content || "Imagem"}
-                            </span>
-                          ) : (
-                            <span className="whitespace-pre-wrap break-words">{m.content}</span>
-                          )}
-                          {m.at && m.kind !== "sticker" && (
-                            <div className={`text-[9px] mt-1 opacity-70 ${isUser ? "text-muted-foreground" : "text-primary-foreground"}`}>
-                              {format(new Date(m.at), "HH:mm")}
+                        <div className={`flex gap-3 items-end ${isUser ? "justify-start" : "justify-end"} group`}>
+                          {isUser && (
+                            <div className="h-8 w-8 rounded-full bg-muted border border-border/40 grid place-items-center shrink-0 shadow-sm overflow-hidden mb-1">
+                              {selected.profile_pic_url ? (
+                                <img src={selected.profile_pic_url} className="h-full w-full object-cover" alt="" />
+                              ) : (
+                                <User className="h-4 w-4 text-muted-foreground" />
+                              )}
                             </div>
                           )}
-                        </div>
-                        {!isUser && (
-                          <div className="h-7 w-7 rounded-full bg-primary/15 text-primary grid place-items-center shrink-0">
-                            <Bot className="h-3.5 w-3.5" />
+                          <div
+                            className={`max-w-[75%] px-4 py-3 rounded-2xl text-[13.5px] leading-relaxed shadow-sm transition-all duration-200 ${
+                              isUser
+                                 ? "bg-card text-foreground rounded-bl-sm border border-border/40 hover:shadow-md"
+                                 : "bg-primary text-primary-foreground rounded-br-sm shadow-lg shadow-primary/15 hover:shadow-primary/25"
+                            } ${m.kind === "sticker" ? "text-4xl bg-transparent shadow-none !px-1 !py-0" : ""}`}
+                          >
+                            {m.kind === "audio" ? (
+                              <span className="flex items-center gap-3 py-1 font-medium">
+                                <div className="h-8 w-8 rounded-full bg-background/10 flex items-center justify-center">
+                                  <Mic className="h-4 w-4" />
+                                </div>
+                                <span>Áudio do WhatsApp</span>
+                              </span>
+                            ) : m.kind === "image" ? (
+                              <div className="space-y-2">
+                                <img 
+                                  src={m.media || (typeof m.content === 'string' && m.content.startsWith('http') ? m.content : undefined)} 
+                                  className="rounded-xl max-w-full h-auto cursor-pointer transition hover:brightness-110 shadow-sm" 
+                                  alt="" 
+                                  onClick={() => m.media && window.open(m.media, '_blank')} 
+                                />
+                                {m.content && !m.content.startsWith("🖼️") && (
+                                  <p className="opacity-90">{m.content}</p>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="whitespace-pre-wrap break-words">{m.content}</span>
+                            )}
+                            {m.at && m.kind !== "sticker" && (
+                              <div className={`text-[10px] mt-2 flex justify-end font-medium opacity-70 ${isUser ? "text-muted-foreground" : "text-primary-foreground/90"}`}>
+                                {format(new Date(m.at), "HH:mm")}
+                                {!isUser && <span className="ml-1 text-[10px] shrink-0">✓✓</span>}
+                              </div>
+                            )}
                           </div>
-                        )}
+                          {!isUser && (
+                            <div className="h-8 w-8 rounded-full bg-primary/10 text-primary border border-primary/20 grid place-items-center shrink-0 shadow-sm mb-1">
+                              <Bot className="h-4 w-4" />
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -1027,83 +1061,28 @@ function ConversasPage() {
                 )}
               </div>
 
-              {/* Composer */}
-              <div className="border-t border-border bg-card p-3">
-                {recording ? (
-                  <div className="flex items-center gap-3 px-2">
-                    <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                    <span className="text-sm font-mono">
-                      {String(Math.floor(recordSecs / 60)).padStart(2, "0")}:
-                      {String(recordSecs % 60).padStart(2, "0")}
-                    </span>
-                    <span className="text-xs text-muted-foreground flex-1">Gravando áudio...</span>
-                    <button
-                      onClick={() => stopRecording(true)}
-                      className="h-9 w-9 grid place-items-center rounded-full hover:bg-muted transition"
-                      title="Cancelar"
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </button>
-                    <button
-                      onClick={() => stopRecording(false)}
-                      disabled={sending}
-                      className="h-10 w-10 grid place-items-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition disabled:opacity-50"
-                      title="Enviar áudio"
-                    >
-                      <Send className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="relative flex items-end gap-2">
-                    {/* Stickers popover */}
-                    {stickerOpen && (
-                      <div className="absolute bottom-12 left-0 z-10 bg-popover border border-border rounded-2xl shadow-lg p-3 w-72">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-bold text-muted-foreground">Figurinhas</span>
-                          <button onClick={() => setStickerOpen(false)} className="p-1 hover:bg-muted rounded">
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                        <div className="grid grid-cols-5 gap-1">
-                          {STICKERS.map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => sendSticker(s)}
-                              className="text-2xl h-11 grid place-items-center rounded-lg hover:bg-muted transition"
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <button
-                      onClick={() => setStickerOpen((v) => !v)}
-                      className="h-10 w-10 grid place-items-center rounded-full hover:bg-muted transition shrink-0"
-                      title="Figurinhas"
-                    >
-                      <Smile className="h-5 w-5 text-muted-foreground" />
-                    </button>
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="h-10 w-10 grid place-items-center rounded-full hover:bg-muted transition shrink-0"
-                      title="Imagem"
-                    >
-                      <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                    </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) sendImageFile(f);
-                        e.target.value = "";
-                      }}
-                    />
+              {/* Novo Composer Estilizado */}
+              <div className="p-5 bg-card/80 border-t border-border/40 backdrop-blur-xl relative">
+                <div className="max-w-4xl mx-auto flex items-end gap-2.5 relative">
+                  <div className="flex-1 bg-muted/40 rounded-2xl border border-border/30 focus-within:border-primary/30 focus-within:ring-4 focus-within:ring-primary/5 transition-all duration-300 flex items-end px-3 py-2.5 shadow-inner group">
+                    <div className="flex items-center gap-1 mb-0.5 mr-2 shrink-0">
+                      <button
+                        onClick={() => setStickerOpen(!stickerOpen)}
+                        className={`h-9 w-9 rounded-xl transition-all duration-200 flex items-center justify-center ${stickerOpen ? "text-primary bg-background shadow-sm" : "text-muted-foreground hover:bg-background/80 hover:text-foreground"}`}
+                      >
+                        <Smile className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="h-9 w-9 rounded-xl text-muted-foreground hover:bg-background/80 hover:text-foreground transition-all duration-200 flex items-center justify-center"
+                      >
+                        <ImageIcon className="h-5 w-5" />
+                      </button>
+                    </div>
+                    
                     <textarea
+                      rows={1}
+                      placeholder={recording ? "Gravando áudio..." : "Digite uma mensagem..."}
                       value={text}
                       onChange={(e) => setText(e.target.value)}
                       onKeyDown={(e) => {
@@ -1112,30 +1091,81 @@ function ConversasPage() {
                           sendText();
                         }
                       }}
-                      rows={1}
-                      placeholder="Digite uma mensagem..."
-                      className="flex-1 resize-none bg-muted/50 rounded-2xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/30 max-h-28"
+                      className="flex-1 min-h-[40px] max-h-32 bg-transparent border-none outline-none shadow-none resize-none transition-all py-2 px-0 text-[14px] leading-relaxed"
+                      disabled={recording || sending}
                     />
-                    {text.trim() ? (
-                      <button
-                        onClick={sendText}
-                        disabled={sending}
-                        className="h-10 w-10 grid place-items-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition disabled:opacity-50 shrink-0"
-                        title="Enviar"
-                      >
-                        {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={startRecording}
-                        className="h-10 w-10 grid place-items-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition shrink-0"
-                        title="Gravar áudio"
-                      >
-                        <Mic className="h-4 w-4" />
-                      </button>
-                    )}
+
+                    <div className="flex items-center gap-1 mb-0.5 ml-2 shrink-0">
+                      {recording ? (
+                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
+                          <span className="text-[11px] font-black text-destructive animate-pulse font-mono tracking-tighter bg-destructive/10 px-2 py-1 rounded-lg">
+                            {format(recordSecs * 1000, "mm:ss")}
+                          </span>
+                          <button 
+                            onClick={() => stopRecording(true)} 
+                            className="h-9 w-9 rounded-xl bg-destructive/10 hover:bg-destructive/20 flex items-center justify-center text-destructive transition-colors shadow-sm"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={startRecording}
+                          className="h-9 w-9 rounded-xl text-muted-foreground hover:bg-background/80 hover:text-foreground transition-all duration-200 flex items-center justify-center"
+                        >
+                          <Mic className="h-5 w-5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
-                )}
+
+                  <button
+                    onClick={recording ? () => stopRecording(false) : sendText}
+                    disabled={(!text.trim() && !recording) || sending}
+                    className="h-[52px] w-[52px] rounded-2xl bg-primary text-primary-foreground disabled:opacity-50 disabled:grayscale transition-all duration-300 flex items-center justify-center shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-95 group/send"
+                  >
+                    {sending ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <Send className="h-5 w-5 transition-transform duration-300 group-hover/send:translate-x-0.5 group-hover/send:-translate-y-0.5" />
+                    )}
+                  </button>
+
+                  {/* Stickers Popover Estilizado */}
+                  {stickerOpen && (
+                    <div className="absolute bottom-[calc(100%+12px)] left-0 z-50 bg-popover/95 backdrop-blur-xl border border-border/40 rounded-[24px] shadow-2xl p-4 w-[320px] animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+                      <div className="flex items-center justify-between mb-3 px-1">
+                        <span className="text-[11px] font-black text-muted-foreground/60 uppercase tracking-widest">Emojis & Stickers</span>
+                        <button onClick={() => setStickerOpen(false)} className="h-6 w-6 rounded-full hover:bg-muted transition-colors flex items-center justify-center">
+                          <X className="h-3.5 w-3.5 text-muted-foreground" />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-5 gap-2 max-h-[240px] overflow-y-auto pr-1 custom-scrollbar">
+                        {STICKERS.map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => sendSticker(s)}
+                            className="text-2xl h-12 flex items-center justify-center rounded-xl hover:bg-muted transition-all duration-200 hover:scale-110 active:scale-90"
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) sendImageFile(f);
+                    e.target.value = "";
+                  }}
+                />
               </div>
             </div>
           ) : (
