@@ -692,7 +692,20 @@ function ConversasPage() {
         <div className="flex-1 flex overflow-hidden">
           {/* Sidebar conversas */}
           <div className="w-[340px] border-r border-border flex flex-col bg-card/40">
-            <div className="p-3 border-b border-border space-y-2">
+            <div className="p-3 border-b border-border space-y-2.5">
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold">Inbox</h3>
+                  {totalUnread > 0 && (
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
+                      {totalUnread}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] text-muted-foreground">
+                  {items.length} conversa{items.length === 1 ? "" : "s"}
+                </span>
+              </div>
               <div className="relative">
                 <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -701,6 +714,26 @@ function ConversasPage() {
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 h-9"
                 />
+              </div>
+              <div className="flex items-center gap-1">
+                {[
+                  { id: "all", label: "Todas" },
+                  { id: "unread", label: "Não lidas" },
+                  { id: "bot", label: "Bot" },
+                  { id: "manual", label: "Manual" },
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => setStatusFilter(f.id as typeof statusFilter)}
+                    className={`flex-1 text-[10px] font-bold py-1.5 rounded-lg transition ${
+                      statusFilter === f.id
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
               </div>
               <button
                 onClick={() => syncFromWhatsApp(true)}
@@ -745,6 +778,7 @@ function ConversasPage() {
                     .join("")
                     .slice(0, 2)
                     .toUpperCase();
+                  const unread = unreadCount(c);
                   return (
                     <button
                       key={c.id}
@@ -761,20 +795,32 @@ function ConversasPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-bold text-sm truncate">{c.contact_name ?? c.contact_phone}</span>
+                          <span className={`text-sm truncate ${unread > 0 ? "font-bold" : "font-semibold"}`}>
+                            {c.contact_name ?? c.contact_phone}
+                          </span>
                           <span className="text-[10px] text-muted-foreground shrink-0">
                             {formatDistanceToNow(new Date(c.last_message_at), { addSuffix: false, locale: ptBR })}
                           </span>
                         </div>
                         <div className="flex items-center justify-between gap-2 mt-0.5">
-                          <p className="text-xs text-muted-foreground truncate">{last?.content ?? "—"}</p>
-                          <span
-                            className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
-                              c.status === "handed_off" ? "bg-warning/15 text-warning" : "bg-success/15 text-success"
-                            }`}
-                          >
-                            {c.status === "handed_off" ? "MANUAL" : "BOT"}
-                          </span>
+                          <p className={`text-xs truncate ${unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                            {last?.role === "assistant" || last?.role === "agent" ? "Você: " : ""}
+                            {last?.content ?? "—"}
+                          </p>
+                          <div className="flex items-center gap-1 shrink-0">
+                            {unread > 0 && (
+                              <span className="text-[10px] min-w-[18px] h-[18px] px-1 grid place-items-center rounded-full font-bold bg-primary text-primary-foreground">
+                                {unread > 99 ? "99+" : unread}
+                              </span>
+                            )}
+                            <span
+                              className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
+                                c.status === "handed_off" ? "bg-warning/15 text-warning" : "bg-success/15 text-success"
+                              }`}
+                            >
+                              {c.status === "handed_off" ? "MANUAL" : "BOT"}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </button>
