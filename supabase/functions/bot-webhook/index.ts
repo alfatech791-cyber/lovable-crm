@@ -56,9 +56,6 @@ serve(async (req) => {
     if (!settings || settings.webhook_secret !== secret) {
       return json({ error: "invalid secret" }, 401);
     }
-    if (!settings.is_active) {
-      return json({ ok: true, inactive: true });
-    }
 
     // Carrega/cria conversa
     const { data: conv } = await supabase
@@ -70,6 +67,12 @@ serve(async (req) => {
 
     const transcript: any[] = (conv?.transcript as any[]) ?? [];
     transcript.push({ role: "user", content: messageText, at: new Date().toISOString() });
+
+    // Se o bot estiver inativo, apenas grava a mensagem para o atendimento manual
+    if (!settings.is_active) {
+      await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active");
+      return json({ ok: true, inactive: true, stored: true });
+    }
 
     // Handoff por palavra-chave ou limite
     const lower = messageText.toLowerCase();
