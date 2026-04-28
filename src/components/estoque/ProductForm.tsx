@@ -505,6 +505,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                     <p className="text-[9px] text-muted-foreground">Enviar alerta de estoque baixo para o setor de compras</p>
                   </div>
                   <Switch defaultChecked />
+                </div>
               </div>
             </div>
           </div>
