@@ -4,11 +4,20 @@ export const sidebarItems = [
   { title: "Relatórios", url: "/relatorios", icon: "BarChart3" as const },
 
   { type: "header", title: "Atendimento & CRM" },
-  { title: "WhatsApp", url: "/whatsapp", icon: "MessageSquare" as const },
-  { title: "Instagram", url: "/instagram", icon: "Instagram" as const },
-  { title: "CRM Leads", url: "/leads", icon: "UserPlus" as const },
-  { title: "Funil de Vendas", url: "/funil", icon: "Trello" as const },
-  { title: "Automações", url: "/automacao", icon: "Zap" as const },
+  {
+    title: "CRM",
+    url: "/crm",
+    icon: "Sparkles" as const,
+    children: [
+      { title: "Visão Geral", url: "/crm" },
+      { title: "Leads", url: "/leads" },
+      { title: "Funil de Vendas", url: "/funil" },
+      { title: "Bot de Atendimento", url: "/crm/bot" },
+      { title: "Automações", url: "/automacao" },
+      { title: "WhatsApp", url: "/whatsapp" },
+      { title: "Instagram", url: "/instagram" },
+    ]
+  },
 
   { type: "header", title: "Operação Comercial" },
   {
