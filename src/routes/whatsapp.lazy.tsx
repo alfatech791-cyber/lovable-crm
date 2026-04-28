@@ -91,11 +91,20 @@ function WhatsAppPage() {
   const handleDelete = async (name: string) => {
     if (!confirm(`Deseja realmente EXCLUIR permanentemente a instância ${name}?`)) return;
     try {
-      await evolution.deleteInstance(name);
-      toast.success("Instância excluída!");
-      fetchInstances();
-    } catch {
-      toast.error("Erro ao excluir.");
+      // A Evolution API exige logout antes de deletar uma instância conectada.
+      // Tentamos o logout primeiro (silencioso se já estiver desconectada).
+      try {
+        await evolution.logoutInstance(name);
+      } catch (e) {
+        console.warn("Logout falhou (instância pode já estar desconectada):", e);
+      }
+      const result = await evolution.deleteInstance(name);
+      console.log("Delete result:", result);
+      toast.success(`Instância ${name} excluída da Evolution!`);
+      await fetchInstances();
+    } catch (err) {
+      console.error("Erro ao excluir instância:", err);
+      toast.error("Erro ao excluir instância na Evolution API.");
     }
   };
 
