@@ -318,7 +318,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
             </TabsContent>
 
             <TabsContent value="tech" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div className="space-y-5">
                   <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
                     <Hash className="h-3 w-3" /> Identificação
@@ -326,15 +326,17 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                   
                   <div className="grid gap-4">
                     <div className="grid gap-2">
-                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">SKU / Código Interno</Label>
-                      <Input placeholder="GER-100234" className="bg-muted/20 h-10 border-sidebar-border text-xs" />
+                      <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-widest">SKU / Part Number</Label>
+                      <Input placeholder="GER-100234" className="bg-muted/10 h-11 border-border text-xs font-bold font-mono tracking-widest" />
                     </div>
-                    {isSmartphone && (
-                      <div className="grid gap-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">IMEI 1 (Principal)</Label>
-                        <Input id="imei" defaultValue={product?.imei} placeholder="35xxxxxxxxxxxxx" className="bg-muted/30 h-11 border-sidebar-border font-mono text-sm tracking-widest" />
-                      </div>
-                    )}
+                    <div className="grid gap-2">
+                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-widest">IMEI Principal (SIM 1)</Label>
+                       <Input id="imei" defaultValue={product?.imei} placeholder="Ex: 356789..." className="bg-muted/10 h-12 border-border font-mono text-sm tracking-[0.2em] font-black focus:ring-4 focus:ring-primary/5 transition-all" />
+                    </div>
+                    <div className="grid gap-2 opacity-40 grayscale pointer-events-none">
+                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-widest">IMEI Secundário (eSIM)</Label>
+                       <Input placeholder="35..." className="bg-muted/5 h-11 border-border font-mono text-xs tracking-widest" />
+                    </div>
                   </div>
                 </div>
 
