@@ -58,6 +58,7 @@ export type Database = {
           id: string
           last_message_at: string
           messages_count: number
+          remote_jid: string | null
           status: string
           transcript: Json
           user_id: string
@@ -69,6 +70,7 @@ export type Database = {
           id?: string
           last_message_at?: string
           messages_count?: number
+          remote_jid?: string | null
           status?: string
           transcript?: Json
           user_id: string
@@ -80,6 +82,7 @@ export type Database = {
           id?: string
           last_message_at?: string
           messages_count?: number
+          remote_jid?: string | null
           status?: string
           transcript?: Json
           user_id?: string
