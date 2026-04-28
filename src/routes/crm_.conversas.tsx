@@ -390,14 +390,14 @@ function ConversasPage() {
     }
   };
 
-  const load = async () => {
+  const load = async (silent = false) => {
     if (!user?.id) {
       setLoading(false);
       setLoadError(null);
       return;
     }
 
-    setLoading(true);
+    if (!silent) setLoading(true);
     setLoadError(null);
     try {
       const { data, error } = await supabase
@@ -578,7 +578,7 @@ function ConversasPage() {
       }
 
       if (user?.id) {
-        await load();
+        await load(true);
       } else {
         applyConversations(valid, lastIncomingMessageRef.current.size > 0);
         setLoading(false);
