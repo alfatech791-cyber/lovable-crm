@@ -116,19 +116,59 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                           </Select>
                         </div>
                         <div className="grid gap-2">
-                          <Label className="text-[10px] font-bold uppercase text-muted-foreground/70 tracking-wider">Status</Label>
-                          <Select defaultValue="ativo">
+                          <Label className="text-[10px] font-bold uppercase text-muted-foreground/70 tracking-wider">Fornecedor</Label>
+                          <Select defaultValue="padrao">
                             <SelectTrigger className="bg-card/50 h-10 border-sidebar-border"><SelectValue /></SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="ativo">Disponível</SelectItem>
-                              <SelectItem value="rascunho">Rascunho</SelectItem>
-                              <SelectItem value="indisponivel">Indisponível</SelectItem>
+                              <SelectItem value="padrao">Principal</SelectItem>
+                              <SelectItem value="dist">Distribuidora Oficial</SelectItem>
+                              <SelectItem value="import">Importação Direta</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                       </div>
                     </div>
                   </section>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
+                        <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                           <Settings2 className="h-3 w-3" /> Visibilidade
+                        </h3>
+                        <div className="grid grid-cols-2 gap-3">
+                           <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-card/40 border border-sidebar-border/30">
+                              <Label className="text-[9px] font-bold uppercase opacity-60">Status</Label>
+                              <Select defaultValue="ativo">
+                                 <SelectTrigger className="h-7 text-[10px] bg-transparent border-none p-0 focus:ring-0 shadow-none"><SelectValue /></SelectTrigger>
+                                 <SelectContent>
+                                    <SelectItem value="ativo">Disponível</SelectItem>
+                                    <SelectItem value="rascunho">Rascunho</SelectItem>
+                                 </SelectContent>
+                              </Select>
+                           </div>
+                           <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-card/40 border border-sidebar-border/30">
+                              <Label className="text-[9px] font-bold uppercase opacity-60">Destaque</Label>
+                              <div className="flex items-center justify-between h-7">
+                                 <span className="text-[10px] font-medium">Home Page</span>
+                                 <Switch className="scale-50 -mr-2" />
+                              </div>
+                           </div>
+                        </div>
+                     </section>
+
+                     <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
+                        <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                           <Truck className="h-3 w-3" /> Tipo de Entrega
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                           {['Pronta Entrega', 'Retirada', 'Expressa'].map(t => (
+                              <Badge key={t} variant="secondary" className="text-[9px] bg-primary/10 text-primary border-none hover:bg-primary/20 cursor-pointer">
+                                 {t}
+                              </Badge>
+                           ))}
+                        </div>
+                     </section>
+                  </div>
 
                   <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
                      <div className="flex items-center justify-between">
