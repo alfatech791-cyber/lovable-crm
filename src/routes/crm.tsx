@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { Sparkles, UserPlus, Trello, Bot, Zap, MessageSquare, Instagram, ArrowRight, TrendingUp, DollarSign, Users, MessageCircle } from "lucide-react";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from "recharts";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,6 +30,8 @@ function CrmHub() {
   const { user } = useAuth();
   const [stats, setStats] = useState({ leads: 0, pipelineValue: 0, botConvs: 0, won: 0 });
   const [recentLeads, setRecentLeads] = useState<any[]>([]);
+  const [leadsSeries, setLeadsSeries] = useState<{ day: string; count: number }[]>([]);
+  const [funnelSeries, setFunnelSeries] = useState<{ name: string; value: number; count: number }[]>([]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -36,12 +39,14 @@ function CrmHub() {
       // Garante estágios
       await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
 
-      const [{ count: leadsCount }, { data: pipeline }, { count: botCount }, { data: stages }, { data: latest }] = await Promise.all([
+      const since = new Date(); since.setDate(since.getDate() - 29);
+      const [{ count: leadsCount }, { data: pipeline }, { count: botCount }, { data: stages }, { data: latest }, { data: trend }] = await Promise.all([
         supabase.from("leads").select("*", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("pipeline_leads").select("deal_value, stage_id").eq("user_id", user.id),
         supabase.from("bot_conversations").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("funnel_stages").select("id, name").eq("user_id", user.id),
+        supabase.from("funnel_stages").select("id, name, order_index").eq("user_id", user.id).order("order_index"),
         supabase.from("leads").select("id, name, phone, source, status, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
+        supabase.from("leads").select("created_at").eq("user_id", user.id).gte("created_at", since.toISOString()),
       ]);
 
       const wonStageIds = (stages ?? []).filter((s: any) => /ganho|fechado|won/i.test(s.name)).map((s: any) => s.id);
@@ -55,6 +60,31 @@ function CrmHub() {
         won,
       });
       setRecentLeads(latest ?? []);
+
+      // Série últimos 30 dias
+      const days: { day: string; count: number }[] = [];
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        days.push({ day: key.slice(5), count: 0 });
+      }
+      (trend ?? []).forEach((l: any) => {
+        const k = l.created_at.slice(5, 10);
+        const item = days.find((d) => d.day === k);
+        if (item) item.count++;
+      });
+      setLeadsSeries(days);
+
+      // Funil por etapa
+      const series = (stages ?? []).map((s: any) => {
+        const inStage = (pipeline ?? []).filter((p: any) => p.stage_id === s.id);
+        return {
+          name: s.name,
+          count: inStage.length,
+          value: inStage.reduce((sum: number, p: any) => sum + Number(p.deal_value ?? 0), 0),
+        };
+      });
+      setFunnelSeries(series);
     })();
   }, [user?.id]);
 
@@ -87,6 +117,51 @@ function CrmHub() {
             <Kpi icon={TrendingUp} label="Valor pipeline" value={fmt(stats.pipelineValue)} color="text-info" bg="bg-info/10" />
             <Kpi icon={DollarSign} label="Ganhos fechados" value={fmt(stats.won)} color="text-success" bg="bg-success/10" />
             <Kpi icon={MessageCircle} label="Conversas bot" value={stats.botConvs.toLocaleString("pt-BR")} color="text-warning" bg="bg-warning/10" />
+          </div>
+
+          {/* Gráficos */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-5 shadow-card">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-bold font-display">Leads nos últimos 30 dias</h3>
+                  <p className="text-xs text-muted-foreground">Evolução diária de novos contatos</p>
+                </div>
+              </div>
+              <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={leadsSeries}>
+                    <defs>
+                      <linearGradient id="grLead" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={10} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} allowDecimals={false} />
+                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                    <Area type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#grLead)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+              <h3 className="font-bold font-display mb-1">Funil por etapa</h3>
+              <p className="text-xs text-muted-foreground mb-4">Negócios em cada estágio</p>
+              <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={funnelSeries} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                    <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={10} allowDecimals={false} />
+                    <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} width={80} />
+                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 6, 6, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

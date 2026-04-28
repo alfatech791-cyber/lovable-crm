@@ -5,6 +5,7 @@ import { Topbar } from "@/components/layout/Topbar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Bot, Sparkles, MessageSquare, Clock, Brain, Save, Loader2, Power, Users, Zap, Smartphone, Copy, Send, Webhook } from "lucide-react";
+import { evolution } from "@/lib/evolution";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -159,8 +160,8 @@ function BotPage() {
   };
 
   const projectRef = (import.meta.env.VITE_SUPABASE_PROJECT_ID as string) || "";
-  const webhookUrl = projectRef && webhookSecret
-    ? `https://${projectRef}.supabase.co/functions/v1/bot-webhook?secret=${webhookSecret}`
+  const webhookUrl = projectRef && webhookSecret && user?.id
+    ? `https://${projectRef}.supabase.co/functions/v1/bot-webhook?uid=${user.id}&secret=${webhookSecret}`
     : "";
 
   const copyWebhook = async () => {
@@ -394,8 +395,24 @@ function BotPage() {
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="w-full"
+                      disabled={!webhookUrl || !form.whatsapp_instance}
+                      onClick={async () => {
+                        try {
+                          await evolution.setWebhook(form.whatsapp_instance!, webhookUrl);
+                          toast.success("Webhook configurado na Evolution!");
+                        } catch (e: any) {
+                          toast.error("Falha: " + (e?.message ?? String(e)));
+                        }
+                      }}
+                    >
+                      Configurar webhook automaticamente
+                    </Button>
                     <p className="text-[11px] text-muted-foreground">
-                      Cole essa URL no campo de webhook da sua instância Evolution para receber mensagens.
+                      Ou copie e cole no campo de webhook da sua instância Evolution.
                     </p>
                   </div>
                 </Section>
