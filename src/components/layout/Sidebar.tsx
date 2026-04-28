@@ -1,6 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import * as Icons from "lucide-react";
-import { Sparkles, ChevronRight } from "lucide-react";
+import { Sparkles, ChevronRight, X } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 import { sidebarItems } from "@/lib/mock";
@@ -8,6 +9,10 @@ import { sidebarItems } from "@/lib/mock";
 export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: boolean) => void }) {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const [flyout, setFlyout] = useState<any | null>(null);
+
+  // Fecha flyout ao trocar de rota
+  useEffect(() => { setFlyout(null); }, [location.pathname]);
 
   const filteredItems = sidebarItems;
 
@@ -49,7 +54,27 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
 
           const Icon = (Icons as any)[item.icon] || Icons.HelpCircle;
           const active = location.pathname === item.url || (item.children?.some((child: any) => location.pathname === child.url));
-          
+
+          // Item com flyout: abre segundo painel ao clicar
+          if (item.flyout) {
+            const isOpen = flyout?.url === item.url;
+            return (
+              <button
+                key={item.url}
+                onClick={() => setFlyout(isOpen ? null : item)}
+                className={`group w-full relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all text-left
+                  ${active || isOpen
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-glow"
+                    : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-white"
+                  }`}
+              >
+                <Icon className="h-[18px] w-[18px]" strokeWidth={active || isOpen ? 2.4 : 2} />
+                <span>{item.title}</span>
+                <ChevronRight className={`h-4 w-4 ml-auto transition-transform ${isOpen ? "translate-x-0.5" : ""}`} />
+              </button>
+            );
+          }
+
           return (
             <div key={item.url} className="space-y-1">
               <Link
@@ -114,6 +139,82 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
         </button>
       </div>
     </aside>
+
+    {/* Flyout: segundo painel dedicado */}
+    {flyout && (
+      <>
+        <div
+          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
+          onClick={() => setFlyout(null)}
+        />
+        <aside className="fixed inset-y-0 left-[244px] z-50 w-[300px] bg-sidebar border-l border-sidebar-border/40 text-sidebar-foreground flex flex-col shadow-2xl animate-in slide-in-from-left-4 duration-200">
+          <div className="flex items-center justify-between px-5 h-[68px] border-b border-sidebar-border">
+            <div className="flex items-center gap-2.5">
+              <div className="h-9 w-9 rounded-xl bg-gradient-primary grid place-items-center shadow-glow">
+                {(() => {
+                  const FIcon = (Icons as any)[flyout.icon] || Icons.HelpCircle;
+                  return <FIcon className="h-4.5 w-4.5 text-white" strokeWidth={2.5} />;
+                })()}
+              </div>
+              <div className="leading-tight">
+                <div className="font-display font-bold text-[16px] text-white tracking-tight">{flyout.title}</div>
+                <div className="text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-bold">Menu dedicado</div>
+              </div>
+            </div>
+            <button
+              onClick={() => setFlyout(null)}
+              className="h-8 w-8 grid place-items-center rounded-lg text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-white transition"
+              aria-label="Fechar"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
+            {flyout.children?.map((child: any) => {
+              const ChildIcon = child.icon ? (Icons as any)[child.icon] : null;
+              const isActive = location.pathname === child.url;
+              return (
+                <Link
+                  key={child.url}
+                  to={child.url}
+                  onClick={() => setFlyout(null)}
+                  className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all
+                    ${isActive
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-glow"
+                      : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-white"
+                    }`}
+                >
+                  {ChildIcon ? (
+                    <ChildIcon className="h-[16px] w-[16px]" strokeWidth={isActive ? 2.4 : 2} />
+                  ) : (
+                    <span className="h-1.5 w-1.5 rounded-full bg-current opacity-50" />
+                  )}
+                  <span className="flex-1">{child.title}</span>
+                  {child.badge && (
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary/20 text-primary uppercase">{child.badge}</span>
+                  )}
+                  <ChevronRight className={`h-3.5 w-3.5 transition-opacity ${isActive ? "opacity-80" : "opacity-0 group-hover:opacity-60"}`} />
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="px-3 pb-3">
+            <Link
+              to={flyout.url}
+              onClick={() => setFlyout(null)}
+              className="block rounded-xl bg-gradient-sidebar-cta p-3 text-white shadow-elegant hover:opacity-90 transition"
+            >
+              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/80 mb-1">
+                <Sparkles className="h-3 w-3" /> Visão Geral
+              </div>
+              <div className="text-sm font-bold">Abrir painel completo</div>
+            </Link>
+          </div>
+        </aside>
+      </>
+    )}
     </>
   );
 }
