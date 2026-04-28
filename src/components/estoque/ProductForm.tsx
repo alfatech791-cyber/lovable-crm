@@ -175,18 +175,33 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                          </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                          <div className="md:col-span-3 grid gap-2">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">EAN / Código de Barras</Label>
-                            <Input placeholder="789..." className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
-                          </div>
-                          <div className="md:col-span-3 grid gap-2">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código NCM</Label>
-                            <Input placeholder="8517.13.00" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
-                          </div>
-                          <div className="md:col-span-3 grid gap-2">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Referência do Fabricante</Label>
-                            <Input placeholder="REF-123" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
-                          </div>
+                           <div className="md:col-span-3 grid gap-2">
+                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">EAN / Código de Barras</Label>
+                             <Input 
+                               value={formData.ean}
+                               onChange={(e) => handleChange("ean", e.target.value)}
+                               placeholder="789..." 
+                               className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                             />
+                           </div>
+                           <div className="md:col-span-3 grid gap-2">
+                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código NCM</Label>
+                             <Input 
+                               value={formData.ncm}
+                               onChange={(e) => handleChange("ncm", e.target.value)}
+                               placeholder="8517.13.00" 
+                               className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                             />
+                           </div>
+                           <div className="md:col-span-3 grid gap-2">
+                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Referência do Fabricante</Label>
+                             <Input 
+                               value={formData.reference}
+                               onChange={(e) => handleChange("reference", e.target.value)}
+                               placeholder="REF-123" 
+                               className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                             />
+                           </div>
                           <div className="md:col-span-3 grid gap-2">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 flex items-center gap-2">
                               Tipo do Produto
@@ -206,7 +221,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                            <div className="grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Categoria</Label>
-                             <Select defaultValue={product?.category || "Acessórios"} onValueChange={(v) => setIsSmartphone(v === "Smartphones")}>
+                             <Select value={formData.category} onValueChange={(v) => handleChange("category", v)}>
                                <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
                                <SelectContent className="border-border shadow-elegant">
                                  <SelectItem value="Smartphones">Smartphones</SelectItem>
@@ -218,7 +233,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                            </div>
                            <div className="grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fabricante / Marca</Label>
-                             <Select defaultValue="apple">
+                             <Select value={formData.brand} onValueChange={(v) => handleChange("brand", v)}>
                                <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
                                <SelectContent className="border-border shadow-elegant">
                                  <SelectItem value="apple">Apple</SelectItem>
@@ -230,7 +245,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                            </div>
                            <div className="grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fornecedor</Label>
-                             <Select defaultValue="padrao">
+                             <Select value={formData.supplier} onValueChange={(v) => handleChange("supplier", v)}>
                                <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
                                <SelectContent className="border-border shadow-elegant">
                                  <SelectItem value="padrao">Principal</SelectItem>
@@ -240,7 +255,12 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                            </div>
                            <div className="grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Modelo / Referência</Label>
-                             <Input placeholder="iPhone 15 Pro Max" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                             <Input 
+                               value={formData.model}
+                               onChange={(e) => handleChange("model", e.target.value)}
+                               placeholder="iPhone 15 Pro Max" 
+                               className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                             />
                            </div>
                          </div>
                        </div>
