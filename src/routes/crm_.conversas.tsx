@@ -508,7 +508,7 @@ function ConversasPage() {
           const raw = await evolution.findMessages(instance, chat.remoteJid!);
           const transcript = normalizeTranscript(asArray<any>(raw));
           const fallbackTranscript = normalizeTranscript(chat.lastMessage ? [chat.lastMessage] : []);
-          const mergedTranscript = transcript.length > 0 ? transcript : (ex?.transcript ?? fallbackTranscript);
+          const mergedTranscript = transcript.length > 0 ? transcript : (ex?.transcript ?? fallbackTranscript); mergedTranscript.sort((a, b) => +new Date(a.at || 0) - +new Date(b.at || 0));
           const lastAt =
             mergedTranscript[mergedTranscript.length - 1]?.at ??
             normTs(chat.updatedAt ?? chat.lastMessageTime ?? chat.conversationTimestamp ?? chat.lastMessage?.messageTimestamp);
@@ -608,7 +608,7 @@ function ConversasPage() {
 
               const row = { ...(payload.new as any), transcript: (payload.new as any).transcript || [] } as any as Conversation;
               setItems((prev) => {
-                const next = [row, ...prev.filter((c) => c.id !== row.id)];
+                const next = [row, ...prev.filter((c) => c.id !== row.id)].filter((c, i, a) => a.findIndex(t => t.contact_phone === c.contact_phone) === i);
                 next.sort((a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at));
                 return next;
               });
@@ -665,7 +665,7 @@ function ConversasPage() {
 
   useEffect(() => {
     // Mensagens mais recentes ficam no topo — rolar para o início ao abrir/atualizar
-    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [selected?.transcript?.length, selectedId]);
 
   // Mark conversation as read when opened or when new messages arrive while open
@@ -998,9 +998,9 @@ function ConversasPage() {
                 {(selected.transcript ?? []).length === 0 ? (
                   <div className="text-xs text-center text-muted-foreground py-10">Sem mensagens registradas.</div>
                 ) : (
-                  [...selected.transcript].reverse().map((m, i, arr) => {
+                  [...selected.transcript].sort((a, b) => +new Date(a.at || 0) - +new Date(b.at || 0)).map((m, i, arr) => {
                     const isUser = m.role === "user";
-                    const older = arr[i + 1];
+                    const older = arr[i - 1];
                     const showDate =
                       !older ||
                       (m.at && older.at && new Date(m.at).toDateString() !== new Date(older.at).toDateString());
