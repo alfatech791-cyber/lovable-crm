@@ -38,7 +38,7 @@ const tabs = [
         ))}
       </div>
       <ul className="flex-1 overflow-y-auto divide-y divide-border">
-        {messages.map((m) => (
+        {messages.length > 0 ? messages.map((m) => (
           <li key={m.name} className="flex items-start gap-3 px-5 py-3 hover:bg-muted/50 cursor-pointer transition">
             <div className="relative shrink-0">
               <div className="h-10 w-10 rounded-full bg-gradient-primary grid place-items-center text-white text-xs font-semibold">
@@ -57,7 +57,14 @@ const tabs = [
               <span className="ml-1 mt-1 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-[10px] font-semibold text-primary-foreground grid place-items-center">{m.unread}</span>
             )}
           </li>
-        ))}
+        )) : (
+          <li className="flex flex-col items-center justify-center py-20 px-10 text-center">
+            <div className="h-12 w-12 rounded-2xl bg-muted/50 grid place-items-center mb-3">
+              <MessageSquare className="h-6 w-6 text-muted-foreground/40" />
+            </div>
+            <p className="text-[13px] font-medium text-muted-foreground">Sua central de mensagens está limpa</p>
+          </li>
+        )}
       </ul>
        <div className="p-3 border-t border-border">
          <button 
