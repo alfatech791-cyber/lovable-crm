@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Smartphone, Tag, DollarSign, Layers, Hash, Info, History, CheckCircle2, Plus, Cpu, Upload, Image as ImageIcon, Truck, FileText, Globe, ShoppingBag, Percent, BarChart3, Settings2, Receipt, Info as InfoIcon, Zap, Copy } from "lucide-react";
+ import { Smartphone, Tag, DollarSign, Layers, Hash, Info, History, CheckCircle2, Plus, Cpu, Upload, Image as ImageIcon, Truck, FileText, Globe, ShoppingBag, Percent, BarChart3, Settings2, Receipt, Info as InfoIcon, Zap, Copy, Box, ClipboardList, ShieldCheck, Warehouse, MapPin } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 
