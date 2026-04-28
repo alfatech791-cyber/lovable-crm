@@ -865,65 +865,82 @@ function ConversasPage() {
                     .toUpperCase();
                   const unread = unreadCount(c);
                   return (
-                    <button
-                      key={c.id}
-                      onClick={() => setSelectedId(c.id)}
-                      className={`w-full flex items-start gap-3 p-3 border-b border-border/50 transition relative text-left ${
-                        selectedId === c.id ? "bg-primary/5" : "hover:bg-muted/30"
-                      }`}
-                    >
-                      {selectedId === c.id && (
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
-                      )}
-                      <div className="relative shrink-0">
-                        <Avatar className="h-11 w-11">
-                          {c.profile_pic_url ? (
-                            <AvatarImage src={c.profile_pic_url} alt={displayName} />
-                          ) : null}
-                          <AvatarFallback className="bg-gradient-to-br from-primary to-primary/60 text-white font-bold text-sm">
-                            {c.is_group ? <Users className="h-5 w-5" /> : initials || "?"}
-                          </AvatarFallback>
-                        </Avatar>
-                        {c.is_group && (
-                          <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-primary text-primary-foreground grid place-items-center border-2 border-card">
-                            <Users className="h-2.5 w-2.5" />
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className={`text-sm truncate flex items-center gap-1 ${unread > 0 ? "font-bold" : "font-semibold"}`}>
-                            {displayName}
-                            {c.is_group && (
-                              <span className="text-[9px] font-bold px-1 py-px rounded bg-muted text-muted-foreground">GRUPO</span>
-                            )}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground shrink-0">
-                            {formatDistanceToNow(new Date(c.last_message_at), { addSuffix: false, locale: ptBR })}
-                          </span>
+                  filtered.map((c) => {
+                    const last = c.transcript?.[c.transcript.length - 1];
+                    const displayName = c.contact_name ?? c.contact_phone;
+                    const initials = displayName
+                      .split(" ")
+                      .map((s) => s[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase();
+                    const unread = unreadCount(c);
+                    const isSelected = selectedId === c.id;
+
+                    return (
+                      <button
+                        key={c.id}
+                        onClick={() => setSelectedId(c.id)}
+                        className={`w-full flex items-center gap-3.5 p-3 rounded-2xl transition-all duration-300 relative text-left group ${
+                          isSelected 
+                            ? "bg-primary/[0.08] shadow-[0_4px_20px_-4px_rgba(var(--primary-rgb),0.1)] ring-1 ring-primary/20" 
+                            : "hover:bg-muted/50 border-transparent"
+                        }`}
+                      >
+                        <div className="relative shrink-0">
+                          <Avatar className={`h-12 w-12 transition-transform duration-500 ${isSelected ? "scale-105" : "group-hover:scale-105"}`}>
+                            {c.profile_pic_url ? (
+                              <AvatarImage src={c.profile_pic_url} alt={displayName} />
+                            ) : null}
+                            <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-white font-bold text-sm shadow-inner">
+                              {c.is_group ? <Users className="h-5 w-5" /> : initials || "?"}
+                            </AvatarFallback>
+                          </Avatar>
+                          {c.is_group && (
+                            <span className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground grid place-items-center border-2 border-background shadow-sm">
+                              <Users className="h-3 w-3" />
+                            </span>
+                          )}
+                          <div className={`absolute -left-1.5 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-full transition-all duration-300 ${isSelected ? "opacity-100" : "opacity-0 scale-y-0"}`} />
                         </div>
-                        <div className="flex items-center justify-between gap-2 mt-0.5">
-                          <p className={`text-xs truncate ${unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                            {last?.role === "assistant" || last?.role === "agent" ? "Você: " : ""}
-                            {last?.content ?? "—"}
-                          </p>
-                          <div className="flex items-center gap-1 shrink-0">
-                            {unread > 0 && (
-                              <span className="text-[10px] min-w-[18px] h-[18px] px-1 grid place-items-center rounded-full font-bold bg-primary text-primary-foreground">
-                                {unread > 99 ? "99+" : unread}
-                              </span>
-                            )}
-                            <span
-                              className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
-                                c.status === "handed_off" ? "bg-warning/15 text-warning" : "bg-success/15 text-success"
-                              }`}
-                            >
-                              {c.status === "handed_off" ? "MANUAL" : "BOT"}
+
+                        <div className="flex-1 min-w-0 py-0.5">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <span className={`text-sm truncate flex items-center gap-1.5 ${unread > 0 || isSelected ? "text-foreground font-bold" : "text-foreground/80 font-semibold"}`}>
+                              {displayName}
+                              {c.is_group && (
+                                <span className="text-[8px] font-black px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground/80 tracking-tighter uppercase">GP</span>
+                              )}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground/70 font-medium shrink-0">
+                              {formatDistanceToNow(new Date(c.last_message_at), { addSuffix: false, locale: ptBR })}
                             </span>
                           </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <p className={`text-xs truncate transition-colors ${unread > 0 ? "text-foreground font-semibold" : "text-muted-foreground/80"}`}>
+                              {last?.role === "assistant" || last?.role === "agent" ? (
+                                <span className="text-primary/70 font-medium mr-1">Você:</span>
+                              ) : ""}
+                              {last?.content ?? "—"}
+                            </p>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {unread > 0 && (
+                                <span className="text-[10px] min-w-[18px] h-[18px] px-1.5 grid place-items-center rounded-full font-black bg-primary text-primary-foreground animate-in zoom-in duration-300 shadow-sm shadow-primary/20">
+                                  {unread > 99 ? "99+" : unread}
+                                </span>
+                              )}
+                              <div 
+                                className={`h-2 w-2 rounded-full ring-4 ring-background ${
+                                  c.status === "handed_off" ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]" : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
+                                }`}
+                                title={c.status === "handed_off" ? "Manual" : "Bot Ativo"}
+                              />
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </button>
+                      </button>
+                    );
+                  })
                   );
                 })
               )}
