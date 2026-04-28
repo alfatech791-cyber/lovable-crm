@@ -20,26 +20,37 @@ export function QrCodeModal({ instanceName, onClose, onSuccess }: QrCodeModalPro
       setLoading(true);
       setError(null);
       console.log(`Iniciando configuração da instância: ${instanceName}`);
-      
-      // 1. Garantir que a instância existe e está configurada
-      // A Evolution API geralmente cria a instância no momento do connect se ela não existir, 
-      // mas para garantir webhooks e disparadores, podemos forçar uma atualização de configurações aqui.
-      
-      // 2. Buscar o QR Code
+
       const data = await evolution.getQrCode(instanceName);
       console.log("QR Code Data Received:", data);
-       if (data.base64) {
-         setQrCode(data.base64);
-       } else if (data.qrcode?.base64) {
-         setQrCode(data.qrcode.base64);
-      } else if (data.code === "ALREADY_CONNECTED") {
+
+      // Cobre todos os formatos: v1 { qrcode: { base64 } }, v2 { base64 }, { code }, raw string
+      const base64 =
+        data?.base64 ||
+        data?.qrcode?.base64 ||
+        data?.qrcode ||
+        (typeof data === "string" ? data : null);
+
+      const code = data?.code || data?.qrcode?.code;
+
+      if (base64) {
+        // garante prefixo data URI
+        const src = String(base64).startsWith("data:")
+          ? String(base64)
+          : `data:image/png;base64,${base64}`;
+        setQrCode(src);
+      } else if (code && typeof code === "string") {
+        // Renderiza via API pública de QR usando o code retornado
+        setQrCode(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(code)}`);
+      } else if (data?.instance?.state === "open" || data?.state === "open") {
         setStatus("open");
         onSuccess();
       } else {
         setError("Não foi possível gerar o QR Code. Tente novamente.");
       }
     } catch (err) {
-      setError("Erro ao buscar QR Code.");
+      console.error(err);
+      setError("Erro ao buscar QR Code. Verifique a conexão com a Evolution API.");
     } finally {
       setLoading(false);
     }
@@ -47,23 +58,31 @@ export function QrCodeModal({ instanceName, onClose, onSuccess }: QrCodeModalPro
 
   useEffect(() => {
     setupAndFetchQrCode();
-    // Polling status
-    const interval = setInterval(async () => {
+    // Auto-refresh do QR a cada 30s (expira) + polling de status a cada 4s
+    const refreshInterval = setInterval(() => {
+      if (status !== "open") setupAndFetchQrCode();
+    }, 30000);
+
+    const statusInterval = setInterval(async () => {
       try {
         const state = await evolution.getInstanceConnection(instanceName);
         const currentState = state.instance?.state || state.state;
         if (currentState === "open") {
           setStatus("open");
-          clearInterval(interval);
+          clearInterval(statusInterval);
+          clearInterval(refreshInterval);
           toast.success("WhatsApp conectado com sucesso!");
           setTimeout(onSuccess, 2000);
         }
       } catch (e) {
         // ignore
       }
-    }, 5000);
+    }, 4000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(statusInterval);
+      clearInterval(refreshInterval);
+    };
   }, [instanceName]);
 
   return (
