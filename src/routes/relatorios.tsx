@@ -89,8 +89,7 @@ function ReportsPage() {
                 <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Novo</span>
               </div>
               <p className="text-[15px] text-muted-foreground font-medium max-w-2xl leading-relaxed">
-                Seu faturamento cresceu <span className="text-foreground font-bold">12.5%</span> este mês, impulsionado principalmente pelo canal <span className="text-foreground font-bold">Google Ads</span>. 
-                Dica: O ticket médio dos leads do Instagram é <span className="text-success font-bold">15% maior</span>. Considere realocar parte do orçamento.
+              Bem-vindo ao módulo de inteligência. <span className="text-foreground font-bold">Cadastre seus primeiros dados</span> para que a ConectaAI possa gerar insights estratégicos sobre seu funil de vendas e faturamento.
               </p>
             </div>
             <div className="flex flex-col gap-2 min-w-[180px]">
@@ -106,10 +105,10 @@ function ReportsPage() {
           {/* Main Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {[
-              { label: "Faturamento", value: "R$ 145.800", trend: "+12.5%", isUp: true, icon: DollarSign, bg: "bg-primary/10", text: "text-primary" },
-              { label: "Leads Totais", value: "2.861", trend: "+18.2%", isUp: true, icon: Users, bg: "bg-info/10", text: "text-info" },
-              { label: "Conversão", value: "5.2%", trend: "-2.1%", isUp: false, icon: Target, bg: "bg-success/10", text: "text-success" },
-              { label: "Ticket Médio", value: "R$ 1.550", trend: "+4.3%", isUp: true, icon: TrendingUp, bg: "bg-warning/10", text: "text-warning" },
+              { label: "Faturamento", value: "R$ 0,00", trend: "0%", isUp: true, icon: DollarSign, bg: "bg-primary/10", text: "text-primary" },
+              { label: "Leads Totais", value: "0", trend: "0%", isUp: true, icon: Users, bg: "bg-info/10", text: "text-info" },
+              { label: "Conversão", value: "0,0%", trend: "0%", isUp: true, icon: Target, bg: "bg-success/10", text: "text-success" },
+              { label: "Ticket Médio", value: "R$ 0,00", trend: "0%", isUp: true, icon: TrendingUp, bg: "bg-warning/10", text: "text-warning" },
             ].map((stat, i) => (
               <div key={i} className="bg-white border border-border rounded-2xl p-5 shadow-card hover:border-primary/20 transition-colors group">
                 <div className="flex items-start justify-between mb-4">
