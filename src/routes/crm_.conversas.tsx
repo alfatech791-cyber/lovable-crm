@@ -1057,7 +1057,7 @@ function ConversasPage() {
                                     <p className="text-[10px] font-bold text-primary mb-1 opacity-80 uppercase tracking-tighter">{m.sender}</p>
                                   )}
                                   <span className="whitespace-pre-wrap break-words">{m.content}</span>
-                                </> /
+                                </>
                               <span className="whitespace-pre-wrap break-words">{m.content}</span>
                             )}
                             {m.at && m.kind !== "sticker" && (
