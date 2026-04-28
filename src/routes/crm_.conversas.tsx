@@ -793,11 +793,11 @@ function ConversasPage() {
     <div className="flex h-screen w-full bg-background overflow-hidden">
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Conversas" subtitle="Atenda WhatsApp em tempo real" />
+        <Topbar title="Conversas" subtitle="Gerencie seus atendimentos do WhatsApp em um só lugar" />
         <div className="flex-1 flex overflow-hidden">
           {/* Sidebar conversas */}
-          <div className="w-[380px] border-r border-border/40 flex flex-col bg-sidebar/30 backdrop-blur-xl">
-            <div className="p-4 border-b border-border/40 space-y-4">
+          <div className="w-[380px] border-r border-border/20 flex flex-col bg-card/50 backdrop-blur-xl">
+            <div className="p-4 border-b border-border/20 space-y-4">
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2.5">
                   <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -825,7 +825,7 @@ function ConversasPage() {
                   placeholder="Buscar contato..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 h-10 bg-background/50 border-border/40 focus-visible:ring-primary/20 transition-all rounded-xl"
+                  className="pl-9 h-10 bg-background/50 border-border/20 focus-visible:ring-primary/20 transition-all rounded-xl"
                 />
               </div>
 
@@ -893,7 +893,7 @@ function ConversasPage() {
                     <button
                       key={c.id}
                       onClick={() => setSelectedId(c.id)}
-                      className={`w-full flex items-center gap-3.5 p-3 rounded-2xl transition-all duration-300 relative text-left group ${
+                      className={`w-full flex items-center gap-3.5.5 p-3.5 rounded-xl transition-all duration-300 relative text-left group ${
                         isSelected 
                           ? "bg-primary/[0.08] shadow-[0_4px_20px_-4px_rgba(var(--primary-rgb),0.1)] ring-1 ring-primary/20" 
                           : "hover:bg-muted/50 border-transparent"
@@ -928,7 +928,7 @@ function ConversasPage() {
                             {formatDistanceToNow(new Date(c.last_message_at), { addSuffix: false, locale: ptBR })}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center justify-between gap-3.5">
                           <p className={`text-xs truncate transition-colors ${unread > 0 ? "text-foreground font-semibold" : "text-muted-foreground/80"}`}>
                             {last?.role === "assistant" || last?.role === "agent" ? (
                               <span className="text-primary/70 font-medium mr-1">Você:</span>
@@ -961,7 +961,7 @@ function ConversasPage() {
           {selected ? (
             <div className="flex-1 flex flex-col bg-card/20 min-w-0">
               <div className="h-[68px] px-6 border-b border-border flex items-center justify-between bg-card">
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-3.5 min-w-0">
                   <Avatar className="h-10 w-10 shrink-0">
                     {selected.profile_pic_url ? (
                       <AvatarImage src={selected.profile_pic_url} alt={selected.contact_name ?? selected.contact_phone} />
@@ -1013,9 +1013,9 @@ function ConversasPage() {
                             </span>
                           </div>
                         )}
-                        <div className={`flex gap-3 items-end ${isUser ? "justify-start" : "justify-end"} group`}>
+                        <div className={`flex gap-3.5 items-end ${isUser ? "justify-start" : "justify-end"} group`}>
                           {isUser && (
-                            <div className="h-8 w-8 rounded-full bg-muted border border-border/40 grid place-items-center shrink-0 shadow-sm overflow-hidden mb-1">
+                            <div className="h-8 w-8 rounded-full bg-muted border border-border/20 grid place-items-center shrink-0 shadow-sm overflow-hidden mb-1">
                               {selected.profile_pic_url ? (
                                 <img src={selected.profile_pic_url} className="h-full w-full object-cover" alt="" />
                               ) : (
@@ -1024,14 +1024,14 @@ function ConversasPage() {
                             </div>
                           )}
                           <div
-                            className={`max-w-[75%] px-4 py-3 rounded-2xl text-[13.5px] leading-relaxed shadow-sm transition-all duration-200 ${
+                            className={`max-w-[85%] px-4 py-3 rounded-xl text-[13.5px] leading-relaxed shadow-sm transition-all duration-200 ${
                               isUser
-                                 ? "bg-card text-foreground rounded-bl-sm border border-border/40 hover:shadow-md"
-                                 : "bg-primary text-primary-foreground rounded-br-sm shadow-lg shadow-primary/15 hover:shadow-primary/25"
+                                 ? "bg-card text-foreground rounded-bl-none border border-border/20 hover:shadow-md"
+                                 : "bg-primary text-primary-foreground rounded-br-none shadow-lg shadow-primary/15 hover:shadow-primary/25"
                             } ${m.kind === "sticker" ? "text-4xl bg-transparent shadow-none !px-1 !py-0" : ""}`}
                           >
                             {m.kind === "audio" ? (
-                              <span className="flex items-center gap-3 py-1 font-medium">
+                              <span className="flex items-center gap-3.5 py-1 font-medium">
                                 <div className="h-8 w-8 rounded-full bg-background/10 flex items-center justify-center">
                                   <Mic className="h-4 w-4" />
                                 </div>
@@ -1072,9 +1072,9 @@ function ConversasPage() {
               </div>
 
               {/* Novo Composer Estilizado */}
-              <div className="p-5 bg-card/80 border-t border-border/40 backdrop-blur-xl relative">
+              <div className="p-5 bg-card/80 border-t border-border/20 backdrop-blur-xl relative">
                 <div className="max-w-4xl mx-auto flex items-end gap-2.5 relative">
-                  <div className="flex-1 bg-muted/40 rounded-2xl border border-border/30 focus-within:border-primary/30 focus-within:ring-4 focus-within:ring-primary/5 transition-all duration-300 flex items-end px-3 py-2.5 shadow-inner group">
+                  <div className="flex-1 bg-muted/40 rounded-xl border border-border/30 focus-within:border-primary/30 focus-within:ring-4 focus-within:ring-primary/5 transition-all duration-300 flex items-end px-3 py-2.5 shadow-inner group">
                     <div className="flex items-center gap-1 mb-0.5 mr-2 shrink-0">
                       <button
                         onClick={() => setStickerOpen(!stickerOpen)}
@@ -1132,7 +1132,7 @@ function ConversasPage() {
                   <button
                     onClick={recording ? () => stopRecording(false) : sendText}
                     disabled={(!text.trim() && !recording) || sending}
-                    className="h-[52px] w-[52px] rounded-2xl bg-primary text-primary-foreground disabled:opacity-50 disabled:grayscale transition-all duration-300 flex items-center justify-center shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-95 group/send"
+                    className="h-[52px] w-[52px] rounded-xl bg-primary text-primary-foreground disabled:opacity-50 disabled:grayscale transition-all duration-300 flex items-center justify-center shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-95 group/send"
                   >
                     {sending ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
@@ -1143,7 +1143,7 @@ function ConversasPage() {
 
                   {/* Stickers Popover Estilizado */}
                   {stickerOpen && (
-                    <div className="absolute bottom-[calc(100%+12px)] left-0 z-50 bg-popover/95 backdrop-blur-xl border border-border/40 rounded-[24px] shadow-2xl p-4 w-[320px] animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+                    <div className="absolute bottom-[calc(100%+12px)] left-0 z-50 bg-popover/95 backdrop-blur-xl border border-border/20 rounded-[24px] shadow-2xl p-4 w-[320px] animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
                       <div className="flex items-center justify-between mb-3 px-1">
                         <span className="text-[11px] font-black text-muted-foreground/60 uppercase tracking-widest">Emojis & Stickers</span>
                         <button onClick={() => setStickerOpen(false)} className="h-6 w-6 rounded-full hover:bg-muted transition-colors flex items-center justify-center">
