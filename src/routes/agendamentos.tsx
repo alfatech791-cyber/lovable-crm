@@ -119,7 +119,8 @@ function AgendamentosPage() {
             </Card>
           </div>
         </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
