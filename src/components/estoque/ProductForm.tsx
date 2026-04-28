@@ -216,74 +216,86 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
               </div>
             </TabsContent>
 
-            <TabsContent value="tech" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              {isSmartphone ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
+            <TabsContent value="tech" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-5">
+                  <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                    <Hash className="h-3 w-3" /> Identificação
+                  </h5>
+                  
+                  <div className="grid gap-4">
                     <div className="grid gap-2">
-                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
-                        <Hash className="h-3.5 w-3.5" /> IMEI Principal
-                      </Label>
-                      <Input id="imei" defaultValue={product?.imei} placeholder="Ex: 356789123456789" className="bg-muted/30 h-11 border-sidebar-border font-mono text-xs tracking-widest" />
+                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">SKU / Código Interno</Label>
+                      <Input placeholder="GER-100234" className="bg-muted/20 h-10 border-sidebar-border text-xs" />
                     </div>
-                    <div className="grid gap-2">
-                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
-                        <Palette className="h-3.5 w-3.5" /> Cor do Aparelho
-                      </Label>
-                      <Select defaultValue="space-gray">
-                        <SelectTrigger className="bg-muted/30 h-11">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="space-gray">Cinza Espacial</SelectItem>
-                          <SelectItem value="silver">Prateado</SelectItem>
-                          <SelectItem value="gold">Dourado</SelectItem>
-                          <SelectItem value="blue">Azul Marinho</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="grid gap-2">
-                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
-                        <Cpu className="h-3.5 w-3.5" /> Capacidade / Memória
-                      </Label>
-                      <Select defaultValue="256gb">
-                        <SelectTrigger className="bg-muted/30 h-11">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="64gb">64GB</SelectItem>
-                          <SelectItem value="128gb">128GB</SelectItem>
-                          <SelectItem value="256gb">256GB</SelectItem>
-                          <SelectItem value="512gb">512GB</SelectItem>
-                          <SelectItem value="1tb">1TB</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex items-center justify-between p-4 rounded-2xl bg-sidebar-primary/10 border border-sidebar-primary/20">
-                      <div className="space-y-0.5">
-                        <Label className="text-sm font-bold flex items-center gap-2 text-primary">
-                          Aparelho Usado
-                        </Label>
-                        <p className="text-[10px] text-muted-foreground font-medium">Ativar para itens de vitrine ou seminovos</p>
+                    {isSmartphone && (
+                      <div className="grid gap-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">IMEI 1 (Principal)</Label>
+                        <Input id="imei" defaultValue={product?.imei} placeholder="35xxxxxxxxxxxxx" className="bg-muted/30 h-11 border-sidebar-border font-mono text-sm tracking-widest" />
                       </div>
-                      <Switch />
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-5">
+                  <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                    <Cpu className="h-3 w-3" /> Hardware & Estética
+                  </h5>
+
+                  <div className="grid gap-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Cor</Label>
+                        <Select defaultValue="natural-titanium">
+                          <SelectTrigger className="bg-muted/30 h-10 border-sidebar-border text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="natural-titanium">Titânio Natural</SelectItem>
+                            <SelectItem value="black-titanium">Titânio Preto</SelectItem>
+                            <SelectItem value="white-titanium">Titânio Branco</SelectItem>
+                            <SelectItem value="blue-titanium">Titânio Azul</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Capacidade</Label>
+                        <Select defaultValue="256gb">
+                          <SelectTrigger className="bg-muted/30 h-10 border-sidebar-border text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="128gb">128 GB</SelectItem>
+                            <SelectItem value="256gb">256 GB</SelectItem>
+                            <SelectItem value="512gb">512 GB</SelectItem>
+                            <SelectItem value="1tb">1 TB</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-sidebar-primary/5 border border-sidebar-primary/10 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <History className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <Label className="text-xs font-bold text-primary italic uppercase tracking-tighter">Condição: Seminovo</Label>
+                          <p className="text-[9px] text-muted-foreground">Ative para controle de aparelhos usados</p>
+                        </div>
+                      </div>
+                      <Switch className="data-[state=checked]:bg-primary" />
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-center space-y-4 opacity-50">
-                  <div className="h-16 w-16 rounded-3xl bg-muted flex items-center justify-center">
-                    <Smartphone className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <div className="max-w-[280px]">
-                    <h4 className="font-bold text-sm">Ficha Técnica Simplificada</h4>
-                    <p className="text-xs text-muted-foreground mt-1">Detalhes avançados como IMEI e memória estão disponíveis apenas para a categoria de smartphones.</p>
-                  </div>
-                </div>
-              )}
+              </div>
+              
+              <div className="grid gap-2 mt-4 pt-4 border-t border-sidebar-border/30">
+                <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider flex items-center gap-2">
+                  <Info className="h-3 w-3" /> Descrição Adicional
+                </Label>
+                <textarea className="w-full bg-muted/20 border border-sidebar-border rounded-xl p-3 text-xs outline-none focus:ring-1 focus:ring-primary/20 min-h-[80px]" placeholder="Ex: Saúde da bateria 100%, sem riscos na tela, acompanha caixa original..." />
+              </div>
             </TabsContent>
           </div>
         </Tabs>
