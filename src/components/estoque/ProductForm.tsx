@@ -58,7 +58,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                                Nome do Produto
                                <Badge variant="outline" className="text-[8px] h-3.5 px-1 py-0 border-primary/20 text-primary">Obrigatório</Badge>
                              </Label>
-                             <Input id="name" defaultValue={product?.name} placeholder="Ex: Apple iPhone 15 Pro Max 256GB" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                       <Input id="name" defaultValue={product?.name || ""} placeholder="Ex: Apple iPhone 15 Pro Max 256GB" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
                            </div>
                            <div className="md:col-span-4 grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código Interno / SKU</Label>
@@ -216,7 +216,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda Final</Label>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-primary text-primary-foreground font-black text-[10px] rounded-l-xl shadow-glow">R$</div>
-                        <Input id="price" type="number" defaultValue={product?.price} className="bg-card h-12 border-primary/20 focus:ring-4 focus:ring-primary/5 text-lg font-black text-primary transition-all pl-12" />
+                         <Input id="price" type="number" defaultValue={product?.price || ""} className="bg-card h-12 border-primary/20 focus:ring-4 focus:ring-primary/5 text-lg font-black text-primary transition-all pl-12" />
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -240,7 +240,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                     <div className="grid grid-cols-2 gap-3">
                       <div className="grid gap-2">
                         <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Saldo Atual</Label>
-                        <Input id="stock" type="number" defaultValue={product?.stock} className="bg-card h-12 border-border font-black text-lg text-center focus:ring-4 focus:ring-primary/5 transition-all" />
+                         <Input id="stock" type="number" defaultValue={product?.stock ?? ""} className="bg-card h-12 border-border font-black text-lg text-center focus:ring-4 focus:ring-primary/5 transition-all" />
                       </div>
                       <div className="grid gap-2">
                         <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Estoque Mín.</Label>
@@ -296,7 +296,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                     {isSmartphone && (
                       <div className="grid gap-2">
                          <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-widest">IMEI Principal (SIM 1)</Label>
-                         <Input id="imei" defaultValue={product?.imei} placeholder="Ex: 356789..." className="bg-muted/10 h-12 border-border font-mono text-sm tracking-[0.2em] font-black focus:ring-4 focus:ring-primary/5 transition-all" />
+                         <Input id="imei" defaultValue={product?.imei || ""} placeholder="Ex: 356789..." className="bg-muted/10 h-12 border-border font-mono text-sm tracking-[0.2em] font-black focus:ring-4 focus:ring-primary/5 transition-all" />
                       </div>
                     )}
                   </div>
