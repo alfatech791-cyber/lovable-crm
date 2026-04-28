@@ -66,7 +66,36 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                            </div>
                          </div>
 
-                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">EAN / Código de Barras</Label>
+                            <Input placeholder="789..." className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                          </div>
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código NCM</Label>
+                            <Input placeholder="8517.13.00" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                          </div>
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Referência do Fabricante</Label>
+                            <Input placeholder="REF-123" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                          </div>
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 flex items-center gap-2">
+                              Tipo do Produto
+                              <Badge variant="outline" className="text-[8px] h-3.5 px-1 py-0 border-primary/20 text-primary">Estoque</Badge>
+                            </Label>
+                            <Select defaultValue="simples">
+                              <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="simples">Produto Simples</SelectItem>
+                                <SelectItem value="composto">Produto Composto</SelectItem>
+                                <SelectItem value="servico">Serviço</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                            <div className="grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Categoria</Label>
                              <Select defaultValue={product?.category || "Acessórios"} onValueChange={(v) => setIsSmartphone(v === "Smartphones")}>
@@ -211,74 +240,120 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                      <DollarSign className="h-3.5 w-3.5" /> Precificação e Venda
                    </h5>
-                   <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda Final</Label>
-                      <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-primary text-primary-foreground font-black text-[10px] rounded-l-xl shadow-glow">R$</div>
-                         <Input id="price" type="number" defaultValue={product?.price || ""} className="bg-card h-12 border-primary/20 focus:ring-4 focus:ring-primary/5 text-lg font-black text-primary transition-all pl-12" />
+                    <div className="grid gap-4">
+                      <div className="grid gap-2">
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda (Varejo)</Label>
+                        <div className="relative group">
+                          <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-primary text-primary-foreground font-black text-[10px] rounded-l-xl shadow-glow">R$</div>
+                          <Input id="price" type="number" defaultValue={product?.price || ""} className="bg-card h-12 border-primary/20 focus:ring-4 focus:ring-primary/5 text-lg font-black text-primary transition-all pl-12" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-1.5">
+                          <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda (Atacado)</Label>
+                          <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-bold text-[8px] rounded-l-lg border border-r-0 border-border">R$</div>
+                            <Input type="number" className="bg-card h-9 border-border text-xs font-bold pl-10" />
+                          </div>
+                        </div>
+                        <div className="grid gap-1.5">
+                          <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Custo (Compra)</Label>
+                          <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-bold text-[8px] rounded-l-lg border border-r-0 border-border">R$</div>
+                            <Input type="number" className="bg-card h-9 border-border text-xs font-bold pl-10" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-1.5">
+                          <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Lucro Bruto (%)</Label>
+                          <Input type="number" placeholder="45.00" className="bg-card h-9 border-border text-xs font-bold" />
+                        </div>
+                        <div className="grid gap-1.5">
+                          <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Markup (%)</Label>
+                          <Input type="number" placeholder="81.82" className="bg-card h-9 border-border text-xs font-bold" />
+                        </div>
+                      </div>
+                      <div className="pt-2">
+                         <div className="flex items-center justify-between p-3 rounded-xl bg-primary/10 border border-primary/20">
+                            <div className="space-y-0.5">
+                               <span className="text-[9px] font-black uppercase text-primary block">Lucro Estimado</span>
+                               <span className="text-sm font-black text-primary">R$ 0,00</span>
+                            </div>
+                            <Percent className="h-4 w-4 text-primary/40" />
+                         </div>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="grid gap-1.5">
-                        <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço Atacado</Label>
-                        <Input type="number" className="bg-card h-9 border-border text-xs font-bold" />
-                      </div>
-                      <div className="grid gap-1.5">
-                        <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Custo Médio</Label>
-                        <Input type="number" className="bg-card h-9 border-border text-xs font-bold" />
-                      </div>
-                    </div>
-                   </div>
                  </section>
 
                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                     <Warehouse className="h-3.5 w-3.5" /> Controle de Estoque
+                     <Warehouse className="h-3.5 w-3.5" /> Estoque & Unidade
                    </h5>
                    <div className="grid gap-4">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="grid gap-2">
-                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Saldo Atual</Label>
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Estoque Inicial</Label>
                          <Input id="stock" type="number" defaultValue={product?.stock ?? ""} className="bg-card h-12 border-border font-black text-lg text-center focus:ring-4 focus:ring-primary/5 transition-all" />
                       </div>
                       <div className="grid gap-2">
-                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Estoque Mín.</Label>
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Estoque Mínimo</Label>
                         <Input id="min_stock" type="number" defaultValue={product?.min_stock || 2} className="bg-card h-12 border-border text-center text-warning font-black text-lg focus:ring-4 focus:ring-warning/5 transition-all" />
                       </div>
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
-                      <div className="space-y-0.5">
-                        <span className="text-[9px] font-black uppercase text-muted-foreground/60 block">Reservado</span>
-                        <span className="text-xs font-black">0 un</span>
-                      </div>
-                      <Box className="h-4 w-4 text-muted-foreground/30" />
-                    </div>
-                   </div>
-                 </section>
-
-                 <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
-                   <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                     <MapPin className="h-3.5 w-3.5" /> Armazenamento
-                   </h5>
-                   <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Localização (Gôndola/Box)</Label>
-                      <Input placeholder="Ex: A-12-04" className="bg-card h-10 border-border text-sm font-mono font-black" />
                     </div>
                     <div className="grid gap-2">
                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Unidade de Medida</Label>
                       <Select defaultValue="un">
-                        <SelectTrigger className="bg-card h-10 border-border text-xs font-bold"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="bg-card h-11 border-border font-semibold transition-all"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="un">Unidade (UN)</SelectItem>
                           <SelectItem value="cx">Caixa (CX)</SelectItem>
                           <SelectItem value="jg">Jogo (JG)</SelectItem>
+                          <SelectItem value="pc">Peça (PC)</SelectItem>
+                          <SelectItem value="kit">Kit (KIT)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
+                    <div className="grid gap-2">
+                      <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Peso Bruto (kg)</Label>
+                      <Input type="number" step="0.001" placeholder="0.250" className="bg-card h-11 border-border text-sm font-bold" />
+                    </div>
                    </div>
                  </section>
+
+                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
+                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                      <MapPin className="h-3.5 w-3.5" /> Armazenamento & Localização
+                    </h5>
+                    <div className="grid gap-4">
+                      <div className="grid gap-2">
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Localização (Box/Prateleira)</Label>
+                        <Input placeholder="Ex: A-12-04" className="bg-card h-11 border-border text-sm font-mono font-black" />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Loja / Depósito</Label>
+                        <Select defaultValue="matriz">
+                          <SelectTrigger className="bg-card h-11 border-border font-semibold transition-all"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="matriz">Loja Matriz</SelectItem>
+                            <SelectItem value="filial1">Filial Centro</SelectItem>
+                            <SelectItem value="deposito">Depósito Central</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Status Inicial</Label>
+                        <Select defaultValue="ativo">
+                          <SelectTrigger className="bg-card h-11 border-border font-semibold transition-all"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ativo">Ativo</SelectItem>
+                            <SelectItem value="rascunho">Rascunho</SelectItem>
+                            <SelectItem value="desativado">Desativado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </section>
                </div>
 
               {/* Técnico */}
@@ -322,74 +397,6 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                 </div>
               </div>
 
-               {/* Dados Fiscais, Logística e Extras */}
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-10 border-t border-border/50">
-                 <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
-                   <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                     <Percent className="h-3 w-3" /> Fiscal & Tributário
-                   </h5>
-                   <div className="grid grid-cols-2 gap-3">
-                     <div className="grid gap-1.5">
-                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">NCM</Label>
-                       <Input placeholder="8517.13.00" className="bg-card h-9 border-border text-[10px] font-mono" />
-                     </div>
-                     <div className="grid gap-1.5">
-                       <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">CEST</Label>
-                       <Input placeholder="21.053.01" className="bg-card h-9 border-border text-[10px] font-mono" />
-                     </div>
-                     <div className="grid gap-1.5">
-                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">ICMS %</Label>
-                       <Input placeholder="18" className="bg-card h-9 border-border text-[10px]" />
-                     </div>
-                     <div className="grid gap-1.5">
-                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">IPI %</Label>
-                       <Input placeholder="5" className="bg-card h-9 border-border text-[10px]" />
-                     </div>
-                   </div>
-                 </section>
-
-                 <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
-                   <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                     <Globe className="h-3 w-3" /> Logística & Dimensões
-                   </h5>
-                   <div className="grid grid-cols-2 gap-3">
-                     <div className="grid gap-1.5 col-span-2">
-                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Peso Bruto (kg)</Label>
-                       <Input type="number" step="0.001" placeholder="0.250" className="bg-card h-9 border-border text-[10px]" />
-                     </div>
-                     <div className="grid gap-1.5">
-                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Largura (cm)</Label>
-                       <Input type="number" placeholder="10" className="bg-card h-9 border-border text-[10px]" />
-                     </div>
-                     <div className="grid gap-1.5">
-                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Altura (cm)</Label>
-                       <Input type="number" placeholder="5" className="bg-card h-9 border-border text-[10px]" />
-                     </div>
-                   </div>
-                 </section>
-
-                 <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
-                   <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                     <Settings2 className="h-3 w-3" /> Configurações Extras
-                   </h5>
-                   <div className="space-y-3">
-                     <div className="flex items-center justify-between p-2 rounded-lg bg-card/50 border border-border">
-                       <div className="space-y-0.5">
-                         <Label className="text-[10px] font-black uppercase opacity-70">Sincronizar</Label>
-                         <p className="text-[8px] text-muted-foreground">Marketplaces</p>
-                       </div>
-                       <Switch className="scale-75" defaultChecked />
-                     </div>
-                     <div className="flex items-center justify-between p-2 rounded-lg bg-card/50 border border-border">
-                       <div className="space-y-0.5">
-                         <Label className="text-[10px] font-black uppercase opacity-70">Notificar</Label>
-                         <p className="text-[8px] text-muted-foreground">Estoque Baixo</p>
-                       </div>
-                       <Switch className="scale-75" defaultChecked />
-                     </div>
-                   </div>
-                 </section>
-               </div>
             </div>
         </div>
 
