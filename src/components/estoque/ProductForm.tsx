@@ -83,21 +83,24 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                       <Tag className="h-3 w-3" /> Identificação Básica
                     </h3>
                     
-                    <div className="grid gap-4">
-                      <div className="grid gap-2">
-                        <Label className="text-[10px] font-bold uppercase text-muted-foreground/70 tracking-wider">Título Comercial do Anúncio</Label>
-                        <div className="relative">
-                           <Input id="name" defaultValue={product?.name} placeholder="Ex: Apple iPhone 15 Pro Max 256GB - Titânio Natural" className="bg-card/50 h-12 border-sidebar-border focus:ring-1 focus:ring-primary/20 text-base font-semibold" />
-                           <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground/40 uppercase">0/60</div>
+                    <div className="grid gap-5">
+                      <div className="grid gap-2.5">
+                        <div className="flex items-center justify-between px-1">
+                           <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest flex items-center gap-2">
+                              Título Comercial do Anúncio
+                              <Badge variant="outline" className="text-[8px] h-3.5 px-1 py-0 border-primary/20 text-primary">Obrigatório</Badge>
+                           </Label>
+                           <span className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-tighter">0 / 80 Caracteres</span>
                         </div>
+                        <Input id="name" defaultValue={product?.name} placeholder="Ex: Apple iPhone 15 Pro Max 256GB - Titânio Natural" className="bg-card h-14 border-border shadow-sm focus:border-primary/50 focus:ring-4 focus:ring-primary/5 text-base font-bold transition-all placeholder:font-medium" />
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
                         <div className="grid gap-2">
-                          <Label className="text-[10px] font-bold uppercase text-muted-foreground/70 tracking-wider">Categoria</Label>
+                          <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Categoria</Label>
                           <Select defaultValue={product?.category || "Acessórios"} onValueChange={(v) => setIsSmartphone(v === "Smartphones")}>
-                            <SelectTrigger className="bg-card/50 h-10 border-sidebar-border"><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
+                            <SelectContent className="border-border shadow-elegant">
                               <SelectItem value="Smartphones">Smartphones</SelectItem>
                               <SelectItem value="Tablets">Tablets</SelectItem>
                               <SelectItem value="Watch">Smartwatches</SelectItem>
@@ -107,10 +110,10 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                           </Select>
                         </div>
                         <div className="grid gap-2">
-                          <Label className="text-[10px] font-bold uppercase text-muted-foreground/70 tracking-wider">Fabricante</Label>
+                          <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fabricante</Label>
                           <Select defaultValue="apple">
-                            <SelectTrigger className="bg-card/50 h-10 border-sidebar-border"><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
+                            <SelectContent className="border-border shadow-elegant">
                               <SelectItem value="apple">Apple Inc.</SelectItem>
                               <SelectItem value="samsung">Samsung</SelectItem>
                               <SelectItem value="xiaomi">Xiaomi</SelectItem>
@@ -119,10 +122,10 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                           </Select>
                         </div>
                         <div className="grid gap-2">
-                          <Label className="text-[10px] font-bold uppercase text-muted-foreground/70 tracking-wider">Fornecedor</Label>
+                          <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fornecedor</Label>
                           <Select defaultValue="padrao">
-                            <SelectTrigger className="bg-card/50 h-10 border-sidebar-border"><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
+                            <SelectContent className="border-border shadow-elegant">
                               <SelectItem value="padrao">Principal</SelectItem>
                               <SelectItem value="dist">Distribuidora Oficial</SelectItem>
                               <SelectItem value="import">Importação Direta</SelectItem>
