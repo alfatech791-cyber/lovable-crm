@@ -1049,20 +1049,20 @@ function ConversasPage() {
                           >
                             {m.kind === "audio" ? (
                               <span className="flex items-center gap-3.5 py-1 font-medium">
-                                <div className="h-8 w-8 rounded-full bg-background/10 flex items-center justify-center">
+                                <span className="h-8 w-8 rounded-full bg-background/10 inline-flex items-center justify-center">
                                   <Mic className="h-4 w-4" />
-                                </div>
+                                </span>
                                 <span>Áudio do WhatsApp</span>
                               </span>
                             ) : m.kind === "image" ? (
                               <div className="space-y-2">
                                 <img 
-                                  src={m.media || (typeof m.content === 'string' && m.content.startsWith('http') ? m.content : undefined)} 
+                                  src={m.media || (typeof m.content === 'string' && m.content.startsWith('http') ? m.content : '')} 
                                   className="rounded-xl max-w-full h-auto cursor-pointer transition hover:brightness-110 shadow-sm" 
                                   alt="" 
                                   onClick={() => m.media && window.open(m.media, '_blank')} 
                                 />
-                                {m.content && !m.content.startsWith("🖼️") && (
+                                {m.content && typeof m.content === 'string' && !m.content.startsWith("🖼️") && (
                                   <p className="opacity-90">{m.content}</p>
                                 )}
                               </div>
