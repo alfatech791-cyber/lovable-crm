@@ -140,44 +140,77 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
               </div>
             </TabsContent>
 
-            <TabsContent value="stock" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="grid gap-2">
-                    <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
-                      <DollarSign className="h-3.5 w-3.5" /> Preço de Venda (R$)
-                    </Label>
-                    <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-primary">R$</span>
-                      <Input id="price" type="number" defaultValue={product?.price} className="bg-muted/30 h-12 pl-10 border-sidebar-border focus:ring-2 focus:ring-primary/20 text-lg font-bold" />
+            <TabsContent value="stock" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Coluna de Preços */}
+                <div className="space-y-5">
+                  <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                    <DollarSign className="h-3 w-3" /> Financeiro
+                  </h5>
+                  
+                  <div className="grid gap-4">
+                    <div className="grid gap-2">
+                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda</Label>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-primary/10 text-primary font-bold text-sm rounded-l-lg border border-r-0 border-sidebar-border group-focus-within:border-primary/50 transition-colors">R$</div>
+                        <Input id="price" type="number" defaultValue={product?.price} className="bg-muted/30 h-11 pl-12 rounded-l-none border-sidebar-border focus:ring-1 focus:ring-primary/20 text-base font-bold" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Custo (Opcional)</Label>
-                    <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/50">R$</span>
-                      <Input type="number" className="bg-muted/30 h-12 pl-10 border-sidebar-border" />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Custo Unitário</Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 text-xs font-bold">R$</span>
+                          <Input type="number" className="bg-muted/20 h-10 pl-9 border-sidebar-border text-xs" />
+                        </div>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Margem Bruta</Label>
+                        <div className="relative">
+                          <Input disabled value="35%" className="bg-muted/10 h-10 pr-9 border-sidebar-border text-xs font-bold text-success" />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-success/50 text-[10px] font-bold">%</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Qtd. em Estoque</Label>
-                      <Input id="stock" type="number" defaultValue={product?.stock} className="bg-muted/30 h-11 border-sidebar-border" />
+                {/* Coluna de Estoque */}
+                <div className="space-y-5">
+                  <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                    <Layers className="h-3 w-3" /> Inventário
+                  </h5>
+
+                  <div className="grid gap-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Saldo Inicial</Label>
+                        <Input id="stock" type="number" defaultValue={product?.stock} className="bg-muted/30 h-11 border-sidebar-border font-bold text-center" />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Mínimo (Alerta)</Label>
+                        <Input id="min_stock" type="number" defaultValue={product?.min_stock || 2} className="bg-muted/30 h-11 border-sidebar-border text-center text-warning font-bold" />
+                      </div>
                     </div>
-                    <div className="grid gap-2">
-                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Estoque Mínimo</Label>
-                      <Input id="min_stock" type="number" defaultValue={product?.min_stock || 2} className="bg-muted/30 h-11 border-sidebar-border" />
+
+                    <div className="p-3 rounded-xl bg-muted/20 border border-sidebar-border/50 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label className="text-xs font-bold">Reserva de Segurança</Label>
+                          <p className="text-[9px] text-muted-foreground">Bloqueia venda se atingir o mínimo</p>
+                        </div>
+                        <Switch className="scale-75" />
+                      </div>
+                      <Separator className="opacity-30" />
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label className="text-xs font-bold">Permitir Venda sem Estoque</Label>
+                          <p className="text-[9px] text-muted-foreground">Útil para encomendas/drop</p>
+                        </div>
+                        <Switch className="scale-75" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-muted/20 border border-sidebar-border/50">
-                    <div className="space-y-0.5">
-                      <Label className="text-sm font-bold">Controlar Validade?</Label>
-                      <p className="text-[10px] text-muted-foreground">Útil para peças e baterias</p>
-                    </div>
-                    <Switch />
                   </div>
                 </div>
               </div>
