@@ -31,7 +31,7 @@ serve(async (req) => {
     const userId = userRes.user.id;
 
     const body = await req.json().catch(() => ({}));
-    const phone: string = String(body.phone ?? "").replace(/\D/g, "");
+    const rawPhone = String(body.phone ?? ""); const phone = rawPhone.includes("@") ? rawPhone : rawPhone.replace(/\D/g, "");
     const text: string = String(body.text ?? "").trim();
     const kind: string = String(body.kind ?? "text"); // text | audio | sticker | image
     const media: string | null = body.media ? String(body.media) : null; // base64 (sem prefixo) OU URL
