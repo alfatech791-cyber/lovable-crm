@@ -347,16 +347,29 @@ function ConversasPage() {
   const ensureWebhook = async (instance: string) => {
     if (!user?.id || !instance) return;
     if (webhookCheckedRef.current === instance) return;
-    webhookCheckedRef.current = instance;
     try {
-      const { data: settings } = await supabase
+      let { data: settings, error: fetchError } = await supabase
         .from("bot_settings")
-        .select("webhook_secret")
+        .select("webhook_secret, whatsapp_instance")
         .eq("user_id", user.id)
         .maybeSingle();
+
+      if (!settings && !fetchError) {
+        console.log("[conversas] criando bot_settings inicial...");
+        const { data: newSettings, error: insertError } = await supabase
+          .from("bot_settings")
+          .insert({ user_id: user.id, whatsapp_instance: instance })
+          .select()
+          .single();
+        
+        if (insertError) throw insertError;
+        settings = newSettings;
+      }
+
       const secret = settings?.webhook_secret;
       if (!secret) return; // bot ainda não configurado; nada a fazer
 
+      webhookCheckedRef.current = instance;
       const projectRef = (import.meta.env.VITE_SUPABASE_PROJECT_ID as string | undefined) ?? null;
       if (!projectRef) return;
       const expectedUrl = `https://${projectRef}.supabase.co/functions/v1/bot-webhook?uid=${user.id}&secret=${secret}`;
