@@ -567,7 +567,8 @@ function ConversasPage() {
   );
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    // Mensagens mais recentes ficam no topo — rolar para o início ao abrir/atualizar
+    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }, [selected?.transcript?.length, selectedId]);
 
   // Mark conversation as read when opened or when new messages arrive while open
@@ -861,12 +862,13 @@ function ConversasPage() {
                 {(selected.transcript ?? []).length === 0 ? (
                   <div className="text-xs text-center text-muted-foreground py-10">Sem mensagens registradas.</div>
                 ) : (
-                  selected.transcript.map((m, i) => {
+                  [...selected.transcript].reverse().map((m, i, arr) => {
                     const isUser = m.role === "user";
-                    const prev = selected.transcript[i - 1];
+                    // Lista invertida: a "anterior" cronologicamente é a próxima do array
+                    const older = arr[i + 1];
                     const showDate =
-                      !prev ||
-                      (m.at && prev.at && new Date(m.at).toDateString() !== new Date(prev.at).toDateString());
+                      !older ||
+                      (m.at && older.at && new Date(m.at).toDateString() !== new Date(older.at).toDateString());
                     return (
                       <div key={i}>
                         {showDate && m.at && (
