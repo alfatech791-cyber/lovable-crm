@@ -136,38 +136,63 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
          <div className="overflow-x-auto">
            <table className="w-full text-left border-collapse">
              <thead>
-               <tr className="border-b border-border bg-muted/30">
-                 <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Produto</th>
-                 <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Categoria</th>
-                 <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Estoque</th>
-                 <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Preço Venda</th>
-                 <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</th>
-                 <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Ações</th>
-               </tr>
+                <tr className="border-b border-border bg-muted/30">
+                  <th className="px-6 py-4 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Produto / Referência</th>
+                  <th className="px-6 py-4 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-center">NCM / EAN</th>
+                  <th className="px-6 py-4 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Categoria</th>
+                  <th className="px-6 py-4 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-center">Estoque Atual</th>
+                  <th className="px-6 py-4 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Preço Venda</th>
+                  <th className="px-6 py-4 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-4 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Ações</th>
+                </tr>
              </thead>
              <tbody className="divide-y divide-border">
                 {filteredProducts.map((product) => (
-                 <tr key={product.id} className="hover:bg-muted/30 transition-colors">
-                   <td className="px-6 py-4">
-                     <div className="flex items-center gap-3">
-                       <div className="h-10 w-10 rounded-lg bg-muted grid place-items-center shrink-0">
-                         <Package className="h-5 w-5 text-muted-foreground" />
-                       </div>
-                       <div>
-                         <div className="font-semibold text-sm">{product.name}</div>
-                         {product.imei && <div className="text-[10px] text-muted-foreground font-mono">IMEI: {product.imei}</div>}
-                       </div>
-                     </div>
-                   </td>
-                   <td className="px-6 py-4">
-                     <span className="text-xs px-2 py-1 rounded bg-muted font-medium">{product.category}</span>
-                   </td>
-                   <td className="px-6 py-4">
-                     <div className="flex items-center gap-2">
-                       <span className={`text-sm font-bold ${(product.stock || 0) <= 3 ? 'text-destructive' : ''}`}>{product.stock || 0} un</span>
-                       {(product.stock || 0) <= 3 && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}
-                     </div>
-                   </td>
+                  <tr key={product.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        {product.image ? (
+                          <img src={product.image} alt={product.name} className="h-10 w-10 rounded-lg object-cover shrink-0 border border-border" />
+                        ) : (
+                          <div className="h-10 w-10 rounded-lg bg-muted grid place-items-center shrink-0 border border-border">
+                            <Package className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-semibold text-sm text-foreground leading-none mb-1">{product.name}</div>
+                          <div className="flex items-center gap-2">
+                            {product.reference && <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded text-secondary-foreground font-medium">REF: {product.reference}</span>}
+                            {product.brand && <span className="text-[10px] text-muted-foreground">{product.brand}</span>}
+                            {product.imei && <div className="text-[10px] text-muted-foreground font-mono">IMEI: {product.imei}</div>}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-[10px] font-mono text-muted-foreground bg-muted/50 px-2 py-0.5 rounded leading-none">{product.ncm || '---'}</span>
+                        <span className="text-[10px] font-mono text-muted-foreground leading-none">{product.ean || '---'}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-xs px-2 py-1 rounded bg-muted font-medium">{product.category}</span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="inline-flex flex-col items-center">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-bold ${(product.stock || 0) <= 3 ? 'text-destructive' : 'text-foreground'}`}>
+                            {product.stock || 0}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground font-medium uppercase">{product.unit || 'un'}</span>
+                        </div>
+                        <div className="w-16 h-1 bg-muted rounded-full mt-1 overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full ${ (product.stock || 0) <= 3 ? 'bg-destructive' : 'bg-primary' }`}
+                            style={{ width: `${Math.min(((product.stock || 0) / 10) * 100, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    </td>
                    <td className="px-6 py-4">
                      <span className="text-sm font-bold text-primary">
                        {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
