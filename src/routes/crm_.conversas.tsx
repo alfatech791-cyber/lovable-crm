@@ -56,7 +56,7 @@ type Conversation = {
   last_message_at: string;
   transcript: Msg[];
   profile_pic_url: string | null;
-  is_group: boolean; remote_jid?: string | null;
+  is_group: boolean; remote_jid: string | null;
 };
 
 type EvolutionChat = {
@@ -556,14 +556,14 @@ function ConversasPage() {
           } satisfies Conversation;
         })
       );
-      const valid = rows.filter((row): row is Conversation => !!row && row.transcript.length > 0);
+      const valid = rows.filter((row): row is Conversation => !!row && (row as any).transcript.length > 0) as Conversation[];
       if (user?.id && valid.length > 0) {
         const upsertRows = valid.map((row) => ({
           ...(row.id.includes(":") ? {} : { id: row.id }),
           user_id: user.id,
           contact_phone: row.contact_phone,
           contact_name: row.contact_name,
-          remote_jid: (row as any).remote_jid,
+          remote_jid: row.remote_jid,
           transcript: row.transcript as any,
           status: row.status,
           messages_count: row.messages_count,
