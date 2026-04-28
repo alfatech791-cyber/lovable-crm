@@ -394,8 +394,23 @@ function BotPage() {
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="w-full"
+                      disabled={!webhookUrl || !form.whatsapp_instance}
+                      onClick={async () => {
+                        const { data, error } = await supabase.functions.invoke("evolution-config", {
+                          body: { action: "set_webhook", instance: form.whatsapp_instance, webhookUrl },
+                        });
+                        if (error) toast.error("Falha: " + error.message);
+                        else toast.success("Webhook configurado na Evolution!");
+                      }}
+                    >
+                      Configurar webhook automaticamente
+                    </Button>
                     <p className="text-[11px] text-muted-foreground">
-                      Cole essa URL no campo de webhook da sua instância Evolution para receber mensagens.
+                      Ou copie e cole no campo de webhook da sua instância Evolution.
                     </p>
                   </div>
                 </Section>
