@@ -11,22 +11,23 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
  
- export function StockList() {
-   const [isAddOpen, setIsAddOpen] = useState(false);
-   const [editingProduct, setEditingProduct] = useState<any>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  export function StockList() {
+    const [isAddOpen, setIsAddOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState<any>(null);
+    const [localProducts, setLocalProducts] = useState(products);
+   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [viewTab, setViewTab] = useState("all");
 
-   const stats = useMemo(() => {
-     const totalValue = products.reduce((acc, p) => acc + (p.price * (p.stock || 0)), 0);
-     const lowStock = products.filter(p => (p.stock || 0) <= 3 && (p.stock || 0) > 0).length;
-     const outOfStock = products.filter(p => (p.stock || 0) === 0).length;
-     return { totalValue, lowStock, outOfStock, totalItems: products.length };
-   }, [products]);
-
-  const filteredProducts = useMemo(() => {
-    return products.filter(product => {
+    const stats = useMemo(() => {
+      const totalValue = localProducts.reduce((acc, p) => acc + (p.price * (p.stock || 0)), 0);
+      const lowStock = localProducts.filter(p => (p.stock || 0) <= 3 && (p.stock || 0) > 0).length;
+      const outOfStock = localProducts.filter(p => (p.stock || 0) === 0).length;
+      return { totalValue, lowStock, outOfStock, totalItems: localProducts.length };
+    }, [localProducts]);
+ 
+   const filteredProducts = useMemo(() => {
+     return localProducts.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                            (product.imei?.includes(searchTerm));
       const matchesCategory = filterCategory === "all" || product.category === filterCategory;
@@ -36,7 +37,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
       
       return matchesSearch && matchesCategory;
     });
-  }, [searchTerm, filterCategory, viewTab]);
+   }, [searchTerm, filterCategory, viewTab, localProducts]);
+
+   const handleAddProduct = (data: any) => {
+     const newProduct = {
+       ...data,
+       id: Math.random().toString(36).substr(2, 9),
+     };
+     setLocalProducts(prev => [newProduct, ...prev]);
+   };
+
+   const handleUpdateProduct = (data: any) => {
+     setLocalProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...p, ...data } : p));
+   };
+
+   const handleDeleteProduct = (id: string) => {
+     if (window.confirm("Tem certeza que deseja excluir este produto?")) {
+       setLocalProducts(prev => prev.filter(p => p.id !== id));
+     }
+   };
 
    return (
      <div className="space-y-6">
@@ -217,9 +236,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
                           <DropdownMenuItem className="gap-2">
                             <History className="h-4 w-4" /> Movimentação
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2 text-destructive focus:text-destructive">
-                            <Trash2 className="h-4 w-4" /> Excluir
-                          </DropdownMenuItem>
+                           <DropdownMenuItem onClick={() => handleDeleteProduct(product.id)} className="gap-2 text-destructive focus:text-destructive">
+                             <Trash2 className="h-4 w-4" /> Excluir
+                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                    </td>
@@ -230,12 +249,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
          </div>
        </div>
 
-       <ProductForm open={isAddOpen} onOpenChange={setIsAddOpen} />
-       <ProductForm 
-         open={!!editingProduct} 
-         onOpenChange={(open) => !open && setEditingProduct(null)} 
-         product={editingProduct} 
-       />
+        <ProductForm open={isAddOpen} onOpenChange={setIsAddOpen} onSave={handleAddProduct} />
+        <ProductForm 
+          open={!!editingProduct} 
+          onOpenChange={(open) => !open && setEditingProduct(null)} 
+          product={editingProduct}
+          onSave={handleUpdateProduct}
+        />
      </div>
    );
  }
