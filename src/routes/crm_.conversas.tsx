@@ -594,7 +594,14 @@ function ConversasPage() {
     if (!selected) return;
     setSending(true);
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+      if (!accessToken) {
+        toast.error("Sessão expirada. Faça login novamente.");
+        return;
+      }
       const { data, error } = await supabase.functions.invoke("send-whatsapp", {
+        headers: { Authorization: `Bearer ${accessToken}` },
         body: {
           phone: selected.contact_phone,
           contactName: selected.contact_name,

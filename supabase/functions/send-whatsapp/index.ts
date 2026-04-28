@@ -14,18 +14,20 @@ serve(async (req) => {
 
   try {
     const auth = req.headers.get("Authorization") ?? "";
-    if (!auth.startsWith("Bearer ")) return json({ error: "unauthorized" }, 401);
+    const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+    if (!token) return json({ error: "unauthorized: missing token" }, 401);
 
+    // Admin client (service role) — usado para validar o token e gravar
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { global: { headers: { Authorization: auth } } }
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { data: userRes, error: userErr } = await supabase.auth.getUser(
-      auth.replace("Bearer ", "")
-    );
-    if (userErr || !userRes?.user) return json({ error: "unauthorized" }, 401);
+    const { data: userRes, error: userErr } = await supabase.auth.getUser(token);
+    if (userErr || !userRes?.user) {
+      console.error("auth error", userErr);
+      return json({ error: "unauthorized: invalid session" }, 401);
+    }
     const userId = userRes.user.id;
 
     const body = await req.json().catch(() => ({}));
