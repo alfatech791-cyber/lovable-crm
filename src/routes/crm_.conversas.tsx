@@ -140,14 +140,16 @@ const blobToBase64 = (blob: Blob): Promise<string> =>
   });
 
 function ConversasPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [items, setItems] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [resolvedInstance, setResolvedInstance] = useState<string | null>(null);
   const [recording, setRecording] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
   const [stickerOpen, setStickerOpen] = useState(false);
@@ -156,6 +158,115 @@ function ConversasPage() {
   const recordTimerRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const syncLockRef = useRef(false);
+  const readyForNotificationsRef = useRef(false);
+  const lastIncomingMessageRef = useRef(new Map<string, string>());
+
+  const getLastIncomingKey = (conversation: Conversation) => {
+    const lastIncoming = [...(conversation.transcript ?? [])]
+      .reverse()
+      .find((message) => message.role === "user");
+
+    if (!lastIncoming) return null;
+
+    return [conversation.contact_phone, lastIncoming.at ?? "", lastIncoming.kind ?? "text", lastIncoming.content]
+      .join("|")
+      .trim();
+  };
+
+  const rememberConversation = (conversation: Conversation) => {
+    const key = getLastIncomingKey(conversation);
+    if (key) lastIncomingMessageRef.current.set(conversation.contact_phone, key);
+  };
+
+  const maybeNotifyIncoming = (conversation: Conversation) => {
+    const key = getLastIncomingKey(conversation);
+    if (!key) return;
+
+    const previousKey = lastIncomingMessageRef.current.get(conversation.contact_phone);
+    lastIncomingMessageRef.current.set(conversation.contact_phone, key);
+
+    if (!readyForNotificationsRef.current || previousKey === key) return;
+
+    const title = conversation.contact_name ?? conversation.contact_phone;
+    const lastIncoming = [...(conversation.transcript ?? [])]
+      .reverse()
+      .find((message) => message.role === "user");
+    const description = lastIncoming?.content || "Nova mensagem recebida";
+
+    toast.info(`Nova mensagem de ${title}`, { description });
+
+    if (
+      typeof window !== "undefined" &&
+      "Notification" in window &&
+      Notification.permission === "granted" &&
+      document.visibilityState !== "visible"
+    ) {
+      new Notification(title, { body: description });
+    }
+  };
+
+  const applyConversations = (list: Conversation[], notify = false) => {
+    const sorted = [...list].sort(
+      (a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at)
+    );
+
+    (notify ? sorted.forEach(maybeNotifyIncoming) : sorted.forEach(rememberConversation));
+
+    setItems(sorted);
+    setSelectedId((current) => {
+      if (current && sorted.some((conversation) => conversation.id === current)) return current;
+      return sorted[0]?.id ?? null;
+    });
+  };
+
+  const resolveInstance = async () => {
+    if (!user?.id) return null;
+
+    const [{ data: settings, error: settingsError }, { data: savedInstances, error: instancesError }] = await Promise.all([
+      supabase.from("bot_settings").select("whatsapp_instance").eq("user_id", user.id).maybeSingle(),
+      supabase
+        .from("whatsapp_instances")
+        .select("instance_name, status, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
+    ]);
+
+    if (settingsError) throw settingsError;
+    if (instancesError) throw instancesError;
+
+    const configured = settings?.whatsapp_instance?.trim();
+    if (configured) {
+      setResolvedInstance(configured);
+      return configured;
+    }
+
+    const statusPriority = ["open", "connected", "active", "online", "connecting"];
+    const dbCandidate = (savedInstances ?? []).find((instance) =>
+      statusPriority.includes(String(instance.status ?? "").toLowerCase())
+    )?.instance_name;
+
+    if (dbCandidate) {
+      setResolvedInstance(dbCandidate);
+      return dbCandidate;
+    }
+
+    const remoteInstances = await evolution.getInstances();
+    const remoteCandidate =
+      remoteInstances.find((instance) => statusPriority.includes(String(instance.status ?? "").toLowerCase()))?.instanceName ??
+      remoteInstances[0]?.instanceName ??
+      null;
+
+    if (remoteCandidate) {
+      setResolvedInstance(remoteCandidate);
+      await supabase.from("bot_settings").upsert(
+        { user_id: user.id, whatsapp_instance: remoteCandidate },
+        { onConflict: "user_id" }
+      );
+    }
+
+    return remoteCandidate;
+  };
 
   const load = async () => {
     if (!user?.id) return;
