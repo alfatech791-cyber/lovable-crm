@@ -909,8 +909,13 @@ function ConversasPage() {
                   return (
                     <button
                       key={c.id}
-                      onClick={() => setSelectedId(c.id)}
-                      className={`w-full flex items-center gap-3.5.5 p-3.5 rounded-xl transition-all duration-300 relative text-left group ${
+                       onClick={() => {
+                         if (selectedId !== c.id) {
+                           setSelectedId(c.id);
+                           markAsRead(c);
+                         }
+                       }}
+                       className={`w-full flex items-center gap-3.5 p-3.5 rounded-xl transition-all duration-300 relative text-left group border border-transparent ${
                         isSelected 
                           ? "bg-primary/[0.08] shadow-[0_4px_20px_-4px_rgba(var(--primary-rgb),0.1)] ring-1 ring-primary/20" 
                           : "hover:bg-muted/50 border-transparent"
