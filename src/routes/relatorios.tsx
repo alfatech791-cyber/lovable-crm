@@ -8,10 +8,7 @@ import {
   Lightbulb, AlertCircle
 } from "lucide-react";
 import { SalesChart } from "@/components/dashboard/SalesChart";
-import { 
-  BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, 
-  PieChart as RePieChart, Pie
-} from "recharts";
+import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart as RePieChart, Pie } from "recharts";
 import { funnelData, originData, topPerformers } from "@/lib/mock";
 import { useAuth } from "@/contexts/AuthContext";
 
