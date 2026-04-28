@@ -241,8 +241,8 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
               </div>
             </TabsContent>
 
-            <TabsContent value="stock" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <TabsContent value="stock" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 {/* Coluna de Preços */}
                 <div className="space-y-5">
                   <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
@@ -253,8 +253,8 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                     <div className="grid gap-2">
                       <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda</Label>
                       <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-primary/10 text-primary font-bold text-sm rounded-l-lg border border-r-0 border-sidebar-border group-focus-within:border-primary/50 transition-colors">R$</div>
-                        <Input id="price" type="number" defaultValue={product?.price} className="bg-muted/30 h-11 pl-12 rounded-l-none border-sidebar-border focus:ring-1 focus:ring-primary/20 text-base font-bold" />
+                        <div className="absolute inset-y-0 left-0 w-12 flex items-center justify-center bg-primary/10 text-primary font-black text-sm rounded-l-xl border border-r-0 border-border group-focus-within:border-primary/40 transition-colors">R$</div>
+                        <Input id="price" type="number" defaultValue={product?.price} className="bg-muted/10 h-14 pl-14 rounded-l-none border-border focus:ring-4 focus:ring-primary/5 text-xl font-black text-primary transition-all" />
                       </div>
                     </div>
 
@@ -262,15 +262,15 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                       <div className="grid gap-2">
                         <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Custo Unitário</Label>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 text-xs font-bold">R$</span>
-                          <Input type="number" className="bg-muted/20 h-10 pl-9 border-sidebar-border text-xs" />
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/30 text-xs font-black">R$</span>
+                          <Input type="number" className="bg-muted/5 h-11 pl-9 border-border text-sm font-bold" />
                         </div>
                       </div>
                       <div className="grid gap-2">
                         <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Margem Bruta</Label>
                         <div className="relative">
-                          <Input disabled value="35%" className="bg-muted/10 h-10 pr-9 border-sidebar-border text-xs font-bold text-success" />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-success/50 text-[10px] font-bold">%</span>
+                          <Input disabled value="35%" className="bg-success/5 h-11 pr-10 border-success/20 text-sm font-black text-success" />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-success font-black text-[10px] uppercase">%</span>
                         </div>
                       </div>
                     </div>
@@ -286,16 +286,16 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                   <div className="grid gap-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid gap-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Saldo Inicial</Label>
-                        <Input id="stock" type="number" defaultValue={product?.stock} className="bg-muted/30 h-11 border-sidebar-border font-bold text-center" />
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Saldo Inicial</Label>
+                        <Input id="stock" type="number" defaultValue={product?.stock} className="bg-muted/10 h-14 border-border font-black text-xl text-center focus:ring-4 focus:ring-primary/5 transition-all" />
                       </div>
                       <div className="grid gap-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Mínimo (Alerta)</Label>
-                        <Input id="min_stock" type="number" defaultValue={product?.min_stock || 2} className="bg-muted/30 h-11 border-sidebar-border text-center text-warning font-bold" />
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Mínimo (Alerta)</Label>
+                        <Input id="min_stock" type="number" defaultValue={product?.min_stock || 2} className="bg-muted/10 h-14 border-border text-center text-warning font-black text-xl focus:ring-4 focus:ring-warning/5 transition-all" />
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-muted/20 border border-sidebar-border/50 space-y-3">
+                    <div className="p-4 rounded-2xl bg-muted/20 border border-border space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
                           <Label className="text-xs font-bold">Reserva de Segurança</Label>
@@ -303,7 +303,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                         </div>
                         <Switch className="scale-75" />
                       </div>
-                      <Separator className="opacity-30" />
+                      <Separator className="opacity-10" />
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
                           <Label className="text-xs font-bold">Permitir Venda sem Estoque</Label>
