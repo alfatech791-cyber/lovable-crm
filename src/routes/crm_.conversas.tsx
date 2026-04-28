@@ -665,7 +665,7 @@ function ConversasPage() {
 
   useEffect(() => {
     // Mensagens mais recentes ficam no topo — rolar para o início ao abrir/atualizar
-    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [selected?.transcript?.length, selectedId]);
 
   // Mark conversation as read when opened or when new messages arrive while open
