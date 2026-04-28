@@ -257,4 +257,3 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
     </Dialog>
   );
 }
-}
