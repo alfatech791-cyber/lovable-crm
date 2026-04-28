@@ -379,8 +379,7 @@ function ConversasPage() {
             normTs(chat.updatedAt ?? chat.lastMessageTime ?? chat.conversationTimestamp ?? chat.lastMessage?.messageTimestamp);
 
           return {
-            id: user?.id ? ex?.id : ex?.id ?? `${instance}:${phone}`,
-            ...(user?.id ? { user_id: user.id } : {}),
+            id: ex?.id ?? `${instance}:${phone}`,
             contact_phone: phone,
             contact_name:
               chat.name ??
@@ -393,14 +392,25 @@ function ConversasPage() {
             status: ex?.status ?? "active",
             messages_count: mergedTranscript.length,
             last_message_at: lastAt,
-          };
+          } satisfies Conversation;
         })
       );
-      const valid = rows.filter((row): row is NonNullable<typeof row> => !!row && row.transcript.length > 0);
+      const valid = rows.filter((row): row is Conversation => !!row && row.transcript.length > 0);
       if (user?.id && valid.length > 0) {
+        const upsertRows = valid.map((row) => ({
+          ...(row.id.includes(":") ? {} : { id: row.id }),
+          user_id: user.id,
+          contact_phone: row.contact_phone,
+          contact_name: row.contact_name,
+          transcript: row.transcript as any,
+          status: row.status,
+          messages_count: row.messages_count,
+          last_message_at: row.last_message_at,
+        }));
+
         const { error: upsertError } = await supabase
           .from("bot_conversations")
-          .upsert(valid, { onConflict: "user_id,contact_phone" });
+          .upsert(upsertRows, { onConflict: "user_id,contact_phone" });
         if (upsertError) throw upsertError;
       }
 
