@@ -148,18 +148,6 @@ function WhatsAppPage() {
                 <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-tight">Aguardando Conexão</p>
               </div>
             </div>
-
-            <div className="bg-primary rounded-2xl p-6 shadow-lg shadow-primary/20 flex flex-col justify-between group transition-all duration-300">
-              <div className="flex items-center justify-between mb-4">
-                <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center text-white">
-                  <Icons.Plus className="h-6 w-6" />
-                </div>
-              </div>
-              <div>
-                <p className="text-lg font-black text-white leading-tight">Nova Instância</p>
-                <p className="text-[11px] font-bold text-white/70 uppercase tracking-tight">Criar canal agora</p>
-              </div>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
