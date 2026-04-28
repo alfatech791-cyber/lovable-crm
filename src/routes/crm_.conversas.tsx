@@ -45,7 +45,7 @@ type Msg = {
   at?: string;
   sent?: boolean;
   kind?: "text" | "audio" | "sticker" | "image";
-  media?: string; // url ou data url para preview local
+  media?: string; sender?: string | null; // url ou data url para preview local
 };
 type Conversation = {
   id: string;
@@ -150,7 +150,7 @@ const normalizeTranscript = (messages: any[]): Msg[] =>
         kind,
         content,
         at: normTs(m?.messageTimestamp ?? m?.timestamp ?? m?.createdAt),
-        sent: fromMe ? m?.status !== "ERROR" : undefined,
+        sent: fromMe ? m?.status !== "ERROR" : undefined, sender: m?.pushName || m?.verifiedName || m?.name || null,
       } as Msg;
     })
     .filter(Boolean) as Msg[];
@@ -1052,6 +1052,9 @@ function ConversasPage() {
                                 )}
                               </div>
                             ) : (
+                                {selected.is_group && isUser && m.sender && (
+                                  <p className="text-[10px] font-bold text-primary mb-1 opacity-80 uppercase tracking-tighter">{m.sender}</p>
+                                )}
                               <span className="whitespace-pre-wrap break-words">{m.content}</span>
                             )}
                             {m.at && m.kind !== "sticker" && (
