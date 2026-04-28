@@ -708,18 +708,76 @@ function ConversasPage() {
         toast.error("Sessão expirada. Faça login novamente.");
         return;
       }
-      const { data, error } = await supabase.functions.invoke("send-whatsapp", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        body: {
-          phone: selected.remote_jid || (selected.is_group && !selected.contact_phone.includes("@") ? `${selected.contact_phone}@g.us` : selected.contact_phone),
-          contactName: selected.contact_name,
-          ...payload,
-        },
-      });
-      if (error) throw error;
-      if (data?.error) toast.error("Falha Evolution: " + data.error);
-      else if (!data?.ok) toast.warning("Registrada, mas envio pode ter falhado.");
-      else toast.success("Enviada!");
+       const jid = selected.remote_jid || (selected.is_group && !selected.contact_phone.includes("@") ? `${selected.contact_phone}@g.us` : selected.contact_phone);
+       const instance = await resolveInstance();
+       
+       if (!instance) {
+         toast.error("Instância do WhatsApp não encontrada.");
+         return;
+       }
+
+       let endpoint = "";
+       let body: any = { number: jid };
+
+       if (payload.kind === "text") {
+         endpoint = `/api/evolution/message/sendText/${instance}`;
+         body.text = payload.text;
+       } else if (payload.kind === "audio") {
+         endpoint = `/api/evolution/message/sendWhatsAppAudio/${instance}`;
+         body.audio = payload.media;
+         body.encoding = true;
+       } else if (payload.kind === "sticker") {
+         endpoint = `/api/evolution/message/sendSticker/${instance}`;
+         body.sticker = payload.media;
+       } else if (payload.kind === "image") {
+         endpoint = `/api/evolution/message/sendMedia/${instance}`;
+         body.mediatype = "image";
+         body.media = payload.media;
+         body.mimetype = payload.mimetype;
+         if (payload.fileName) body.fileName = payload.fileName;
+         if (payload.text) body.caption = payload.text;
+       }
+
+       if (!endpoint) {
+         toast.error("Tipo de mensagem inválido.");
+         return;
+       }
+
+       const res = await fetch(endpoint, {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify(body),
+       });
+
+       const data = await res.json();
+       if (!res.ok) throw new Error(data.error || "Erro ao enviar via Evolution");
+
+       // Grava localmente no banco para manter o histórico
+       const { data: conv } = await supabase
+         .from("bot_conversations")
+         .select("transcript, contact_name, status")
+         .eq("id", selected.id)
+         .single();
+
+       const transcript = Array.isArray(conv?.transcript) ? conv.transcript : [];
+       const placeholder = payload.kind === "audio" ? "🎤 Áudio" : payload.kind === "sticker" ? "🟦 Figurinha" : payload.kind === "image" ? "🖼️ Imagem" : payload.text;
+       
+        const newMsg: Msg = {
+          role: "agent",
+          kind: payload.kind as any,
+          content: String(payload.text || placeholder),
+          at: new Date().toISOString(),
+          sent: true,
+        };
+
+        const { error: upsertError } = await supabase.from("bot_conversations").update({
+          transcript: [...transcript, newMsg] as any,
+          messages_count: transcript.length + 1,
+          last_message_at: new Date().toISOString(),
+        }).eq("id", selected.id);
+
+       if (upsertError) console.error("Erro ao atualizar transcript:", upsertError);
+       toast.success("Enviada!");
     } catch (e: any) {
       toast.error(e?.message ?? "Erro ao enviar");
     } finally {
