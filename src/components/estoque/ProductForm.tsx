@@ -507,6 +507,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                   <Switch defaultChecked />
                 </div>
               </div>
+              </div>
             </div>
           </div>
 
