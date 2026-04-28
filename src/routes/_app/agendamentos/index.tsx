@@ -15,7 +15,7 @@ const mockAgendamentos = [
   { id: 3, cliente: "Marcos Paulo", servico: "Reparo Placa", data: "2024-04-28", hora: "14:00", status: "Confirmado", tecnico: "Ricardo" },
 ];
 
-export const Route = createFileRoute("/agendamentos")({
+export const Route = createFileRoute("/_app/agendamentos/")({
   component: AgendamentosPage,
 });
 
