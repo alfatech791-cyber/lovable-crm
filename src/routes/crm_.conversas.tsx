@@ -49,6 +49,30 @@ function ConversasPage() {
       setSelected(list[0] ?? null);
       setLoading(false);
     })();
+    const ch = supabase
+      .channel("bot_conversations:" + user.id)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bot_conversations", filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          setItems((prev) => {
+            if (payload.eventType === "DELETE") {
+              return prev.filter((c) => c.id !== (payload.old as any).id);
+            }
+            const row = payload.new as any as Conversation;
+            const next = [row, ...prev.filter((c) => c.id !== row.id)];
+            next.sort((a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at));
+            return next;
+          });
+          setSelected((cur) => {
+            const row = payload.new as any as Conversation;
+            if (cur && row && cur.id === row.id) return row;
+            return cur;
+          });
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, [user?.id]);
 
   const filtered = items.filter((c) =>
