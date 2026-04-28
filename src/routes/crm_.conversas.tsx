@@ -570,10 +570,26 @@ function ConversasPage() {
                 <div className="h-full grid place-items-center">
                   <Loader2 className="h-5 w-5 animate-spin text-primary" />
                 </div>
+              ) : loadError ? (
+                <div className="p-6 text-center text-xs text-muted-foreground space-y-3">
+                  <MessageSquare className="h-8 w-8 mx-auto opacity-50" />
+                  <div>{loadError}</div>
+                  <button
+                    onClick={() => {
+                      load();
+                      syncFromWhatsApp(false);
+                    }}
+                    className="mx-auto h-8 px-3 rounded-lg bg-muted hover:bg-muted/80 transition text-[11px] font-bold flex items-center gap-1.5"
+                  >
+                    <RefreshCw className="h-3 w-3" /> Tentar novamente
+                  </button>
+                </div>
               ) : filtered.length === 0 ? (
                 <div className="p-6 text-center text-xs text-muted-foreground">
                   <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  Nenhuma conversa ainda.
+                  {resolvedInstance
+                    ? "Nenhuma conversa encontrada ainda. Vamos continuar sincronizando automaticamente."
+                    : "Nenhuma conversa ainda. Conecte a instância do WhatsApp para puxar o histórico."}
                 </div>
               ) : (
                 filtered.map((c) => {
