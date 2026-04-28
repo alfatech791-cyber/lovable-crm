@@ -237,24 +237,64 @@ export interface Automation {
     { name: "Fábio Júnior", origin: "Instagram", responsavel: "Ana K.", etapa: "Novo Contato", time: "2h atrás" },
   ];
  
- export interface Product {
-   id: string;
-   name: string;
-   category: string;
-   price: number;
-   stock: number;
-   imei?: string;
-   image?: string;
- }
- 
- export const products: Product[] = [
-   { id: "1", name: "iPhone 15 Pro Max 256GB", category: "Smartphones", price: 7899.00, stock: 5, imei: "356789123456789" },
-   { id: "2", name: "Samsung Galaxy S24 Ultra", category: "Smartphones", price: 6599.00, stock: 3, imei: "356789123456781" },
-   { id: "3", name: "Capa Silicone iPhone 15", category: "Acessórios", price: 149.90, stock: 25 },
-   { id: "4", name: "Carregador 20W USB-C Apple", category: "Acessórios", price: 199.00, stock: 15 },
-   { id: "5", name: "Película de Vidro 3D", category: "Acessórios", price: 59.90, stock: 50 },
-   { id: "6", name: "Xiaomi Redmi Note 13", category: "Smartphones", price: 1599.00, stock: 8, imei: "356789123456782" },
- ];
+  export interface Product {
+    id: string;
+    name: string;
+    category: string;
+    price: number;
+    stock: number;
+    imei?: string;
+    image?: string;
+    reference?: string;
+    brand?: string;
+    ncm?: string;
+    ean?: string;
+    unit?: string;
+  }
+  
+  export const products: Product[] = [
+    { 
+      id: "1", 
+      name: "iPhone 15 Pro Max 256GB", 
+      category: "Smartphones", 
+      price: 7899.00, 
+      stock: 5, 
+      imei: "356789123456789", 
+      reference: "IP15PM-256", 
+      brand: "Apple", 
+      ncm: "85171300", 
+      ean: "194253702151", 
+      unit: "un" 
+    },
+    { 
+      id: "2", 
+      name: "Samsung Galaxy S24 Ultra", 
+      category: "Smartphones", 
+      price: 6599.00, 
+      stock: 3, 
+      imei: "356789123456781", 
+      reference: "S24U-512", 
+      brand: "Samsung", 
+      ncm: "85171300", 
+      ean: "7892509123456", 
+      unit: "un" 
+    },
+    { 
+      id: "3", 
+      name: "Capa Silicone iPhone 15", 
+      category: "Acessórios", 
+      price: 149.90, 
+      stock: 25, 
+      reference: "ACC-CAP-I15", 
+      brand: "Generic", 
+      ncm: "39269090", 
+      ean: "7891234567890", 
+      unit: "un" 
+    },
+    { id: "4", name: "Carregador 20W USB-C Apple", category: "Acessórios", price: 199.00, stock: 15, reference: "ACC-CHG-20W", brand: "Apple", ncm: "85044010", unit: "un" },
+    { id: "5", name: "Película de Vidro 3D", category: "Acessórios", price: 59.90, stock: 50, reference: "ACC-PEL-3D", ncm: "70071900", unit: "un" },
+    { id: "6", name: "Xiaomi Redmi Note 13", category: "Smartphones", price: 1599.00, stock: 8, imei: "356789123456782", reference: "RN13-128", brand: "Xiaomi", ncm: "85171300", unit: "un" },
+  ];
  
   export const funnelData = [
     { name: "Leads", value: 1000, color: "var(--color-primary)" },
