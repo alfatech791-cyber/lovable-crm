@@ -110,7 +110,7 @@ function WhatsAppPage() {
         />
 
         <main className="flex-1 overflow-y-auto p-4 lg:p-8 space-y-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="bg-card rounded-2xl p-6 border border-border shadow-sm flex flex-col justify-between group hover:border-primary/30 transition-all duration-300">
               <div className="flex items-center justify-between mb-4">
                 <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
@@ -146,18 +146,6 @@ function WhatsAppPage() {
               <div>
                 <p className="text-2xl font-black tabular-nums text-warning">{stats.disconnected}</p>
                 <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-tight">Aguardando Conexão</p>
-              </div>
-            </div>
-
-            <div className="bg-primary rounded-2xl p-6 shadow-lg shadow-primary/20 flex flex-col justify-between group transition-all duration-300">
-              <div className="flex items-center justify-between mb-4">
-                <div className="h-12 w-12 rounded-2xl bg-white/20 flex items-center justify-center text-white">
-                  <Icons.Plus className="h-6 w-6" />
-                </div>
-              </div>
-              <div>
-                <p className="text-lg font-black text-white leading-tight">Nova Instância</p>
-                <p className="text-[11px] font-bold text-white/70 uppercase tracking-tight">Criar canal agora</p>
               </div>
             </div>
           </div>
@@ -326,43 +314,6 @@ function WhatsAppPage() {
             </div>
           </div>
 
-          <div className="h-8" />
-
-          <div className="rounded-3xl bg-slate-900 text-white p-8 overflow-hidden relative group">
-            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
-              <Icons.ShieldCheck className="h-32 w-32" />
-            </div>
-
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
-              <div className="max-w-md">
-                <div className="flex items-center gap-2 text-primary/80 mb-2">
-                  <Icons.Info className="h-4 w-4" />
-                  <span className="text-xs font-bold uppercase tracking-widest">Evolution API Status</span>
-                </div>
-                <h3 className="text-2xl font-bold mb-3">Infraestrutura Segura</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">
-                  Suas conexões são processadas via Evolution API em servidores criptografados, garantindo alta performance e estabilidade para automações.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm">
-                  <p className="text-[10px] uppercase font-bold text-slate-500 mb-1">API Endpoint</p>
-                  <p className="text-xs font-mono text-slate-300 truncate max-w-[180px]">
-                    {import.meta.env.VITE_EVOLUTION_API_URL || "API não configurada"}
-                  </p>
-                </div>
-
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm">
-                  <p className="text-[10px] uppercase font-bold text-slate-500 mb-1">Status Global</p>
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-                    <span className="text-xs font-bold text-success">OPERACIONAL</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </main>
 
         {selectedInstance && (
