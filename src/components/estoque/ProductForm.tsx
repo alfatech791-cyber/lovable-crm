@@ -204,6 +204,9 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                         </section>
                      </div>
                    </div>
+                 </div>
+               </div>
+
                {/* Gestão de Estoque, Preço e Localização */}
                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-border/50">
                  <section className="bg-primary/5 rounded-2xl border border-primary/10 p-5 space-y-5">
