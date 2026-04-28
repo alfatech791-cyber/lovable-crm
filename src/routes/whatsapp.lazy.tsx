@@ -38,11 +38,12 @@ function WhatsAppPage() {
   }, []);
 
   const filteredInstances = useMemo(() => {
-    return instances.filter(
-      (inst) =>
-        inst.instanceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        inst.owner?.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
+    const q = searchQuery.toLowerCase();
+    return instances.filter((inst) => {
+      const name = (inst?.instanceName ?? "").toLowerCase();
+      const owner = (inst?.owner ?? "").toLowerCase();
+      return name.includes(q) || owner.includes(q);
+    });
   }, [instances, searchQuery]);
 
   const stats = useMemo(
