@@ -300,7 +300,6 @@ function ConversasPage() {
   };
 
   const load = async () => {
-    if (authLoading) return;
     if (!user?.id) {
       setLoading(false);
       setLoadError(null);
@@ -364,6 +363,41 @@ function ConversasPage() {
       const byPhone = new Map(
         existing.map((c) => [c.contact_phone, c])
       );
+      const previewRows = chats
+        .map((chat) => {
+          const phone = getContactPhone(chat);
+          if (!phone) return null;
+
+          const existingConversation = byPhone.get(phone);
+          const previewTranscript = existingConversation?.transcript?.length
+            ? existingConversation.transcript
+            : normalizeTranscript(chat.lastMessage ? [chat.lastMessage] : []);
+
+          return {
+            id: existingConversation?.id ?? `${instance}:${phone}`,
+            contact_phone: phone,
+            contact_name:
+              chat.name ??
+              chat.pushName ??
+              chat.profileName ??
+              chat.lastMessage?.pushName ??
+              existingConversation?.contact_name ??
+              null,
+            transcript: previewTranscript,
+            status: existingConversation?.status ?? "active",
+            messages_count: previewTranscript.length,
+            last_message_at:
+              previewTranscript[previewTranscript.length - 1]?.at ??
+              normTs(chat.updatedAt ?? chat.lastMessageTime ?? chat.conversationTimestamp ?? chat.lastMessage?.messageTimestamp),
+          } satisfies Conversation;
+        })
+        .filter((row): row is Conversation => !!row);
+
+      if (previewRows.length > 0) {
+        applyConversations(previewRows, lastIncomingMessageRef.current.size > 0);
+        setLoading(false);
+      }
+
       const rows = await Promise.all(
         chats.slice(0, 30).map(async (chat) => {
           const phone = getContactPhone(chat);
@@ -432,8 +466,6 @@ function ConversasPage() {
   };
 
   useEffect(() => {
-    if (authLoading) return;
-
     load();
     const ch = user?.id
       ? supabase
@@ -481,7 +513,7 @@ function ConversasPage() {
       if (ch) supabase.removeChannel(ch);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, authLoading]);
+  }, [user?.id]);
 
   const filtered = useMemo(
     () =>
