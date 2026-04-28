@@ -762,19 +762,19 @@ function ConversasPage() {
        const transcript = Array.isArray(conv?.transcript) ? conv.transcript : [];
        const placeholder = payload.kind === "audio" ? "🎤 Áudio" : payload.kind === "sticker" ? "🟦 Figurinha" : payload.kind === "image" ? "🖼️ Imagem" : payload.text;
        
-       const newMsg = {
-         role: "agent",
-         kind: payload.kind,
-         content: payload.text || placeholder,
-         at: new Date().toISOString(),
-         sent: true,
-       };
+        const newMsg: Msg = {
+          role: "agent",
+          kind: payload.kind as any,
+          content: String(payload.text || placeholder),
+          at: new Date().toISOString(),
+          sent: true,
+        };
 
-       const { error: upsertError } = await supabase.from("bot_conversations").update({
-         transcript: [...transcript, newMsg],
-         messages_count: transcript.length + 1,
-         last_message_at: new Date().toISOString(),
-       }).eq("id", selected.id);
+        const { error: upsertError } = await supabase.from("bot_conversations").update({
+          transcript: [...transcript, newMsg] as any,
+          messages_count: transcript.length + 1,
+          last_message_at: new Date().toISOString(),
+        }).eq("id", selected.id);
 
        if (upsertError) console.error("Erro ao atualizar transcript:", upsertError);
        toast.success("Enviada!");
