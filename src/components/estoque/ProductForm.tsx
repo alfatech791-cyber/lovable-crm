@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Smartphone, Package, Tag, DollarSign, Layers, Hash, Info, History, CheckCircle2, Plus, Box, ShieldCheck, Palette, Cpu, Upload, Image as ImageIcon, X, Truck, FileText, Globe, ShoppingBag, Percent, BarChart3, Settings2 } from "lucide-react";
+import { Smartphone, Package, Tag, DollarSign, Layers, Hash, Info, History, CheckCircle2, Plus, Box, ShieldCheck, Palette, Cpu, Upload, Image as ImageIcon, X, Truck, FileText, Globe, ShoppingBag, Percent, BarChart3, Settings2, Receipt, Search, Info as InfoIcon, Zap, MoreHorizontal, Copy } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
@@ -28,7 +28,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden border-sidebar-border bg-sidebar/95 backdrop-blur-xl">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border-sidebar-border bg-sidebar/95 backdrop-blur-xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <div className="flex items-center gap-3 p-6 pb-0">
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-glow">
@@ -41,8 +41,8 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
           </div>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="p-0">
-          <div className="px-6 py-2 border-b border-sidebar-border/50">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="p-0 flex-1 overflow-hidden flex flex-col">
+          <div className="px-6 py-0 border-b border-sidebar-border/50 bg-muted/20">
             <TabsList className="bg-transparent h-12 p-0 gap-6 w-full justify-start overflow-x-auto scrollbar-none">
               <TabsTrigger 
                 value="general" 
@@ -71,78 +71,163 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
             </TabsList>
           </div>
 
-          <div className="p-6">
-            <TabsContent value="general" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Categoria</Label>
-                      <Select defaultValue={product?.category || "Acessórios"} onValueChange={(v) => setIsSmartphone(v === "Smartphones")}>
-                        <SelectTrigger className="bg-muted/30 h-11 border-sidebar-border focus:ring-1 focus:ring-primary/20">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Smartphones">Smartphones</SelectItem>
-                          <SelectItem value="Tablets">Tablets</SelectItem>
-                          <SelectItem value="Acessórios">Acessórios</SelectItem>
-                          <SelectItem value="Peças">Peças</SelectItem>
-                        </SelectContent>
-                      </Select>
+          <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+            <TabsContent value="general" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="lg:col-span-8 space-y-6">
+                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
+                    <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                      <Tag className="h-3 w-3" /> Identificação Básica
+                    </h3>
+                    
+                    <div className="grid gap-4">
+                      <div className="grid gap-2">
+                        <Label className="text-[10px] font-bold uppercase text-muted-foreground/70 tracking-wider">Título Comercial do Anúncio</Label>
+                        <div className="relative">
+                           <Input id="name" defaultValue={product?.name} placeholder="Ex: Apple iPhone 15 Pro Max 256GB - Titânio Natural" className="bg-card/50 h-12 border-sidebar-border focus:ring-1 focus:ring-primary/20 text-base font-semibold" />
+                           <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground/40 uppercase">0/60</div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div className="grid gap-2">
+                          <Label className="text-[10px] font-bold uppercase text-muted-foreground/70 tracking-wider">Categoria</Label>
+                          <Select defaultValue={product?.category || "Acessórios"} onValueChange={(v) => setIsSmartphone(v === "Smartphones")}>
+                            <SelectTrigger className="bg-card/50 h-10 border-sidebar-border"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Smartphones">Smartphones</SelectItem>
+                              <SelectItem value="Tablets">Tablets</SelectItem>
+                              <SelectItem value="Watch">Smartwatches</SelectItem>
+                              <SelectItem value="Acessórios">Acessórios</SelectItem>
+                              <SelectItem value="Peças">Peças Técnicas</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label className="text-[10px] font-bold uppercase text-muted-foreground/70 tracking-wider">Fabricante</Label>
+                          <Select defaultValue="apple">
+                            <SelectTrigger className="bg-card/50 h-10 border-sidebar-border"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="apple">Apple Inc.</SelectItem>
+                              <SelectItem value="samsung">Samsung</SelectItem>
+                              <SelectItem value="xiaomi">Xiaomi</SelectItem>
+                              <SelectItem value="motorola">Motorola</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label className="text-[10px] font-bold uppercase text-muted-foreground/70 tracking-wider">Fornecedor</Label>
+                          <Select defaultValue="padrao">
+                            <SelectTrigger className="bg-card/50 h-10 border-sidebar-border"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="padrao">Principal</SelectItem>
+                              <SelectItem value="dist">Distribuidora Oficial</SelectItem>
+                              <SelectItem value="import">Importação Direta</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
-                    <div className="grid gap-2">
-                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Marca</Label>
-                      <Select defaultValue="apple">
-                        <SelectTrigger className="bg-muted/30 h-11 border-sidebar-border focus:ring-1 focus:ring-primary/20">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="apple">Apple</SelectItem>
-                          <SelectItem value="samsung">Samsung</SelectItem>
-                          <SelectItem value="xiaomi">Xiaomi</SelectItem>
-                          <SelectItem value="outros">Outros</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  </section>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
+                        <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                           <Settings2 className="h-3 w-3" /> Visibilidade
+                        </h3>
+                        <div className="grid grid-cols-2 gap-3">
+                           <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-card/40 border border-sidebar-border/30">
+                              <Label className="text-[9px] font-bold uppercase opacity-60">Status</Label>
+                              <Select defaultValue="ativo">
+                                 <SelectTrigger className="h-7 text-[10px] bg-transparent border-none p-0 focus:ring-0 shadow-none"><SelectValue /></SelectTrigger>
+                                 <SelectContent>
+                                    <SelectItem value="ativo">Disponível</SelectItem>
+                                    <SelectItem value="rascunho">Rascunho</SelectItem>
+                                 </SelectContent>
+                              </Select>
+                           </div>
+                           <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-card/40 border border-sidebar-border/30">
+                              <Label className="text-[9px] font-bold uppercase opacity-60">Destaque</Label>
+                              <div className="flex items-center justify-between h-7">
+                                 <span className="text-[10px] font-medium">Home Page</span>
+                                 <Switch className="scale-50 -mr-2" />
+                              </div>
+                           </div>
+                        </div>
+                     </section>
+
+                     <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
+                        <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                           <Truck className="h-3 w-3" /> Tipo de Entrega
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                           {['Pronta Entrega', 'Retirada', 'Expressa'].map(t => (
+                              <Badge key={t} variant="secondary" className="text-[9px] bg-primary/10 text-primary border-none hover:bg-primary/20 cursor-pointer">
+                                 {t}
+                              </Badge>
+                           ))}
+                        </div>
+                     </section>
                   </div>
 
-                  <div className="grid gap-2">
-                    <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
-                      <Tag className="h-3.5 w-3.5" /> Nome do Produto
-                    </Label>
-                    <Input id="name" defaultValue={product?.name} placeholder="Ex: iPhone 15 Pro Max 256GB" className="bg-muted/30 h-11 border-sidebar-border focus:ring-1 focus:ring-primary/20" />
-                  </div>
+                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
+                     <div className="flex items-center justify-between">
+                        <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                          <InfoIcon className="h-3 w-3" /> Descrição Técnica (E-commerce)
+                        </h3>
+                        <div className="flex items-center gap-2">
+                           <Button variant="ghost" size="sm" className="h-7 text-[9px] font-bold uppercase gap-1"><Copy className="h-3 w-3" /> Copiar IA</Button>
+                           <Button variant="ghost" size="sm" className="h-7 text-[9px] font-bold uppercase gap-1 text-primary"><Zap className="h-3 w-3 fill-current" /> Gerar com ConectaAI</Button>
+                        </div>
+                     </div>
+                     <textarea className="w-full bg-card/30 border border-sidebar-border rounded-xl p-4 text-sm outline-none focus:ring-1 focus:ring-primary/20 min-h-[160px] custom-scrollbar" placeholder="Descreva os principais benefícios, diferenciais e o que acompanha o produto..." />
+                  </section>
                 </div>
 
-                <div className="space-y-3">
-                  <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
-                    <ImageIcon className="h-3.5 w-3.5" /> Mídia do Produto
-                  </Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {/* Main Image Slot */}
-                    <div className="col-span-1 border-2 border-dashed border-sidebar-border/50 rounded-xl h-24 flex flex-col items-center justify-center gap-1 hover:bg-muted/20 transition-colors cursor-pointer group bg-muted/10">
-                      <Upload className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
-                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">Principal</span>
+                <div className="lg:col-span-4 space-y-6">
+                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
+                    <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                      <ImageIcon className="h-3 w-3" /> Galeria de Fotos
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="aspect-square border-2 border-dashed border-primary/30 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-all cursor-pointer group bg-primary/5">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-glow">
+                          <Upload className="h-5 w-5" />
+                        </div>
+                        <span className="text-[9px] font-black text-primary uppercase tracking-widest">Principal</span>
+                      </div>
+                      <div className="grid grid-cols-2 grid-rows-2 gap-3 aspect-square">
+                         {Array.from({ length: 4 }).map((_, i) => (
+                           <div key={i} className="border border-dashed border-sidebar-border/50 rounded-xl flex items-center justify-center bg-muted/5 hover:bg-muted/10 transition-colors cursor-pointer">
+                              <Plus className="h-4 w-4 text-muted-foreground/30" />
+                           </div>
+                         ))}
+                      </div>
                     </div>
-                    {/* Additional slots */}
-                    <div className="border-2 border-dashed border-sidebar-border/30 rounded-xl h-24 flex items-center justify-center bg-muted/5 opacity-50">
-                       <Plus className="h-4 w-4 text-muted-foreground" />
+                    <div className="p-3 bg-card/40 rounded-xl border border-sidebar-border/30">
+                       <p className="text-[10px] text-muted-foreground leading-tight">
+                          <strong>Dica:</strong> Fotos com fundo branco aumentam a conversão em até 30% nos marketplaces.
+                       </p>
                     </div>
-                    <div className="border-2 border-dashed border-sidebar-border/30 rounded-xl h-24 flex items-center justify-center bg-muted/5 opacity-50 relative group">
-                       <Plus className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
-                  <p className="text-[9px] text-muted-foreground text-center">Formatos aceitos: JPG, PNG. Max 5MB.</p>
-                </div>
-              </div>
+                  </section>
 
-              <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 flex items-start gap-4">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                  <ShieldCheck className="h-4 w-4" />
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-sm font-bold leading-none">Status do Registro</h4>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">Este produto será cadastrado na base global e ficará disponível para venda em todos os canais conectados.</p>
+                  <section className="bg-primary/5 rounded-2xl border border-primary/10 p-5 space-y-4">
+                    <h3 className="text-[11px] font-black uppercase tracking-widest text-primary">Resumo do Registro</h3>
+                    <div className="space-y-3">
+                       <div className="flex justify-between text-[11px]">
+                          <span className="text-muted-foreground">ID Interno</span>
+                          <span className="font-mono text-primary">#PROD-{(Math.random()*10000).toFixed(0)}</span>
+                       </div>
+                       <div className="flex justify-between text-[11px]">
+                          <span className="text-muted-foreground">Criado por</span>
+                          <span className="font-bold">Renato S.</span>
+                       </div>
+                       <div className="flex justify-between text-[11px]">
+                          <span className="text-muted-foreground">Data Registro</span>
+                          <span className="font-bold">{new Date().toLocaleDateString('pt-BR')}</span>
+                       </div>
+                    </div>
+                  </section>
                 </div>
               </div>
             </TabsContent>
@@ -223,7 +308,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
               </div>
             </TabsContent>
 
-            <TabsContent value="tech" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <TabsContent value="tech" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-5">
                   <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
@@ -281,17 +366,43 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-sidebar-primary/5 border border-sidebar-primary/10 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <History className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="space-y-0.5">
-                          <Label className="text-xs font-bold text-primary italic uppercase tracking-tighter">Condição: Seminovo</Label>
-                          <p className="text-[9px] text-muted-foreground">Ative para controle de aparelhos usados</p>
-                        </div>
-                      </div>
-                      <Switch className="data-[state=checked]:bg-primary" />
+                    <div className="space-y-3">
+                       <div className="p-4 rounded-2xl bg-sidebar-primary/5 border border-sidebar-primary/10 flex items-center justify-between hover:bg-sidebar-primary/10 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                              <History className="h-4 w-4 text-primary" />
+                            </div>
+                            <div className="space-y-0.5">
+                              <Label className="text-xs font-black text-primary uppercase tracking-tighter italic">Aparelho Seminovo</Label>
+                              <p className="text-[9px] text-muted-foreground">Controle de garantia diferenciada</p>
+                            </div>
+                          </div>
+                          <Switch className="data-[state=checked]:bg-primary" />
+                       </div>
+                       
+                       <div className="grid grid-cols-2 gap-3">
+                          <div className="grid gap-1.5">
+                             <Label className="text-[9px] font-black uppercase text-muted-foreground/50 tracking-widest px-1">Saúde Bateria</Label>
+                             <div className="relative">
+                                <Input placeholder="100" className="bg-muted/10 h-9 border-sidebar-border text-xs font-bold pr-7" />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground">%</span>
+                             </div>
+                          </div>
+                          <div className="grid gap-1.5">
+                             <Label className="text-[9px] font-black uppercase text-muted-foreground/50 tracking-widest px-1">Garantia Loja</Label>
+                             <Select defaultValue="90">
+                                <SelectTrigger className="bg-muted/10 h-9 border-sidebar-border text-xs font-bold">
+                                   <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                   <SelectItem value="30">30 Dias</SelectItem>
+                                   <SelectItem value="90">90 Dias</SelectItem>
+                                   <SelectItem value="180">180 Dias</SelectItem>
+                                   <SelectItem value="365">1 Ano</SelectItem>
+                                </SelectContent>
+                             </Select>
+                          </div>
+                       </div>
                     </div>
                   </div>
                 </div>
@@ -305,7 +416,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
               </div>
             </TabsContent>
 
-            <TabsContent value="fiscal" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <TabsContent value="fiscal" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Bloco Fiscal */}
                 <div className="space-y-5">
@@ -340,7 +451,27 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                     </div>
                   </div>
                 </div>
+                
+                {/* Bloco Tributário */}
+                <div className="space-y-5">
+                  <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                    <Receipt className="h-3 w-3" /> Regras Tributárias
+                  </h5>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">ICMS</Label>
+                      <Input placeholder="Alíquota %" className="bg-muted/20 h-10 border-sidebar-border text-xs" />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">IPI</Label>
+                      <Input placeholder="Alíquota %" className="bg-muted/20 h-10 border-sidebar-border text-xs" />
+                    </div>
+                  </div>
+                </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Bloco Logística & Canais */}
                 <div className="space-y-5">
                   <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
@@ -406,11 +537,14 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
           </div>
         </Tabs>
 
-        <DialogFooter className="p-6 pt-0 gap-2">
-          <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl">Cancelar</Button>
-          <Button onClick={() => onOpenChange(false)} className="bg-gradient-primary shadow-glow gap-2 px-6 rounded-xl">
-            {product ? <CheckCircle2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-            {product ? "Salvar Alterações" : "Cadastrar Item"}
+        <DialogFooter className="p-4 md:p-6 pt-4 gap-3 bg-muted/20 border-t border-sidebar-border/50 shrink-0">
+          <div className="mr-auto hidden md:flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
+             <InfoIcon className="h-3 w-3" /> Todos os campos com * são obrigatórios para emissão de NF
+          </div>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl h-11 px-6 font-bold text-xs uppercase tracking-widest">Descartar</Button>
+          <Button onClick={() => onOpenChange(false)} className="bg-gradient-primary shadow-glow gap-2 px-8 rounded-xl h-11 font-black text-xs uppercase tracking-widest group">
+            {product ? <CheckCircle2 className="h-4 w-4 group-hover:scale-110 transition-transform" /> : <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />}
+            {product ? "Salvar Alterações" : "Finalizar Cadastro"}
           </Button>
         </DialogFooter>
       </DialogContent>
