@@ -28,45 +28,48 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-sidebar-border bg-sidebar/95 backdrop-blur-xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-5xl p-0 overflow-hidden border-sidebar-border bg-background backdrop-blur-xl max-h-[90vh] flex flex-col shadow-elegant">
         <DialogHeader>
-          <div className="flex items-center gap-3 p-6 pb-0">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-glow">
+          <div className="flex items-center gap-4 p-6 pb-4 bg-muted/20">
+            <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-glow shrink-0">
               {product ? <History className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
             </div>
-            <div>
-              <DialogTitle className="text-xl font-bold">{product ? "Editar Item" : "Novo Item"}</DialogTitle>
-              <DialogDescription className="text-xs">Gerencie os detalhes técnicos e comerciais</DialogDescription>
+            <div className="space-y-0.5">
+              <DialogTitle className="text-2xl font-black tracking-tight">{product ? "Editar Registro" : "Novo Cadastro"}</DialogTitle>
+              <DialogDescription className="text-xs font-medium text-muted-foreground flex items-center gap-2">
+                 {product ? "Atualização de estoque e metadados" : "Preencha os dados técnicos para visibilidade global"}
+                 <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[9px] uppercase font-bold py-0 h-4">Beta IA</Badge>
+              </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="p-0 flex-1 overflow-hidden flex flex-col">
-          <div className="px-6 py-0 border-b border-sidebar-border/50 bg-muted/20">
-            <TabsList className="bg-transparent h-12 p-0 gap-6 w-full justify-start overflow-x-auto scrollbar-none">
+          <div className="px-6 py-0 border-b border-border bg-muted/30">
+            <TabsList className="bg-transparent h-14 p-0 gap-8 w-full justify-start overflow-x-auto scrollbar-none">
               <TabsTrigger 
                 value="general" 
-                className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full gap-2 px-1 transition-all"
+                className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full gap-2 px-0 text-xs font-black uppercase tracking-widest transition-all opacity-60 data-[state=active]:opacity-100"
               >
-                <Info className="h-4 w-4" /> Geral
+                <Info className="h-3.5 w-3.5" /> Geral
               </TabsTrigger>
               <TabsTrigger 
                 value="stock" 
-                className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full gap-2 px-1 transition-all"
+                className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full gap-2 px-0 text-xs font-black uppercase tracking-widest transition-all opacity-60 data-[state=active]:opacity-100"
               >
-                <Layers className="h-4 w-4" /> Estoque & Preços
+                <Layers className="h-3.5 w-3.5" /> Estoque & Preços
               </TabsTrigger>
               <TabsTrigger 
                 value="tech" 
-                className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full gap-2 px-1 transition-all"
+                className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full gap-2 px-0 text-xs font-black uppercase tracking-widest transition-all opacity-60 data-[state=active]:opacity-100"
               >
-                <Smartphone className="h-4 w-4" /> Ficha Técnica
+                <Smartphone className="h-3.5 w-3.5" /> Ficha Técnica
               </TabsTrigger>
               <TabsTrigger 
                 value="fiscal" 
-                className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full gap-2 px-1 transition-all"
+                className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full gap-2 px-0 text-xs font-black uppercase tracking-widest transition-all opacity-60 data-[state=active]:opacity-100"
               >
-                <FileText className="h-4 w-4" /> Fiscal & E-commerce
+                <FileText className="h-3.5 w-3.5" /> Fiscal & Vendas
               </TabsTrigger>
             </TabsList>
           </div>
