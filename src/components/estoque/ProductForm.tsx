@@ -303,6 +303,105 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                 <textarea className="w-full bg-muted/20 border border-sidebar-border rounded-xl p-3 text-xs outline-none focus:ring-1 focus:ring-primary/20 min-h-[80px]" placeholder="Ex: Saúde da bateria 100%, sem riscos na tela, acompanha caixa original..." />
               </div>
             </TabsContent>
+
+            <TabsContent value="fiscal" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Bloco Fiscal */}
+                <div className="space-y-5">
+                  <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                    <Percent className="h-3 w-3" /> Tributação & Fiscal
+                  </h5>
+                  
+                  <div className="grid gap-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">NCM</Label>
+                        <Input placeholder="8517.13.00" className="bg-muted/20 h-10 border-sidebar-border text-xs" />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">CEST</Label>
+                        <Input placeholder="21.053.01" className="bg-muted/20 h-10 border-sidebar-border text-xs" />
+                      </div>
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Origem da Mercadoria</Label>
+                      <Select defaultValue="1">
+                        <SelectTrigger className="bg-muted/30 h-10 border-sidebar-border text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">0 - Nacional</SelectItem>
+                          <SelectItem value="1">1 - Estrangeira - Importação Direta</SelectItem>
+                          <SelectItem value="2">2 - Estrangeira - Adquirida no Mercado Interno</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bloco Logística & Canais */}
+                <div className="space-y-5">
+                  <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                    <Globe className="h-3 w-3" /> Logística & Canais
+                  </h5>
+
+                  <div className="grid gap-4">
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="grid gap-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Peso (kg)</Label>
+                        <Input type="number" step="0.001" placeholder="0.250" className="bg-muted/20 h-10 border-sidebar-border text-xs text-center" />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Larg (cm)</Label>
+                        <Input type="number" placeholder="10" className="bg-muted/20 h-10 border-sidebar-border text-xs text-center" />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Alt (cm)</Label>
+                        <Input type="number" placeholder="5" className="bg-muted/20 h-10 border-sidebar-border text-xs text-center" />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 p-3 rounded-xl bg-muted/20 border border-sidebar-border/50">
+                      <Label className="text-[10px] font-black uppercase text-muted-foreground/40 mb-1">Canais de Venda Ativos</Label>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 gap-1 px-2 py-1">
+                          <ShoppingBag className="h-3 w-3" /> PDV Balcão
+                        </Badge>
+                        <Badge variant="outline" className="bg-orange-500/5 text-orange-500 border-orange-500/20 gap-1 px-2 py-1 opacity-50">
+                          <Globe className="h-3 w-3" /> E-commerce
+                        </Badge>
+                        <Badge variant="outline" className="bg-green-500/5 text-green-500 border-green-500/20 gap-1 px-2 py-1 opacity-50">
+                          <Percent className="h-3 w-3" /> Mercado Livre
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Opções de Integração */}
+              <div className="p-4 rounded-2xl bg-muted/30 border border-sidebar-border/50 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center justify-between px-2">
+                  <div className="space-y-0.5">
+                    <Label className="text-xs font-bold flex items-center gap-2">
+                      <Settings2 className="h-3 w-3 text-primary" /> Sincronizar Estoque
+                    </Label>
+                    <p className="text-[9px] text-muted-foreground">Atualizar saldo em todos os marketplaces integrados</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between px-2">
+                  <div className="space-y-0.5">
+                    <Label className="text-xs font-bold flex items-center gap-2">
+                      <BarChart3 className="h-3 w-3 text-primary" /> Notificar Compras
+                    </Label>
+                    <p className="text-[9px] text-muted-foreground">Enviar alerta de estoque baixo para o setor de compras</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </div>
+            </TabsContent>
           </div>
         </Tabs>
 
