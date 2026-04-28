@@ -6,12 +6,16 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, ShoppingCart, TrendingDown } from "lucide-react";
 
 export function Stockouts() {
-  const stockouts = [
-    { id: "1", name: "iPhone 11 64GB - Preto", stock: 0, minStock: 2, lastSold: "2024-04-15" },
-    { id: "2", name: "Cabo Lightning Original", stock: 1, minStock: 10, lastSold: "2024-04-21" },
-    { id: "3", name: "Tela iPhone 13 Original", stock: 0, minStock: 3, lastSold: "2024-04-10" },
-    { id: "4", name: "Bateria iPhone XR (Premium)", stock: 2, minStock: 5, lastSold: "2024-04-20" },
-  ];
+   const stockouts = [
+     { id: "1", name: "iPhone 11 64GB - Preto", stock: 0, minStock: 2, lastSold: "2024-04-15" },
+     { id: "2", name: "Cabo Lightning Original", stock: 1, minStock: 10, lastSold: "2024-04-21" },
+     { id: "3", name: "Tela iPhone 13 Original", stock: 0, minStock: 3, lastSold: "2024-04-10" },
+     { id: "4", name: "Bateria iPhone XR (Premium)", stock: 2, minStock: 5, lastSold: "2024-04-20" },
+     { id: "5", name: "iPhone 12 128GB - Branco", stock: 0, minStock: 1, lastSold: "2024-04-18" },
+     { id: "6", name: "Fone de Ouvido P2", stock: 0, minStock: 5, lastSold: "2024-04-12" },
+     { id: "7", name: "Capa Transparente G54", stock: 0, minStock: 3, lastSold: "2024-04-19" },
+     { id: "8", name: "Película Privacidade S23", stock: 0, minStock: 10, lastSold: "2024-04-20" },
+   ];
 
   return (
     <div className="space-y-6">
