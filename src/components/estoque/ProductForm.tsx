@@ -106,9 +106,12 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                             <div className="grid gap-2">
                               <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Modelo / Referência</Label>
                               <Input placeholder="iPhone 15 Pro Max" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
-                            </div>
-                          </div>
-                        </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
                       </section>
 
                       <section className="lg:col-span-4 bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
