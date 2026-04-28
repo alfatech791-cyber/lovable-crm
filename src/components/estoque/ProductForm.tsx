@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Smartphone, Package, Tag, DollarSign, Layers, Hash, Info, History, CheckCircle2, Plus, Box, ShieldCheck, Palette, Cpu, Upload } from "lucide-react";
+import { Smartphone, Package, Tag, DollarSign, Layers, Hash, Info, History, CheckCircle2, Plus, Box, ShieldCheck, Palette, Cpu, Upload, Image as ImageIcon, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
@@ -68,13 +68,6 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
             <TabsContent value="general" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <div className="grid gap-2">
-                    <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
-                      <Tag className="h-3.5 w-3.5" /> Nome do Produto
-                    </Label>
-                    <Input id="name" defaultValue={product?.name} placeholder="Ex: iPhone 15 Pro Max 256GB" className="bg-muted/30 h-11 border-sidebar-border focus:ring-1 focus:ring-primary/20" />
-                  </div>
-
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Categoria</Label>
@@ -105,18 +98,34 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                       </Select>
                     </div>
                   </div>
+
+                  <div className="grid gap-2">
+                    <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
+                      <Tag className="h-3.5 w-3.5" /> Nome do Produto
+                    </Label>
+                    <Input id="name" defaultValue={product?.name} placeholder="Ex: iPhone 15 Pro Max 256GB" className="bg-muted/30 h-11 border-sidebar-border focus:ring-1 focus:ring-primary/20" />
+                  </div>
                 </div>
 
-                <div className="grid gap-2">
+                <div className="space-y-3">
                   <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
-                    <Box className="h-3.5 w-3.5" /> Imagem do Produto
+                    <ImageIcon className="h-3.5 w-3.5" /> Mídia do Produto
                   </Label>
-                  <div className="border-2 border-dashed border-sidebar-border/50 rounded-2xl h-32 flex flex-col items-center justify-center gap-2 hover:bg-muted/20 transition-colors cursor-pointer group">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                      <Upload className="h-5 w-5" />
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Main Image Slot */}
+                    <div className="col-span-1 border-2 border-dashed border-sidebar-border/50 rounded-xl h-24 flex flex-col items-center justify-center gap-1 hover:bg-muted/20 transition-colors cursor-pointer group bg-muted/10">
+                      <Upload className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
+                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">Principal</span>
                     </div>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Carregar Foto</span>
+                    {/* Additional slots */}
+                    <div className="border-2 border-dashed border-sidebar-border/30 rounded-xl h-24 flex items-center justify-center bg-muted/5 opacity-50">
+                       <Plus className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="border-2 border-dashed border-sidebar-border/30 rounded-xl h-24 flex items-center justify-center bg-muted/5 opacity-50 relative group">
+                       <Plus className="h-4 w-4 text-muted-foreground" />
+                    </div>
                   </div>
+                  <p className="text-[9px] text-muted-foreground text-center">Formatos aceitos: JPG, PNG. Max 5MB.</p>
                 </div>
               </div>
 
