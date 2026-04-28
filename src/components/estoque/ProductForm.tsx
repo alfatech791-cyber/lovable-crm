@@ -45,9 +45,9 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-muted/5">
             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
                {/* Identificação e Visibilidade */}
-               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                 <div className="lg:col-span-12 space-y-6">
-                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 gap-6">
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                      <section className="lg:col-span-2 bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
                        <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                          <Tag className="h-3 w-3" /> Identificação Básica
@@ -68,7 +68,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div className="grid gap-2">
                               <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Categoria</Label>
                               <Select defaultValue={product?.category || "Acessórios"} onValueChange={(v) => setIsSmartphone(v === "Smartphones")}>
@@ -111,7 +111,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                         </div>
                      </section>
 
-                     <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
+                      <section className="lg:col-span-4 bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
                         <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                            <Settings2 className="h-3 w-3" /> Visibilidade & Status
                         </h3>
@@ -204,11 +204,9 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                         </section>
                      </div>
                    </div>
-                 </div>
-               </div>
 
-               {/* Gestão de Estoque, Preço e Localização */}
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-border/50">
+                   {/* Gestão de Estoque, Preço e Localização */}
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-border/50">
                  <section className="bg-primary/5 rounded-2xl border border-primary/10 p-5 space-y-5">
                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                      <DollarSign className="h-3.5 w-3.5" /> Precificação e Venda
