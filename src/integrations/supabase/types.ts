@@ -59,6 +59,7 @@ export type Database = {
           last_message_at: string
           messages_count: number
           status: string
+          transcript: Json
           user_id: string
         }
         Insert: {
@@ -69,6 +70,7 @@ export type Database = {
           last_message_at?: string
           messages_count?: number
           status?: string
+          transcript?: Json
           user_id: string
         }
         Update: {
@@ -79,6 +81,7 @@ export type Database = {
           last_message_at?: string
           messages_count?: number
           status?: string
+          transcript?: Json
           user_id?: string
         }
         Relationships: []
@@ -103,6 +106,8 @@ export type Database = {
           system_prompt: string
           updated_at: string
           user_id: string
+          webhook_secret: string | null
+          whatsapp_instance: string | null
         }
         Insert: {
           ai_model?: string
@@ -123,6 +128,8 @@ export type Database = {
           system_prompt?: string
           updated_at?: string
           user_id: string
+          webhook_secret?: string | null
+          whatsapp_instance?: string | null
         }
         Update: {
           ai_model?: string
@@ -143,6 +150,8 @@ export type Database = {
           system_prompt?: string
           updated_at?: string
           user_id?: string
+          webhook_secret?: string | null
+          whatsapp_instance?: string | null
         }
         Relationships: []
       }
@@ -744,7 +753,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      ensure_default_funnel_stages: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
