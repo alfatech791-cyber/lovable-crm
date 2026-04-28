@@ -161,6 +161,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                           onChange={(e) => handleChange("name", e.target.value)}
                           placeholder="Ex: Apple iPhone 15 Pro Max 256GB" 
                           className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                          required
                         />
                            </div>
                            <div className="md:col-span-4 grid gap-2">
@@ -271,17 +272,17 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                            <Settings2 className="h-3 w-3" /> Visibilidade & Status
                         </h3>
                         <div className="grid grid-cols-1 gap-3">
-                           <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-card border border-sidebar-border/30">
-                              <Label className="text-[9px] font-bold uppercase opacity-60">Status do Produto</Label>
-                              <Select defaultValue="ativo">
-                                 <SelectTrigger className="h-7 text-[10px] bg-transparent border-none p-0 focus:ring-0 shadow-none font-bold"><SelectValue /></SelectTrigger>
-                                 <SelectContent>
-                                    <SelectItem value="ativo">Disponível para Venda</SelectItem>
-                                    <SelectItem value="rascunho">Aguardando Revisão</SelectItem>
-                                    <SelectItem value="indisponivel">Indisponível</SelectItem>
-                                 </SelectContent>
-                              </Select>
-                           </div>
+                            <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-card border border-sidebar-border/30">
+                               <Label className="text-[9px] font-bold uppercase opacity-60">Status do Produto</Label>
+                               <Select value={formData.location === "indisponivel" ? "indisponivel" : (formData.location === "rascunho" ? "rascunho" : "ativo")} onValueChange={(v) => handleChange("location", v)}>
+                                  <SelectTrigger className="h-7 text-[10px] bg-transparent border-none p-0 focus:ring-0 shadow-none font-bold"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                     <SelectItem value="ativo">Disponível para Venda</SelectItem>
+                                     <SelectItem value="rascunho">Aguardando Revisão</SelectItem>
+                                     <SelectItem value="indisponivel">Indisponível</SelectItem>
+                                  </SelectContent>
+                               </Select>
+                            </div>
                            <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-sidebar-border/30">
                               <div className="space-y-0.5">
                                 <Label className="text-[9px] font-bold uppercase opacity-60">Destaque na Home</Label>
@@ -307,9 +308,14 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                               <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
                                  <InfoIcon className="h-3 w-3" /> Descrição Comercial
                               </h3>
-                              <Button variant="outline" size="sm" className="h-7 text-[9px] font-black uppercase gap-1.5 px-3 rounded-lg border-primary/30 text-primary hover:bg-primary/5 shadow-sm"><Zap className="h-3 w-3 fill-current" /> IA</Button>
-                           </div>
-                           <textarea className="w-full bg-muted/20 border border-border rounded-xl p-3 text-sm font-medium outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 min-h-[120px] custom-scrollbar transition-all leading-relaxed" placeholder="Diferenciais competitivos..." />
+                               <Button variant="outline" size="sm" className="h-7 text-[9px] font-black uppercase gap-1.5 px-3 rounded-lg border-primary/30 text-primary hover:bg-primary/5 shadow-sm"><Zap className="h-3 w-3 fill-current" /> IA</Button>
+                            </div>
+                           <textarea 
+                             value={formData.description}
+                             onChange={(e) => handleChange("description", e.target.value)}
+                             className="w-full bg-muted/20 border border-border rounded-xl p-3 text-sm font-medium outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 min-h-[120px] custom-scrollbar transition-all leading-relaxed" 
+                             placeholder="Diferenciais competitivos..." 
+                           />
                         </section>
 
                         <section className="bg-card rounded-2xl border border-border p-5 space-y-4 shadow-sm">
@@ -317,18 +323,33 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                              <ClipboardList className="h-3 w-3" /> Ficha Técnica / Spec
                            </h3>
                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                              <div className="grid gap-1.5">
-                                <Label className="text-[9px] font-bold uppercase opacity-60">Processador</Label>
-                                <Input className="h-9 text-xs bg-muted/10 border-border" placeholder="Ex: A17 Pro" />
-                              </div>
-                              <div className="grid gap-1.5">
-                                <Label className="text-[9px] font-bold uppercase opacity-60">Memória RAM</Label>
-                                <Input className="h-9 text-xs bg-muted/10 border-border" placeholder="Ex: 8GB" />
-                              </div>
-                              <div className="grid gap-1.5">
-                                <Label className="text-[9px] font-bold uppercase opacity-60">Display</Label>
-                                <Input className="h-9 text-xs bg-muted/10 border-border" placeholder="Ex: 6.7 OLED" />
-                              </div>
+                               <div className="grid gap-1.5">
+                                 <Label className="text-[9px] font-bold uppercase opacity-60">Processador</Label>
+                                 <Input 
+                                   value={formData.processor}
+                                   onChange={(e) => handleChange("processor", e.target.value)}
+                                   className="h-9 text-xs bg-muted/10 border-border" 
+                                   placeholder="Ex: A17 Pro" 
+                                 />
+                               </div>
+                               <div className="grid gap-1.5">
+                                 <Label className="text-[9px] font-bold uppercase opacity-60">Memória RAM</Label>
+                                 <Input 
+                                   value={formData.ram}
+                                   onChange={(e) => handleChange("ram", e.target.value)}
+                                   className="h-9 text-xs bg-muted/10 border-border" 
+                                   placeholder="Ex: 8GB" 
+                                 />
+                               </div>
+                               <div className="grid gap-1.5">
+                                 <Label className="text-[9px] font-bold uppercase opacity-60">Display</Label>
+                                 <Input 
+                                   value={formData.display}
+                                   onChange={(e) => handleChange("display", e.target.value)}
+                                   className="h-9 text-xs bg-muted/10 border-border" 
+                                   placeholder="Ex: 6.7 OLED" 
+                                 />
+                               </div>
                            </div>
                         </section>
                      </div>
@@ -458,22 +479,29 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                       </div>
                     </div>
                     <div className="grid gap-2">
-                      <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Unidade de Medida</Label>
-                      <Select defaultValue="un">
-                        <SelectTrigger className="bg-card h-11 border-border font-semibold transition-all"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="un">Unidade (UN)</SelectItem>
-                          <SelectItem value="cx">Caixa (CX)</SelectItem>
-                          <SelectItem value="jg">Jogo (JG)</SelectItem>
-                          <SelectItem value="pc">Peça (PC)</SelectItem>
-                          <SelectItem value="kit">Kit (KIT)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Peso Bruto (kg)</Label>
-                      <Input type="number" step="0.001" placeholder="0.250" className="bg-card h-11 border-border text-sm font-bold" />
-                    </div>
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Unidade de Medida</Label>
+                        <Select value={formData.unit} onValueChange={(v) => handleChange("unit", v)}>
+                          <SelectTrigger className="bg-card h-11 border-border font-semibold transition-all"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="un">Unidade (UN)</SelectItem>
+                            <SelectItem value="cx">Caixa (CX)</SelectItem>
+                            <SelectItem value="jg">Jogo (JG)</SelectItem>
+                            <SelectItem value="pc">Peça (PC)</SelectItem>
+                            <SelectItem value="kit">Kit (KIT)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Peso Bruto (kg)</Label>
+                        <Input 
+                          type="number" 
+                          step="0.001" 
+                          value={formData.weight}
+                          onChange={(e) => handleChange("weight", parseFloat(e.target.value) || 0)}
+                          placeholder="0.250" 
+                          className="bg-card h-11 border-border text-sm font-bold" 
+                        />
+                      </div>
                    </div>
                  </section>
 
@@ -484,11 +512,16 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                     <div className="grid gap-4">
                       <div className="grid gap-2">
                         <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Localização (Box/Prateleira)</Label>
-                        <Input placeholder="Ex: A-12-04" className="bg-card h-11 border-border text-sm font-mono font-black" />
+                        <Input 
+                          value={formData.location}
+                          onChange={(e) => handleChange("location", e.target.value)}
+                          placeholder="Ex: A-12-04" 
+                          className="bg-card h-11 border-border text-sm font-mono font-black" 
+                        />
                       </div>
                       <div className="grid gap-2">
                         <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Loja / Depósito</Label>
-                        <Select defaultValue="matriz">
+                        <Select value={formData.store} onValueChange={(v) => handleChange("store", v)}>
                           <SelectTrigger className="bg-card h-11 border-border font-semibold transition-all"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="matriz">Loja Matriz</SelectItem>
@@ -527,7 +560,13 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                     {isSmartphone && (
                       <div className="grid gap-2">
                          <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-widest">IMEI Principal (SIM 1)</Label>
-                         <Input id="imei" defaultValue={product?.imei || ""} placeholder="Ex: 356789..." className="bg-muted/10 h-12 border-border font-mono text-sm tracking-[0.2em] font-black focus:ring-4 focus:ring-primary/5 transition-all" />
+                                 <Input 
+                                   id="imei" 
+                                   value={formData.imei} 
+                                   onChange={(e) => handleChange("imei", e.target.value)}
+                                   placeholder="Ex: 356789..." 
+                                   className="bg-muted/10 h-12 border-border font-mono text-sm tracking-[0.2em] font-black focus:ring-4 focus:ring-primary/5 transition-all" 
+                                 />
                       </div>
                     )}
                   </div>
@@ -542,11 +581,21 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid gap-2">
                         <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Cor</Label>
-                        <Input placeholder="Ex: Titânio Natural" className="bg-muted/10 h-10 border-border text-xs font-bold" />
+                        <Input 
+                          value={formData.color} 
+                          onChange={(e) => handleChange("color", e.target.value)} 
+                          placeholder="Ex: Titânio Natural" 
+                          className="bg-muted/10 h-10 border-border text-xs font-bold" 
+                        />
                       </div>
                       <div className="grid gap-2">
                         <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Capacidade</Label>
-                        <Input placeholder="Ex: 256GB" className="bg-muted/10 h-10 border-border text-xs font-bold" />
+                        <Input 
+                          value={formData.capacity} 
+                          onChange={(e) => handleChange("capacity", e.target.value)} 
+                          placeholder="Ex: 256GB" 
+                          className="bg-muted/10 h-10 border-border text-xs font-bold" 
+                        />
                       </div>
                     </div>
                   </div>

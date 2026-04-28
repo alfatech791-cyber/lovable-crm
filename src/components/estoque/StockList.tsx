@@ -42,9 +42,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
    const handleAddProduct = (data: any) => {
      const newProduct = {
        ...data,
-       id: Math.random().toString(36).substr(2, 9),
-     };
-     setLocalProducts(prev => [newProduct, ...prev]);
+        id: Math.random().toString(36).substr(2, 9),
+        image: "", // Garante que a imagem comece vazia se não fornecida
+      };
+      setLocalProducts(prev => [newProduct, ...prev]);
    };
 
    const handleUpdateProduct = (data: any) => {
