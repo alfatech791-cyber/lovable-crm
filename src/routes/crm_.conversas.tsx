@@ -547,13 +547,18 @@ function ConversasPage() {
 
   const filtered = useMemo(
     () =>
-      items.filter(
-        (c) =>
+      items.filter((c) => {
+        const matchSearch =
           !search ||
           (c.contact_name ?? "").toLowerCase().includes(search.toLowerCase()) ||
-          c.contact_phone.includes(search)
-      ),
-    [items, search]
+          c.contact_phone.includes(search);
+        if (!matchSearch) return false;
+        if (statusFilter === "bot") return c.status !== "handed_off";
+        if (statusFilter === "manual") return c.status === "handed_off";
+        if (statusFilter === "unread") return unreadCount(c) > 0;
+        return true;
+      }),
+    [items, search, statusFilter, readState]
   );
 
   const selected = useMemo(
@@ -564,6 +569,25 @@ function ConversasPage() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [selected?.transcript?.length, selectedId]);
+
+  // Mark conversation as read when opened or when new messages arrive while open
+  useEffect(() => {
+    if (selected) markAsRead(selected);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId, selected?.transcript?.length]);
+
+  const totalUnread = useMemo(
+    () => items.reduce((acc, c) => acc + unreadCount(c), 0),
+    [items, readState]
+  );
+
+  const formatDateLabel = (iso: string) => {
+    const d = new Date(iso);
+    if (isToday(d)) return "Hoje";
+    if (isYesterday(d)) return "Ontem";
+    if (isThisWeek(d, { locale: ptBR })) return format(d, "EEEE", { locale: ptBR });
+    return format(d, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+  };
 
   const sendPayload = async (payload: Record<string, unknown>) => {
     if (!selected) return;
