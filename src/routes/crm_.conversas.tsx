@@ -627,9 +627,14 @@ function ConversasPage() {
       syncFromWhatsApp(false);
     }, 300);
 
-    const poller = window.setInterval(() => {
-      syncFromWhatsApp(false);
-    }, 15000);
+    const poller = window.setInterval(() => syncFromWhatsApp(false), 10000);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        syncFromWhatsApp(false);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
 
     if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().catch(() => undefined);
@@ -638,6 +643,7 @@ function ConversasPage() {
     return () => {
       clearTimeout(initialTimer);
       clearInterval(poller);
+      document.removeEventListener("visibilitychange", handleVisibility);
       readyForNotificationsRef.current = false;
       if (ch) supabase.removeChannel(ch);
     };
