@@ -152,47 +152,65 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                      </section>
                    </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
-                        <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                           <Settings2 className="h-3 w-3" /> Visibilidade
-                        </h3>
-                        <div className="grid grid-cols-2 gap-3">
-                           <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-card/40 border border-sidebar-border/30">
-                              <Label className="text-[9px] font-bold uppercase opacity-60">Status</Label>
-                              <Select defaultValue="ativo">
-                                 <SelectTrigger className="h-7 text-[10px] bg-transparent border-none p-0 focus:ring-0 shadow-none"><SelectValue /></SelectTrigger>
-                                 <SelectContent>
-                                    <SelectItem value="ativo">Disponível</SelectItem>
-                                    <SelectItem value="rascunho">Rascunho</SelectItem>
-                                 </SelectContent>
-                              </Select>
+                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                     <div className="lg:col-span-8 space-y-6">
+                        <section className="bg-card rounded-2xl border border-border p-5 space-y-4 shadow-sm">
+                           <div className="flex items-center justify-between">
+                              <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
+                                 <InfoIcon className="h-3 w-3" /> Descrição Comercial
+                              </h3>
+                              <Button variant="outline" size="sm" className="h-7 text-[9px] font-black uppercase gap-1.5 px-3 rounded-lg border-primary/30 text-primary hover:bg-primary/5 shadow-sm"><Zap className="h-3 w-3 fill-current" /> IA</Button>
                            </div>
-                           <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-card/40 border border-sidebar-border/30">
-                              <Label className="text-[9px] font-bold uppercase opacity-60">Destaque</Label>
-                              <div className="flex items-center justify-between h-7">
-                                 <span className="text-[10px] font-medium">Home Page</span>
-                                 <Switch className="scale-50 -mr-2" />
+                           <textarea className="w-full bg-muted/20 border border-border rounded-xl p-3 text-sm font-medium outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 min-h-[120px] custom-scrollbar transition-all leading-relaxed" placeholder="Diferenciais competitivos..." />
+                        </section>
+
+                        <section className="bg-card rounded-2xl border border-border p-5 space-y-4 shadow-sm">
+                           <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
+                             <ClipboardList className="h-3 w-3" /> Ficha Técnica / Spec
+                           </h3>
+                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div className="grid gap-1.5">
+                                <Label className="text-[9px] font-bold uppercase opacity-60">Processador</Label>
+                                <Input className="h-9 text-xs bg-muted/10 border-border" placeholder="Ex: A17 Pro" />
+                              </div>
+                              <div className="grid gap-1.5">
+                                <Label className="text-[9px] font-bold uppercase opacity-60">Memória RAM</Label>
+                                <Input className="h-9 text-xs bg-muted/10 border-border" placeholder="Ex: 8GB" />
+                              </div>
+                              <div className="grid gap-1.5">
+                                <Label className="text-[9px] font-bold uppercase opacity-60">Display</Label>
+                                <Input className="h-9 text-xs bg-muted/10 border-border" placeholder="Ex: 6.7 OLED" />
                               </div>
                            </div>
-                        </div>
-                     </section>
+                        </section>
+                     </div>
 
-                     <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
-                        <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                           <Truck className="h-3 w-3" /> Tipo de Entrega
-                        </h3>
-                        <div className="flex flex-wrap gap-2">
-                           {['Pronta Entrega', 'Retirada', 'Expressa'].map(t => (
-                              <Badge key={t} variant="secondary" className="text-[9px] bg-primary/10 text-primary border-none hover:bg-primary/20 cursor-pointer">
-                                 {t}
-                              </Badge>
-                           ))}
-                        </div>
-                     </section>
-                  </div>
-
-
+                     <div className="lg:col-span-4 space-y-6">
+                        <section className="bg-card rounded-2xl border border-border p-5 space-y-5 shadow-sm h-full">
+                           <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
+                             <ImageIcon className="h-3 w-3" /> Mídia do Produto
+                           </h3>
+                           <div className="space-y-4">
+                             <div className="aspect-square border-2 border-dashed border-primary/20 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-primary/[0.02] hover:border-primary/40 transition-all cursor-pointer group bg-muted/10">
+                               <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-glow">
+                                 <Upload className="h-5 w-5" />
+                               </div>
+                               <div className="text-center px-4">
+                                  <span className="text-[10px] font-black text-primary uppercase tracking-widest block">Upload Principal</span>
+                                  <span className="text-[9px] font-bold text-muted-foreground/60 uppercase">PNG, JPG até 5MB</span>
+                               </div>
+                             </div>
+                             <div className="grid grid-cols-3 gap-2">
+                                {Array.from({ length: 3 }).map((_, i) => (
+                                  <div key={i} className="aspect-square border border-dashed border-border rounded-xl flex items-center justify-center bg-muted/20 hover:bg-muted/30 transition-all cursor-pointer">
+                                     <Plus className="h-3 w-3 text-muted-foreground/40" />
+                                  </div>
+                                ))}
+                             </div>
+                           </div>
+                        </section>
+                     </div>
+                   </div>
                {/* Gestão de Estoque, Preço e Localização */}
                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-border/50">
                  <section className="bg-primary/5 rounded-2xl border border-primary/10 p-5 space-y-5">
