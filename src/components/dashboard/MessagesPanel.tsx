@@ -1,5 +1,5 @@
  import { messages } from "@/lib/mock";
- import { ArrowRight, Filter, MoreHorizontal } from "lucide-react";
+  import { ArrowRight, Filter, MoreHorizontal, MessageSquare } from "lucide-react";
  import { useState } from "react";
  import { useNavigate } from "@tanstack/react-router";
 
