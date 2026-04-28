@@ -15,7 +15,8 @@ serve(async (req) => {
   try {
     const url = new URL(req.url);
     const userId = url.searchParams.get("uid");
-    if (!userId) return json({ error: "missing uid" }, 400);
+    const secret = url.searchParams.get("secret");
+    if (!userId || !secret) return json({ error: "missing uid or secret" }, 400);
 
     const payload = await req.json().catch(() => ({}));
     const event = payload?.event ?? payload?.type;
@@ -52,7 +53,10 @@ serve(async (req) => {
       .eq("user_id", userId)
       .maybeSingle();
 
-    if (!settings || !settings.is_active) {
+    if (!settings || settings.webhook_secret !== secret) {
+      return json({ error: "invalid secret" }, 401);
+    }
+    if (!settings.is_active) {
       return json({ ok: true, inactive: true });
     }
 
