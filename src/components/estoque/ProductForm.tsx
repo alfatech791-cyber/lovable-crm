@@ -53,69 +53,62 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                          <Tag className="h-3 w-3" /> Identificação Básica
                        </h3>
                        
-                       <div className="grid gap-5">
-                         <div className="grid gap-2.5">
-                           <div className="flex items-center justify-between px-1">
-                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest flex items-center gap-2">
-                                 Título Comercial do Anúncio
-                                 <Badge variant="outline" className="text-[8px] h-3.5 px-1 py-0 border-primary/20 text-primary">Obrigatório</Badge>
+                        <div className="grid gap-5">
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                            <div className="md:col-span-8 grid gap-2">
+                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 flex items-center gap-2">
+                                Nome do Produto
+                                <Badge variant="outline" className="text-[8px] h-3.5 px-1 py-0 border-primary/20 text-primary">Obrigatório</Badge>
                               </Label>
-                              <span className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-tighter">0 / 80 Caracteres</span>
-                           </div>
-                           <Input id="name" defaultValue={product?.name} placeholder="Ex: Apple iPhone 15 Pro Max 256GB - Titânio Natural" className="bg-card h-14 border-border shadow-sm focus:border-primary/50 focus:ring-4 focus:ring-primary/5 text-base font-bold transition-all placeholder:font-medium" />
-                         </div>
+                              <Input id="name" defaultValue={product?.name} placeholder="Ex: Apple iPhone 15 Pro Max 256GB" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                            </div>
+                            <div className="md:col-span-4 grid gap-2">
+                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código Interno / SKU</Label>
+                              <Input placeholder="AUTO-GEN-001" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                            </div>
+                          </div>
 
-                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                           <div className="grid gap-2">
-                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Categoria</Label>
-                             <Select defaultValue={product?.category || "Acessórios"} onValueChange={(v) => setIsSmartphone(v === "Smartphones")}>
-                               <SelectTrigger className="bg-card h-10 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
-                               <SelectContent className="border-border shadow-elegant">
-                                 <SelectItem value="Smartphones">Smartphones</SelectItem>
-                                 <SelectItem value="Tablets">Tablets</SelectItem>
-                                 <SelectItem value="Watch">Smartwatches</SelectItem>
-                                 <SelectItem value="Acessórios">Acessórios</SelectItem>
-                                 <SelectItem value="Peças">Peças Técnicas</SelectItem>
-                               </SelectContent>
-                             </Select>
-                           </div>
-                           <div className="grid gap-2">
-                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fabricante</Label>
-                             <Select defaultValue="apple">
-                               <SelectTrigger className="bg-card h-10 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
-                               <SelectContent className="border-border shadow-elegant">
-                                 <SelectItem value="apple">Apple Inc.</SelectItem>
-                                 <SelectItem value="samsung">Samsung</SelectItem>
-                                 <SelectItem value="xiaomi">Xiaomi</SelectItem>
-                                 <SelectItem value="motorola">Motorola</SelectItem>
-                               </SelectContent>
-                             </Select>
-                           </div>
-                           <div className="grid gap-2">
-                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fornecedor</Label>
-                             <Select defaultValue="padrao">
-                               <SelectTrigger className="bg-card h-10 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
-                               <SelectContent className="border-border shadow-elegant">
-                                 <SelectItem value="padrao">Principal</SelectItem>
-                                 <SelectItem value="dist">Distribuidora Oficial</SelectItem>
-                                 <SelectItem value="import">Importação Direta</SelectItem>
-                               </SelectContent>
-                             </Select>
-                           </div>
-                           <div className="grid gap-2">
-                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Garantia</Label>
-                             <Select defaultValue="12">
-                               <SelectTrigger className="bg-card h-10 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
-                               <SelectContent className="border-border shadow-elegant">
-                                 <SelectItem value="3">3 Meses</SelectItem>
-                                 <SelectItem value="6">6 Meses</SelectItem>
-                                 <SelectItem value="12">12 Meses</SelectItem>
-                                 <SelectItem value="24">24 Meses</SelectItem>
-                               </SelectContent>
-                             </Select>
-                           </div>
-                         </div>
-                       </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="grid gap-2">
+                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Categoria</Label>
+                              <Select defaultValue={product?.category || "Acessórios"} onValueChange={(v) => setIsSmartphone(v === "Smartphones")}>
+                                <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
+                                <SelectContent className="border-border shadow-elegant">
+                                  <SelectItem value="Smartphones">Smartphones</SelectItem>
+                                  <SelectItem value="Tablets">Tablets</SelectItem>
+                                  <SelectItem value="Watch">Smartwatches</SelectItem>
+                                  <SelectItem value="Acessórios">Acessórios</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="grid gap-2">
+                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fabricante / Marca</Label>
+                              <Select defaultValue="apple">
+                                <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
+                                <SelectContent className="border-border shadow-elegant">
+                                  <SelectItem value="apple">Apple</SelectItem>
+                                  <SelectItem value="samsung">Samsung</SelectItem>
+                                  <SelectItem value="xiaomi">Xiaomi</SelectItem>
+                                  <SelectItem value="motorola">Motorola</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="grid gap-2">
+                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fornecedor</Label>
+                              <Select defaultValue="padrao">
+                                <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
+                                <SelectContent className="border-border shadow-elegant">
+                                  <SelectItem value="padrao">Principal</SelectItem>
+                                  <SelectItem value="dist">Distribuidora</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="grid gap-2">
+                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Modelo / Referência</Label>
+                              <Input placeholder="iPhone 15 Pro Max" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                            </div>
+                          </div>
+                        </div>
                      </section>
 
                      <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
