@@ -150,7 +150,7 @@ const normalizeTranscript = (messages: any[]): Msg[] =>
         kind,
         content,
         at: normTs(m?.messageTimestamp ?? m?.timestamp ?? m?.createdAt),
-        sent: fromMe ? m?.status !== "ERROR" : undefined, sender: m?.pushName || m?.verifiedName || m?.name || null,
+        sent: fromMe ? m?.status !== "ERROR" : undefined, sender: m?.pushName || m?.verifiedName || m?.name || m?.verifiedName || null,
       } as Msg;
     })
     .filter(Boolean) as Msg[];
@@ -1051,15 +1051,14 @@ function ConversasPage() {
                                   <p className="opacity-90">{m.content}</p>
                                 )}
                               </div>
-                            ) : (
-                                <>
-                                  {selected.is_group && isUser && m.sender && (
-                                    <p className="text-[10px] font-bold text-primary mb-1 opacity-80 uppercase tracking-tighter">{m.sender}</p>
-                                  )}
-                                  <span className="whitespace-pre-wrap break-words">{m.content}</span>
-                                </>
-                              <span className="whitespace-pre-wrap break-words">{m.content}</span>
-                            )}
+) : (
+<>
+{selected.is_group && isUser && m.sender && (
+<p className="text-[10px] font-bold text-primary mb-1 opacity-80 uppercase tracking-tighter">{m.sender}</p>
+)}
+<span className="whitespace-pre-wrap break-words">{m.content}</span>
+</>
+)}
                             {m.at && m.kind !== "sticker" && (
                               <div className={`text-[10px] mt-2 flex justify-end font-medium opacity-70 ${isUser ? "text-muted-foreground" : "text-primary-foreground/90"}`}>
                                 {format(new Date(m.at), "HH:mm")}
