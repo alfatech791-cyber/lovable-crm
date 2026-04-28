@@ -606,7 +606,7 @@ function ConversasPage() {
                 return;
               }
 
-              const row = payload.new as any as Conversation;
+              const row = { ...(payload.new as any), transcript: (payload.new as any).transcript || [] } as any as Conversation;
               setItems((prev) => {
                 const next = [row, ...prev.filter((c) => c.id !== row.id)];
                 next.sort((a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at));
