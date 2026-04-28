@@ -27,24 +27,28 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
       )}
       
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-[244px] bg-sidebar text-sidebar-foreground flex flex-col transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-50 bg-sidebar text-sidebar-foreground flex flex-col transition-[transform,width] duration-300 ease-in-out
         lg:relative lg:translate-x-0
+        ${flyout ? "w-[68px]" : "w-[244px]"}
         ${open ? "translate-x-0" : "-translate-x-full"}
       `}>
       {/* Brand */}
-      <div className="flex items-center gap-2.5 px-5 h-[68px] border-b border-sidebar-border">
+      <div className={`flex items-center gap-2.5 h-[68px] border-b border-sidebar-border ${flyout ? "px-3 justify-center" : "px-5"}`}>
         <div className="h-9 w-9 rounded-xl bg-gradient-primary grid place-items-center shadow-glow">
           <Sparkles className="h-4.5 w-4.5 text-white" strokeWidth={2.5} />
         </div>
-        <div className="leading-tight">
-          <div className="font-display font-bold text-[17px] text-white tracking-tight">ConectaCRM</div>
-        </div>
+        {!flyout && (
+          <div className="leading-tight">
+            <div className="font-display font-bold text-[17px] text-white tracking-tight">ConectaCRM</div>
+          </div>
+        )}
       </div>
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto custom-scrollbar">
         {filteredItems.map((item: any, idx: number) => {
           if (item.type === "header") {
+            if (flyout) return null;
             return (
               <div key={`header-${idx}`} className="px-3 pt-4 pb-2 text-[10px] font-black uppercase tracking-widest text-sidebar-foreground/30">
                 {item.title}
@@ -62,15 +66,16 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
               <button
                 key={item.url}
                 onClick={() => setFlyout(isOpen ? null : item)}
-                className={`group w-full relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all text-left
+                title={flyout ? item.title : undefined}
+                className={`group w-full relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all text-left ${flyout ? "justify-center" : ""}
                   ${active || isOpen
                     ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-glow"
                     : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-white"
                   }`}
               >
                 <Icon className="h-[18px] w-[18px]" strokeWidth={active || isOpen ? 2.4 : 2} />
-                <span>{item.title}</span>
-                <ChevronRight className={`h-4 w-4 ml-auto transition-transform ${isOpen ? "translate-x-0.5" : ""}`} />
+                {!flyout && <span>{item.title}</span>}
+                {!flyout && <ChevronRight className={`h-4 w-4 ml-auto transition-transform ${isOpen ? "translate-x-0.5" : ""}`} />}
               </button>
             );
           }
@@ -79,19 +84,20 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
             <div key={item.url} className="space-y-1">
               <Link
                 to={item.url}
-                className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all
+                title={flyout ? item.title : undefined}
+                className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all ${flyout ? "justify-center" : ""}
                   ${active
                     ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-glow"
                     : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-white"
                   }`}
               >
                 <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.4 : 2} />
-                <span>{item.title}</span>
-                {active && !item.children && <ChevronRight className="h-4 w-4 ml-auto opacity-80" />}
-                {item.children && <Icons.ChevronDown className={`h-3.5 w-3.5 ml-auto transition-transform ${active ? "rotate-180" : ""}`} />}
+                {!flyout && <span>{item.title}</span>}
+                {!flyout && active && !item.children && <ChevronRight className="h-4 w-4 ml-auto opacity-80" />}
+                {!flyout && item.children && <Icons.ChevronDown className={`h-3.5 w-3.5 ml-auto transition-transform ${active ? "rotate-180" : ""}`} />}
               </Link>
               
-              {item.children && active && (
+              {!flyout && item.children && active && (
                 <div className="ml-9 space-y-1 border-l border-sidebar-border/50 pl-2 py-1">
                   {item.children.map((child: any) => (
                     <Link
@@ -115,27 +121,32 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
 
       {/* Info card */}
       <div className="px-3 pb-3 space-y-3">
-        <div className="rounded-xl bg-gradient-sidebar-cta p-3.5 text-white shadow-elegant">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider">
-            <Sparkles className="h-3.5 w-3.5" /> Novo: IA Conecta
+        {!flyout && (
+          <div className="rounded-xl bg-gradient-sidebar-cta p-3.5 text-white shadow-elegant">
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider">
+              <Sparkles className="h-3.5 w-3.5" /> Novo: IA Conecta
+            </div>
+            <p className="mt-1.5 text-xs text-white/85 leading-snug">
+              Resuma conversas, gere respostas e muito mais.
+            </p>
+            <button className="mt-3 w-full rounded-md bg-white/15 hover:bg-white/25 backdrop-blur-sm py-1.5 text-xs font-medium transition">
+              Experimentar agora
+            </button>
           </div>
-          <p className="mt-1.5 text-xs text-white/85 leading-snug">
-            Resuma conversas, gere respostas e muito mais.
-          </p>
-          <button className="mt-3 w-full rounded-md bg-white/15 hover:bg-white/25 backdrop-blur-sm py-1.5 text-xs font-medium transition">
-            Experimentar agora
-          </button>
-        </div>
+        )}
 
-        <button 
+        <button
           onClick={logout}
-          className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition group"
+          title={flyout ? "Sair" : undefined}
+          className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition group ${flyout ? "justify-center" : ""}`}
         >
           <Icons.LogOut className="h-[18px] w-[18px]" />
-          <div className="leading-tight text-left">
-            <div className="text-[13px] font-medium">Sair da Conta</div>
-            <div className="text-[11px] opacity-60">Encerrar sessão</div>
-          </div>
+          {!flyout && (
+            <div className="leading-tight text-left">
+              <div className="text-[13px] font-medium">Sair da Conta</div>
+              <div className="text-[11px] opacity-60">Encerrar sessão</div>
+            </div>
+          )}
         </button>
       </div>
     </aside>
@@ -143,11 +154,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
     {/* Flyout: segundo painel dedicado */}
     {flyout && (
       <>
-        <div
-          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
-          onClick={() => setFlyout(null)}
-        />
-        <aside className="fixed inset-y-0 left-[244px] z-50 w-[300px] bg-sidebar border-l border-sidebar-border/40 text-sidebar-foreground flex flex-col shadow-2xl animate-in slide-in-from-left-4 duration-200">
+        <aside className="fixed inset-y-0 left-[68px] z-50 w-[280px] bg-sidebar border-l border-sidebar-border/40 text-sidebar-foreground flex flex-col shadow-2xl animate-in slide-in-from-left-4 duration-200">
           <div className="flex items-center justify-between px-5 h-[68px] border-b border-sidebar-border">
             <div className="flex items-center gap-2.5">
               <div className="h-9 w-9 rounded-xl bg-gradient-primary grid place-items-center shadow-glow">
