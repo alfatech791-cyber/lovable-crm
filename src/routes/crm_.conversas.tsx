@@ -23,7 +23,7 @@ import {
   X,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format, isToday, isYesterday, isThisWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 
@@ -174,6 +174,7 @@ function ConversasPage() {
   const [recording, setRecording] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
   const [stickerOpen, setStickerOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"all" | "bot" | "manual" | "unread">("all");
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const recordTimerRef = useRef<number | null>(null);
@@ -182,6 +183,19 @@ function ConversasPage() {
   const syncLockRef = useRef(false);
   const readyForNotificationsRef = useRef(false);
   const lastIncomingMessageRef = useRef(new Map<string, string>());
+  const [readState, setReadState] = useState<Record<string, number>>({});
+
+  const unreadCount = (c: Conversation) => {
+    const seen = readState[c.id] ?? 0;
+    const incoming = (c.transcript ?? []).filter((m) => m.role === "user").length;
+    return Math.max(0, incoming - seen);
+  };
+
+  const markAsRead = (c: Conversation | null) => {
+    if (!c) return;
+    const incoming = (c.transcript ?? []).filter((m) => m.role === "user").length;
+    setReadState((prev) => (prev[c.id] === incoming ? prev : { ...prev, [c.id]: incoming }));
+  };
 
   const getLastIncomingKey = (conversation: Conversation) => {
     const lastIncoming = [...(conversation.transcript ?? [])]
@@ -533,13 +547,18 @@ function ConversasPage() {
 
   const filtered = useMemo(
     () =>
-      items.filter(
-        (c) =>
+      items.filter((c) => {
+        const matchSearch =
           !search ||
           (c.contact_name ?? "").toLowerCase().includes(search.toLowerCase()) ||
-          c.contact_phone.includes(search)
-      ),
-    [items, search]
+          c.contact_phone.includes(search);
+        if (!matchSearch) return false;
+        if (statusFilter === "bot") return c.status !== "handed_off";
+        if (statusFilter === "manual") return c.status === "handed_off";
+        if (statusFilter === "unread") return unreadCount(c) > 0;
+        return true;
+      }),
+    [items, search, statusFilter, readState]
   );
 
   const selected = useMemo(
@@ -550,6 +569,25 @@ function ConversasPage() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [selected?.transcript?.length, selectedId]);
+
+  // Mark conversation as read when opened or when new messages arrive while open
+  useEffect(() => {
+    if (selected) markAsRead(selected);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId, selected?.transcript?.length]);
+
+  const totalUnread = useMemo(
+    () => items.reduce((acc, c) => acc + unreadCount(c), 0),
+    [items, readState]
+  );
+
+  const formatDateLabel = (iso: string) => {
+    const d = new Date(iso);
+    if (isToday(d)) return "Hoje";
+    if (isYesterday(d)) return "Ontem";
+    if (isThisWeek(d, { locale: ptBR })) return format(d, "EEEE", { locale: ptBR });
+    return format(d, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+  };
 
   const sendPayload = async (payload: Record<string, unknown>) => {
     if (!selected) return;
@@ -654,7 +692,20 @@ function ConversasPage() {
         <div className="flex-1 flex overflow-hidden">
           {/* Sidebar conversas */}
           <div className="w-[340px] border-r border-border flex flex-col bg-card/40">
-            <div className="p-3 border-b border-border space-y-2">
+            <div className="p-3 border-b border-border space-y-2.5">
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold">Inbox</h3>
+                  {totalUnread > 0 && (
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
+                      {totalUnread}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] text-muted-foreground">
+                  {items.length} conversa{items.length === 1 ? "" : "s"}
+                </span>
+              </div>
               <div className="relative">
                 <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -663,6 +714,26 @@ function ConversasPage() {
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 h-9"
                 />
+              </div>
+              <div className="flex items-center gap-1">
+                {[
+                  { id: "all", label: "Todas" },
+                  { id: "unread", label: "Não lidas" },
+                  { id: "bot", label: "Bot" },
+                  { id: "manual", label: "Manual" },
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => setStatusFilter(f.id as typeof statusFilter)}
+                    className={`flex-1 text-[10px] font-bold py-1.5 rounded-lg transition ${
+                      statusFilter === f.id
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
               </div>
               <button
                 onClick={() => syncFromWhatsApp(true)}
@@ -707,6 +778,7 @@ function ConversasPage() {
                     .join("")
                     .slice(0, 2)
                     .toUpperCase();
+                  const unread = unreadCount(c);
                   return (
                     <button
                       key={c.id}
@@ -723,20 +795,32 @@ function ConversasPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-bold text-sm truncate">{c.contact_name ?? c.contact_phone}</span>
+                          <span className={`text-sm truncate ${unread > 0 ? "font-bold" : "font-semibold"}`}>
+                            {c.contact_name ?? c.contact_phone}
+                          </span>
                           <span className="text-[10px] text-muted-foreground shrink-0">
                             {formatDistanceToNow(new Date(c.last_message_at), { addSuffix: false, locale: ptBR })}
                           </span>
                         </div>
                         <div className="flex items-center justify-between gap-2 mt-0.5">
-                          <p className="text-xs text-muted-foreground truncate">{last?.content ?? "—"}</p>
-                          <span
-                            className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
-                              c.status === "handed_off" ? "bg-warning/15 text-warning" : "bg-success/15 text-success"
-                            }`}
-                          >
-                            {c.status === "handed_off" ? "MANUAL" : "BOT"}
-                          </span>
+                          <p className={`text-xs truncate ${unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                            {last?.role === "assistant" || last?.role === "agent" ? "Você: " : ""}
+                            {last?.content ?? "—"}
+                          </p>
+                          <div className="flex items-center gap-1 shrink-0">
+                            {unread > 0 && (
+                              <span className="text-[10px] min-w-[18px] h-[18px] px-1 grid place-items-center rounded-full font-bold bg-primary text-primary-foreground">
+                                {unread > 99 ? "99+" : unread}
+                              </span>
+                            )}
+                            <span
+                              className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
+                                c.status === "handed_off" ? "bg-warning/15 text-warning" : "bg-success/15 text-success"
+                              }`}
+                            >
+                              {c.status === "handed_off" ? "MANUAL" : "BOT"}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </button>
@@ -779,33 +863,47 @@ function ConversasPage() {
                 ) : (
                   selected.transcript.map((m, i) => {
                     const isUser = m.role === "user";
-                    const isBot = m.role === "assistant" && m.kind !== "audio" && m.kind !== "sticker"
-                      ? true
-                      : m.role === "assistant";
+                    const prev = selected.transcript[i - 1];
+                    const showDate =
+                      !prev ||
+                      (m.at && prev.at && new Date(m.at).toDateString() !== new Date(prev.at).toDateString());
                     return (
-                      <div key={i} className={`flex gap-2 ${isUser ? "justify-start" : "justify-end"}`}>
+                      <div key={i}>
+                        {showDate && m.at && (
+                          <div className="flex justify-center my-4">
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                              {formatDateLabel(m.at)}
+                            </span>
+                          </div>
+                        )}
+                        <div className={`flex gap-2 ${isUser ? "justify-start" : "justify-end"}`}>
                         {isUser && (
                           <div className="h-7 w-7 rounded-full bg-muted grid place-items-center shrink-0">
                             <User className="h-3.5 w-3.5" />
                           </div>
                         )}
                         <div
-                          className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm ${
+                          className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm shadow-sm ${
                             isUser
                               ? "bg-muted rounded-bl-sm"
                               : "bg-primary text-primary-foreground rounded-br-sm"
-                          } ${m.kind === "sticker" ? "text-3xl bg-transparent !px-1 !py-0" : ""}`}
+                          } ${m.kind === "sticker" ? "text-3xl bg-transparent shadow-none !px-1 !py-0" : ""}`}
                         >
                           {m.kind === "audio" ? (
                             <span className="flex items-center gap-2">
-                              <Mic className="h-4 w-4" /> Áudio enviado
+                              <Mic className="h-4 w-4" /> Áudio
                             </span>
                           ) : m.kind === "image" ? (
                             <span className="flex items-center gap-2">
                               <ImageIcon className="h-4 w-4" /> {m.content || "Imagem"}
                             </span>
                           ) : (
-                            m.content
+                            <span className="whitespace-pre-wrap break-words">{m.content}</span>
+                          )}
+                          {m.at && m.kind !== "sticker" && (
+                            <div className={`text-[9px] mt-1 opacity-70 ${isUser ? "text-muted-foreground" : "text-primary-foreground"}`}>
+                              {format(new Date(m.at), "HH:mm")}
+                            </div>
                           )}
                         </div>
                         {!isUser && (
@@ -813,6 +911,7 @@ function ConversasPage() {
                             <Bot className="h-3.5 w-3.5" />
                           </div>
                         )}
+                        </div>
                       </div>
                     );
                   })
