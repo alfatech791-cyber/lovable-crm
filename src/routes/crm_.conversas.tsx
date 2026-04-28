@@ -425,9 +425,7 @@ function ConversasPage() {
       ensureWebhook(instance);
 
       const rawChats = await evolution.findChats(instance);
-      const chats = asArray<EvolutionChat>(rawChats).filter(
-        (c) => !!c?.remoteJid && !String(c.remoteJid).endsWith("@g.us")
-      );
+      const chats = asArray<EvolutionChat>(rawChats).filter((c) => !!c?.remoteJid);
       if (chats.length === 0) {
         if (showToast) toast.info("Nenhuma conversa na instância.");
         return;
@@ -439,6 +437,7 @@ function ConversasPage() {
         .map((chat) => {
           const phone = getContactPhone(chat);
           if (!phone) return null;
+          const isGroup = String(chat.remoteJid ?? "").endsWith("@g.us");
 
           const existingConversation = byPhone.get(phone);
           const previewTranscript = existingConversation?.transcript?.length
@@ -449,6 +448,7 @@ function ConversasPage() {
             id: existingConversation?.id ?? `${instance}:${phone}`,
             contact_phone: phone,
             contact_name:
+              chat.subject ??
               chat.name ??
               chat.pushName ??
               chat.profileName ??
@@ -461,6 +461,12 @@ function ConversasPage() {
             last_message_at:
               previewTranscript[previewTranscript.length - 1]?.at ??
               normTs(chat.updatedAt ?? chat.lastMessageTime ?? chat.conversationTimestamp ?? chat.lastMessage?.messageTimestamp),
+            profile_pic_url:
+              chat.profilePicUrl ??
+              chat.profilePictureUrl ??
+              existingConversation?.profile_pic_url ??
+              null,
+            is_group: isGroup,
           } satisfies Conversation;
         })
         .filter((row): row is Conversation => !!row);
@@ -474,6 +480,7 @@ function ConversasPage() {
         chats.slice(0, 30).map(async (chat) => {
           const phone = getContactPhone(chat);
           if (!phone) return null;
+          const isGroup = String(chat.remoteJid ?? "").endsWith("@g.us");
 
           const ex = byPhone.get(phone);
           const raw = await evolution.findMessages(instance, chat.remoteJid!);
@@ -484,20 +491,45 @@ function ConversasPage() {
             mergedTranscript[mergedTranscript.length - 1]?.at ??
             normTs(chat.updatedAt ?? chat.lastMessageTime ?? chat.conversationTimestamp ?? chat.lastMessage?.messageTimestamp);
 
+          let picUrl =
+            chat.profilePicUrl ??
+            chat.profilePictureUrl ??
+            ex?.profile_pic_url ??
+            null;
+          let displayName =
+            chat.subject ??
+            chat.name ??
+            chat.pushName ??
+            chat.profileName ??
+            chat.lastMessage?.pushName ??
+            ex?.contact_name ??
+            null;
+
+          // Para grupos, busca nome e foto via group/findGroupInfos quando faltar
+          if (isGroup && (!picUrl || !displayName)) {
+            const info = await evolution.findGroupInfo(instance, chat.remoteJid!);
+            if (info) {
+              displayName = displayName ?? info?.subject ?? info?.name ?? null;
+              picUrl = picUrl ?? info?.pictureUrl ?? info?.profilePicUrl ?? null;
+            }
+          }
+
+          // Para contatos individuais, busca a foto de perfil quando faltar
+          if (!isGroup && !picUrl) {
+            const number = String(chat.remoteJid ?? "").split("@")[0];
+            picUrl = await evolution.fetchProfilePictureUrl(instance, number);
+          }
+
           return {
             id: ex?.id ?? `${instance}:${phone}`,
             contact_phone: phone,
-            contact_name:
-              chat.name ??
-              chat.pushName ??
-              chat.profileName ??
-              chat.lastMessage?.pushName ??
-              ex?.contact_name ??
-              null,
+            contact_name: displayName,
             transcript: mergedTranscript,
             status: ex?.status ?? "active",
             messages_count: mergedTranscript.length,
             last_message_at: lastAt,
+            profile_pic_url: picUrl,
+            is_group: isGroup,
           } satisfies Conversation;
         })
       );
