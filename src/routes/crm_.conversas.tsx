@@ -390,14 +390,14 @@ function ConversasPage() {
     }
   };
 
-  const load = async () => {
+  const load = async (silent = false) => {
     if (!user?.id) {
       setLoading(false);
       setLoadError(null);
       return;
     }
 
-    setLoading(true);
+    if (!silent) setLoading(true);
     setLoadError(null);
     try {
       const { data, error } = await supabase
@@ -489,6 +489,7 @@ function ConversasPage() {
               existingConversation?.profile_pic_url ??
               null,
             is_group: isGroup,
+            remote_jid: chat.remoteJid || null,
           } satisfies Conversation;
         })
         .filter((row): row is Conversation => !!row);
@@ -499,13 +500,15 @@ function ConversasPage() {
       }
 
       const rows = await Promise.all(
-        chats.slice(0, 30).map(async (chat) => {
+        chats.slice(0, 50).map(async (chat) => {
           const phone = getContactPhone(chat);
           if (!phone) return null;
           const isGroup = String(chat.remoteJid ?? "").endsWith("@g.us");
 
           const ex = byPhone.get(phone);
-          const raw = await evolution.findMessages(instance, chat.remoteJid!);
+          // Só busca o histórico completo se for a conversa selecionada ou se não tivermos transcript
+          const shouldFetchFull = chat.remoteJid === selected?.remote_jid || !ex?.transcript?.length;
+          const raw = shouldFetchFull ? await evolution.findMessages(instance, chat.remoteJid!) : [];
           const transcript = normalizeTranscript(asArray<any>(raw));
           const fallbackTranscript = normalizeTranscript(chat.lastMessage ? [chat.lastMessage] : []);
           const mergedTranscript = transcript.length > 0 ? transcript : (ex?.transcript ?? fallbackTranscript); mergedTranscript.sort((a, b) => +new Date(a.at || 0) - +new Date(b.at || 0));
@@ -577,7 +580,7 @@ function ConversasPage() {
       }
 
       if (user?.id) {
-        await load();
+        await load(true);
       } else {
         applyConversations(valid, lastIncomingMessageRef.current.size > 0);
         setLoading(false);
@@ -627,9 +630,14 @@ function ConversasPage() {
       syncFromWhatsApp(false);
     }, 300);
 
-    const poller = window.setInterval(() => {
-      syncFromWhatsApp(false);
-    }, 15000);
+    const poller = window.setInterval(() => syncFromWhatsApp(false), 10000);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        syncFromWhatsApp(false);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
 
     if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().catch(() => undefined);
@@ -638,6 +646,7 @@ function ConversasPage() {
     return () => {
       clearTimeout(initialTimer);
       clearInterval(poller);
+      document.removeEventListener("visibilitychange", handleVisibility);
       readyForNotificationsRef.current = false;
       if (ch) supabase.removeChannel(ch);
     };
@@ -702,7 +711,7 @@ function ConversasPage() {
       const { data, error } = await supabase.functions.invoke("send-whatsapp", {
         headers: { Authorization: `Bearer ${accessToken}` },
         body: {
-          phone: selected.remote_jid || selected.contact_phone,
+          phone: selected.remote_jid || (selected.is_group && !selected.contact_phone.includes("@") ? `${selected.contact_phone}@g.us` : selected.contact_phone),
           contactName: selected.contact_name,
           ...payload,
         },
@@ -805,7 +814,13 @@ function ConversasPage() {
                   <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
                     <MessageSquare className="h-4 w-4 text-primary" />
                   </div>
-                  <h3 className="text-base font-bold tracking-tight">Conversas</h3>
+                  <div className="flex flex-col">
+                    <h3 className="text-base font-bold tracking-tight">Conversas</h3>
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <span className={`h-1 w-1 rounded-full ${syncing ? "bg-amber-400 animate-pulse" : "bg-emerald-400"}`} />
+                      Sincronização automática ativa
+                    </span>
+                  </div>
                   {totalUnread > 0 && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary text-primary-foreground shadow-sm shadow-primary/20">
                       {totalUnread}
