@@ -14,8 +14,8 @@ export function SalesChart() {
         </button>
       </div>
       <div className="flex items-baseline gap-2 mb-3">
-        <span className="text-[26px] font-bold font-display tracking-tight">R$ 78.540</span>
-        <span className="text-xs text-success font-semibold">↑ 31% <span className="text-muted-foreground font-normal">vs mês anterior</span></span>
+        <span className="text-[26px] font-bold font-display tracking-tight">R$ 0,00</span>
+        <span className="text-xs text-muted-foreground font-semibold">0% <span className="text-muted-foreground font-normal">vs mês anterior</span></span>
       </div>
       <div className="h-[200px] -ml-2">
         <ResponsiveContainer>
