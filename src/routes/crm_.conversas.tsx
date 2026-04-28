@@ -998,7 +998,7 @@ function ConversasPage() {
                 {(selected.transcript ?? []).length === 0 ? (
                   <div className="text-xs text-center text-muted-foreground py-10">Sem mensagens registradas.</div>
                 ) : (
-                  [...selected.transcript].reverse().map((m, i, arr) => {
+                  [...selected.transcript].sort((a, b) => +new Date(a.at || 0) - +new Date(b.at || 0)).map((m, i, arr) => {
                     const isUser = m.role === "user";
                     const older = arr[i + 1];
                     const showDate =
