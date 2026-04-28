@@ -207,7 +207,11 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                     </div>
 
                     {/* Gestão de Estoque, Preço e Localização */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-border/50">
+                    </div>
+                  </div>
+
+                  {/* Gestão de Estoque, Preço e Localização */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-border/50">
                  <section className="bg-primary/5 rounded-2xl border border-primary/10 p-5 space-y-5">
                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                      <DollarSign className="h-3.5 w-3.5" /> Precificação e Venda
