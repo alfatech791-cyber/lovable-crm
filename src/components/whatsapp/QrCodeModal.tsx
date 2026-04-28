@@ -42,6 +42,16 @@ export function QrCodeModal({ instanceName, onClose, onSuccess }: QrCodeModalPro
       const data = await evolution.getQrCode(instanceName);
       console.log("QR Code Data Received:", data);
 
+      // Evolution API retorna { status: 404, response: { message: ["..."] } } se a instância não existir
+      if ((data as any)?.status && (data as any)?.status >= 400) {
+        const apiMsg =
+          (data as any)?.response?.message?.[0] ||
+          (data as any)?.message ||
+          `Erro ${(data as any).status}`;
+        setError(String(apiMsg));
+        return;
+      }
+
       const base64 =
         (data as any)?.base64 ||
         (data as any)?.qrcode?.base64 ||

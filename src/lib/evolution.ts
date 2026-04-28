@@ -42,37 +42,31 @@ export const evolution = {
   },
 
    async createInstance(instanceName: string, webhookUrl?: string) {
+     // Payload mínimo compatível com Evolution API v2.
+     // Webhook e eventos podem ser configurados depois com setWebhook se necessário.
+     const body: any = {
+       instanceName,
+       qrcode: true,
+       integration: "WHATSAPP-BAILEYS",
+     };
+     if (webhookUrl) {
+       body.webhook = { url: webhookUrl, enabled: true };
+     }
      const res = await fetch(`${API_URL}/instance/create`, {
        method: "POST",
-       headers: {
-         "Content-Type": "application/json",
-       },
-       body: JSON.stringify({
-         instanceName,
-         token: "",
-         qrcode: true,
-         webhook: webhookUrl || "",
-         webhook_by_events: false,
-         events: [
-           "MESSAGES_UPSERT",
-           "MESSAGES_UPDATE",
-           "MESSAGES_DELETE",
-           "SEND_MESSAGE",
-           "CONTACTS_UPSERT",
-           "CONTACTS_UPDATE",
-           "PRESENCE_UPDATE",
-           "CHATS_UPSERT",
-           "CHATS_UPDATE",
-           "CHATS_DELETE",
-           "GROUPS_UPSERT",
-           "GROUPS_UPDATE",
-           "GROUP_PARTICIPANTS_UPDATE",
-           "CONNECTION_UPDATE",
-           "CALL"
-         ]
-       }),
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify(body),
      });
-     return res.json();
+     const data = await res.json();
+     if (!res.ok) {
+       const msg =
+         data?.response?.message?.[0] ||
+         data?.message ||
+         `Erro ${res.status} ao criar instância`;
+       console.error("createInstance falhou:", data);
+       throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
+     }
+     return data;
    },
  
    async setWebhook(instanceName: string, url: string) {
