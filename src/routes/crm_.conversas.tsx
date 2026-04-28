@@ -702,7 +702,7 @@ function ConversasPage() {
       const { data, error } = await supabase.functions.invoke("send-whatsapp", {
         headers: { Authorization: `Bearer ${accessToken}` },
         body: {
-          phone: selected.contact_phone,
+          phone: selected.remote_jid || selected.contact_phone,
           contactName: selected.contact_name,
           ...payload,
         },
