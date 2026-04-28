@@ -537,7 +537,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
           </div>
         </Tabs>
 
-        <DialogFooter className="p-6 pt-4 gap-3 bg-muted/20 border-t border-sidebar-border/50">
+        <DialogFooter className="p-4 md:p-6 pt-4 gap-3 bg-muted/20 border-t border-sidebar-border/50 shrink-0">
           <div className="mr-auto hidden md:flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
              <InfoIcon className="h-3 w-3" /> Todos os campos com * são obrigatórios para emissão de NF
           </div>
