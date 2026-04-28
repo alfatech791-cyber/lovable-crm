@@ -511,9 +511,8 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                   <Switch defaultChecked />
                 </div>
               </div>
-            </TabsContent>
+            </div>
           </div>
-        </Tabs>
 
         <DialogFooter className="p-6 gap-4 bg-muted/30 border-t border-border shrink-0">
           <div className="mr-auto hidden md:flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
