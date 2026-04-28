@@ -226,7 +226,7 @@ export function FinanceDashboard() {
           <CardContent>
             <div className="grid grid-cols-2 gap-4 mb-6">
               <button 
-                onClick={() => navigate({ to: "/financeiro/contas-receber" })}
+                onClick={() => navigate({ to: "/financeiro" })}
                 className="p-4 rounded-2xl border border-blue-100 bg-blue-50/50 hover:bg-blue-50 transition text-left group"
               >
                 <div className="text-[10px] font-black text-blue-600 uppercase mb-1 flex items-center justify-between tracking-widest">
@@ -236,7 +236,7 @@ export function FinanceDashboard() {
                 <div className="text-lg font-black text-blue-700">R$ 0,00</div>
               </button>
               <button 
-                onClick={() => navigate({ to: "/financeiro/contas-pagar" })}
+                onClick={() => navigate({ to: "/financeiro" })}
                 className="p-4 rounded-2xl border border-red-100 bg-red-50/50 hover:bg-red-50 transition text-left group"
               >
                 <div className="text-[10px] font-black text-red-600 uppercase mb-1 flex items-center justify-between tracking-widest">
