@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Smartphone, Package, Tag, DollarSign, Layers, Hash, Info, History, CheckCircle2, Plus, Box, ShieldCheck, Palette, Cpu, Upload, Image as ImageIcon, X, Truck, FileText, Globe, ShoppingBag, Percent, BarChart3, Settings2 } from "lucide-react";
+import { Smartphone, Package, Tag, DollarSign, Layers, Hash, Info, History, CheckCircle2, Plus, Box, ShieldCheck, Palette, Cpu, Upload, Image as ImageIcon, X, Truck, FileText, Globe, ShoppingBag, Percent, BarChart3, Settings2, Receipt, Search, Info as InfoIcon, Zap, MoreHorizontal, Copy } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
@@ -28,7 +28,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden border-sidebar-border bg-sidebar/95 backdrop-blur-xl">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border-sidebar-border bg-sidebar/95 backdrop-blur-xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <div className="flex items-center gap-3 p-6 pb-0">
             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-glow">
@@ -41,8 +41,8 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
           </div>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="p-0">
-          <div className="px-6 py-2 border-b border-sidebar-border/50">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="p-0 flex-1 overflow-hidden flex flex-col">
+          <div className="px-6 py-0 border-b border-sidebar-border/50 bg-muted/20">
             <TabsList className="bg-transparent h-12 p-0 gap-6 w-full justify-start overflow-x-auto scrollbar-none">
               <TabsTrigger 
                 value="general" 
