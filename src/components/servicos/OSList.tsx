@@ -1,5 +1,19 @@
- import { Wrench, Clock, CheckCircle2, AlertCircle, MoreHorizontal, Plus, Search, Filter } from "lucide-react";
- import { serviceOrders } from "@/lib/mock";
+import { Wrench, Clock, CheckCircle2, AlertCircle, MoreHorizontal, Plus, Search, Filter, Loader2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+
+type OSRow = {
+  id: string;
+  status: string | null;
+  problem_description: string | null;
+  equipment: string | null;
+  estimated_cost: number | null;
+  created_at: string | null;
+  customer_id: string;
+  customer?: { full_name: string | null } | null;
+};
  
  const statusColors = {
    "Aguardando": "bg-slate-100 text-slate-700 border-slate-200",
@@ -17,6 +31,43 @@
  };
  
  export function OSList() {
+    const { user } = useAuth();
+    const [rows, setRows] = useState<OSRow[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [search, setSearch] = useState("");
+
+    useEffect(() => {
+      if (!user?.id) return;
+      setLoading(true);
+      (async () => {
+        const { data, error } = await supabase
+          .from("service_orders")
+          .select("id,status,problem_description,equipment,estimated_cost,created_at,customer_id,customer:customers(full_name)")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+        if (error) toast.error("Erro ao carregar OS: " + error.message);
+        setRows((data as any) ?? []);
+        setLoading(false);
+      })();
+    }, [user?.id]);
+
+    const filtered = useMemo(() => {
+      const q = search.trim().toLowerCase();
+      if (!q) return rows;
+      return rows.filter((r) =>
+        (r.customer?.full_name ?? "").toLowerCase().includes(q) ||
+        (r.equipment ?? "").toLowerCase().includes(q) ||
+        (r.problem_description ?? "").toLowerCase().includes(q)
+      );
+    }, [rows, search]);
+
+    const stats = useMemo(() => ({
+      total: rows.length,
+      open: rows.filter((r) => r.status === "open").length,
+      progress: rows.filter((r) => r.status === "in_progress").length,
+      done: rows.filter((r) => r.status === "done").length,
+    }), [rows]);
+
    return (
      <div className="space-y-6">
        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -25,6 +76,8 @@
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
              <input 
                placeholder="Buscar OS, cliente ou aparelho..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                className="w-full h-10 pl-9 pr-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20 transition"
              />
            </div>
@@ -32,17 +85,17 @@
              <Filter className="h-4 w-4" /> Filtros
            </button>
          </div>
-         <button className="h-10 px-5 rounded-xl bg-gradient-primary text-white flex items-center gap-2 text-sm font-bold shadow-glow hover:opacity-95 transition">
+          <a href="/servicos/nova" className="h-10 px-5 rounded-xl bg-gradient-primary text-white flex items-center gap-2 text-sm font-bold shadow-glow hover:opacity-95 transition">
            <Plus className="h-4 w-4" /> Nova OS
-         </button>
+          </a>
        </div>
  
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
          {[
-           { label: "Total do Mês", value: "48", icon: Wrench, color: "text-primary" },
-           { label: "Em Bancada", value: "12", icon: Clock, color: "text-blue-500" },
-           { label: "Aguardando Peça", value: "5", icon: AlertCircle, color: "text-amber-500" },
-           { label: "Prontas p/ Retirada", value: "8", icon: CheckCircle2, color: "text-green-500" },
+            { label: "Total", value: String(stats.total), icon: Wrench, color: "text-primary" },
+            { label: "Em Aberto", value: String(stats.open), icon: AlertCircle, color: "text-amber-500" },
+            { label: "Em Andamento", value: String(stats.progress), icon: Clock, color: "text-blue-500" },
+            { label: "Concluídas", value: String(stats.done), icon: CheckCircle2, color: "text-green-500" },
          ].map(stat => (
            <div key={stat.label} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-4 shadow-sm">
              <div className={`h-12 w-12 rounded-xl bg-muted/50 grid place-items-center ${stat.color}`}>
@@ -65,36 +118,34 @@
                  <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Cliente / Aparelho</th>
                  <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Problema Relatado</th>
                  <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</th>
-                 <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Prioridade</th>
+                  <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Valor</th>
                  <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Data</th>
                  <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Ações</th>
                </tr>
              </thead>
              <tbody className="divide-y divide-border">
-               {serviceOrders.map((os) => (
+                {filtered.map((os) => (
                  <tr key={os.id} className="hover:bg-muted/30 transition-colors">
                    <td className="px-6 py-4">
-                     <span className="font-mono text-xs font-bold text-primary">{os.id}</span>
+                      <span className="font-mono text-xs font-bold text-primary">{os.id.slice(0, 8)}</span>
                    </td>
                    <td className="px-6 py-4">
-                     <div className="font-semibold text-sm">{os.customer}</div>
-                     <div className="text-xs text-muted-foreground">{os.device}</div>
+                      <div className="font-semibold text-sm">{os.customer?.full_name ?? "—"}</div>
+                      <div className="text-xs text-muted-foreground">{os.equipment ?? "—"}</div>
                    </td>
                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                     {os.problem}
+                      {os.problem_description ?? "—"}
                    </td>
                    <td className="px-6 py-4">
-                     <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${statusColors[os.status as keyof typeof statusColors]}`}>
-                       {os.status}
-                     </span>
+                      <span className="px-2.5 py-1 rounded-full text-[11px] font-bold border bg-muted">
+                        {os.status ?? "open"}
+                      </span>
                    </td>
                    <td className="px-6 py-4 text-xs">
-                     <span className={priorityColors[os.priority as keyof typeof priorityColors]}>
-                       {os.priority}
-                     </span>
+                      {(os.estimated_cost ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                    </td>
                    <td className="px-6 py-4 text-xs text-muted-foreground">
-                     {new Date(os.date).toLocaleDateString('pt-BR')}
+                      {os.created_at ? new Date(os.created_at).toLocaleDateString("pt-BR") : "—"}
                    </td>
                    <td className="px-6 py-4">
                      <button className="p-2 rounded-lg hover:bg-muted transition">
@@ -106,7 +157,12 @@
              </tbody>
            </table>
          </div>
-         {serviceOrders.length === 0 && (
+          {loading && (
+            <div className="p-12 grid place-items-center">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          )}
+          {!loading && filtered.length === 0 && (
            <div className="p-20 text-center">
              <div className="h-16 w-16 rounded-full bg-muted grid place-items-center mx-auto mb-4">
                <Wrench className="h-8 w-8 text-muted-foreground/40" />
