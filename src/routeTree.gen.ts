@@ -54,19 +54,7 @@ import { Route as EstoqueComprasRouteImport } from './routes/estoque.compras'
 import { Route as EstoqueAtualRouteImport } from './routes/estoque.atual'
 import { Route as CrmConversasRouteImport } from './routes/crm_.conversas'
 import { Route as CrmBotRouteImport } from './routes/crm_.bot'
-import { Route as AppRelatoriosIndexRouteImport } from './routes/_app/relatorios/index'
-import { Route as AppMarketingIndexRouteImport } from './routes/_app/marketing/index'
-import { Route as AppClientesIndexRouteImport } from './routes/_app/clientes/index'
-import { Route as AppAgendamentosIndexRouteImport } from './routes/_app/agendamentos/index'
 import { Route as ApiEvolutionSplatRouteImport } from './routes/api/evolution/$'
-import { Route as AppOperacaoTransportadoresRouteImport } from './routes/_app/operacao/transportadores'
-import { Route as AppOperacaoTiposProdutosRouteImport } from './routes/_app/operacao/tipos-produtos'
-import { Route as AppOperacaoServicosRouteImport } from './routes/_app/operacao/servicos'
-import { Route as AppOperacaoMaquininhasRouteImport } from './routes/_app/operacao/maquininhas'
-import { Route as AppFinanceiroContasReceberRouteImport } from './routes/_app/financeiro/contas-receber'
-import { Route as AppFinanceiroContasPagarRouteImport } from './routes/_app/financeiro/contas-pagar'
-import { Route as AppConfiguracoesParametrosRouteImport } from './routes/_app/configuracoes/parametros'
-import { Route as AppClientesNovoRouteImport } from './routes/_app/clientes/novo'
 
 const WhatsappRoute = WhatsappRouteImport.update({
   id: '/whatsapp',
@@ -293,74 +281,9 @@ const CrmBotRoute = CrmBotRouteImport.update({
   path: '/crm/bot',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRelatoriosIndexRoute = AppRelatoriosIndexRouteImport.update({
-  id: '/_app/relatorios/',
-  path: '/relatorios/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppMarketingIndexRoute = AppMarketingIndexRouteImport.update({
-  id: '/_app/marketing/',
-  path: '/marketing/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppClientesIndexRoute = AppClientesIndexRouteImport.update({
-  id: '/_app/clientes/',
-  path: '/clientes/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppAgendamentosIndexRoute = AppAgendamentosIndexRouteImport.update({
-  id: '/_app/agendamentos/',
-  path: '/agendamentos/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiEvolutionSplatRoute = ApiEvolutionSplatRouteImport.update({
   id: '/api/evolution/$',
   path: '/api/evolution/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppOperacaoTransportadoresRoute =
-  AppOperacaoTransportadoresRouteImport.update({
-    id: '/_app/operacao/transportadores',
-    path: '/operacao/transportadores',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const AppOperacaoTiposProdutosRoute =
-  AppOperacaoTiposProdutosRouteImport.update({
-    id: '/_app/operacao/tipos-produtos',
-    path: '/operacao/tipos-produtos',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const AppOperacaoServicosRoute = AppOperacaoServicosRouteImport.update({
-  id: '/_app/operacao/servicos',
-  path: '/operacao/servicos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppOperacaoMaquininhasRoute = AppOperacaoMaquininhasRouteImport.update({
-  id: '/_app/operacao/maquininhas',
-  path: '/operacao/maquininhas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppFinanceiroContasReceberRoute =
-  AppFinanceiroContasReceberRouteImport.update({
-    id: '/_app/financeiro/contas-receber',
-    path: '/financeiro/contas-receber',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const AppFinanceiroContasPagarRoute =
-  AppFinanceiroContasPagarRouteImport.update({
-    id: '/_app/financeiro/contas-pagar',
-    path: '/financeiro/contas-pagar',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const AppConfiguracoesParametrosRoute =
-  AppConfiguracoesParametrosRouteImport.update({
-    id: '/_app/configuracoes/parametros',
-    path: '/configuracoes/parametros',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const AppClientesNovoRoute = AppClientesNovoRouteImport.update({
-  id: '/_app/clientes/novo',
-  path: '/clientes/novo',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -410,26 +333,14 @@ export interface FileRoutesByFullPath {
   '/vendas/historico': typeof VendasHistoricoRoute
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
-  '/clientes/novo': typeof AppClientesNovoRoute
-  '/configuracoes/parametros': typeof AppConfiguracoesParametrosRoute
-  '/financeiro/contas-pagar': typeof AppFinanceiroContasPagarRoute
-  '/financeiro/contas-receber': typeof AppFinanceiroContasReceberRoute
-  '/operacao/maquininhas': typeof AppOperacaoMaquininhasRoute
-  '/operacao/servicos': typeof AppOperacaoServicosRoute
-  '/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
-  '/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
   '/api/evolution/$': typeof ApiEvolutionSplatRoute
-  '/agendamentos/': typeof AppAgendamentosIndexRoute
-  '/clientes/': typeof AppClientesIndexRoute
-  '/marketing/': typeof AppMarketingIndexRoute
-  '/relatorios/': typeof AppRelatoriosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agentes': typeof AgentesRoute
   '/atendimento': typeof AtendimentoRoute
   '/automacao': typeof AutomacaoRoute
-  '/clientes': typeof AppClientesIndexRoute
+  '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/crm': typeof CrmRoute
   '/equipe': typeof EquipeRoute
@@ -442,7 +353,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/pdv': typeof PdvRoute
   '/produtos': typeof ProdutosRoute
-  '/relatorios': typeof AppRelatoriosIndexRoute
+  '/relatorios': typeof RelatoriosRoute
   '/servicos': typeof ServicosRouteWithChildren
   '/vendas': typeof VendasRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
@@ -470,17 +381,7 @@ export interface FileRoutesByTo {
   '/vendas/historico': typeof VendasHistoricoRoute
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
-  '/clientes/novo': typeof AppClientesNovoRoute
-  '/configuracoes/parametros': typeof AppConfiguracoesParametrosRoute
-  '/financeiro/contas-pagar': typeof AppFinanceiroContasPagarRoute
-  '/financeiro/contas-receber': typeof AppFinanceiroContasReceberRoute
-  '/operacao/maquininhas': typeof AppOperacaoMaquininhasRoute
-  '/operacao/servicos': typeof AppOperacaoServicosRoute
-  '/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
-  '/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
   '/api/evolution/$': typeof ApiEvolutionSplatRoute
-  '/agendamentos': typeof AppAgendamentosIndexRoute
-  '/marketing': typeof AppMarketingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -529,19 +430,7 @@ export interface FileRoutesById {
   '/vendas/historico': typeof VendasHistoricoRoute
   '/vendas/orcamentos': typeof VendasOrcamentosRoute
   '/vendas/simulador': typeof VendasSimuladorRoute
-  '/_app/clientes/novo': typeof AppClientesNovoRoute
-  '/_app/configuracoes/parametros': typeof AppConfiguracoesParametrosRoute
-  '/_app/financeiro/contas-pagar': typeof AppFinanceiroContasPagarRoute
-  '/_app/financeiro/contas-receber': typeof AppFinanceiroContasReceberRoute
-  '/_app/operacao/maquininhas': typeof AppOperacaoMaquininhasRoute
-  '/_app/operacao/servicos': typeof AppOperacaoServicosRoute
-  '/_app/operacao/tipos-produtos': typeof AppOperacaoTiposProdutosRoute
-  '/_app/operacao/transportadores': typeof AppOperacaoTransportadoresRoute
   '/api/evolution/$': typeof ApiEvolutionSplatRoute
-  '/_app/agendamentos/': typeof AppAgendamentosIndexRoute
-  '/_app/clientes/': typeof AppClientesIndexRoute
-  '/_app/marketing/': typeof AppMarketingIndexRoute
-  '/_app/relatorios/': typeof AppRelatoriosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -591,19 +480,7 @@ export interface FileRouteTypes {
     | '/vendas/historico'
     | '/vendas/orcamentos'
     | '/vendas/simulador'
-    | '/clientes/novo'
-    | '/configuracoes/parametros'
-    | '/financeiro/contas-pagar'
-    | '/financeiro/contas-receber'
-    | '/operacao/maquininhas'
-    | '/operacao/servicos'
-    | '/operacao/tipos-produtos'
-    | '/operacao/transportadores'
     | '/api/evolution/$'
-    | '/agendamentos/'
-    | '/clientes/'
-    | '/marketing/'
-    | '/relatorios/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -651,17 +528,7 @@ export interface FileRouteTypes {
     | '/vendas/historico'
     | '/vendas/orcamentos'
     | '/vendas/simulador'
-    | '/clientes/novo'
-    | '/configuracoes/parametros'
-    | '/financeiro/contas-pagar'
-    | '/financeiro/contas-receber'
-    | '/operacao/maquininhas'
-    | '/operacao/servicos'
-    | '/operacao/tipos-produtos'
-    | '/operacao/transportadores'
     | '/api/evolution/$'
-    | '/agendamentos'
-    | '/marketing'
   id:
     | '__root__'
     | '/'
@@ -709,19 +576,7 @@ export interface FileRouteTypes {
     | '/vendas/historico'
     | '/vendas/orcamentos'
     | '/vendas/simulador'
-    | '/_app/clientes/novo'
-    | '/_app/configuracoes/parametros'
-    | '/_app/financeiro/contas-pagar'
-    | '/_app/financeiro/contas-receber'
-    | '/_app/operacao/maquininhas'
-    | '/_app/operacao/servicos'
-    | '/_app/operacao/tipos-produtos'
-    | '/_app/operacao/transportadores'
     | '/api/evolution/$'
-    | '/_app/agendamentos/'
-    | '/_app/clientes/'
-    | '/_app/marketing/'
-    | '/_app/relatorios/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -748,19 +603,7 @@ export interface RootRouteChildren {
   WhatsappRoute: typeof WhatsappRoute
   CrmBotRoute: typeof CrmBotRoute
   CrmConversasRoute: typeof CrmConversasRoute
-  AppClientesNovoRoute: typeof AppClientesNovoRoute
-  AppConfiguracoesParametrosRoute: typeof AppConfiguracoesParametrosRoute
-  AppFinanceiroContasPagarRoute: typeof AppFinanceiroContasPagarRoute
-  AppFinanceiroContasReceberRoute: typeof AppFinanceiroContasReceberRoute
-  AppOperacaoMaquininhasRoute: typeof AppOperacaoMaquininhasRoute
-  AppOperacaoServicosRoute: typeof AppOperacaoServicosRoute
-  AppOperacaoTiposProdutosRoute: typeof AppOperacaoTiposProdutosRoute
-  AppOperacaoTransportadoresRoute: typeof AppOperacaoTransportadoresRoute
   ApiEvolutionSplatRoute: typeof ApiEvolutionSplatRoute
-  AppAgendamentosIndexRoute: typeof AppAgendamentosIndexRoute
-  AppClientesIndexRoute: typeof AppClientesIndexRoute
-  AppMarketingIndexRoute: typeof AppMarketingIndexRoute
-  AppRelatoriosIndexRoute: typeof AppRelatoriosIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1080,95 +923,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CrmBotRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/relatorios/': {
-      id: '/_app/relatorios/'
-      path: '/relatorios'
-      fullPath: '/relatorios/'
-      preLoaderRoute: typeof AppRelatoriosIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/marketing/': {
-      id: '/_app/marketing/'
-      path: '/marketing'
-      fullPath: '/marketing/'
-      preLoaderRoute: typeof AppMarketingIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/clientes/': {
-      id: '/_app/clientes/'
-      path: '/clientes'
-      fullPath: '/clientes/'
-      preLoaderRoute: typeof AppClientesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/agendamentos/': {
-      id: '/_app/agendamentos/'
-      path: '/agendamentos'
-      fullPath: '/agendamentos/'
-      preLoaderRoute: typeof AppAgendamentosIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/evolution/$': {
       id: '/api/evolution/$'
       path: '/api/evolution/$'
       fullPath: '/api/evolution/$'
       preLoaderRoute: typeof ApiEvolutionSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/operacao/transportadores': {
-      id: '/_app/operacao/transportadores'
-      path: '/operacao/transportadores'
-      fullPath: '/operacao/transportadores'
-      preLoaderRoute: typeof AppOperacaoTransportadoresRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/operacao/tipos-produtos': {
-      id: '/_app/operacao/tipos-produtos'
-      path: '/operacao/tipos-produtos'
-      fullPath: '/operacao/tipos-produtos'
-      preLoaderRoute: typeof AppOperacaoTiposProdutosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/operacao/servicos': {
-      id: '/_app/operacao/servicos'
-      path: '/operacao/servicos'
-      fullPath: '/operacao/servicos'
-      preLoaderRoute: typeof AppOperacaoServicosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/operacao/maquininhas': {
-      id: '/_app/operacao/maquininhas'
-      path: '/operacao/maquininhas'
-      fullPath: '/operacao/maquininhas'
-      preLoaderRoute: typeof AppOperacaoMaquininhasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/financeiro/contas-receber': {
-      id: '/_app/financeiro/contas-receber'
-      path: '/financeiro/contas-receber'
-      fullPath: '/financeiro/contas-receber'
-      preLoaderRoute: typeof AppFinanceiroContasReceberRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/financeiro/contas-pagar': {
-      id: '/_app/financeiro/contas-pagar'
-      path: '/financeiro/contas-pagar'
-      fullPath: '/financeiro/contas-pagar'
-      preLoaderRoute: typeof AppFinanceiroContasPagarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/configuracoes/parametros': {
-      id: '/_app/configuracoes/parametros'
-      path: '/configuracoes/parametros'
-      fullPath: '/configuracoes/parametros'
-      preLoaderRoute: typeof AppConfiguracoesParametrosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/clientes/novo': {
-      id: '/_app/clientes/novo'
-      path: '/clientes/novo'
-      fullPath: '/clientes/novo'
-      preLoaderRoute: typeof AppClientesNovoRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1280,19 +1039,7 @@ const rootRouteChildren: RootRouteChildren = {
   WhatsappRoute: WhatsappRoute,
   CrmBotRoute: CrmBotRoute,
   CrmConversasRoute: CrmConversasRoute,
-  AppClientesNovoRoute: AppClientesNovoRoute,
-  AppConfiguracoesParametrosRoute: AppConfiguracoesParametrosRoute,
-  AppFinanceiroContasPagarRoute: AppFinanceiroContasPagarRoute,
-  AppFinanceiroContasReceberRoute: AppFinanceiroContasReceberRoute,
-  AppOperacaoMaquininhasRoute: AppOperacaoMaquininhasRoute,
-  AppOperacaoServicosRoute: AppOperacaoServicosRoute,
-  AppOperacaoTiposProdutosRoute: AppOperacaoTiposProdutosRoute,
-  AppOperacaoTransportadoresRoute: AppOperacaoTransportadoresRoute,
   ApiEvolutionSplatRoute: ApiEvolutionSplatRoute,
-  AppAgendamentosIndexRoute: AppAgendamentosIndexRoute,
-  AppClientesIndexRoute: AppClientesIndexRoute,
-  AppMarketingIndexRoute: AppMarketingIndexRoute,
-  AppRelatoriosIndexRoute: AppRelatoriosIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

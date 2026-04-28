@@ -1,7 +1,7 @@
- import { createFileRoute } from "@tanstack/react-router";
- import { AppSidebar } from "@/components/layout/Sidebar";
- import { Topbar } from "@/components/layout/Topbar";
- import VendasDashboard from "@/routes/_app/vendas/index";
+import { createFileRoute } from "@tanstack/react-router";
+import { AppSidebar } from "@/components/layout/Sidebar";
+import { Topbar } from "@/components/layout/Topbar";
+import VendasDashboard from "@/components/vendas/VendasDashboard";
 
 export const Route = createFileRoute("/vendas")({
    component: VendasPage,
