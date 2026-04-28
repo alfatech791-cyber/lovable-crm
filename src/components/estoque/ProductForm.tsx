@@ -8,20 +8,117 @@ import { Badge } from "@/components/ui/badge";
 import { Tag, DollarSign, History, CheckCircle2, Plus, Cpu, Upload, Image as ImageIcon, Hash, Settings2, Info as InfoIcon, Zap, Box, ClipboardList, Warehouse, MapPin, Percent, Globe } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
+interface ProductFormData {
+  name: string;
+  sku?: string;
+  ean?: string;
+  ncm?: string;
+  reference?: string;
+  category: string;
+  brand?: string;
+  supplier?: string;
+  model?: string;
+  price: number;
+  wholesale_price?: number;
+  cost_price?: number;
+  stock: number;
+  min_stock?: number;
+  unit: string;
+  weight?: number;
+  location?: string;
+  store?: string;
+  imei?: string;
+  color?: string;
+  capacity?: string;
+  description?: string;
+  processor?: string;
+  ram?: string;
+  display?: string;
+}
+
 interface ProductFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product?: any;
+  onSave?: (data: ProductFormData) => void;
 }
 
-export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
+export function ProductForm({ open, onOpenChange, product, onSave }: ProductFormProps) {
   const [isSmartphone, setIsSmartphone] = useState(product?.category === "Smartphones");
+  const [formData, setFormData] = useState<ProductFormData>({
+    name: product?.name || "",
+    sku: product?.sku || "",
+    ean: product?.ean || "",
+    ncm: product?.ncm || "",
+    reference: product?.reference || "",
+    category: product?.category || "Acessórios",
+    brand: product?.brand || "apple",
+    supplier: product?.supplier || "padrao",
+    model: product?.model || "",
+    price: product?.price || 0,
+    wholesale_price: product?.wholesale_price || 0,
+    cost_price: product?.cost_price || 0,
+    stock: product?.stock || 0,
+    min_stock: product?.min_stock || 2,
+    unit: product?.unit || "un",
+    weight: product?.weight || 0,
+    location: product?.location || "",
+    store: product?.store || "matriz",
+    imei: product?.imei || "",
+    color: product?.color || "",
+    capacity: product?.capacity || "",
+    description: product?.description || "",
+    processor: product?.processor || "",
+    ram: product?.ram || "",
+    display: product?.display || "",
+  });
 
   useEffect(() => {
     if (product) {
       setIsSmartphone(product.category === "Smartphones");
+      setFormData({
+        name: product.name || "",
+        sku: product.sku || "",
+        ean: product.ean || "",
+        ncm: product.ncm || "",
+        reference: product.reference || "",
+        category: product.category || "Acessórios",
+        brand: product.brand || "apple",
+        supplier: product.supplier || "padrao",
+        model: product.model || "",
+        price: product.price || 0,
+        wholesale_price: product.wholesale_price || 0,
+        cost_price: product.cost_price || 0,
+        stock: product.stock || 0,
+        min_stock: product.min_stock || 2,
+        unit: product.unit || "un",
+        weight: product.weight || 0,
+        location: product.location || "",
+        store: product.store || "matriz",
+        imei: product.imei || "",
+        color: product.color || "",
+        capacity: product.capacity || "",
+        description: product.description || "",
+        processor: product.processor || "",
+        ram: product.ram || "",
+        display: product.display || "",
+      });
     }
   }, [product]);
+
+  const handleChange = (field: keyof ProductFormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === "category") {
+      setIsSmartphone(value === "Smartphones");
+    }
+  };
+
+  const handleSave = () => {
+    if (onSave) {
+      onSave(formData);
+    }
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -58,27 +155,53 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                                Nome do Produto
                                <Badge variant="outline" className="text-[8px] h-3.5 px-1 py-0 border-primary/20 text-primary">Obrigatório</Badge>
                              </Label>
-                       <Input id="name" defaultValue={product?.name || ""} placeholder="Ex: Apple iPhone 15 Pro Max 256GB" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                        <Input 
+                          id="name" 
+                          value={formData.name} 
+                          onChange={(e) => handleChange("name", e.target.value)}
+                          placeholder="Ex: Apple iPhone 15 Pro Max 256GB" 
+                          className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                        />
                            </div>
                            <div className="md:col-span-4 grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código Interno / SKU</Label>
-                             <Input placeholder="AUTO-GEN-001" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                              <Input 
+                                value={formData.sku}
+                                onChange={(e) => handleChange("sku", e.target.value)}
+                                placeholder="AUTO-GEN-001" 
+                                className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                              />
                            </div>
                          </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                          <div className="md:col-span-3 grid gap-2">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">EAN / Código de Barras</Label>
-                            <Input placeholder="789..." className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
-                          </div>
-                          <div className="md:col-span-3 grid gap-2">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código NCM</Label>
-                            <Input placeholder="8517.13.00" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
-                          </div>
-                          <div className="md:col-span-3 grid gap-2">
-                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Referência do Fabricante</Label>
-                            <Input placeholder="REF-123" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
-                          </div>
+                           <div className="md:col-span-3 grid gap-2">
+                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">EAN / Código de Barras</Label>
+                             <Input 
+                               value={formData.ean}
+                               onChange={(e) => handleChange("ean", e.target.value)}
+                               placeholder="789..." 
+                               className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                             />
+                           </div>
+                           <div className="md:col-span-3 grid gap-2">
+                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código NCM</Label>
+                             <Input 
+                               value={formData.ncm}
+                               onChange={(e) => handleChange("ncm", e.target.value)}
+                               placeholder="8517.13.00" 
+                               className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                             />
+                           </div>
+                           <div className="md:col-span-3 grid gap-2">
+                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Referência do Fabricante</Label>
+                             <Input 
+                               value={formData.reference}
+                               onChange={(e) => handleChange("reference", e.target.value)}
+                               placeholder="REF-123" 
+                               className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                             />
+                           </div>
                           <div className="md:col-span-3 grid gap-2">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 flex items-center gap-2">
                               Tipo do Produto
@@ -98,7 +221,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                            <div className="grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Categoria</Label>
-                             <Select defaultValue={product?.category || "Acessórios"} onValueChange={(v) => setIsSmartphone(v === "Smartphones")}>
+                             <Select value={formData.category} onValueChange={(v) => handleChange("category", v)}>
                                <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
                                <SelectContent className="border-border shadow-elegant">
                                  <SelectItem value="Smartphones">Smartphones</SelectItem>
@@ -110,7 +233,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                            </div>
                            <div className="grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fabricante / Marca</Label>
-                             <Select defaultValue="apple">
+                             <Select value={formData.brand} onValueChange={(v) => handleChange("brand", v)}>
                                <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
                                <SelectContent className="border-border shadow-elegant">
                                  <SelectItem value="apple">Apple</SelectItem>
@@ -122,7 +245,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                            </div>
                            <div className="grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fornecedor</Label>
-                             <Select defaultValue="padrao">
+                             <Select value={formData.supplier} onValueChange={(v) => handleChange("supplier", v)}>
                                <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
                                <SelectContent className="border-border shadow-elegant">
                                  <SelectItem value="padrao">Principal</SelectItem>
@@ -132,7 +255,12 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                            </div>
                            <div className="grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Modelo / Referência</Label>
-                             <Input placeholder="iPhone 15 Pro Max" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                             <Input 
+                               value={formData.model}
+                               onChange={(e) => handleChange("model", e.target.value)}
+                               placeholder="iPhone 15 Pro Max" 
+                               className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                             />
                            </div>
                          </div>
                        </div>
@@ -244,24 +372,40 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                       <div className="grid gap-2">
                         <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda (Varejo)</Label>
                         <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-primary text-primary-foreground font-black text-[10px] rounded-l-xl shadow-glow">R$</div>
-                          <Input id="price" type="number" defaultValue={product?.price || ""} className="bg-card h-12 border-primary/20 focus:ring-4 focus:ring-primary/5 text-lg font-black text-primary transition-all pl-12" />
-                        </div>
+                           <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-primary text-primary-foreground font-black text-[10px] rounded-l-xl shadow-glow">R$</div>
+                           <Input 
+                             id="price" 
+                             type="number" 
+                             value={formData.price}
+                             onChange={(e) => handleChange("price", parseFloat(e.target.value) || 0)}
+                             className="bg-card h-12 border-primary/20 focus:ring-4 focus:ring-primary/5 text-lg font-black text-primary transition-all pl-12" 
+                           />
+                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="grid gap-1.5">
                           <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda (Atacado)</Label>
                           <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-bold text-[8px] rounded-l-lg border border-r-0 border-border">R$</div>
-                            <Input type="number" className="bg-card h-9 border-border text-xs font-bold pl-10" />
-                          </div>
+                             <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-bold text-[8px] rounded-l-lg border border-r-0 border-border">R$</div>
+                             <Input 
+                               type="number" 
+                               value={formData.wholesale_price}
+                               onChange={(e) => handleChange("wholesale_price", parseFloat(e.target.value) || 0)}
+                               className="bg-card h-9 border-border text-xs font-bold pl-10" 
+                             />
+                           </div>
                         </div>
                         <div className="grid gap-1.5">
                           <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Custo (Compra)</Label>
                           <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-bold text-[8px] rounded-l-lg border border-r-0 border-border">R$</div>
-                            <Input type="number" className="bg-card h-9 border-border text-xs font-bold pl-10" />
-                          </div>
+                             <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-bold text-[8px] rounded-l-lg border border-r-0 border-border">R$</div>
+                             <Input 
+                               type="number" 
+                               value={formData.cost_price}
+                               onChange={(e) => handleChange("cost_price", parseFloat(e.target.value) || 0)}
+                               className="bg-card h-9 border-border text-xs font-bold pl-10" 
+                             />
+                           </div>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
@@ -294,11 +438,23 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                     <div className="grid grid-cols-2 gap-3">
                       <div className="grid gap-2">
                         <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Estoque Inicial</Label>
-                         <Input id="stock" type="number" defaultValue={product?.stock ?? ""} className="bg-card h-12 border-border font-black text-lg text-center focus:ring-4 focus:ring-primary/5 transition-all" />
+                        <Input 
+                          id="stock" 
+                          type="number" 
+                          value={formData.stock}
+                          onChange={(e) => handleChange("stock", parseInt(e.target.value) || 0)}
+                          className="bg-card h-12 border-border font-black text-lg text-center focus:ring-4 focus:ring-primary/5 transition-all" 
+                        />
                       </div>
                       <div className="grid gap-2">
                         <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Estoque Mínimo</Label>
-                        <Input id="min_stock" type="number" defaultValue={product?.min_stock || 2} className="bg-card h-12 border-border text-center text-warning font-black text-lg focus:ring-4 focus:ring-warning/5 transition-all" />
+                        <Input 
+                          id="min_stock" 
+                          type="number" 
+                          value={formData.min_stock}
+                          onChange={(e) => handleChange("min_stock", parseInt(e.target.value) || 0)}
+                          className="bg-card h-12 border-border text-center text-warning font-black text-lg focus:ring-4 focus:ring-warning/5 transition-all" 
+                        />
                       </div>
                     </div>
                     <div className="grid gap-2">
@@ -405,7 +561,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
              <InfoIcon className="h-3.5 w-3.5 text-primary/60" /> Verifique todos os dados antes de salvar o registro
           </div>
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-2xl h-12 px-8 font-black text-[10px] uppercase tracking-widest hover:bg-destructive/10 hover:text-destructive transition-all">Descartar</Button>
-          <Button onClick={() => onOpenChange(false)} className="bg-gradient-primary shadow-glow gap-3 px-10 rounded-2xl h-12 font-black text-[10px] uppercase tracking-widest group">
+          <Button onClick={handleSave} className="bg-gradient-primary shadow-glow gap-3 px-10 rounded-2xl h-12 font-black text-[10px] uppercase tracking-widest group">
             {product ? <CheckCircle2 className="h-4 w-4 group-hover:scale-110 transition-transform" /> : <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />}
             {product ? "Salvar Registro" : "Concluir Cadastro"}
           </Button>
