@@ -175,7 +175,7 @@ function ReportsPage() {
                           }}
                         />
                         <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={32}>
-                          {funnelData.map((entry, index) => (
+                          {funnelData.length > 0 && funnelData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Bar>
@@ -207,27 +207,29 @@ function ReportsPage() {
                   <h3 className="text-lg font-bold">Top Agentes</h3>
                   <button className="text-primary hover:underline text-xs font-bold">Ver tudo</button>
                 </div>
-                <div className="p-4 space-y-2">
-                  {topPerformers.map((agent, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-border">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
-                          {agent.avatar}
+                  <div className="p-4 space-y-2">
+                    {topPerformers.length > 0 ? topPerformers.map((agent, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-border">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
+                            {agent.avatar}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold leading-none mb-1">{agent.name}</p>
+                            <p className="text-xs text-muted-foreground font-medium">{agent.sales} vendas efetuadas</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-bold leading-none mb-1">{agent.name}</p>
-                          <p className="text-xs text-muted-foreground font-medium">{agent.sales} vendas efetuadas</p>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-foreground mb-1">{agent.revenue}</p>
+                          <p className="text-[10px] font-bold text-success flex items-center justify-end gap-0.5">
+                            <ArrowUpRight className="h-2.5 w-2.5" /> {agent.trend}
+                          </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold text-foreground mb-1">{agent.revenue}</p>
-                        <p className="text-[10px] font-bold text-success flex items-center justify-end gap-0.5">
-                          <ArrowUpRight className="h-2.5 w-2.5" /> {agent.trend}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    )) : (
+                      <div className="p-8 text-center text-sm text-muted-foreground">Sem dados de agentes</div>
+                    )}
+                  </div>
                 <div className="p-4 pt-0">
                   <button className="w-full py-3 rounded-xl bg-slate-50 text-muted-foreground text-xs font-bold hover:bg-slate-100 transition-colors flex items-center justify-center gap-2">
                     <UserCheck className="h-4 w-4" /> Relatório Completo de Equipe
@@ -246,7 +248,7 @@ function ReportsPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <RePieChart>
                         <Pie
-                          data={originData}
+                          data={originData.length > 0 ? originData : [{ name: 'Sem dados', value: 100, color: '#e2e8f0' }]}
                           cx="50%"
                           cy="50%"
                           innerRadius={60}
@@ -254,9 +256,11 @@ function ReportsPage() {
                           paddingAngle={8}
                           dataKey="value"
                         >
-                          {originData.map((entry, index) => (
+                          {originData.length > 0 ? originData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
+                          )) : (
+                            <Cell fill="#e2e8f0" />
+                          )}
                         </Pie>
                         <Tooltip 
                           content={({ active, payload }) => {
@@ -278,7 +282,7 @@ function ReportsPage() {
                     </div>
                   </div>
                   <div className="space-y-3 mt-4">
-                    {originData.map((item, i) => (
+                    {originData.length > 0 ? originData.map((item, i) => (
                       <div key={i} className="flex items-center justify-between group cursor-default">
                         <div className="flex items-center gap-2">
                           <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
@@ -291,7 +295,9 @@ function ReportsPage() {
                           </div>
                         </div>
                       </div>
-                    ))}
+                    )) : (
+                      <div className="text-center text-xs text-muted-foreground py-4 italic">Sem origens detectadas</div>
+                    )}
                   </div>
                 </div>
               </div>
