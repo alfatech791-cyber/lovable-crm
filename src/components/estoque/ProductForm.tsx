@@ -66,7 +66,36 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                            </div>
                          </div>
 
-                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">EAN / Código de Barras</Label>
+                            <Input placeholder="789..." className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                          </div>
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código NCM</Label>
+                            <Input placeholder="8517.13.00" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                          </div>
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Referência do Fabricante</Label>
+                            <Input placeholder="REF-123" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                          </div>
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 flex items-center gap-2">
+                              Tipo do Produto
+                              <Badge variant="outline" className="text-[8px] h-3.5 px-1 py-0 border-primary/20 text-primary">Estoque</Badge>
+                            </Label>
+                            <Select defaultValue="simples">
+                              <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="simples">Produto Simples</SelectItem>
+                                <SelectItem value="composto">Produto Composto</SelectItem>
+                                <SelectItem value="servico">Serviço</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                            <div className="grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Categoria</Label>
                              <Select defaultValue={product?.category || "Acessórios"} onValueChange={(v) => setIsSmartphone(v === "Smartphones")}>
