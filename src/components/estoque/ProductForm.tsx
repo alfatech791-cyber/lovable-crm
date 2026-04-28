@@ -372,24 +372,40 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                       <div className="grid gap-2">
                         <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda (Varejo)</Label>
                         <div className="relative group">
-                          <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-primary text-primary-foreground font-black text-[10px] rounded-l-xl shadow-glow">R$</div>
-                          <Input id="price" type="number" defaultValue={product?.price || ""} className="bg-card h-12 border-primary/20 focus:ring-4 focus:ring-primary/5 text-lg font-black text-primary transition-all pl-12" />
-                        </div>
+                           <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-primary text-primary-foreground font-black text-[10px] rounded-l-xl shadow-glow">R$</div>
+                           <Input 
+                             id="price" 
+                             type="number" 
+                             value={formData.price}
+                             onChange={(e) => handleChange("price", parseFloat(e.target.value) || 0)}
+                             className="bg-card h-12 border-primary/20 focus:ring-4 focus:ring-primary/5 text-lg font-black text-primary transition-all pl-12" 
+                           />
+                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="grid gap-1.5">
                           <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda (Atacado)</Label>
                           <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-bold text-[8px] rounded-l-lg border border-r-0 border-border">R$</div>
-                            <Input type="number" className="bg-card h-9 border-border text-xs font-bold pl-10" />
-                          </div>
+                             <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-bold text-[8px] rounded-l-lg border border-r-0 border-border">R$</div>
+                             <Input 
+                               type="number" 
+                               value={formData.wholesale_price}
+                               onChange={(e) => handleChange("wholesale_price", parseFloat(e.target.value) || 0)}
+                               className="bg-card h-9 border-border text-xs font-bold pl-10" 
+                             />
+                           </div>
                         </div>
                         <div className="grid gap-1.5">
                           <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Custo (Compra)</Label>
                           <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-bold text-[8px] rounded-l-lg border border-r-0 border-border">R$</div>
-                            <Input type="number" className="bg-card h-9 border-border text-xs font-bold pl-10" />
-                          </div>
+                             <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-bold text-[8px] rounded-l-lg border border-r-0 border-border">R$</div>
+                             <Input 
+                               type="number" 
+                               value={formData.cost_price}
+                               onChange={(e) => handleChange("cost_price", parseFloat(e.target.value) || 0)}
+                               className="bg-card h-9 border-border text-xs font-bold pl-10" 
+                             />
+                           </div>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
@@ -422,11 +438,23 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                     <div className="grid grid-cols-2 gap-3">
                       <div className="grid gap-2">
                         <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Estoque Inicial</Label>
-                         <Input id="stock" type="number" defaultValue={product?.stock ?? ""} className="bg-card h-12 border-border font-black text-lg text-center focus:ring-4 focus:ring-primary/5 transition-all" />
+                        <Input 
+                          id="stock" 
+                          type="number" 
+                          value={formData.stock}
+                          onChange={(e) => handleChange("stock", parseInt(e.target.value) || 0)}
+                          className="bg-card h-12 border-border font-black text-lg text-center focus:ring-4 focus:ring-primary/5 transition-all" 
+                        />
                       </div>
                       <div className="grid gap-2">
                         <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Estoque Mínimo</Label>
-                        <Input id="min_stock" type="number" defaultValue={product?.min_stock || 2} className="bg-card h-12 border-border text-center text-warning font-black text-lg focus:ring-4 focus:ring-warning/5 transition-all" />
+                        <Input 
+                          id="min_stock" 
+                          type="number" 
+                          value={formData.min_stock}
+                          onChange={(e) => handleChange("min_stock", parseInt(e.target.value) || 0)}
+                          className="bg-card h-12 border-border text-center text-warning font-black text-lg focus:ring-4 focus:ring-warning/5 transition-all" 
+                        />
                       </div>
                     </div>
                     <div className="grid gap-2">
@@ -533,7 +561,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
              <InfoIcon className="h-3.5 w-3.5 text-primary/60" /> Verifique todos os dados antes de salvar o registro
           </div>
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-2xl h-12 px-8 font-black text-[10px] uppercase tracking-widest hover:bg-destructive/10 hover:text-destructive transition-all">Descartar</Button>
-          <Button onClick={() => onOpenChange(false)} className="bg-gradient-primary shadow-glow gap-3 px-10 rounded-2xl h-12 font-black text-[10px] uppercase tracking-widest group">
+          <Button onClick={handleSave} className="bg-gradient-primary shadow-glow gap-3 px-10 rounded-2xl h-12 font-black text-[10px] uppercase tracking-widest group">
             {product ? <CheckCircle2 className="h-4 w-4 group-hover:scale-110 transition-transform" /> : <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />}
             {product ? "Salvar Registro" : "Concluir Cadastro"}
           </Button>
