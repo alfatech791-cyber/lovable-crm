@@ -69,7 +69,7 @@ serve(async (req) => {
       .maybeSingle();
 
     const transcript: any[] = (conv?.transcript as any[]) ?? [];
-    transcript.push({ role: "user", content: messageText, at: new Date().toISOString() });
+    transcript.push({ role: "user", content: messageText, at: new Date().toISOString(), sender: data?.pushName || null });
 
     // Se o bot estiver inativo, apenas grava a mensagem para o atendimento manual
     if (!settings.is_active || isGroup) {
