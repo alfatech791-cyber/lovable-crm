@@ -207,60 +207,81 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                 </div>
               </div>
 
-              {/* Financeiro e Inventário */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-border/50">
-                <div className="space-y-5">
-                  <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
-                    <DollarSign className="h-3 w-3" /> Financeiro
-                  </h5>
-                  
-                  <div className="grid gap-4">
+               {/* Gestão de Estoque, Preço e Localização */}
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-border/50">
+                 <section className="bg-primary/5 rounded-2xl border border-primary/10 p-5 space-y-5">
+                   <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                     <DollarSign className="h-3.5 w-3.5" /> Precificação e Venda
+                   </h5>
+                   <div className="grid gap-4">
                     <div className="grid gap-2">
-                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda</Label>
+                      <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda Final</Label>
                       <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 w-12 flex items-center justify-center bg-primary/10 text-primary font-black text-sm rounded-l-xl border border-r-0 border-border group-focus-within:border-primary/40 transition-colors">R$</div>
-                        <Input id="price" type="number" defaultValue={product?.price} className="bg-muted/10 h-14 pl-14 rounded-l-none border-border focus:ring-4 focus:ring-primary/5 text-xl font-black text-primary transition-all" />
+                        <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-primary text-primary-foreground font-black text-[10px] rounded-l-xl shadow-glow">R$</div>
+                        <Input id="price" type="number" defaultValue={product?.price} className="bg-card h-12 border-primary/20 focus:ring-4 focus:ring-primary/5 text-lg font-black text-primary transition-all pl-12" />
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Custo Unitário</Label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/30 text-xs font-black">R$</span>
-                          <Input type="number" className="bg-muted/5 h-11 pl-9 border-border text-sm font-bold" />
-                        </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="grid gap-1.5">
+                        <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço Atacado</Label>
+                        <Input type="number" className="bg-card h-9 border-border text-xs font-bold" />
                       </div>
-                      <div className="grid gap-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Margem Bruta</Label>
-                        <div className="relative">
-                          <Input disabled value="35%" className="bg-success/5 h-11 pr-10 border-success/20 text-sm font-black text-success" />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-success font-black text-[10px] uppercase">%</span>
-                        </div>
+                      <div className="grid gap-1.5">
+                        <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Custo Médio</Label>
+                        <Input type="number" className="bg-card h-9 border-border text-xs font-bold" />
                       </div>
                     </div>
-                  </div>
-                </div>
+                   </div>
+                 </section>
 
-                <div className="space-y-5">
-                  <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
-                    <Layers className="h-3 w-3" /> Inventário
-                  </h5>
-
-                  <div className="grid gap-4">
-                    <div className="grid grid-cols-2 gap-4">
+                 <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
+                   <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                     <Warehouse className="h-3.5 w-3.5" /> Controle de Estoque
+                   </h5>
+                   <div className="grid gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                       <div className="grid gap-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Saldo Inicial</Label>
-                        <Input id="stock" type="number" defaultValue={product?.stock} className="bg-muted/10 h-14 border-border font-black text-xl text-center focus:ring-4 focus:ring-primary/5 transition-all" />
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Saldo Atual</Label>
+                        <Input id="stock" type="number" defaultValue={product?.stock} className="bg-card h-12 border-border font-black text-lg text-center focus:ring-4 focus:ring-primary/5 transition-all" />
                       </div>
                       <div className="grid gap-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Mínimo (Alerta)</Label>
-                        <Input id="min_stock" type="number" defaultValue={product?.min_stock || 2} className="bg-muted/10 h-14 border-border text-center text-warning font-black text-xl focus:ring-4 focus:ring-warning/5 transition-all" />
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Estoque Mín.</Label>
+                        <Input id="min_stock" type="number" defaultValue={product?.min_stock || 2} className="bg-card h-12 border-border text-center text-warning font-black text-lg focus:ring-4 focus:ring-warning/5 transition-all" />
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
+                      <div className="space-y-0.5">
+                        <span className="text-[9px] font-black uppercase text-muted-foreground/60 block">Reservado</span>
+                        <span className="text-xs font-black">0 un</span>
+                      </div>
+                      <Box className="h-4 w-4 text-muted-foreground/30" />
+                    </div>
+                   </div>
+                 </section>
+
+                 <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
+                   <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                     <MapPin className="h-3.5 w-3.5" /> Armazenamento
+                   </h5>
+                   <div className="grid gap-4">
+                    <div className="grid gap-2">
+                      <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Localização (Gôndola/Box)</Label>
+                      <Input placeholder="Ex: A-12-04" className="bg-card h-10 border-border text-sm font-mono font-black" />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Unidade de Medida</Label>
+                      <Select defaultValue="un">
+                        <SelectTrigger className="bg-card h-10 border-border text-xs font-bold"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="un">Unidade (UN)</SelectItem>
+                          <SelectItem value="cx">Caixa (CX)</SelectItem>
+                          <SelectItem value="jg">Jogo (JG)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                   </div>
+                 </section>
+               </div>
 
               {/* Técnico */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-border/50">
