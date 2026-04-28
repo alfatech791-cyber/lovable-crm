@@ -122,9 +122,9 @@ export function TasksCard() {
  export function DispatchCard() {
    const navigate = useNavigate();
   const items = [
-    { icon: Send, label: "Total de mensagens", value: "256", color: "var(--color-primary)" },
-    { icon: CheckCircle2, label: "Entregues", value: "238", sub: "(93%)", color: "var(--color-success)" },
-    { icon: MessageSquare, label: "Respostas", value: "89", sub: "(35%)", color: "oklch(0.65 0.2 330)" },
+    { icon: Send, label: "Total de mensagens", value: "0", color: "var(--color-primary)" },
+    { icon: CheckCircle2, label: "Entregues", value: "0", sub: "(0%)", color: "var(--color-success)" },
+    { icon: MessageSquare, label: "Respostas", value: "0", sub: "(0%)", color: "oklch(0.65 0.2 330)" },
   ];
   return (
     <div className="rounded-2xl bg-card border border-border p-5 shadow-card">
