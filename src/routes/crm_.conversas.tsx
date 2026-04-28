@@ -909,8 +909,8 @@ function ConversasPage() {
                   return (
                     <button
                       key={c.id}
-                      onClick={() => setSelectedId(c.id)}
-                      className={`w-full flex items-center gap-3.5.5 p-3.5 rounded-xl transition-all duration-300 relative text-left group ${
+                       onClick={() => { if (selectedId !== c.id) { setSelectedId(c.id); markAsRead(c); } }}
+                       className={`w-full flex items-center gap-3.5 p-3.5 rounded-xl transition-all duration-300 relative text-left group border border-transparent ${
                         isSelected 
                           ? "bg-primary/[0.08] shadow-[0_4px_20px_-4px_rgba(var(--primary-rgb),0.1)] ring-1 ring-primary/20" 
                           : "hover:bg-muted/50 border-transparent"
@@ -1151,17 +1151,7 @@ function ConversasPage() {
                     </div>
                   </div>
 
-                  <button
-                    onClick={recording ? () => stopRecording(false) : sendText}
-                    disabled={(!text.trim() && !recording) || sending}
-                    className="h-[52px] w-[52px] rounded-xl bg-primary text-primary-foreground disabled:opacity-50 disabled:grayscale transition-all duration-300 flex items-center justify-center shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-95 group/send"
-                  >
-                    {sending ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                      <Send className="h-5 w-5 transition-transform duration-300 group-hover/send:translate-x-0.5 group-hover/send:-translate-y-0.5" />
-                    )}
-                  </button>
+                   <button onClick={recording ? () => stopRecording(false) : sendText} disabled={(!text.trim() && !recording) || sending} className={`h-[52px] w-[52px] rounded-2xl transition-all duration-500 flex items-center justify-center shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-95 group/send ${recording ? "bg-emerald-500 text-white animate-pulse" : "bg-primary text-primary-foreground disabled:opacity-50 disabled:grayscale"}`}> {sending ? ( <Loader2 className="h-5 w-5 animate-spin" /> ) : recording ? ( <Send className="h-5 w-5" /> ) : ( <Send className="h-5 w-5 transition-transform duration-300 group-hover/send:translate-x-0.5 group-hover/send:-translate-y-0.5" /> )} </button>
 
                   {/* Stickers Popover Estilizado */}
                   {stickerOpen && (
