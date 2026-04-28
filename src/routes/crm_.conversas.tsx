@@ -1091,7 +1091,7 @@ function ConversasPage() {
                     </div>
                     
                     <textarea
-                      rows={1}
+                      rows={1} style={{ overflow: "hidden" }} onInput={(e) => { e.currentTarget.style.height = "auto"; e.currentTarget.style.height = e.currentTarget.scrollHeight + "px"; }}
                       placeholder={recording ? "Gravando áudio..." : "Digite uma mensagem..."}
                       value={text}
                       onChange={(e) => setText(e.target.value)}
