@@ -8,20 +8,117 @@ import { Badge } from "@/components/ui/badge";
 import { Tag, DollarSign, History, CheckCircle2, Plus, Cpu, Upload, Image as ImageIcon, Hash, Settings2, Info as InfoIcon, Zap, Box, ClipboardList, Warehouse, MapPin, Percent, Globe } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
+interface ProductFormData {
+  name: string;
+  sku?: string;
+  ean?: string;
+  ncm?: string;
+  reference?: string;
+  category: string;
+  brand?: string;
+  supplier?: string;
+  model?: string;
+  price: number;
+  wholesale_price?: number;
+  cost_price?: number;
+  stock: number;
+  min_stock?: number;
+  unit: string;
+  weight?: number;
+  location?: string;
+  store?: string;
+  imei?: string;
+  color?: string;
+  capacity?: string;
+  description?: string;
+  processor?: string;
+  ram?: string;
+  display?: string;
+}
+
 interface ProductFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product?: any;
+  onSave?: (data: ProductFormData) => void;
 }
 
-export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
+export function ProductForm({ open, onOpenChange, product, onSave }: ProductFormProps) {
   const [isSmartphone, setIsSmartphone] = useState(product?.category === "Smartphones");
+  const [formData, setFormData] = useState<ProductFormData>({
+    name: product?.name || "",
+    sku: product?.sku || "",
+    ean: product?.ean || "",
+    ncm: product?.ncm || "",
+    reference: product?.reference || "",
+    category: product?.category || "Acessórios",
+    brand: product?.brand || "apple",
+    supplier: product?.supplier || "padrao",
+    model: product?.model || "",
+    price: product?.price || 0,
+    wholesale_price: product?.wholesale_price || 0,
+    cost_price: product?.cost_price || 0,
+    stock: product?.stock || 0,
+    min_stock: product?.min_stock || 2,
+    unit: product?.unit || "un",
+    weight: product?.weight || 0,
+    location: product?.location || "",
+    store: product?.store || "matriz",
+    imei: product?.imei || "",
+    color: product?.color || "",
+    capacity: product?.capacity || "",
+    description: product?.description || "",
+    processor: product?.processor || "",
+    ram: product?.ram || "",
+    display: product?.display || "",
+  });
 
   useEffect(() => {
     if (product) {
       setIsSmartphone(product.category === "Smartphones");
+      setFormData({
+        name: product.name || "",
+        sku: product.sku || "",
+        ean: product.ean || "",
+        ncm: product.ncm || "",
+        reference: product.reference || "",
+        category: product.category || "Acessórios",
+        brand: product.brand || "apple",
+        supplier: product.supplier || "padrao",
+        model: product.model || "",
+        price: product.price || 0,
+        wholesale_price: product.wholesale_price || 0,
+        cost_price: product.cost_price || 0,
+        stock: product.stock || 0,
+        min_stock: product.min_stock || 2,
+        unit: product.unit || "un",
+        weight: product.weight || 0,
+        location: product.location || "",
+        store: product.store || "matriz",
+        imei: product.imei || "",
+        color: product.color || "",
+        capacity: product.capacity || "",
+        description: product.description || "",
+        processor: product.processor || "",
+        ram: product.ram || "",
+        display: product.display || "",
+      });
     }
   }, [product]);
+
+  const handleChange = (field: keyof ProductFormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === "category") {
+      setIsSmartphone(value === "Smartphones");
+    }
+  };
+
+  const handleSave = () => {
+    if (onSave) {
+      onSave(formData);
+    }
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -58,11 +155,22 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                                Nome do Produto
                                <Badge variant="outline" className="text-[8px] h-3.5 px-1 py-0 border-primary/20 text-primary">Obrigatório</Badge>
                              </Label>
-                       <Input id="name" defaultValue={product?.name || ""} placeholder="Ex: Apple iPhone 15 Pro Max 256GB" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                        <Input 
+                          id="name" 
+                          value={formData.name} 
+                          onChange={(e) => handleChange("name", e.target.value)}
+                          placeholder="Ex: Apple iPhone 15 Pro Max 256GB" 
+                          className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                        />
                            </div>
                            <div className="md:col-span-4 grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código Interno / SKU</Label>
-                             <Input placeholder="AUTO-GEN-001" className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" />
+                              <Input 
+                                value={formData.sku}
+                                onChange={(e) => handleChange("sku", e.target.value)}
+                                placeholder="AUTO-GEN-001" 
+                                className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                              />
                            </div>
                          </div>
 
