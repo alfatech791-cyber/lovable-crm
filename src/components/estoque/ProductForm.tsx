@@ -321,28 +321,39 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                    </div>
                  </section>
 
-                 <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
-                   <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                     <MapPin className="h-3.5 w-3.5" /> Armazenamento
-                   </h5>
-                   <div className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Localização (Gôndola/Box)</Label>
-                      <Input placeholder="Ex: A-12-04" className="bg-card h-10 border-border text-sm font-mono font-black" />
+                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
+                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                      <MapPin className="h-3.5 w-3.5" /> Armazenamento & Localização
+                    </h5>
+                    <div className="grid gap-4">
+                      <div className="grid gap-2">
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Localização (Box/Prateleira)</Label>
+                        <Input placeholder="Ex: A-12-04" className="bg-card h-11 border-border text-sm font-mono font-black" />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Loja / Depósito</Label>
+                        <Select defaultValue="matriz">
+                          <SelectTrigger className="bg-card h-11 border-border font-semibold transition-all"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="matriz">Loja Matriz</SelectItem>
+                            <SelectItem value="filial1">Filial Centro</SelectItem>
+                            <SelectItem value="deposito">Depósito Central</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Status Inicial</Label>
+                        <Select defaultValue="ativo">
+                          <SelectTrigger className="bg-card h-11 border-border font-semibold transition-all"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ativo">Ativo</SelectItem>
+                            <SelectItem value="rascunho">Rascunho</SelectItem>
+                            <SelectItem value="desativado">Desativado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <div className="grid gap-2">
-                      <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Unidade de Medida</Label>
-                      <Select defaultValue="un">
-                        <SelectTrigger className="bg-card h-10 border-border text-xs font-bold"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="un">Unidade (UN)</SelectItem>
-                          <SelectItem value="cx">Caixa (CX)</SelectItem>
-                          <SelectItem value="jg">Jogo (JG)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                   </div>
-                 </section>
+                  </section>
                </div>
 
               {/* Técnico */}
