@@ -350,7 +350,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
               </div>
             </TabsContent>
 
-            <TabsContent value="fiscal" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <TabsContent value="fiscal" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Bloco Fiscal */}
                 <div className="space-y-5">
@@ -385,7 +385,27 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                     </div>
                   </div>
                 </div>
+                
+                {/* Bloco Tributário */}
+                <div className="space-y-5">
+                  <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                    <Receipt className="h-3 w-3" /> Regras Tributárias
+                  </h5>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">ICMS</Label>
+                      <Input placeholder="Alíquota %" className="bg-muted/20 h-10 border-sidebar-border text-xs" />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">IPI</Label>
+                      <Input placeholder="Alíquota %" className="bg-muted/20 h-10 border-sidebar-border text-xs" />
+                    </div>
+                  </div>
+                </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Bloco Logística & Canais */}
                 <div className="space-y-5">
                   <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
