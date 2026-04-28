@@ -4,7 +4,7 @@ import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bot, Sparkles, MessageSquare, Clock, Brain, Save, Loader2, Power, Users, Zap } from "lucide-react";
+import { Bot, Sparkles, MessageSquare, Clock, Brain, Save, Loader2, Power, Users, Zap, Smartphone, Copy, Send, Webhook } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -51,6 +51,7 @@ type BotForm = {
   auto_reply_delay_seconds: number;
   max_messages_before_handoff: number;
   collect_lead_info: boolean;
+  whatsapp_instance: string | null;
 };
 
 const DEFAULTS: BotForm = {
@@ -68,6 +69,7 @@ const DEFAULTS: BotForm = {
   auto_reply_delay_seconds: 2,
   max_messages_before_handoff: 10,
   collect_lead_info: true,
+  whatsapp_instance: null,
 };
 
 function BotPage() {
@@ -76,6 +78,11 @@ function BotPage() {
   const [keywordsText, setKeywordsText] = useState(DEFAULTS.handoff_keywords.join(", "));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [instances, setInstances] = useState<{ id: string; instance_name: string; status: string | null }[]>([]);
+  const [webhookSecret, setWebhookSecret] = useState<string | null>(null);
+  const [testInput, setTestInput] = useState("");
+  const [testMessages, setTestMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [testLoading, setTestLoading] = useState(false);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -101,10 +108,17 @@ function BotPage() {
           auto_reply_delay_seconds: data.auto_reply_delay_seconds,
           max_messages_before_handoff: data.max_messages_before_handoff,
           collect_lead_info: data.collect_lead_info,
+          whatsapp_instance: (data as any).whatsapp_instance ?? null,
         };
         setForm(next);
         setKeywordsText(next.handoff_keywords.join(", "));
+        setWebhookSecret((data as any).webhook_secret ?? null);
       }
+      const { data: inst } = await supabase
+        .from("whatsapp_instances")
+        .select("id, instance_name, status")
+        .eq("user_id", user.id);
+      setInstances(inst ?? []);
       setLoading(false);
     })();
   }, [user?.id]);
@@ -132,13 +146,47 @@ function BotPage() {
     const payload = { ...form, handoff_keywords, user_id: user.id };
     const { error } = await supabase
       .from("bot_settings")
-      .upsert(payload, { onConflict: "user_id" });
+      .upsert(payload, { onConflict: "user_id" })
+      .select("webhook_secret")
+      .maybeSingle();
     setSaving(false);
     if (error) {
       toast.error("Erro ao salvar: " + error.message);
     } else {
       toast.success("Configurações do bot salvas!");
       update("handoff_keywords", handoff_keywords);
+    }
+  };
+
+  const projectRef = (import.meta.env.VITE_SUPABASE_PROJECT_ID as string) || "";
+  const webhookUrl = projectRef && webhookSecret
+    ? `https://${projectRef}.supabase.co/functions/v1/bot-webhook?secret=${webhookSecret}`
+    : "";
+
+  const copyWebhook = async () => {
+    if (!webhookUrl) return toast.error("Salve as configurações para gerar o webhook.");
+    await navigator.clipboard.writeText(webhookUrl);
+    toast.success("URL do webhook copiada!");
+  };
+
+  const sendTest = async () => {
+    const text = testInput.trim();
+    if (!text || testLoading) return;
+    const next = [...testMessages, { role: "user" as const, content: text }];
+    setTestMessages(next);
+    setTestInput("");
+    setTestLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("bot-test", {
+        body: { messages: next },
+      });
+      if (error) throw error;
+      const reply = (data as any)?.reply ?? (data as any)?.error ?? form.fallback_message;
+      setTestMessages((m) => [...m, { role: "assistant", content: reply }]);
+    } catch (e: any) {
+      setTestMessages((m) => [...m, { role: "assistant", content: "Erro: " + (e?.message ?? String(e)) }]);
+    } finally {
+      setTestLoading(false);
     }
   };
 
