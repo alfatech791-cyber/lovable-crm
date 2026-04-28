@@ -52,6 +52,7 @@ import { Route as EstoqueMovimentacoesRouteImport } from './routes/estoque.movim
 import { Route as EstoqueEtiquetasRouteImport } from './routes/estoque.etiquetas'
 import { Route as EstoqueComprasRouteImport } from './routes/estoque.compras'
 import { Route as EstoqueAtualRouteImport } from './routes/estoque.atual'
+import { Route as CrmConversasRouteImport } from './routes/crm_.conversas'
 import { Route as CrmBotRouteImport } from './routes/crm_.bot'
 import { Route as ApiEvolutionSplatRouteImport } from './routes/api/evolution/$'
 
@@ -270,6 +271,11 @@ const EstoqueAtualRoute = EstoqueAtualRouteImport.update({
   path: '/atual',
   getParentRoute: () => EstoqueRoute,
 } as any)
+const CrmConversasRoute = CrmConversasRouteImport.update({
+  id: '/crm_/conversas',
+  path: '/crm/conversas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CrmBotRoute = CrmBotRouteImport.update({
   id: '/crm_/bot',
   path: '/crm/bot',
@@ -304,6 +310,7 @@ export interface FileRoutesByFullPath {
   '/vendas': typeof VendasRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
   '/crm/bot': typeof CrmBotRoute
+  '/crm/conversas': typeof CrmConversasRoute
   '/estoque/atual': typeof EstoqueAtualRoute
   '/estoque/compras': typeof EstoqueComprasRoute
   '/estoque/etiquetas': typeof EstoqueEtiquetasRoute
@@ -351,6 +358,7 @@ export interface FileRoutesByTo {
   '/vendas': typeof VendasRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
   '/crm/bot': typeof CrmBotRoute
+  '/crm/conversas': typeof CrmConversasRoute
   '/estoque/atual': typeof EstoqueAtualRoute
   '/estoque/compras': typeof EstoqueComprasRoute
   '/estoque/etiquetas': typeof EstoqueEtiquetasRoute
@@ -399,6 +407,7 @@ export interface FileRoutesById {
   '/vendas': typeof VendasRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
   '/crm_/bot': typeof CrmBotRoute
+  '/crm_/conversas': typeof CrmConversasRoute
   '/estoque/atual': typeof EstoqueAtualRoute
   '/estoque/compras': typeof EstoqueComprasRoute
   '/estoque/etiquetas': typeof EstoqueEtiquetasRoute
@@ -448,6 +457,7 @@ export interface FileRouteTypes {
     | '/vendas'
     | '/whatsapp'
     | '/crm/bot'
+    | '/crm/conversas'
     | '/estoque/atual'
     | '/estoque/compras'
     | '/estoque/etiquetas'
@@ -495,6 +505,7 @@ export interface FileRouteTypes {
     | '/vendas'
     | '/whatsapp'
     | '/crm/bot'
+    | '/crm/conversas'
     | '/estoque/atual'
     | '/estoque/compras'
     | '/estoque/etiquetas'
@@ -542,6 +553,7 @@ export interface FileRouteTypes {
     | '/vendas'
     | '/whatsapp'
     | '/crm_/bot'
+    | '/crm_/conversas'
     | '/estoque/atual'
     | '/estoque/compras'
     | '/estoque/etiquetas'
@@ -590,6 +602,7 @@ export interface RootRouteChildren {
   VendasRoute: typeof VendasRouteWithChildren
   WhatsappRoute: typeof WhatsappRoute
   CrmBotRoute: typeof CrmBotRoute
+  CrmConversasRoute: typeof CrmConversasRoute
   ApiEvolutionSplatRoute: typeof ApiEvolutionSplatRoute
 }
 
@@ -896,6 +909,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EstoqueAtualRouteImport
       parentRoute: typeof EstoqueRoute
     }
+    '/crm_/conversas': {
+      id: '/crm_/conversas'
+      path: '/crm/conversas'
+      fullPath: '/crm/conversas'
+      preLoaderRoute: typeof CrmConversasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/crm_/bot': {
       id: '/crm_/bot'
       path: '/crm/bot'
@@ -1018,6 +1038,7 @@ const rootRouteChildren: RootRouteChildren = {
   VendasRoute: VendasRouteWithChildren,
   WhatsappRoute: WhatsappRoute,
   CrmBotRoute: CrmBotRoute,
+  CrmConversasRoute: CrmConversasRoute,
   ApiEvolutionSplatRoute: ApiEvolutionSplatRoute,
 }
 export const routeTree = rootRouteImport
