@@ -1061,83 +1061,28 @@ function ConversasPage() {
                 )}
               </div>
 
-              {/* Composer */}
-              <div className="border-t border-border bg-card p-3">
-                {recording ? (
-                  <div className="flex items-center gap-3 px-2">
-                    <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                    <span className="text-sm font-mono">
-                      {String(Math.floor(recordSecs / 60)).padStart(2, "0")}:
-                      {String(recordSecs % 60).padStart(2, "0")}
-                    </span>
-                    <span className="text-xs text-muted-foreground flex-1">Gravando áudio...</span>
-                    <button
-                      onClick={() => stopRecording(true)}
-                      className="h-9 w-9 grid place-items-center rounded-full hover:bg-muted transition"
-                      title="Cancelar"
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </button>
-                    <button
-                      onClick={() => stopRecording(false)}
-                      disabled={sending}
-                      className="h-10 w-10 grid place-items-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition disabled:opacity-50"
-                      title="Enviar áudio"
-                    >
-                      <Send className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="relative flex items-end gap-2">
-                    {/* Stickers popover */}
-                    {stickerOpen && (
-                      <div className="absolute bottom-12 left-0 z-10 bg-popover border border-border rounded-2xl shadow-lg p-3 w-72">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-bold text-muted-foreground">Figurinhas</span>
-                          <button onClick={() => setStickerOpen(false)} className="p-1 hover:bg-muted rounded">
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                        <div className="grid grid-cols-5 gap-1">
-                          {STICKERS.map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => sendSticker(s)}
-                              className="text-2xl h-11 grid place-items-center rounded-lg hover:bg-muted transition"
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <button
-                      onClick={() => setStickerOpen((v) => !v)}
-                      className="h-10 w-10 grid place-items-center rounded-full hover:bg-muted transition shrink-0"
-                      title="Figurinhas"
-                    >
-                      <Smile className="h-5 w-5 text-muted-foreground" />
-                    </button>
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="h-10 w-10 grid place-items-center rounded-full hover:bg-muted transition shrink-0"
-                      title="Imagem"
-                    >
-                      <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                    </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) sendImageFile(f);
-                        e.target.value = "";
-                      }}
-                    />
+              {/* Novo Composer Estilizado */}
+              <div className="p-5 bg-card/80 border-t border-border/40 backdrop-blur-xl relative">
+                <div className="max-w-4xl mx-auto flex items-end gap-2.5 relative">
+                  <div className="flex-1 bg-muted/40 rounded-2xl border border-border/30 focus-within:border-primary/30 focus-within:ring-4 focus-within:ring-primary/5 transition-all duration-300 flex items-end px-3 py-2.5 shadow-inner group">
+                    <div className="flex items-center gap-1 mb-0.5 mr-2 shrink-0">
+                      <button
+                        onClick={() => setStickerOpen(!stickerOpen)}
+                        className={`h-9 w-9 rounded-xl transition-all duration-200 flex items-center justify-center ${stickerOpen ? "text-primary bg-background shadow-sm" : "text-muted-foreground hover:bg-background/80 hover:text-foreground"}`}
+                      >
+                        <Smile className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="h-9 w-9 rounded-xl text-muted-foreground hover:bg-background/80 hover:text-foreground transition-all duration-200 flex items-center justify-center"
+                      >
+                        <ImageIcon className="h-5 w-5" />
+                      </button>
+                    </div>
+                    
                     <textarea
+                      rows={1}
+                      placeholder={recording ? "Gravando áudio..." : "Digite uma mensagem..."}
                       value={text}
                       onChange={(e) => setText(e.target.value)}
                       onKeyDown={(e) => {
@@ -1146,30 +1091,81 @@ function ConversasPage() {
                           sendText();
                         }
                       }}
-                      rows={1}
-                      placeholder="Digite uma mensagem..."
-                      className="flex-1 resize-none bg-muted/50 rounded-2xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/30 max-h-28"
+                      className="flex-1 min-h-[40px] max-h-32 bg-transparent border-none outline-none shadow-none resize-none transition-all py-2 px-0 text-[14px] leading-relaxed"
+                      disabled={recording || sending}
                     />
-                    {text.trim() ? (
-                      <button
-                        onClick={sendText}
-                        disabled={sending}
-                        className="h-10 w-10 grid place-items-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition disabled:opacity-50 shrink-0"
-                        title="Enviar"
-                      >
-                        {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={startRecording}
-                        className="h-10 w-10 grid place-items-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition shrink-0"
-                        title="Gravar áudio"
-                      >
-                        <Mic className="h-4 w-4" />
-                      </button>
-                    )}
+
+                    <div className="flex items-center gap-1 mb-0.5 ml-2 shrink-0">
+                      {recording ? (
+                        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
+                          <span className="text-[11px] font-black text-destructive animate-pulse font-mono tracking-tighter bg-destructive/10 px-2 py-1 rounded-lg">
+                            {format(recordSecs * 1000, "mm:ss")}
+                          </span>
+                          <button 
+                            onClick={() => stopRecording(true)} 
+                            className="h-9 w-9 rounded-xl bg-destructive/10 hover:bg-destructive/20 flex items-center justify-center text-destructive transition-colors shadow-sm"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={startRecording}
+                          className="h-9 w-9 rounded-xl text-muted-foreground hover:bg-background/80 hover:text-foreground transition-all duration-200 flex items-center justify-center"
+                        >
+                          <Mic className="h-5 w-5" />
+                        </button>
+                      )}
+                    </div>
                   </div>
-                )}
+
+                  <button
+                    onClick={recording ? () => stopRecording(false) : sendText}
+                    disabled={(!text.trim() && !recording) || sending}
+                    className="h-[52px] w-[52px] rounded-2xl bg-primary text-primary-foreground disabled:opacity-50 disabled:grayscale transition-all duration-300 flex items-center justify-center shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-95 group/send"
+                  >
+                    {sending ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <Send className="h-5 w-5 transition-transform duration-300 group-hover/send:translate-x-0.5 group-hover/send:-translate-y-0.5" />
+                    )}
+                  </button>
+
+                  {/* Stickers Popover Estilizado */}
+                  {stickerOpen && (
+                    <div className="absolute bottom-[calc(100%+12px)] left-0 z-50 bg-popover/95 backdrop-blur-xl border border-border/40 rounded-[24px] shadow-2xl p-4 w-[320px] animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+                      <div className="flex items-center justify-between mb-3 px-1">
+                        <span className="text-[11px] font-black text-muted-foreground/60 uppercase tracking-widest">Emojis & Stickers</span>
+                        <button onClick={() => setStickerOpen(false)} className="h-6 w-6 rounded-full hover:bg-muted transition-colors flex items-center justify-center">
+                          <X className="h-3.5 w-3.5 text-muted-foreground" />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-5 gap-2 max-h-[240px] overflow-y-auto pr-1 custom-scrollbar">
+                        {STICKERS.map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => sendSticker(s)}
+                            className="text-2xl h-12 flex items-center justify-center rounded-xl hover:bg-muted transition-all duration-200 hover:scale-110 active:scale-90"
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) sendImageFile(f);
+                    e.target.value = "";
+                  }}
+                />
               </div>
             </div>
           ) : (
