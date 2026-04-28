@@ -508,7 +508,7 @@ function ConversasPage() {
           const raw = await evolution.findMessages(instance, chat.remoteJid!);
           const transcript = normalizeTranscript(asArray<any>(raw));
           const fallbackTranscript = normalizeTranscript(chat.lastMessage ? [chat.lastMessage] : []);
-          const mergedTranscript = transcript.length > 0 ? transcript : ex?.transcript ?? fallbackTranscript;
+          const mergedTranscript = transcript.length > 0 ? transcript : (ex?.transcript ?? fallbackTranscript);
           const lastAt =
             mergedTranscript[mergedTranscript.length - 1]?.at ??
             normTs(chat.updatedAt ?? chat.lastMessageTime ?? chat.conversationTimestamp ?? chat.lastMessage?.messageTimestamp);
