@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.bot-test]
 verify_jwt = true
+
+[functions.evolution-config]
+verify_jwt = true
