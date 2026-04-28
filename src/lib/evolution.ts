@@ -3,8 +3,9 @@
  * Documentação: https://doc.evolution-api.com/
  */
 
-const API_URL = (import.meta as any).env.EVOLUTION_API_URL || (import.meta as any).env.VITE_EVOLUTION_API_URL || "";
-const API_KEY = (import.meta as any).env.EVOLUTION_API_KEY || (import.meta as any).env.VITE_EVOLUTION_API_KEY || "";
+// Todas as chamadas passam pelo proxy server route /api/evolution/*
+// que injeta a URL e a API key da Evolution API a partir das secrets do servidor.
+const API_URL = "/api/evolution";
 
 export interface Instance {
   instanceName: string;
@@ -17,11 +18,7 @@ export interface Instance {
 
 export const evolution = {
   async getInstances() {
-    const res = await fetch(`${API_URL}/instance/fetchInstances`, {
-      headers: {
-        "apikey": API_KEY,
-      },
-    });
+    const res = await fetch(`${API_URL}/instance/fetchInstances`);
     if (!res.ok) {
       const errorText = await res.text();
       console.error("Evolution API Error (fetchInstances):", res.status, errorText);
@@ -35,7 +32,6 @@ export const evolution = {
        method: "POST",
        headers: {
          "Content-Type": "application/json",
-         "apikey": API_KEY,
        },
        body: JSON.stringify({
          instanceName,
@@ -70,7 +66,6 @@ export const evolution = {
        method: "POST",
        headers: {
          "Content-Type": "application/json",
-         "apikey": API_KEY,
        },
        body: JSON.stringify({
          enabled: true,
@@ -101,11 +96,7 @@ export const evolution = {
    async getQrCode(instanceName: string) {
      try {
        console.log(`Buscando QR Code para: ${instanceName}`);
-       const res = await fetch(`${API_URL}/instance/connect/${instanceName}`, {
-         headers: {
-           "apikey": API_KEY,
-         },
-       });
+        const res = await fetch(`${API_URL}/instance/connect/${instanceName}`);
        const data = await res.json();
        console.log("Resposta getQrCode:", data);
        return data;
@@ -118,28 +109,18 @@ export const evolution = {
   async logoutInstance(instanceName: string) {
     const res = await fetch(`${API_URL}/instance/logout/${instanceName}`, {
       method: "DELETE",
-      headers: {
-        "apikey": API_KEY,
-      },
     });
     return res.json();
   },
 
   async getInstanceConnection(instanceName: string) {
-    const res = await fetch(`${API_URL}/instance/connectionState/${instanceName}`, {
-      headers: {
-        "apikey": API_KEY,
-      },
-    });
+    const res = await fetch(`${API_URL}/instance/connectionState/${instanceName}`);
     return res.json();
   },
 
   async deleteInstance(instanceName: string) {
     const res = await fetch(`${API_URL}/instance/delete/${instanceName}`, {
       method: "DELETE",
-      headers: {
-        "apikey": API_KEY,
-      },
     });
     return res.json();
   }
