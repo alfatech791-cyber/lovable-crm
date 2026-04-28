@@ -87,7 +87,7 @@ export const sidebarItems = [
   
   export const salesData = [];
  
-  export const originData = [];
+  export const originData: { name: string; value: number; color: string }[] = [];
  
   export const channelSeries = [];
 
@@ -171,9 +171,9 @@ export interface Automation {
   
   export const products: Product[] = [];
  
-  export const funnelData = [];
+  export const funnelData: { name: string; value: number; color: string }[] = [];
 
-  export const topPerformers = [];
+  export const topPerformers: { name: string; sales: number; revenue: string; avatar: string; trend: string }[] = [];
 
   export const kpis = [
     { label: "Vendas do Dia", value: "R$ 0,00", trend: "0%", sub: "0 vendas hoje", icon: "ShoppingBag", tone: "success" },
