@@ -330,6 +330,37 @@ function ConversasPage() {
     return remoteCandidate;
   };
 
+  // Garante que o webhook da Evolution está apontando para o nosso bot-webhook
+  // para que mensagens recebidas cheguem em tempo real (via DB → Realtime).
+  const ensureWebhook = async (instance: string) => {
+    if (!user?.id || !instance) return;
+    if (webhookCheckedRef.current === instance) return;
+    webhookCheckedRef.current = instance;
+    try {
+      const { data: settings } = await supabase
+        .from("bot_settings")
+        .select("webhook_secret")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const secret = settings?.webhook_secret;
+      if (!secret) return; // bot ainda não configurado; nada a fazer
+
+      const projectRef = (import.meta.env.VITE_SUPABASE_PROJECT_ID as string | undefined) ?? null;
+      if (!projectRef) return;
+      const expectedUrl = `https://${projectRef}.supabase.co/functions/v1/bot-webhook?uid=${user.id}&secret=${secret}`;
+
+      const current = await evolution.getWebhook(instance);
+      const currentUrl = current?.url ?? current?.webhook?.url ?? "";
+      if (currentUrl === expectedUrl) return;
+
+      await evolution.setWebhook(instance, expectedUrl);
+      console.log("[conversas] webhook configurado para tempo real:", expectedUrl);
+    } catch (e) {
+      console.warn("[conversas] não foi possível configurar webhook automaticamente", e);
+      webhookCheckedRef.current = null; // permite tentar de novo depois
+    }
+  };
+
   const load = async () => {
     if (!user?.id) {
       setLoading(false);
