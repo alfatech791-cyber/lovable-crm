@@ -324,57 +324,74 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                 </div>
               </div>
 
-              {/* Fiscal */}
-              <div className="pt-10 border-t border-border/50 space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-5">
-                    <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
-                      <Percent className="h-3 w-3" /> Tributação
-                    </h5>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">NCM</Label>
-                        <Input placeholder="8517.13.00" className="bg-muted/20 h-10 border-sidebar-border text-xs" />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">ICMS %</Label>
-                        <Input placeholder="18" className="bg-muted/20 h-10 border-sidebar-border text-xs" />
-                      </div>
-                    </div>
-                  </div>
+               {/* Dados Fiscais, Logística e Extras */}
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-10 border-t border-border/50">
+                 <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
+                   <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                     <Percent className="h-3 w-3" /> Fiscal & Tributário
+                   </h5>
+                   <div className="grid grid-cols-2 gap-3">
+                     <div className="grid gap-1.5">
+                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">NCM</Label>
+                       <Input placeholder="8517.13.00" className="bg-card h-9 border-border text-[10px] font-mono" />
+                     </div>
+                     <div className="grid gap-1.5">
+                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">CEST</Label>
+                       <Input placeholder="21.053.01" className="bg-card h-9 border-border text-[10px] font-mono" />
+                     </div>
+                     <div className="grid gap-1.5">
+                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">ICMS %</Label>
+                       <Input placeholder="18" className="bg-card h-9 border-border text-[10px]" />
+                     </div>
+                     <div className="grid gap-1.5">
+                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">IPI %</Label>
+                       <Input placeholder="5" className="bg-card h-9 border-border text-[10px]" />
+                     </div>
+                   </div>
+                 </section>
 
-                  <div className="space-y-5">
-                    <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
-                      <Globe className="h-3 w-3" /> Logística
-                    </h5>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="grid gap-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Peso (kg)</Label>
-                        <Input type="number" step="0.001" placeholder="0.250" className="bg-muted/20 h-10 border-sidebar-border text-xs text-center" />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Larg (cm)</Label>
-                        <Input type="number" placeholder="10" className="bg-muted/20 h-10 border-sidebar-border text-xs text-center" />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Alt (cm)</Label>
-                        <Input type="number" placeholder="5" className="bg-muted/20 h-10 border-sidebar-border text-xs text-center" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                 <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
+                   <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                     <Globe className="h-3 w-3" /> Logística & Dimensões
+                   </h5>
+                   <div className="grid grid-cols-2 gap-3">
+                     <div className="grid gap-1.5 col-span-2">
+                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Peso Bruto (kg)</Label>
+                       <Input type="number" step="0.001" placeholder="0.250" className="bg-card h-9 border-border text-[10px]" />
+                     </div>
+                     <div className="grid gap-1.5">
+                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Largura (cm)</Label>
+                       <Input type="number" placeholder="10" className="bg-card h-9 border-border text-[10px]" />
+                     </div>
+                     <div className="grid gap-1.5">
+                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Altura (cm)</Label>
+                       <Input type="number" placeholder="5" className="bg-card h-9 border-border text-[10px]" />
+                     </div>
+                   </div>
+                 </section>
 
-              {/* Sincronização */}
-              <div className="p-4 rounded-2xl bg-muted/30 border border-sidebar-border/50 flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-xs font-bold flex items-center gap-2">
-                    <Settings2 className="h-3 w-3 text-primary" /> Sincronizar Canais
-                  </Label>
-                  <p className="text-[9px] text-muted-foreground">Atualizar saldo em todos os marketplaces</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
+                 <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
+                   <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                     <Settings2 className="h-3 w-3" /> Configurações Extras
+                   </h5>
+                   <div className="space-y-3">
+                     <div className="flex items-center justify-between p-2 rounded-lg bg-card/50 border border-border">
+                       <div className="space-y-0.5">
+                         <Label className="text-[10px] font-black uppercase opacity-70">Sincronizar</Label>
+                         <p className="text-[8px] text-muted-foreground">Marketplaces</p>
+                       </div>
+                       <Switch className="scale-75" defaultChecked />
+                     </div>
+                     <div className="flex items-center justify-between p-2 rounded-lg bg-card/50 border border-border">
+                       <div className="space-y-0.5">
+                         <Label className="text-[10px] font-black uppercase opacity-70">Notificar</Label>
+                         <p className="text-[8px] text-muted-foreground">Estoque Baixo</p>
+                       </div>
+                       <Switch className="scale-75" defaultChecked />
+                     </div>
+                   </div>
+                 </section>
+               </div>
             </div>
         </div>
 
