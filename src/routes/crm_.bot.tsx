@@ -159,8 +159,8 @@ function BotPage() {
   };
 
   const projectRef = (import.meta.env.VITE_SUPABASE_PROJECT_ID as string) || "";
-  const webhookUrl = projectRef && webhookSecret
-    ? `https://${projectRef}.supabase.co/functions/v1/bot-webhook?secret=${webhookSecret}`
+  const webhookUrl = projectRef && webhookSecret && user?.id
+    ? `https://${projectRef}.supabase.co/functions/v1/bot-webhook?uid=${user.id}&secret=${webhookSecret}`
     : "";
 
   const copyWebhook = async () => {
