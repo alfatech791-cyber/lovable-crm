@@ -1058,7 +1058,6 @@ function ConversasPage() {
 )}
 <span className="whitespace-pre-wrap break-words">{m.content}</span>
 </>
-)}
                             {m.at && m.kind !== "sticker" && (
                               <div className={`text-[10px] mt-2 flex justify-end font-medium opacity-70 ${isUser ? "text-muted-foreground" : "text-primary-foreground/90"}`}>
                                 {format(new Date(m.at), "HH:mm")}
