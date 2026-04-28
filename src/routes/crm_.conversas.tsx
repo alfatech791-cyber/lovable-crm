@@ -984,61 +984,76 @@ function ConversasPage() {
                 </button>
               </div>
 
-              <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto space-y-3">
+              <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto space-y-4 bg-gradient-to-b from-transparent to-muted/10 scroll-smooth">
                 {(selected.transcript ?? []).length === 0 ? (
                   <div className="text-xs text-center text-muted-foreground py-10">Sem mensagens registradas.</div>
                 ) : (
                   [...selected.transcript].reverse().map((m, i, arr) => {
                     const isUser = m.role === "user";
-                    // Lista invertida: a "anterior" cronologicamente é a próxima do array
                     const older = arr[i + 1];
                     const showDate =
                       !older ||
                       (m.at && older.at && new Date(m.at).toDateString() !== new Date(older.at).toDateString());
                     return (
-                      <div key={i}>
+                      <div key={i} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                         {showDate && m.at && (
-                          <div className="flex justify-center my-4">
-                            <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-muted text-muted-foreground">
+                          <div className="flex justify-center my-8">
+                            <span className="text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-xl bg-muted/60 text-muted-foreground/80 border border-border/20 backdrop-blur-sm shadow-sm">
                               {formatDateLabel(m.at)}
                             </span>
                           </div>
                         )}
-                        <div className={`flex gap-2 ${isUser ? "justify-start" : "justify-end"}`}>
-                        {isUser && (
-                          <div className="h-7 w-7 rounded-full bg-muted grid place-items-center shrink-0">
-                            <User className="h-3.5 w-3.5" />
-                          </div>
-                        )}
-                        <div
-                          className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm shadow-sm ${
-                            isUser
-                              ? "bg-muted rounded-bl-sm"
-                              : "bg-primary text-primary-foreground rounded-br-sm"
-                          } ${m.kind === "sticker" ? "text-3xl bg-transparent shadow-none !px-1 !py-0" : ""}`}
-                        >
-                          {m.kind === "audio" ? (
-                            <span className="flex items-center gap-2">
-                              <Mic className="h-4 w-4" /> Áudio
-                            </span>
-                          ) : m.kind === "image" ? (
-                            <span className="flex items-center gap-2">
-                              <ImageIcon className="h-4 w-4" /> {m.content || "Imagem"}
-                            </span>
-                          ) : (
-                            <span className="whitespace-pre-wrap break-words">{m.content}</span>
-                          )}
-                          {m.at && m.kind !== "sticker" && (
-                            <div className={`text-[9px] mt-1 opacity-70 ${isUser ? "text-muted-foreground" : "text-primary-foreground"}`}>
-                              {format(new Date(m.at), "HH:mm")}
+                        <div className={`flex gap-3 items-end ${isUser ? "justify-start" : "justify-end"} group`}>
+                          {isUser && (
+                            <div className="h-8 w-8 rounded-full bg-muted border border-border/40 grid place-items-center shrink-0 shadow-sm overflow-hidden mb-1">
+                              {selected.profile_pic_url ? (
+                                <img src={selected.profile_pic_url} className="h-full w-full object-cover" alt="" />
+                              ) : (
+                                <User className="h-4 w-4 text-muted-foreground" />
+                              )}
                             </div>
                           )}
-                        </div>
-                        {!isUser && (
-                          <div className="h-7 w-7 rounded-full bg-primary/15 text-primary grid place-items-center shrink-0">
-                            <Bot className="h-3.5 w-3.5" />
+                          <div
+                            className={`max-w-[75%] px-4 py-3 rounded-2xl text-[13.5px] leading-relaxed shadow-sm transition-all duration-200 ${
+                              isUser
+                                 ? "bg-card text-foreground rounded-bl-sm border border-border/40 hover:shadow-md"
+                                 : "bg-primary text-primary-foreground rounded-br-sm shadow-lg shadow-primary/15 hover:shadow-primary/25"
+                            } ${m.kind === "sticker" ? "text-4xl bg-transparent shadow-none !px-1 !py-0" : ""}`}
+                          >
+                            {m.kind === "audio" ? (
+                              <span className="flex items-center gap-3 py-1 font-medium">
+                                <div className="h-8 w-8 rounded-full bg-background/10 flex items-center justify-center">
+                                  <Mic className="h-4 w-4" />
+                                </div>
+                                <span>Áudio do WhatsApp</span>
+                              </span>
+                            ) : m.kind === "image" ? (
+                              <div className="space-y-2">
+                                <img 
+                                  src={m.media || (typeof m.content === 'string' && m.content.startsWith('http') ? m.content : undefined)} 
+                                  className="rounded-xl max-w-full h-auto cursor-pointer transition hover:brightness-110 shadow-sm" 
+                                  alt="" 
+                                  onClick={() => m.media && window.open(m.media, '_blank')} 
+                                />
+                                {m.content && !m.content.startsWith("🖼️") && (
+                                  <p className="opacity-90">{m.content}</p>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="whitespace-pre-wrap break-words">{m.content}</span>
+                            )}
+                            {m.at && m.kind !== "sticker" && (
+                              <div className={`text-[10px] mt-2 flex justify-end font-medium opacity-70 ${isUser ? "text-muted-foreground" : "text-primary-foreground/90"}`}>
+                                {format(new Date(m.at), "HH:mm")}
+                                {!isUser && <span className="ml-1 text-[10px] shrink-0">✓✓</span>}
+                              </div>
+                            )}
                           </div>
-                        )}
+                          {!isUser && (
+                            <div className="h-8 w-8 rounded-full bg-primary/10 text-primary border border-primary/20 grid place-items-center shrink-0 shadow-sm mb-1">
+                              <Bot className="h-4 w-4" />
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
