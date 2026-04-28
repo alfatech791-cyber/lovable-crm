@@ -414,6 +414,9 @@ function ConversasPage() {
         return;
       }
 
+      // Garante que o webhook está apontando para nosso endpoint (uma vez por instância)
+      ensureWebhook(instance);
+
       const rawChats = await evolution.findChats(instance);
       const chats = asArray<EvolutionChat>(rawChats).filter(
         (c) => !!c?.remoteJid && !String(c.remoteJid).endsWith("@g.us")
