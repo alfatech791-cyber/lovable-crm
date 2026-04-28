@@ -25,7 +25,7 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl p-0 overflow-hidden border-sidebar-border bg-background backdrop-blur-xl max-h-[90vh] flex flex-col shadow-elegant">
+      <DialogContent className="max-w-[95vw] w-[1400px] p-0 overflow-hidden border-sidebar-border bg-background backdrop-blur-xl h-[95vh] flex flex-col shadow-elegant">
         <DialogHeader className="p-6 pb-4 bg-muted/20">
           <div className="flex items-center gap-4">
             <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-glow shrink-0">
