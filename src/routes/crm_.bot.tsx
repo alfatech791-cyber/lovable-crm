@@ -88,12 +88,14 @@ function BotPage() {
   useEffect(() => {
     if (!user?.id) return;
     (async () => {
-      const { data } = await supabase
-        .from("bot_settings")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (data) {
+      try {
+        const { data, error } = await supabase
+          .from("bot_settings")
+          .select("*")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (error) console.error("bot_settings load error", error);
+        if (data) {
         const next: BotForm = {
           is_active: data.is_active,
           bot_name: data.bot_name,
@@ -114,13 +116,19 @@ function BotPage() {
         setForm(next);
         setKeywordsText(next.handoff_keywords.join(", "));
         setWebhookSecret((data as any).webhook_secret ?? null);
+        }
+        const { data: inst, error: instErr } = await supabase
+          .from("whatsapp_instances")
+          .select("id, instance_name, status")
+          .eq("user_id", user.id);
+        if (instErr) console.error("whatsapp_instances load error", instErr);
+        setInstances(inst ?? []);
+      } catch (e) {
+        console.error("Bot page load failed", e);
+        toast.error("Falha ao carregar configurações do bot");
+      } finally {
+        setLoading(false);
       }
-      const { data: inst } = await supabase
-        .from("whatsapp_instances")
-        .select("id, instance_name, status")
-        .eq("user_id", user.id);
-      setInstances(inst ?? []);
-      setLoading(false);
     })();
   }, [user?.id]);
 
