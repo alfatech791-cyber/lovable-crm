@@ -16,6 +16,29 @@ export interface Instance {
   profilePictureUrl?: string;
 }
 
+const parseResponse = async (res: Response) => {
+  const text = await res.text();
+  const data = text ? safeJsonParse(text) : [];
+
+  if (!res.ok) {
+    const message =
+      (typeof data === "object" && data && "message" in data && typeof data.message === "string" && data.message) ||
+      text ||
+      `Erro ${res.status} na Evolution API`;
+    throw new Error(message);
+  }
+
+  return data;
+};
+
+const safeJsonParse = (value: string) => {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+};
+
 export const evolution = {
   async getInstances() {
     const res = await fetch(`${API_URL}/instance/fetchInstances`);
@@ -113,6 +136,23 @@ export const evolution = {
        throw error;
      }
    },
+
+  async findChats(instanceName: string) {
+    const res = await fetch(`${API_URL}/chat/findChats/${instanceName}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    return parseResponse(res);
+  },
+
+  async findMessages(instanceName: string, remoteJid: string) {
+    const res = await fetch(`${API_URL}/chat/findMessages/${instanceName}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ where: { key: { remoteJid } } }),
+    });
+    return parseResponse(res);
+  },
 
   async logoutInstance(instanceName: string) {
     const res = await fetch(`${API_URL}/instance/logout/${instanceName}`, {
