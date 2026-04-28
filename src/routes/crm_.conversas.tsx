@@ -1000,7 +1000,7 @@ function ConversasPage() {
                 ) : (
                   [...selected.transcript].sort((a, b) => +new Date(a.at || 0) - +new Date(b.at || 0)).map((m, i, arr) => {
                     const isUser = m.role === "user";
-                    const older = arr[i + 1];
+                    const older = arr[i - 1];
                     const showDate =
                       !older ||
                       (m.at && older.at && new Date(m.at).toDateString() !== new Date(older.at).toDateString());
