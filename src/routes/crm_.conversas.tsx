@@ -596,6 +596,7 @@ function ConversasPage() {
             "postgres_changes",
             { event: "*", schema: "public", table: "bot_conversations", filter: `user_id=eq.${user.id}` },
             (payload) => {
+              console.log("[conversas] evento em tempo real recebido:", payload.eventType, payload.new);
               if (payload.eventType === "DELETE") {
                 setItems((prev) => prev.filter((c) => c.id !== (payload.old as any).id));
                 return;
