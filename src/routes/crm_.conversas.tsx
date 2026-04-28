@@ -552,6 +552,7 @@ function ConversasPage() {
             last_message_at: lastAt,
             profile_pic_url: picUrl,
             is_group: isGroup,
+            remote_jid: chat.remoteJid || null,
           } satisfies Conversation;
         })
       );
@@ -562,6 +563,7 @@ function ConversasPage() {
           user_id: user.id,
           contact_phone: row.contact_phone,
           contact_name: row.contact_name,
+          remote_jid: (row as any).remote_jid,
           transcript: row.transcript as any,
           status: row.status,
           messages_count: row.messages_count,
