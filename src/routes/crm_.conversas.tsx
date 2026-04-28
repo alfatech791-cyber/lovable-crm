@@ -724,10 +724,10 @@ function ConversasPage() {
   };
 
   const sendSticker = async (emoji: string) => {
-    setStickerOpen(false);
+    setStickerOpen(false); 
     // Envia como texto (emoji grande). Evolution sendSticker requer .webp;
     // como atalho usamos texto — visualmente vira figurinha no chat do cliente.
-    await sendPayload({ kind: "sticker", media: emoji });
+    await sendPayload({ kind: "text", text: emoji });
   };
 
   const sendImageFile = async (file: File) => {
@@ -1091,7 +1091,7 @@ function ConversasPage() {
                     </div>
                     
                     <textarea
-                      rows={1}
+                      rows={1} style={{ overflow: "hidden" }} onInput={(e) => { e.currentTarget.style.height = "auto"; e.currentTarget.style.height = e.currentTarget.scrollHeight + "px"; }}
                       placeholder={recording ? "Gravando áudio..." : "Digite uma mensagem..."}
                       value={text}
                       onChange={(e) => setText(e.target.value)}
