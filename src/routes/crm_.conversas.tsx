@@ -228,7 +228,23 @@ function ConversasPage() {
   };
 
   const applyConversations = (list: Conversation[], notify = false) => {
-    const sorted = [...list].sort(
+    const dedupMap = new Map<string, Conversation>();
+    for (const conversation of list) {
+      const key = conversation.contact_phone;
+      const previous = dedupMap.get(key);
+      if (!previous) {
+        dedupMap.set(key, conversation);
+        continue;
+      }
+      const previousAt = +new Date(previous.last_message_at);
+      const currentAt = +new Date(conversation.last_message_at);
+      const previousLen = previous.transcript?.length ?? 0;
+      const currentLen = conversation.transcript?.length ?? 0;
+      if (currentAt > previousAt || (currentAt === previousAt && currentLen > previousLen)) {
+        dedupMap.set(key, conversation);
+      }
+    }
+    const sorted = [...dedupMap.values()].sort(
       (a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at)
     );
 
