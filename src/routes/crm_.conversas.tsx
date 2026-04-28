@@ -933,11 +933,21 @@ function ConversasPage() {
             <div className="flex-1 flex flex-col bg-card/20 min-w-0">
               <div className="h-[68px] px-6 border-b border-border flex items-center justify-between bg-card">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary/60 grid place-items-center font-bold text-sm text-white shrink-0">
-                    {(selected.contact_name ?? selected.contact_phone).slice(0, 2).toUpperCase()}
-                  </div>
+                  <Avatar className="h-10 w-10 shrink-0">
+                    {selected.profile_pic_url ? (
+                      <AvatarImage src={selected.profile_pic_url} alt={selected.contact_name ?? selected.contact_phone} />
+                    ) : null}
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-primary/60 font-bold text-sm text-white">
+                      {selected.is_group ? <Users className="h-5 w-5" /> : (selected.contact_name ?? selected.contact_phone).slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
                   <div className="min-w-0">
-                    <h2 className="font-bold text-sm truncate">{selected.contact_name ?? selected.contact_phone}</h2>
+                    <h2 className="font-bold text-sm truncate flex items-center gap-1.5">
+                      {selected.contact_name ?? selected.contact_phone}
+                      {selected.is_group && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-muted text-muted-foreground">GRUPO</span>
+                      )}
+                    </h2>
                     <p className="text-[10px] text-muted-foreground">
                       {selected.contact_phone} · {selected.messages_count} mensagens
                     </p>
