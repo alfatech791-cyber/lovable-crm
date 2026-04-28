@@ -288,25 +288,35 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
 
                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                     <Warehouse className="h-3.5 w-3.5" /> Controle de Estoque
+                     <Warehouse className="h-3.5 w-3.5" /> Estoque & Unidade
                    </h5>
                    <div className="grid gap-4">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="grid gap-2">
-                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Saldo Atual</Label>
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Estoque Inicial</Label>
                          <Input id="stock" type="number" defaultValue={product?.stock ?? ""} className="bg-card h-12 border-border font-black text-lg text-center focus:ring-4 focus:ring-primary/5 transition-all" />
                       </div>
                       <div className="grid gap-2">
-                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Estoque Mín.</Label>
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider text-center">Estoque Mínimo</Label>
                         <Input id="min_stock" type="number" defaultValue={product?.min_stock || 2} className="bg-card h-12 border-border text-center text-warning font-black text-lg focus:ring-4 focus:ring-warning/5 transition-all" />
                       </div>
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-card border border-border">
-                      <div className="space-y-0.5">
-                        <span className="text-[9px] font-black uppercase text-muted-foreground/60 block">Reservado</span>
-                        <span className="text-xs font-black">0 un</span>
-                      </div>
-                      <Box className="h-4 w-4 text-muted-foreground/30" />
+                    <div className="grid gap-2">
+                      <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Unidade de Medida</Label>
+                      <Select defaultValue="un">
+                        <SelectTrigger className="bg-card h-11 border-border font-semibold transition-all"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="un">Unidade (UN)</SelectItem>
+                          <SelectItem value="cx">Caixa (CX)</SelectItem>
+                          <SelectItem value="jg">Jogo (JG)</SelectItem>
+                          <SelectItem value="pc">Peça (PC)</SelectItem>
+                          <SelectItem value="kit">Kit (KIT)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Peso Bruto (kg)</Label>
+                      <Input type="number" step="0.001" placeholder="0.250" className="bg-card h-11 border-border text-sm font-bold" />
                     </div>
                    </div>
                  </section>
