@@ -52,6 +52,7 @@ import { Route as EstoqueMovimentacoesRouteImport } from './routes/estoque.movim
 import { Route as EstoqueEtiquetasRouteImport } from './routes/estoque.etiquetas'
 import { Route as EstoqueComprasRouteImport } from './routes/estoque.compras'
 import { Route as EstoqueAtualRouteImport } from './routes/estoque.atual'
+import { Route as CrmBotRouteImport } from './routes/crm.bot'
 import { Route as AppRelatoriosIndexRouteImport } from './routes/_app/relatorios/index'
 import { Route as AppMarketingIndexRouteImport } from './routes/_app/marketing/index'
 import { Route as AppClientesIndexRouteImport } from './routes/_app/clientes/index'
@@ -281,6 +282,11 @@ const EstoqueAtualRoute = EstoqueAtualRouteImport.update({
   path: '/atual',
   getParentRoute: () => EstoqueRoute,
 } as any)
+const CrmBotRoute = CrmBotRouteImport.update({
+  id: '/bot',
+  path: '/bot',
+  getParentRoute: () => CrmRoute,
+} as any)
 const AppRelatoriosIndexRoute = AppRelatoriosIndexRouteImport.update({
   id: '/_app/relatorios/',
   path: '/relatorios/',
@@ -359,7 +365,7 @@ export interface FileRoutesByFullPath {
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
-  '/crm': typeof CrmRoute
+  '/crm': typeof CrmRouteWithChildren
   '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRouteWithChildren
   '/financeiro': typeof FinanceiroRouteWithChildren
@@ -374,6 +380,7 @@ export interface FileRoutesByFullPath {
   '/servicos': typeof ServicosRouteWithChildren
   '/vendas': typeof VendasRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
+  '/crm/bot': typeof CrmBotRoute
   '/estoque/atual': typeof EstoqueAtualRoute
   '/estoque/compras': typeof EstoqueComprasRoute
   '/estoque/etiquetas': typeof EstoqueEtiquetasRoute
@@ -417,7 +424,7 @@ export interface FileRoutesByTo {
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof AppClientesIndexRoute
   '/configuracoes': typeof ConfiguracoesRoute
-  '/crm': typeof CrmRoute
+  '/crm': typeof CrmRouteWithChildren
   '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRouteWithChildren
   '/financeiro': typeof FinanceiroRouteWithChildren
@@ -432,6 +439,7 @@ export interface FileRoutesByTo {
   '/servicos': typeof ServicosRouteWithChildren
   '/vendas': typeof VendasRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
+  '/crm/bot': typeof CrmBotRoute
   '/estoque/atual': typeof EstoqueAtualRoute
   '/estoque/compras': typeof EstoqueComprasRoute
   '/estoque/etiquetas': typeof EstoqueEtiquetasRoute
@@ -474,7 +482,7 @@ export interface FileRoutesById {
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
-  '/crm': typeof CrmRoute
+  '/crm': typeof CrmRouteWithChildren
   '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRouteWithChildren
   '/financeiro': typeof FinanceiroRouteWithChildren
@@ -489,6 +497,7 @@ export interface FileRoutesById {
   '/servicos': typeof ServicosRouteWithChildren
   '/vendas': typeof VendasRouteWithChildren
   '/whatsapp': typeof WhatsappRoute
+  '/crm/bot': typeof CrmBotRoute
   '/estoque/atual': typeof EstoqueAtualRoute
   '/estoque/compras': typeof EstoqueComprasRoute
   '/estoque/etiquetas': typeof EstoqueEtiquetasRoute
@@ -549,6 +558,7 @@ export interface FileRouteTypes {
     | '/servicos'
     | '/vendas'
     | '/whatsapp'
+    | '/crm/bot'
     | '/estoque/atual'
     | '/estoque/compras'
     | '/estoque/etiquetas'
@@ -607,6 +617,7 @@ export interface FileRouteTypes {
     | '/servicos'
     | '/vendas'
     | '/whatsapp'
+    | '/crm/bot'
     | '/estoque/atual'
     | '/estoque/compras'
     | '/estoque/etiquetas'
@@ -663,6 +674,7 @@ export interface FileRouteTypes {
     | '/servicos'
     | '/vendas'
     | '/whatsapp'
+    | '/crm/bot'
     | '/estoque/atual'
     | '/estoque/compras'
     | '/estoque/etiquetas'
@@ -707,7 +719,7 @@ export interface RootRouteChildren {
   AutomacaoRoute: typeof AutomacaoRoute
   ClientesRoute: typeof ClientesRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
-  CrmRoute: typeof CrmRoute
+  CrmRoute: typeof CrmRouteWithChildren
   EquipeRoute: typeof EquipeRoute
   EstoqueRoute: typeof EstoqueRouteWithChildren
   FinanceiroRoute: typeof FinanceiroRouteWithChildren
@@ -1040,6 +1052,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EstoqueAtualRouteImport
       parentRoute: typeof EstoqueRoute
     }
+    '/crm/bot': {
+      id: '/crm/bot'
+      path: '/bot'
+      fullPath: '/crm/bot'
+      preLoaderRoute: typeof CrmBotRouteImport
+      parentRoute: typeof CrmRoute
+    }
     '/_app/relatorios/': {
       id: '/_app/relatorios/'
       path: '/relatorios'
@@ -1134,6 +1153,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface CrmRouteChildren {
+  CrmBotRoute: typeof CrmBotRoute
+}
+
+const CrmRouteChildren: CrmRouteChildren = {
+  CrmBotRoute: CrmBotRoute,
+}
+
+const CrmRouteWithChildren = CrmRoute._addFileChildren(CrmRouteChildren)
+
 interface EstoqueRouteChildren {
   EstoqueAtualRoute: typeof EstoqueAtualRoute
   EstoqueComprasRoute: typeof EstoqueComprasRoute
@@ -1223,7 +1252,7 @@ const rootRouteChildren: RootRouteChildren = {
   AutomacaoRoute: AutomacaoRoute,
   ClientesRoute: ClientesRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
-  CrmRoute: CrmRoute,
+  CrmRoute: CrmRouteWithChildren,
   EquipeRoute: EquipeRoute,
   EstoqueRoute: EstoqueRouteWithChildren,
   FinanceiroRoute: FinanceiroRouteWithChildren,
