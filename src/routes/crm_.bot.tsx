@@ -5,6 +5,7 @@ import { Topbar } from "@/components/layout/Topbar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Bot, Sparkles, MessageSquare, Clock, Brain, Save, Loader2, Power, Users, Zap, Smartphone, Copy, Send, Webhook } from "lucide-react";
+import { evolution } from "@/lib/evolution";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -400,11 +401,12 @@ function BotPage() {
                       className="w-full"
                       disabled={!webhookUrl || !form.whatsapp_instance}
                       onClick={async () => {
-                        const { data, error } = await supabase.functions.invoke("evolution-config", {
-                          body: { action: "set_webhook", instance: form.whatsapp_instance, webhookUrl },
-                        });
-                        if (error) toast.error("Falha: " + error.message);
-                        else toast.success("Webhook configurado na Evolution!");
+                        try {
+                          await evolution.setWebhook(form.whatsapp_instance!, webhookUrl);
+                          toast.success("Webhook configurado na Evolution!");
+                        } catch (e: any) {
+                          toast.error("Falha: " + (e?.message ?? String(e)));
+                        }
                       }}
                     >
                       Configurar webhook automaticamente
