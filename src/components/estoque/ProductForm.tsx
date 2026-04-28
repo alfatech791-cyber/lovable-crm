@@ -326,17 +326,43 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-2xl bg-sidebar-primary/5 border border-sidebar-primary/10 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <History className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="space-y-0.5">
-                          <Label className="text-xs font-bold text-primary italic uppercase tracking-tighter">Condição: Seminovo</Label>
-                          <p className="text-[9px] text-muted-foreground">Ative para controle de aparelhos usados</p>
-                        </div>
-                      </div>
-                      <Switch className="data-[state=checked]:bg-primary" />
+                    <div className="space-y-3">
+                       <div className="p-4 rounded-2xl bg-sidebar-primary/5 border border-sidebar-primary/10 flex items-center justify-between hover:bg-sidebar-primary/10 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                              <History className="h-4 w-4 text-primary" />
+                            </div>
+                            <div className="space-y-0.5">
+                              <Label className="text-xs font-black text-primary uppercase tracking-tighter italic">Aparelho Seminovo</Label>
+                              <p className="text-[9px] text-muted-foreground">Controle de garantia diferenciada</p>
+                            </div>
+                          </div>
+                          <Switch className="data-[state=checked]:bg-primary" />
+                       </div>
+                       
+                       <div className="grid grid-cols-2 gap-3">
+                          <div className="grid gap-1.5">
+                             <Label className="text-[9px] font-black uppercase text-muted-foreground/50 tracking-widest px-1">Saúde Bateria</Label>
+                             <div className="relative">
+                                <Input placeholder="100" className="bg-muted/10 h-9 border-sidebar-border text-xs font-bold pr-7" />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground">%</span>
+                             </div>
+                          </div>
+                          <div className="grid gap-1.5">
+                             <Label className="text-[9px] font-black uppercase text-muted-foreground/50 tracking-widest px-1">Garantia Loja</Label>
+                             <Select defaultValue="90">
+                                <SelectTrigger className="bg-muted/10 h-9 border-sidebar-border text-xs font-bold">
+                                   <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                   <SelectItem value="30">30 Dias</SelectItem>
+                                   <SelectItem value="90">90 Dias</SelectItem>
+                                   <SelectItem value="180">180 Dias</SelectItem>
+                                   <SelectItem value="365">1 Ano</SelectItem>
+                                </SelectContent>
+                             </Select>
+                          </div>
+                       </div>
                     </div>
                   </div>
                 </div>
