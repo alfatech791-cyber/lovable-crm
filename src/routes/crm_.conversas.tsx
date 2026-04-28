@@ -489,6 +489,7 @@ function ConversasPage() {
               existingConversation?.profile_pic_url ??
               null,
             is_group: isGroup,
+            remote_jid: chat.remoteJid || null,
           } satisfies Conversation;
         })
         .filter((row): row is Conversation => !!row);
