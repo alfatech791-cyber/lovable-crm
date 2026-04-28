@@ -204,16 +204,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
                       </span>
                     </td>
                    <td className="px-6 py-4">
-                     <span className="text-sm font-bold text-primary">
-                       {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                     </span>
-                   </td>
-                   <td className="px-6 py-4">
-                     <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${(product.stock || 0) > 0 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
-                       {(product.stock || 0) > 0 ? 'EM ESTOQUE' : 'ESGOTADO'}
-                     </span>
-                   </td>
-                   <td className="px-6 py-4">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button className="p-2 rounded-lg hover:bg-muted transition">
