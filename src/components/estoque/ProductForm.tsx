@@ -71,78 +71,123 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
             </TabsList>
           </div>
 
-          <div className="p-6">
-            <TabsContent value="general" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Categoria</Label>
-                      <Select defaultValue={product?.category || "Acessórios"} onValueChange={(v) => setIsSmartphone(v === "Smartphones")}>
-                        <SelectTrigger className="bg-muted/30 h-11 border-sidebar-border focus:ring-1 focus:ring-primary/20">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Smartphones">Smartphones</SelectItem>
-                          <SelectItem value="Tablets">Tablets</SelectItem>
-                          <SelectItem value="Acessórios">Acessórios</SelectItem>
-                          <SelectItem value="Peças">Peças</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Marca</Label>
-                      <Select defaultValue="apple">
-                        <SelectTrigger className="bg-muted/30 h-11 border-sidebar-border focus:ring-1 focus:ring-primary/20">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="apple">Apple</SelectItem>
-                          <SelectItem value="samsung">Samsung</SelectItem>
-                          <SelectItem value="xiaomi">Xiaomi</SelectItem>
-                          <SelectItem value="outros">Outros</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+          <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+            <TabsContent value="general" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="lg:col-span-8 space-y-6">
+                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
+                    <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                      <Tag className="h-3 w-3" /> Identificação Básica
+                    </h3>
+                    
+                    <div className="grid gap-4">
+                      <div className="grid gap-2">
+                        <Label className="text-[10px] font-bold uppercase text-muted-foreground/70 tracking-wider">Título Comercial do Anúncio</Label>
+                        <div className="relative">
+                           <Input id="name" defaultValue={product?.name} placeholder="Ex: Apple iPhone 15 Pro Max 256GB - Titânio Natural" className="bg-card/50 h-12 border-sidebar-border focus:ring-1 focus:ring-primary/20 text-base font-semibold" />
+                           <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground/40 uppercase">0/60</div>
+                        </div>
+                      </div>
 
-                  <div className="grid gap-2">
-                    <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
-                      <Tag className="h-3.5 w-3.5" /> Nome do Produto
-                    </Label>
-                    <Input id="name" defaultValue={product?.name} placeholder="Ex: iPhone 15 Pro Max 256GB" className="bg-muted/30 h-11 border-sidebar-border focus:ring-1 focus:ring-primary/20" />
-                  </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div className="grid gap-2">
+                          <Label className="text-[10px] font-bold uppercase text-muted-foreground/70 tracking-wider">Categoria</Label>
+                          <Select defaultValue={product?.category || "Acessórios"} onValueChange={(v) => setIsSmartphone(v === "Smartphones")}>
+                            <SelectTrigger className="bg-card/50 h-10 border-sidebar-border"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Smartphones">Smartphones</SelectItem>
+                              <SelectItem value="Tablets">Tablets</SelectItem>
+                              <SelectItem value="Watch">Smartwatches</SelectItem>
+                              <SelectItem value="Acessórios">Acessórios</SelectItem>
+                              <SelectItem value="Peças">Peças Técnicas</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label className="text-[10px] font-bold uppercase text-muted-foreground/70 tracking-wider">Fabricante</Label>
+                          <Select defaultValue="apple">
+                            <SelectTrigger className="bg-card/50 h-10 border-sidebar-border"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="apple">Apple Inc.</SelectItem>
+                              <SelectItem value="samsung">Samsung</SelectItem>
+                              <SelectItem value="xiaomi">Xiaomi</SelectItem>
+                              <SelectItem value="motorola">Motorola</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label className="text-[10px] font-bold uppercase text-muted-foreground/70 tracking-wider">Status</Label>
+                          <Select defaultValue="ativo">
+                            <SelectTrigger className="bg-card/50 h-10 border-sidebar-border"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="ativo">Disponível</SelectItem>
+                              <SelectItem value="rascunho">Rascunho</SelectItem>
+                              <SelectItem value="indisponivel">Indisponível</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
+                     <div className="flex items-center justify-between">
+                        <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                          <InfoIcon className="h-3 w-3" /> Descrição Técnica (E-commerce)
+                        </h3>
+                        <div className="flex items-center gap-2">
+                           <Button variant="ghost" size="sm" className="h-7 text-[9px] font-bold uppercase gap-1"><Copy className="h-3 w-3" /> Copiar IA</Button>
+                           <Button variant="ghost" size="sm" className="h-7 text-[9px] font-bold uppercase gap-1 text-primary"><Zap className="h-3 w-3 fill-current" /> Gerar com ConectaAI</Button>
+                        </div>
+                     </div>
+                     <textarea className="w-full bg-card/30 border border-sidebar-border rounded-xl p-4 text-sm outline-none focus:ring-1 focus:ring-primary/20 min-h-[160px] custom-scrollbar" placeholder="Descreva os principais benefícios, diferenciais e o que acompanha o produto..." />
+                  </section>
                 </div>
 
-                <div className="space-y-3">
-                  <Label className="text-[11px] font-black uppercase text-muted-foreground/60 flex items-center gap-2 tracking-wider">
-                    <ImageIcon className="h-3.5 w-3.5" /> Mídia do Produto
-                  </Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {/* Main Image Slot */}
-                    <div className="col-span-1 border-2 border-dashed border-sidebar-border/50 rounded-xl h-24 flex flex-col items-center justify-center gap-1 hover:bg-muted/20 transition-colors cursor-pointer group bg-muted/10">
-                      <Upload className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
-                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">Principal</span>
+                <div className="lg:col-span-4 space-y-6">
+                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
+                    <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                      <ImageIcon className="h-3 w-3" /> Galeria de Fotos
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="aspect-square border-2 border-dashed border-primary/30 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-all cursor-pointer group bg-primary/5">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-glow">
+                          <Upload className="h-5 w-5" />
+                        </div>
+                        <span className="text-[9px] font-black text-primary uppercase tracking-widest">Principal</span>
+                      </div>
+                      <div className="grid grid-cols-2 grid-rows-2 gap-3 aspect-square">
+                         {Array.from({ length: 4 }).map((_, i) => (
+                           <div key={i} className="border border-dashed border-sidebar-border/50 rounded-xl flex items-center justify-center bg-muted/5 hover:bg-muted/10 transition-colors cursor-pointer">
+                              <Plus className="h-4 w-4 text-muted-foreground/30" />
+                           </div>
+                         ))}
+                      </div>
                     </div>
-                    {/* Additional slots */}
-                    <div className="border-2 border-dashed border-sidebar-border/30 rounded-xl h-24 flex items-center justify-center bg-muted/5 opacity-50">
-                       <Plus className="h-4 w-4 text-muted-foreground" />
+                    <div className="p-3 bg-card/40 rounded-xl border border-sidebar-border/30">
+                       <p className="text-[10px] text-muted-foreground leading-tight">
+                          <strong>Dica:</strong> Fotos com fundo branco aumentam a conversão em até 30% nos marketplaces.
+                       </p>
                     </div>
-                    <div className="border-2 border-dashed border-sidebar-border/30 rounded-xl h-24 flex items-center justify-center bg-muted/5 opacity-50 relative group">
-                       <Plus className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
-                  <p className="text-[9px] text-muted-foreground text-center">Formatos aceitos: JPG, PNG. Max 5MB.</p>
-                </div>
-              </div>
+                  </section>
 
-              <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 flex items-start gap-4">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                  <ShieldCheck className="h-4 w-4" />
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-sm font-bold leading-none">Status do Registro</h4>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">Este produto será cadastrado na base global e ficará disponível para venda em todos os canais conectados.</p>
+                  <section className="bg-primary/5 rounded-2xl border border-primary/10 p-5 space-y-4">
+                    <h3 className="text-[11px] font-black uppercase tracking-widest text-primary">Resumo do Registro</h3>
+                    <div className="space-y-3">
+                       <div className="flex justify-between text-[11px]">
+                          <span className="text-muted-foreground">ID Interno</span>
+                          <span className="font-mono text-primary">#PROD-{(Math.random()*10000).toFixed(0)}</span>
+                       </div>
+                       <div className="flex justify-between text-[11px]">
+                          <span className="text-muted-foreground">Criado por</span>
+                          <span className="font-bold">Renato S.</span>
+                       </div>
+                       <div className="flex justify-between text-[11px]">
+                          <span className="text-muted-foreground">Data Registro</span>
+                          <span className="font-bold">{new Date().toLocaleDateString('pt-BR')}</span>
+                       </div>
+                    </div>
+                  </section>
                 </div>
               </div>
             </TabsContent>
