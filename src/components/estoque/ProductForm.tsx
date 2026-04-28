@@ -208,10 +208,9 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                   </section>
                 </div>
               </div>
-            </TabsContent>
+              </div>
 
-            <TabsContent value="stock" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-border/50">
                 {/* Coluna de Preços */}
                 <div className="space-y-5">
                   <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
@@ -284,10 +283,9 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                   </div>
                 </div>
               </div>
-            </TabsContent>
+              </div>
 
-            <TabsContent value="tech" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-border/50">
                 <div className="space-y-5">
                   <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
                     <Hash className="h-3 w-3" /> Identificação
@@ -394,10 +392,10 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                 </Label>
                 <textarea className="w-full bg-muted/20 border border-sidebar-border rounded-xl p-3 text-xs outline-none focus:ring-1 focus:ring-primary/20 min-h-[80px]" placeholder="Ex: Saúde da bateria 100%, sem riscos na tela, acompanha caixa original..." />
               </div>
-            </TabsContent>
+              </div>
 
-            <TabsContent value="fiscal" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="pt-10 border-t border-border/50 space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Bloco Fiscal */}
                 <div className="space-y-5">
                   <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
