@@ -77,7 +77,7 @@ function BotPage() {
   const { user } = useAuth();
   const [form, setForm] = useState<BotForm>(DEFAULTS);
   const [keywordsText, setKeywordsText] = useState(DEFAULTS.handoff_keywords.join(", "));
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [instances, setInstances] = useState<{ id: string; instance_name: string; status: string | null }[]>([]);
   const [webhookSecret, setWebhookSecret] = useState<string | null>(null);
@@ -86,12 +86,8 @@ function BotPage() {
   const [testLoading, setTestLoading] = useState(false);
 
   useEffect(() => {
-    if (!user?.id) {
-      // Aguarda o AuthContext resolver. Mantém loading=true até o user chegar,
-      // mas garante que se não houver sessão, o spinner não fica eterno.
-      const t = setTimeout(() => setLoading(false), 1500);
-      return () => clearTimeout(t);
-    }
+    if (!user?.id) return;
+    setLoading(true);
     (async () => {
       try {
         const { data, error } = await supabase
@@ -99,7 +95,10 @@ function BotPage() {
           .select("*")
           .eq("user_id", user.id)
           .maybeSingle();
-        if (error) console.error("bot_settings load error", error);
+        if (error) {
+          console.error("bot_settings load error", error);
+          toast.error("Erro ao carregar bot: " + error.message);
+        }
         if (data) {
         const next: BotForm = {
           is_active: data.is_active,
