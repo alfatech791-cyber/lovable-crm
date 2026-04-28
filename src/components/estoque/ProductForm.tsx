@@ -471,11 +471,14 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
           </div>
         </Tabs>
 
-        <DialogFooter className="p-6 pt-0 gap-2">
-          <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl">Cancelar</Button>
-          <Button onClick={() => onOpenChange(false)} className="bg-gradient-primary shadow-glow gap-2 px-6 rounded-xl">
-            {product ? <CheckCircle2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-            {product ? "Salvar Alterações" : "Cadastrar Item"}
+        <DialogFooter className="p-6 pt-4 gap-3 bg-muted/20 border-t border-sidebar-border/50">
+          <div className="mr-auto hidden md:flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
+             <InfoIcon className="h-3 w-3" /> Todos os campos com * são obrigatórios para emissão de NF
+          </div>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl h-11 px-6 font-bold text-xs uppercase tracking-widest">Descartar</Button>
+          <Button onClick={() => onOpenChange(false)} className="bg-gradient-primary shadow-glow gap-2 px-8 rounded-xl h-11 font-black text-xs uppercase tracking-widest group">
+            {product ? <CheckCircle2 className="h-4 w-4 group-hover:scale-110 transition-transform" /> : <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />}
+            {product ? "Salvar Alterações" : "Finalizar Cadastro"}
           </Button>
         </DialogFooter>
       </DialogContent>
