@@ -724,7 +724,7 @@ function ConversasPage() {
   };
 
   const sendSticker = async (emoji: string) => {
-    setStickerOpen(false); if (emoji.length > 2) { await sendPayload({ kind: "text", text: emoji }); return; }
+    setStickerOpen(false); 
     // Envia como texto (emoji grande). Evolution sendSticker requer .webp;
     // como atalho usamos texto — visualmente vira figurinha no chat do cliente.
     await sendPayload({ kind: "text", text: emoji });
