@@ -500,7 +500,7 @@ function ConversasPage() {
       }
 
       const rows = await Promise.all(
-        chats.slice(0, 30).map(async (chat) => {
+        chats.slice(0, 100).map(async (chat) => {
           const phone = getContactPhone(chat);
           if (!phone) return null;
           const isGroup = String(chat.remoteJid ?? "").endsWith("@g.us");
@@ -709,7 +709,7 @@ function ConversasPage() {
       const { data, error } = await supabase.functions.invoke("send-whatsapp", {
         headers: { Authorization: `Bearer ${accessToken}` },
         body: {
-          phone: selected.remote_jid || selected.contact_phone,
+          phone: selected.remote_jid || (selected.is_group && !selected.contact_phone.includes("@") ? `${selected.contact_phone}@g.us` : selected.contact_phone),
           contactName: selected.contact_name,
           ...payload,
         },
