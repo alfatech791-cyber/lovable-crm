@@ -360,6 +360,85 @@ function BotPage() {
 
               {/* Coluna lateral */}
               <div className="space-y-6">
+                {/* WhatsApp */}
+                <Section icon={Smartphone} title="WhatsApp" desc="Instância conectada ao bot">
+                  <div className="space-y-3">
+                    {instances.length === 0 ? (
+                      <div className="text-xs text-muted-foreground">
+                        Nenhuma instância. Conecte uma em <a href="/whatsapp" className="text-primary underline">WhatsApp</a>.
+                      </div>
+                    ) : (
+                      <Select
+                        value={form.whatsapp_instance ?? ""}
+                        onValueChange={(v) => update("whatsapp_instance", v)}
+                      >
+                        <SelectTrigger><SelectValue placeholder="Selecione uma instância" /></SelectTrigger>
+                        <SelectContent>
+                          {instances.map((i) => (
+                            <SelectItem key={i.id} value={i.instance_name}>
+                              {i.instance_name} {i.status ? `· ${i.status}` : ""}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                </Section>
+
+                {/* Webhook */}
+                <Section icon={Webhook} title="Webhook" desc="Configure na Evolution API">
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <Input readOnly value={webhookUrl} placeholder="Salve para gerar a URL" className="font-mono text-[11px]" />
+                      <Button type="button" variant="outline" size="icon" onClick={copyWebhook}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      Cole essa URL no campo de webhook da sua instância Evolution para receber mensagens.
+                    </p>
+                  </div>
+                </Section>
+
+                {/* Chat de teste */}
+                <Section icon={MessageSquare} title="Testar bot" desc="Simule uma conversa">
+                  <div className="space-y-3">
+                    <div className="h-56 overflow-y-auto rounded-lg bg-muted/40 border border-border p-3 space-y-2 text-sm">
+                      {testMessages.length === 0 ? (
+                        <div className="text-xs text-muted-foreground text-center py-8">
+                          Envie uma mensagem para testar.
+                        </div>
+                      ) : (
+                        testMessages.map((m, i) => (
+                          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                            <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-xs ${m.role === "user" ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-card border border-border rounded-bl-sm"}`}>
+                              {m.content}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                      {testLoading && (
+                        <div className="flex justify-start">
+                          <div className="px-3 py-2 rounded-2xl bg-card border border-border">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={testInput}
+                        onChange={(e) => setTestInput(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && sendTest()}
+                        placeholder="Escreva uma mensagem..."
+                      />
+                      <Button type="button" size="icon" onClick={sendTest} disabled={testLoading}>
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </Section>
+
                 {/* Horário */}
                 <Section icon={Clock} title="Horário de atendimento" desc="Quando o bot deve estar ativo">
                   <div className="space-y-4">
