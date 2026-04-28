@@ -70,8 +70,9 @@ function WhatsAppPage() {
       setNewInstanceName("");
       await fetchInstances();
       setSelectedInstance(name);
-    } catch {
-      toast.error("Erro ao criar instância.");
+    } catch (err: any) {
+      console.error("Erro createInstance:", err);
+      toast.error(err?.message || "Erro ao criar instância.");
     } finally {
       setIsCreating(false);
     }
