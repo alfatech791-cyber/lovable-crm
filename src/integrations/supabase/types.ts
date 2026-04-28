@@ -50,6 +50,102 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_conversations: {
+        Row: {
+          contact_name: string | null
+          contact_phone: string
+          created_at: string
+          id: string
+          last_message_at: string
+          messages_count: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          contact_name?: string | null
+          contact_phone: string
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          messages_count?: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          contact_name?: string | null
+          contact_phone?: string
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          messages_count?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bot_settings: {
+        Row: {
+          ai_model: string
+          ai_provider: string
+          ai_temperature: number
+          auto_reply_delay_seconds: number
+          away_message: string
+          bot_name: string
+          business_hours: Json
+          collect_lead_info: boolean
+          created_at: string
+          fallback_message: string
+          greeting: string
+          handoff_keywords: string[]
+          id: string
+          is_active: boolean
+          max_messages_before_handoff: number
+          system_prompt: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_model?: string
+          ai_provider?: string
+          ai_temperature?: number
+          auto_reply_delay_seconds?: number
+          away_message?: string
+          bot_name?: string
+          business_hours?: Json
+          collect_lead_info?: boolean
+          created_at?: string
+          fallback_message?: string
+          greeting?: string
+          handoff_keywords?: string[]
+          id?: string
+          is_active?: boolean
+          max_messages_before_handoff?: number
+          system_prompt?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_model?: string
+          ai_provider?: string
+          ai_temperature?: number
+          auto_reply_delay_seconds?: number
+          away_message?: string
+          bot_name?: string
+          business_hours?: Json
+          collect_lead_info?: boolean
+          created_at?: string
+          fallback_message?: string
+          greeting?: string
+          handoff_keywords?: string[]
+          id?: string
+          is_active?: boolean
+          max_messages_before_handoff?: number
+          system_prompt?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       calendar_events: {
         Row: {
           created_at: string
