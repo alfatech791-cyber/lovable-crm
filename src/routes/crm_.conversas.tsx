@@ -270,7 +270,11 @@ function ConversasPage() {
       (a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at)
     );
 
-    (notify ? sorted.forEach(maybeNotifyIncoming) : sorted.forEach(rememberConversation));
+    if (notify) {
+      sorted.forEach(maybeNotifyIncoming);
+    } else {
+      sorted.forEach(rememberConversation);
+    }
 
     setItems(sorted);
     setSelectedId((current) => {
