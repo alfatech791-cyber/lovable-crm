@@ -17,7 +17,6 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
-  const [activeTab, setActiveTab] = useState("general");
   const [isSmartphone, setIsSmartphone] = useState(product?.category === "Smartphones");
 
   useEffect(() => {
@@ -44,38 +43,8 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
           </div>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="p-0 flex-1 overflow-hidden flex flex-col">
-          <div className="px-6 py-0 border-b border-border bg-muted/30">
-            <TabsList className="bg-transparent h-14 p-0 gap-8 w-full justify-start overflow-x-auto scrollbar-none">
-              <TabsTrigger 
-                value="general" 
-                className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full gap-2 px-0 text-xs font-black uppercase tracking-widest transition-all opacity-60 data-[state=active]:opacity-100"
-              >
-                <Info className="h-3.5 w-3.5" /> Geral
-              </TabsTrigger>
-              <TabsTrigger 
-                value="stock" 
-                className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full gap-2 px-0 text-xs font-black uppercase tracking-widest transition-all opacity-60 data-[state=active]:opacity-100"
-              >
-                <Layers className="h-3.5 w-3.5" /> Estoque & Preços
-              </TabsTrigger>
-              <TabsTrigger 
-                value="tech" 
-                className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full gap-2 px-0 text-xs font-black uppercase tracking-widest transition-all opacity-60 data-[state=active]:opacity-100"
-              >
-                <Smartphone className="h-3.5 w-3.5" /> Ficha Técnica
-              </TabsTrigger>
-              <TabsTrigger 
-                value="fiscal" 
-                className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none h-full gap-2 px-0 text-xs font-black uppercase tracking-widest transition-all opacity-60 data-[state=active]:opacity-100"
-              >
-                <FileText className="h-3.5 w-3.5" /> Fiscal & Vendas
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-            <TabsContent value="general" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex-1 overflow-y-auto p-6 space-y-10 custom-scrollbar bg-muted/5">
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-8 space-y-6">
                   <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
