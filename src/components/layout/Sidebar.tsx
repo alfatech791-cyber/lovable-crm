@@ -153,8 +153,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
 
     {/* Flyout: segundo painel dedicado */}
     {flyout && (
-      <>
-        <aside className="fixed inset-y-0 left-[68px] z-50 w-[280px] bg-sidebar border-l border-sidebar-border/40 text-sidebar-foreground flex flex-col shadow-2xl animate-in slide-in-from-left-4 duration-200">
+      <aside className="relative z-40 w-[280px] shrink-0 bg-sidebar border-l border-sidebar-border/40 text-sidebar-foreground flex flex-col shadow-2xl animate-in slide-in-from-left-4 duration-200">
           <div className="flex items-center justify-between px-5 h-[68px] border-b border-sidebar-border">
             <div className="flex items-center gap-2.5">
               <div className="h-9 w-9 rounded-xl bg-gradient-primary grid place-items-center shadow-glow">
@@ -219,8 +218,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
               <div className="text-sm font-bold">Abrir painel completo</div>
             </Link>
           </div>
-        </aside>
-      </>
+      </aside>
     )}
     </>
   );
