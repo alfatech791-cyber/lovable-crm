@@ -14,7 +14,7 @@ export const sidebarItems = [
       { title: "Leads", url: "/leads", icon: "UserPlus" },
       { title: "Funil de Vendas", url: "/funil", icon: "Trello" },
       { title: "Bot de Atendimento", url: "/crm/bot", icon: "Bot", badge: "IA" },
-      { title: "Conversas do Bot", url: "/crm_/conversas", icon: "MessageSquare" },
+      { title: "Conversas do Bot", url: "/crm/conversas", icon: "MessageSquare" },
       { title: "Automações", url: "/automacao", icon: "Zap" },
       { title: "WhatsApp", url: "/whatsapp", icon: "MessageSquare" },
       { title: "Instagram", url: "/instagram", icon: "Instagram" },
