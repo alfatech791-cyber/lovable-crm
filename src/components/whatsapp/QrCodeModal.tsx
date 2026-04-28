@@ -1,6 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { evolution } from "@/lib/evolution";
-import { X, RefreshCw, AlertCircle, CheckCircle2, ShieldCheck, Smartphone, Zap } from "lucide-react";
+import {
+  X,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle2,
+  ShieldCheck,
+  Smartphone,
+  QrCode as QrCodeIcon,
+  Wifi,
+  Copy,
+  Check,
+} from "lucide-react";
 import { toast } from "sonner";
 
 interface QrCodeModalProps {
@@ -9,40 +20,49 @@ interface QrCodeModalProps {
   onSuccess: () => void;
 }
 
+const QR_LIFETIME = 40;
+
 export function QrCodeModal({ instanceName, onClose, onSuccess }: QrCodeModalProps) {
   const [qrCode, setQrCode] = useState<string | null>(null);
+  const [pairingCode, setPairingCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("idle");
+  const [countdown, setCountdown] = useState<number>(QR_LIFETIME);
+  const [copied, setCopied] = useState(false);
+  const statusRef = useRef(status);
+  statusRef.current = status;
 
   const setupAndFetchQrCode = async () => {
     try {
       setLoading(true);
       setError(null);
-      console.log(`Iniciando configuração da instância: ${instanceName}`);
+      setPairingCode(null);
 
       const data = await evolution.getQrCode(instanceName);
       console.log("QR Code Data Received:", data);
 
-      // Cobre todos os formatos: v1 { qrcode: { base64 } }, v2 { base64 }, { code }, raw string
       const base64 =
-        data?.base64 ||
-        data?.qrcode?.base64 ||
-        data?.qrcode ||
+        (data as any)?.base64 ||
+        (data as any)?.qrcode?.base64 ||
+        (data as any)?.qrcode ||
         (typeof data === "string" ? data : null);
-
-      const code = data?.code || data?.qrcode?.code;
+      const code = (data as any)?.code || (data as any)?.qrcode?.code;
+      const pCode = (data as any)?.pairingCode || (data as any)?.qrcode?.pairingCode;
+      if (pCode) setPairingCode(pCode);
 
       if (base64) {
-        // garante prefixo data URI
         const src = String(base64).startsWith("data:")
           ? String(base64)
           : `data:image/png;base64,${base64}`;
         setQrCode(src);
+        setCountdown(QR_LIFETIME);
       } else if (code && typeof code === "string") {
-        // Renderiza via API pública de QR usando o code retornado
-        setQrCode(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(code)}`);
-      } else if (data?.instance?.state === "open" || data?.state === "open") {
+        setQrCode(
+          `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(code)}`,
+        );
+        setCountdown(QR_LIFETIME);
+      } else if ((data as any)?.instance?.state === "open" || (data as any)?.state === "open") {
         setStatus("open");
         onSuccess();
       } else {
@@ -58,141 +78,258 @@ export function QrCodeModal({ instanceName, onClose, onSuccess }: QrCodeModalPro
 
   useEffect(() => {
     setupAndFetchQrCode();
-    // Auto-refresh do QR a cada 30s (expira) + polling de status a cada 4s
+
     const refreshInterval = setInterval(() => {
-      if (status !== "open") setupAndFetchQrCode();
-    }, 30000);
+      if (statusRef.current !== "open") setupAndFetchQrCode();
+    }, QR_LIFETIME * 1000);
+
+    const tickInterval = setInterval(() => {
+      setCountdown((c) => (c > 0 ? c - 1 : 0));
+    }, 1000);
 
     const statusInterval = setInterval(async () => {
       try {
         const state = await evolution.getInstanceConnection(instanceName);
-        const currentState = state.instance?.state || state.state;
+        const currentState = (state as any).instance?.state || (state as any).state;
         if (currentState === "open") {
           setStatus("open");
           clearInterval(statusInterval);
           clearInterval(refreshInterval);
+          clearInterval(tickInterval);
           toast.success("WhatsApp conectado com sucesso!");
           setTimeout(onSuccess, 2000);
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
-    }, 4000);
+    }, 3000);
 
     return () => {
       clearInterval(statusInterval);
       clearInterval(refreshInterval);
+      clearInterval(tickInterval);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [instanceName]);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-card border border-border w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h3 className="font-display font-bold text-lg">Conectar WhatsApp</h3>
-          <button onClick={onClose} className="h-8 w-8 rounded-full hover:bg-muted grid place-items-center transition">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+  const handleCopyPairing = async () => {
+    if (!pairingCode) return;
+    try {
+      await navigator.clipboard.writeText(pairingCode);
+      setCopied(true);
+      toast.success("Código copiado!");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Não foi possível copiar.");
+    }
+  };
 
-        <div className="flex flex-col md:flex-row min-h-[400px]">
-          {/* Instruções Lateral */}
-          <div className="flex-1 p-8 bg-muted/20 border-r border-border hidden md:flex flex-col justify-center">
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Smartphone className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold">Passo 1</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">Abra o WhatsApp no seu celular e toque no menu ou configurações.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Zap className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold">Passo 2</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">Selecione "Dispositivos Conectados" e depois "Conectar um dispositivo".</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold">Configuração Automática</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">Webhooks e disparadores já estão sendo configurados automaticamente para esta instância.</p>
-                </div>
-              </div>
+  const progress = Math.max(0, (countdown / QR_LIFETIME) * 100);
+
+  const steps = [
+    { icon: Smartphone, title: "Abra o WhatsApp", desc: "No seu celular, toque em Menu (⋮) ou Configurações." },
+    { icon: Wifi, title: "Dispositivos conectados", desc: 'Toque em "Dispositivos conectados" → "Conectar um dispositivo".' },
+    { icon: QrCodeIcon, title: "Aponte para o QR", desc: "Aponte a câmera do celular para o código ao lado." },
+  ];
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="relative bg-card border border-border w-full max-w-3xl rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+
+        {/* Header */}
+        <div className="relative flex items-center justify-between px-7 py-5 border-b border-border bg-gradient-to-r from-card to-muted/20">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <QrCodeIcon className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-display font-black text-lg leading-tight">Conectar WhatsApp</h3>
+              <p className="text-[11px] font-bold text-muted-foreground tracking-wide">
+                Instância: <span className="text-foreground">{instanceName}</span>
+              </p>
             </div>
           </div>
 
-          {/* QR Code Área */}
-          <div className="flex-1 p-8 flex flex-col items-center justify-center bg-card">
-            {loading ? (
-              <div className="flex flex-col items-center space-y-4">
-                <div className="relative">
-                  <div className="h-32 w-32 rounded-3xl border-4 border-primary/20 border-t-primary animate-spin" />
-                  <RefreshCw className="absolute inset-0 m-auto h-8 w-8 text-primary/40" />
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 border border-border">
+              <span className={`h-2 w-2 rounded-full ${status === "open" ? "bg-success" : "bg-warning animate-pulse"}`} />
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                {status === "open" ? "Online" : "Aguardando"}
+              </span>
+            </div>
+            <button
+              onClick={onClose}
+              className="h-9 w-9 rounded-full hover:bg-muted grid place-items-center transition"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="relative grid grid-cols-1 md:grid-cols-5">
+          {/* Instruções */}
+          <div className="md:col-span-2 p-8 bg-gradient-to-br from-muted/30 to-transparent border-b md:border-b-0 md:border-r border-border">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-4">
+              Como conectar
+            </p>
+            <h4 className="text-xl font-black leading-tight mb-6">
+              Vincule seu WhatsApp em <span className="text-primary">3 passos</span>
+            </h4>
+
+            <div className="space-y-5">
+              {steps.map((step, i) => (
+                <div key={i} className="flex items-start gap-4 group">
+                  <div className="relative shrink-0">
+                    <div className="h-10 w-10 rounded-xl bg-card border border-border flex items-center justify-center text-primary group-hover:scale-110 group-hover:border-primary/40 transition-all">
+                      <step.icon className="h-4 w-4" />
+                    </div>
+                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-black flex items-center justify-center">
+                      {i + 1}
+                    </span>
+                  </div>
+                  <div className="pt-1">
+                    <p className="text-sm font-bold leading-tight">{step.title}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed mt-1">{step.desc}</p>
+                  </div>
                 </div>
-                <p className="text-sm font-bold text-primary animate-pulse">Preparando conexão...</p>
+              ))}
+            </div>
+
+            <div className="mt-7 flex items-center gap-2 px-4 py-3 rounded-2xl bg-success/5 border border-success/20">
+              <ShieldCheck className="h-4 w-4 text-success shrink-0" />
+              <p className="text-[11px] font-medium text-muted-foreground leading-snug">
+                Conexão criptografada via Evolution API. Suas mensagens permanecem privadas.
+              </p>
+            </div>
+          </div>
+
+          {/* QR Code */}
+          <div className="md:col-span-3 p-8 flex flex-col items-center justify-center min-h-[460px]">
+            {loading ? (
+              <div className="flex flex-col items-center space-y-5">
+                <div className="relative">
+                  <div className="h-36 w-36 rounded-3xl border-4 border-primary/15 border-t-primary animate-spin" />
+                  <QrCodeIcon className="absolute inset-0 m-auto h-10 w-10 text-primary/40" />
+                </div>
+                <p className="text-sm font-black uppercase tracking-widest text-primary animate-pulse">
+                  Preparando QR Code...
+                </p>
               </div>
             ) : error ? (
-              <div className="text-center space-y-4">
-                <div className="h-16 w-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
-                  <AlertCircle className="h-8 w-8 text-destructive" />
+              <div className="text-center space-y-5 max-w-xs">
+                <div className="h-20 w-20 bg-destructive/10 rounded-3xl flex items-center justify-center mx-auto">
+                  <AlertCircle className="h-10 w-10 text-destructive" />
                 </div>
-                <p className="text-sm font-bold text-destructive">{error}</p>
+                <div>
+                  <p className="text-base font-black mb-1">Algo deu errado</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{error}</p>
+                </div>
                 <button
                   onClick={setupAndFetchQrCode}
-                  className="h-10 px-6 rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all"
+                  className="h-11 px-6 rounded-2xl bg-primary text-primary-foreground text-sm font-bold shadow-lg shadow-primary/30 hover:scale-[1.03] transition-all flex items-center gap-2 mx-auto"
                 >
-                  Tentar Novamente
+                  <RefreshCw className="h-4 w-4" /> Tentar novamente
                 </button>
               </div>
             ) : status === "open" ? (
               <div className="text-center space-y-4 animate-in zoom-in-90">
-                <div className="h-20 w-20 bg-success/10 rounded-full flex items-center justify-center mx-auto">
-                  <CheckCircle2 className="h-12 w-12 text-success" />
+                <div className="relative mx-auto h-24 w-24">
+                  <div className="absolute inset-0 rounded-full bg-success/20 animate-ping" />
+                  <div className="relative h-24 w-24 bg-success/10 rounded-full flex items-center justify-center">
+                    <CheckCircle2 className="h-14 w-14 text-success" />
+                  </div>
                 </div>
-                <h4 className="text-xl font-black">Conectado!</h4>
-                <p className="text-sm text-muted-foreground">O ambiente já está 100% configurado para uso.</p>
+                <h4 className="text-2xl font-black">Conectado!</h4>
+                <p className="text-sm text-muted-foreground max-w-xs">
+                  Seu WhatsApp está vinculado e pronto para enviar e receber mensagens.
+                </p>
               </div>
             ) : (
-              <div className="flex flex-col items-center space-y-6 w-full animate-in fade-in slide-in-from-bottom-4">
-                <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-primary to-primary-glow rounded-[2rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
-                  <div className="relative bg-white p-4 rounded-[1.5rem] shadow-2xl border border-border">
+              <div className="flex flex-col items-center space-y-5 w-full animate-in fade-in slide-in-from-bottom-4">
+                <div className="relative">
+                  <div className="absolute -inset-1.5 bg-gradient-to-r from-primary via-primary to-primary rounded-[2rem] blur opacity-40 animate-pulse" />
+                  <div className="relative bg-white p-5 rounded-[1.75rem] shadow-2xl">
                     {qrCode ? (
-                      <img src={qrCode} alt="WhatsApp QR Code" className="h-48 w-48 lg:h-56 lg:w-56" />
+                      <img src={qrCode} alt="WhatsApp QR Code" className="h-60 w-60 lg:h-64 lg:w-64" />
                     ) : (
-                      <div className="h-48 w-48 flex items-center justify-center bg-muted/50 rounded-xl">
+                      <div className="h-60 w-60 flex items-center justify-center bg-muted/50 rounded-xl">
                         <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
                       </div>
                     )}
+                    <div className="absolute top-2 left-2 h-5 w-5 border-t-2 border-l-2 border-primary rounded-tl-lg" />
+                    <div className="absolute top-2 right-2 h-5 w-5 border-t-2 border-r-2 border-primary rounded-tr-lg" />
+                    <div className="absolute bottom-2 left-2 h-5 w-5 border-b-2 border-l-2 border-primary rounded-bl-lg" />
+                    <div className="absolute bottom-2 right-2 h-5 w-5 border-b-2 border-r-2 border-primary rounded-br-lg" />
                   </div>
                 </div>
-                
-                <div className="text-center">
-                  <p className="text-xs font-black uppercase tracking-widest text-primary mb-1">Aguardando Leitura</p>
-                  <p className="text-[11px] text-muted-foreground font-medium">O código expira em breve</p>
+
+                <div className="w-full max-w-xs space-y-2">
+                  <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+                    <span className="text-muted-foreground">Expira em</span>
+                    <span className={countdown <= 10 ? "text-destructive" : "text-primary"}>
+                      {countdown}s
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-1000 ${
+                        countdown <= 10 ? "bg-destructive" : "bg-primary"
+                      }`}
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
                 </div>
+
+                {pairingCode && (
+                  <div className="w-full max-w-xs">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center mb-2">
+                      Ou use o código de pareamento
+                    </p>
+                    <button
+                      onClick={handleCopyPairing}
+                      className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-muted/60 hover:bg-muted border border-border transition group"
+                    >
+                      <span className="font-mono font-black text-lg tracking-[0.3em] text-foreground">
+                        {pairingCode}
+                      </span>
+                      {copied ? (
+                        <Check className="h-4 w-4 text-success" />
+                      ) : (
+                        <Copy className="h-4 w-4 text-muted-foreground group-hover:text-primary transition" />
+                      )}
+                    </button>
+                  </div>
+                )}
 
                 <button
                   onClick={setupAndFetchQrCode}
                   className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
                 >
-                  <RefreshCw className="h-3 w-3" /> Atualizar agora
+                  <RefreshCw className="h-3 w-3" /> Gerar novo código
                 </button>
               </div>
             )}
           </div>
         </div>
 
-        <div className="px-6 py-4 bg-muted/30 border-t border-border flex justify-end">
-          <button onClick={onClose} className="h-10 px-6 rounded-xl border border-border hover:bg-muted text-sm font-semibold transition">
+        {/* Footer */}
+        <div className="relative px-7 py-4 bg-muted/20 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-[11px] text-muted-foreground flex items-center gap-2">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Polling de status a cada 3s · Atualização automática
+          </p>
+          <button
+            onClick={onClose}
+            className="h-10 px-6 rounded-xl border border-border hover:bg-muted text-sm font-semibold transition"
+          >
             Fechar
           </button>
         </div>
