@@ -293,7 +293,7 @@ function ConversasPage() {
     }
 
     const [{ data: settings, error: settingsError }, { data: savedInstances, error: instancesError }] = await Promise.all([
-      supabase.from("bot_settings").select("whatsapp_instance").eq("user_id", user.id).maybeSingle(),
+      supabase.from("bot_settings").select("whatsapp_instance, webhook_secret").eq("user_id", user.id).maybeSingle(),
       supabase
         .from("whatsapp_instances")
         .select("instance_name, status, created_at")
@@ -328,12 +328,17 @@ function ConversasPage() {
 
     if (remoteCandidate) {
       setResolvedInstance(remoteCandidate);
-      await supabase.from("bot_settings").upsert(
+      const { error: upsertError } = await supabase.from("bot_settings").upsert(
         { user_id: user.id, whatsapp_instance: remoteCandidate },
         { onConflict: "user_id" }
       );
+      if (upsertError) console.error("[conversas] erro ao salvar bot_settings:", upsertError);
+    } else if (!settings) {
+      // Se não há instância mas também não há settings, cria ao menos o registro básico para gerar o webhook_secret
+      await supabase.from("bot_settings").insert({ user_id: user.id });
     }
 
+    console.log("[conversas] instância resolvida:", remoteCandidate || "nenhuma");
     return remoteCandidate;
   };
 
@@ -342,16 +347,29 @@ function ConversasPage() {
   const ensureWebhook = async (instance: string) => {
     if (!user?.id || !instance) return;
     if (webhookCheckedRef.current === instance) return;
-    webhookCheckedRef.current = instance;
     try {
-      const { data: settings } = await supabase
+      let { data: settings, error: fetchError } = await supabase
         .from("bot_settings")
-        .select("webhook_secret")
+        .select("webhook_secret, whatsapp_instance")
         .eq("user_id", user.id)
         .maybeSingle();
+
+      if (!settings && !fetchError) {
+        console.log("[conversas] criando bot_settings inicial...");
+        const { data: newSettings, error: insertError } = await supabase
+          .from("bot_settings")
+          .insert({ user_id: user.id, whatsapp_instance: instance })
+          .select()
+          .single();
+        
+        if (insertError) throw insertError;
+        settings = newSettings;
+      }
+
       const secret = settings?.webhook_secret;
       if (!secret) return; // bot ainda não configurado; nada a fazer
 
+      webhookCheckedRef.current = instance;
       const projectRef = (import.meta.env.VITE_SUPABASE_PROJECT_ID as string | undefined) ?? null;
       if (!projectRef) return;
       const expectedUrl = `https://${projectRef}.supabase.co/functions/v1/bot-webhook?uid=${user.id}&secret=${secret}`;
@@ -578,6 +596,7 @@ function ConversasPage() {
             "postgres_changes",
             { event: "*", schema: "public", table: "bot_conversations", filter: `user_id=eq.${user.id}` },
             (payload) => {
+              console.log("[conversas] evento em tempo real recebido:", payload.eventType, payload.new);
               if (payload.eventType === "DELETE") {
                 setItems((prev) => prev.filter((c) => c.id !== (payload.old as any).id));
                 return;

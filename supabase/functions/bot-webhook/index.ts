@@ -29,9 +29,11 @@ serve(async (req) => {
     const data = payload?.data ?? payload;
     const fromMe = data?.key?.fromMe;
     const remoteJid: string = data?.key?.remoteJid ?? "";
-    if (fromMe || !remoteJid || remoteJid.endsWith("@g.us")) {
-      return json({ ok: true, skipped: true });
+    if (fromMe || !remoteJid) {
+      return json({ ok: true, skipped: "fromMe or no remoteJid" });
     }
+    
+    const isGroup = remoteJid.endsWith("@g.us");
 
     const messageText: string =
       data?.message?.conversation ??
@@ -40,11 +42,12 @@ serve(async (req) => {
     if (!messageText.trim()) return json({ ok: true, empty: true });
 
     const phone = remoteJid.split("@")[0];
-    const contactName = data?.pushName ?? null;
+    // Pega o nome do contato ou o subject do grupo
+    const contactName = data?.pushName ?? data?.subject ?? null;
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
     const { data: settings } = await supabase
@@ -69,11 +72,11 @@ serve(async (req) => {
     transcript.push({ role: "user", content: messageText, at: new Date().toISOString() });
 
     // Se o bot estiver inativo, apenas grava a mensagem para o atendimento manual
-    if (!settings.is_active) {
+    if (!settings.is_active || isGroup) {
+      // Nota: Bot não responde em grupos por padrão para evitar loop/spam
       await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active");
-      return json({ ok: true, inactive: true, stored: true });
+      return json({ ok: true, inactiveOrGroup: true, stored: true });
     }
-
     // Handoff por palavra-chave ou limite
     const lower = messageText.toLowerCase();
     const keywordHit = (settings.handoff_keywords ?? []).some((k: string) => lower.includes(k.toLowerCase()));
