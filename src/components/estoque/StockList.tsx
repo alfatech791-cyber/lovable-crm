@@ -1,23 +1,47 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { 
   Package, Search, Plus, Filter, MoreHorizontal, ArrowUpDown, 
   AlertTriangle, Edit, Trash2, History, Layers, TrendingUp, 
-  Clock, FileDown, Smartphone, Tablet, Watch
+  Clock, FileDown, Smartphone, Tablet, Watch, Loader2
 } from "lucide-react";
- import { products } from "@/lib/mock";
  import { ProductForm } from "./ProductForm";
  import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
  
   export function StockList() {
+    const { user } = useAuth();
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<any>(null);
-    const [localProducts, setLocalProducts] = useState(products);
+    const [localProducts, setLocalProducts] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
    const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [viewTab, setViewTab] = useState("all");
+
+    useEffect(() => {
+      if (!user?.id) return;
+      setLoading(true);
+      (async () => {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+        if (error) toast.error("Erro ao carregar produtos: " + error.message);
+        // Adapta campos do banco para o shape usado na UI
+        const rows = (data ?? []).map((p: any) => ({
+          ...p,
+          stock: p.stock_quantity ?? 0,
+        }));
+        setLocalProducts(rows);
+        setLoading(false);
+      })();
+    }, [user?.id]);
 
     const stats = useMemo(() => {
       const totalValue = localProducts.reduce((acc, p) => acc + (p.price * (p.stock || 0)), 0);
@@ -39,23 +63,51 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
     });
    }, [searchTerm, filterCategory, viewTab, localProducts]);
 
-   const handleAddProduct = (data: any) => {
-     const newProduct = {
-       ...data,
-        id: Math.random().toString(36).substr(2, 9),
-        image: "", // Garante que a imagem comece vazia se não fornecida
-      };
-      setLocalProducts(prev => [newProduct, ...prev]);
+   const handleAddProduct = async (data: any) => {
+     if (!user?.id) return;
+     const payload: any = {
+       user_id: user.id,
+       name: data.name,
+       sku: data.sku ?? data.reference ?? null,
+       category: data.category ?? null,
+       price: Number(data.price ?? 0),
+       cost_price: Number(data.cost_price ?? 0),
+       stock_quantity: Number(data.stock ?? data.stock_quantity ?? 0),
+       min_stock: Number(data.min_stock ?? 0),
+       image_url: data.image ?? data.image_url ?? null,
+       description: data.description ?? null,
+     };
+     const { data: row, error } = await supabase.from("products").insert(payload).select().single();
+     if (error) return toast.error("Erro ao criar: " + error.message);
+     setLocalProducts((prev) => [{ ...row, stock: row.stock_quantity }, ...prev]);
+     toast.success("Produto criado!");
    };
 
-   const handleUpdateProduct = (data: any) => {
-     setLocalProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...p, ...data } : p));
+   const handleUpdateProduct = async (data: any) => {
+     if (!editingProduct) return;
+     const payload: any = {
+       name: data.name,
+       sku: data.sku ?? data.reference ?? null,
+       category: data.category ?? null,
+       price: Number(data.price ?? 0),
+       cost_price: Number(data.cost_price ?? 0),
+       stock_quantity: Number(data.stock ?? data.stock_quantity ?? 0),
+       min_stock: Number(data.min_stock ?? 0),
+       image_url: data.image ?? data.image_url ?? null,
+       description: data.description ?? null,
+     };
+     const { error } = await supabase.from("products").update(payload).eq("id", editingProduct.id);
+     if (error) return toast.error("Erro ao salvar: " + error.message);
+     setLocalProducts((prev) => prev.map((p) => p.id === editingProduct.id ? { ...p, ...payload, stock: payload.stock_quantity } : p));
+     toast.success("Produto atualizado!");
    };
 
-   const handleDeleteProduct = (id: string) => {
-     if (window.confirm("Tem certeza que deseja excluir este produto?")) {
-       setLocalProducts(prev => prev.filter(p => p.id !== id));
-     }
+   const handleDeleteProduct = async (id: string) => {
+     if (!window.confirm("Tem certeza que deseja excluir este produto?")) return;
+     const { error } = await supabase.from("products").delete().eq("id", id);
+     if (error) return toast.error("Erro ao excluir: " + error.message);
+     setLocalProducts((prev) => prev.filter((p) => p.id !== id));
+     toast.success("Produto excluído.");
    };
 
    return (
@@ -248,6 +300,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
              </tbody>
            </table>
          </div>
+         {loading && (
+           <div className="p-12 grid place-items-center">
+             <Loader2 className="h-6 w-6 animate-spin text-primary" />
+           </div>
+         )}
+         {!loading && filteredProducts.length === 0 && (
+           <div className="p-16 text-center">
+             <div className="h-14 w-14 rounded-full bg-muted grid place-items-center mx-auto mb-3">
+               <Package className="h-7 w-7 text-muted-foreground/40" />
+             </div>
+             <h3 className="text-base font-bold">Nenhum produto cadastrado</h3>
+             <p className="text-sm text-muted-foreground mt-1">Clique em "Novo Produto" para começar.</p>
+           </div>
+         )}
        </div>
 
         <ProductForm open={isAddOpen} onOpenChange={setIsAddOpen} onSave={handleAddProduct} />
