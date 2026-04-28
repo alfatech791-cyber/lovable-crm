@@ -183,6 +183,7 @@ function ConversasPage() {
   const syncLockRef = useRef(false);
   const readyForNotificationsRef = useRef(false);
   const lastIncomingMessageRef = useRef(new Map<string, string>());
+  const webhookCheckedRef = useRef<string | null>(null);
   const [readState, setReadState] = useState<Record<string, number>>({});
 
   const unreadCount = (c: Conversation) => {
