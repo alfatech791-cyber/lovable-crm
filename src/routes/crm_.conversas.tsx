@@ -293,7 +293,7 @@ function ConversasPage() {
     }
 
     const [{ data: settings, error: settingsError }, { data: savedInstances, error: instancesError }] = await Promise.all([
-      supabase.from("bot_settings").select("whatsapp_instance").eq("user_id", user.id).maybeSingle(),
+      supabase.from("bot_settings").select("whatsapp_instance, webhook_secret").eq("user_id", user.id).maybeSingle(),
       supabase
         .from("whatsapp_instances")
         .select("instance_name, status, created_at")
@@ -328,12 +328,17 @@ function ConversasPage() {
 
     if (remoteCandidate) {
       setResolvedInstance(remoteCandidate);
-      await supabase.from("bot_settings").upsert(
+      const { error: upsertError } = await supabase.from("bot_settings").upsert(
         { user_id: user.id, whatsapp_instance: remoteCandidate },
         { onConflict: "user_id" }
       );
+      if (upsertError) console.error("[conversas] erro ao salvar bot_settings:", upsertError);
+    } else if (!settings) {
+      // Se não há instância mas também não há settings, cria ao menos o registro básico para gerar o webhook_secret
+      await supabase.from("bot_settings").insert({ user_id: user.id });
     }
 
+    console.log("[conversas] instância resolvida:", remoteCandidate || "nenhuma");
     return remoteCandidate;
   };
 
