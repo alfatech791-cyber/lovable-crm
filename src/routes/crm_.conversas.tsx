@@ -55,6 +55,8 @@ type Conversation = {
   messages_count: number;
   last_message_at: string;
   transcript: Msg[];
+  profile_pic_url?: string | null;
+  is_group?: boolean;
 };
 
 type EvolutionChat = {
@@ -67,6 +69,9 @@ type EvolutionChat = {
   lastMessageTime?: number | string;
   conversationTimestamp?: number | string;
   lastMessage?: any;
+  profilePicUrl?: string;
+  profilePictureUrl?: string;
+  subject?: string;
 };
 
 const STICKERS = [
