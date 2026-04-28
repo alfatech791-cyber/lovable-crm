@@ -183,6 +183,19 @@ function ConversasPage() {
   const syncLockRef = useRef(false);
   const readyForNotificationsRef = useRef(false);
   const lastIncomingMessageRef = useRef(new Map<string, string>());
+  const [readState, setReadState] = useState<Record<string, number>>({});
+
+  const unreadCount = (c: Conversation) => {
+    const seen = readState[c.id] ?? 0;
+    const incoming = (c.transcript ?? []).filter((m) => m.role === "user").length;
+    return Math.max(0, incoming - seen);
+  };
+
+  const markAsRead = (c: Conversation | null) => {
+    if (!c) return;
+    const incoming = (c.transcript ?? []).filter((m) => m.role === "user").length;
+    setReadState((prev) => (prev[c.id] === incoming ? prev : { ...prev, [c.id]: incoming }));
+  };
 
   const getLastIncomingKey = (conversation: Conversation) => {
     const lastIncoming = [...(conversation.transcript ?? [])]
