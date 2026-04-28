@@ -505,10 +505,10 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                     <p className="text-[9px] text-muted-foreground">Enviar alerta de estoque baixo para o setor de compras</p>
                   </div>
                   <Switch defaultChecked />
-                </div>
                </div>
-              </div>
-            </div>
+             </div>
+           </div>
+        </div>
 
         <DialogFooter className="p-6 gap-4 bg-muted/30 border-t border-border shrink-0">
           <div className="mr-auto hidden md:flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
