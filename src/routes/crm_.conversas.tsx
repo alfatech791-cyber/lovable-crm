@@ -630,7 +630,7 @@ function ConversasPage() {
       syncFromWhatsApp(false);
     }, 300);
 
-    const poller = window.setInterval(() => syncFromWhatsApp(false), 10000);
+     const poller = window.setInterval(() => syncFromWhatsApp(false), 5000);
 
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
