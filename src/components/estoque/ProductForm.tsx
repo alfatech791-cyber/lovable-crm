@@ -281,7 +281,6 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                   </div>
                 </div>
               </div>
-              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-border/50">
                 <div className="space-y-5">
