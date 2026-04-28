@@ -176,43 +176,46 @@ export function ProductForm({ open, onOpenChange, product }: ProductFormProps) {
                      </section>
                   </div>
 
-                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
+                  <section className="bg-card rounded-2xl border border-border p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow">
                      <div className="flex items-center justify-between">
-                        <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                        <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
                           <InfoIcon className="h-3 w-3" /> Descrição Técnica (E-commerce)
                         </h3>
                         <div className="flex items-center gap-2">
-                           <Button variant="ghost" size="sm" className="h-7 text-[9px] font-bold uppercase gap-1"><Copy className="h-3 w-3" /> Copiar IA</Button>
-                           <Button variant="ghost" size="sm" className="h-7 text-[9px] font-bold uppercase gap-1 text-primary"><Zap className="h-3 w-3 fill-current" /> Gerar com ConectaAI</Button>
+                           <Button variant="ghost" size="sm" className="h-8 text-[10px] font-black uppercase gap-1.5 px-3 rounded-lg hover:bg-muted"><Copy className="h-3 w-3" /> Copiar</Button>
+                           <Button variant="outline" size="sm" className="h-8 text-[10px] font-black uppercase gap-1.5 px-4 rounded-lg border-primary/30 text-primary hover:bg-primary/5 shadow-sm"><Zap className="h-3 w-3 fill-current" /> Gerar com IA</Button>
                         </div>
                      </div>
-                     <textarea className="w-full bg-card/30 border border-sidebar-border rounded-xl p-4 text-sm outline-none focus:ring-1 focus:ring-primary/20 min-h-[160px] custom-scrollbar" placeholder="Descreva os principais benefícios, diferenciais e o que acompanha o produto..." />
+                     <textarea className="w-full bg-muted/20 border border-border rounded-xl p-4 text-sm font-medium outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/30 min-h-[180px] custom-scrollbar transition-all leading-relaxed" placeholder="Descreva os diferenciais competitivos, especificações e acessórios que acompanham o item..." />
                   </section>
                 </div>
 
                 <div className="lg:col-span-4 space-y-6">
-                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
-                    <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                  <section className="bg-card rounded-2xl border border-border p-5 space-y-5 shadow-sm">
+                    <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
                       <ImageIcon className="h-3 w-3" /> Galeria de Fotos
                     </h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="aspect-square border-2 border-dashed border-primary/30 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-all cursor-pointer group bg-primary/5">
+                    <div className="space-y-4">
+                      <div className="aspect-square border-2 border-dashed border-primary/20 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-primary/[0.02] hover:border-primary/40 transition-all cursor-pointer group bg-muted/10">
                         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-glow">
                           <Upload className="h-5 w-5" />
                         </div>
-                        <span className="text-[9px] font-black text-primary uppercase tracking-widest">Principal</span>
+                        <div className="text-center">
+                           <span className="text-[10px] font-black text-primary uppercase tracking-widest block">Upload Principal</span>
+                           <span className="text-[9px] font-bold text-muted-foreground/60 uppercase">Drag & drop ou clique</span>
+                        </div>
                       </div>
                       <div className="grid grid-cols-2 grid-rows-2 gap-3 aspect-square">
                          {Array.from({ length: 4 }).map((_, i) => (
-                           <div key={i} className="border border-dashed border-sidebar-border/50 rounded-xl flex items-center justify-center bg-muted/5 hover:bg-muted/10 transition-colors cursor-pointer">
-                              <Plus className="h-4 w-4 text-muted-foreground/30" />
+                           <div key={i} className="border border-dashed border-border rounded-2xl flex items-center justify-center bg-muted/20 hover:bg-muted/30 hover:border-border/80 transition-all cursor-pointer">
+                              <Plus className="h-4 w-4 text-muted-foreground/40" />
                            </div>
                          ))}
                       </div>
                     </div>
-                    <div className="p-3 bg-card/40 rounded-xl border border-sidebar-border/30">
-                       <p className="text-[10px] text-muted-foreground leading-tight">
-                          <strong>Dica:</strong> Fotos com fundo branco aumentam a conversão em até 30% nos marketplaces.
+                    <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                       <p className="text-[10px] font-medium text-primary leading-snug">
+                          <strong className="font-black uppercase tracking-tighter mr-1">Dica Pro:</strong> Fotos com iluminação neutra e fundo limpo elevam o ticket médio em 15%.
                        </p>
                     </div>
                   </section>
