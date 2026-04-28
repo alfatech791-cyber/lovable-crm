@@ -86,7 +86,12 @@ function BotPage() {
   const [testLoading, setTestLoading] = useState(false);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      // Aguarda o AuthContext resolver. Mantém loading=true até o user chegar,
+      // mas garante que se não houver sessão, o spinner não fica eterno.
+      const t = setTimeout(() => setLoading(false), 1500);
+      return () => clearTimeout(t);
+    }
     (async () => {
       try {
         const { data, error } = await supabase
