@@ -773,31 +773,40 @@ function ConversasPage() {
         <Topbar title="Conversas" subtitle="Atenda WhatsApp em tempo real" />
         <div className="flex-1 flex overflow-hidden">
           {/* Sidebar conversas */}
-          <div className="w-[340px] border-r border-border flex flex-col bg-card/40">
-            <div className="p-3 border-b border-border space-y-2.5">
+          <div className="w-[380px] border-r border-border/40 flex flex-col bg-sidebar/30 backdrop-blur-xl">
+            <div className="p-4 border-b border-border/40 space-y-4">
               <div className="flex items-center justify-between px-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold">Inbox</h3>
+                <div className="flex items-center gap-2.5">
+                  <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <MessageSquare className="h-4 w-4 text-primary" />
+                  </div>
+                  <h3 className="text-base font-bold tracking-tight">Conversas</h3>
                   {totalUnread > 0 && (
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary text-primary-foreground shadow-sm shadow-primary/20">
                       {totalUnread}
                     </span>
                   )}
                 </div>
-                <span className="text-[10px] text-muted-foreground">
-                  {items.length} conversa{items.length === 1 ? "" : "s"}
-                </span>
+                <button 
+                  onClick={() => syncFromWhatsApp(true)}
+                  className="h-8 w-8 rounded-full hover:bg-muted/80 transition-colors flex items-center justify-center text-muted-foreground"
+                  title="Sincronizar"
+                >
+                  <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+                </button>
               </div>
-              <div className="relative">
-                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              
+              <div className="relative group">
+                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
                 <Input
                   placeholder="Buscar contato..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 h-9"
+                  className="pl-9 h-10 bg-background/50 border-border/40 focus-visible:ring-primary/20 transition-all rounded-xl"
                 />
               </div>
-              <div className="flex items-center gap-1">
+
+              <div className="flex items-center gap-1.5 p-1 bg-muted/40 rounded-xl">
                 {[
                   { id: "all", label: "Todas" },
                   { id: "unread", label: "Não lidas" },
@@ -807,25 +816,18 @@ function ConversasPage() {
                   <button
                     key={f.id}
                     onClick={() => setStatusFilter(f.id as typeof statusFilter)}
-                    className={`flex-1 text-[10px] font-bold py-1.5 rounded-lg transition ${
+                    className={`flex-1 text-[11px] font-semibold py-1.5 rounded-lg transition-all duration-200 ${
                       statusFilter === f.id
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                         ? "bg-background text-foreground shadow-sm"
+                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {f.label}
                   </button>
                 ))}
               </div>
-              <button
-                onClick={() => syncFromWhatsApp(true)}
-                className="w-full py-1.5 text-[11px] font-bold rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 transition flex items-center justify-center gap-1.5"
-              >
-                <RefreshCw className={`h-3 w-3 ${syncing ? "animate-spin" : ""}`} />
-                {syncing ? "Sincronizando..." : "Atualizar"}
-              </button>
             </div>
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto p-2 space-y-1">
               {loading ? (
                 <div className="h-full grid place-items-center">
                   <Loader2 className="h-5 w-5 animate-spin text-primary" />
