@@ -269,31 +269,55 @@ function ConversasPage() {
   };
 
   const load = async () => {
-    if (!user?.id) return;
-    const { data } = await supabase
-      .from("bot_conversations")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("last_message_at", { ascending: false });
-    const list = (data ?? []) as any as Conversation[];
-    setItems(list);
-    setSelectedId((cur) => cur ?? list[0]?.id ?? null);
-    setLoading(false);
+    if (authLoading) return;
+    if (!user?.id) {
+      setLoading(false);
+      setItems([]);
+      setSelectedId(null);
+      return;
+    }
+
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const { data, error } = await supabase
+        .from("bot_conversations")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("last_message_at", { ascending: false });
+
+      if (error) throw error;
+
+      applyConversations((data ?? []) as any as Conversation[]);
+    } catch (error: any) {
+      console.error("Erro ao carregar conversas", error);
+      setLoadError(error?.message ?? "Não foi possível carregar as conversas.");
+      setItems([]);
+      setSelectedId(null);
+      toast.error(error?.message ?? "Não foi possível carregar as conversas.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const syncFromWhatsApp = async (showToast = false) => {
-    if (!user?.id || syncing) return;
+    if (!user?.id || syncLockRef.current) return;
+    syncLockRef.current = true;
     setSyncing(true);
     try {
-      const [{ data: settings }, { data: existing }] = await Promise.all([
-        supabase.from("bot_settings").select("whatsapp_instance").eq("user_id", user.id).maybeSingle(),
-        supabase.from("bot_conversations").select("*").eq("user_id", user.id),
-      ]);
-      const instance = settings?.whatsapp_instance;
+      const instance = await resolveInstance();
+      const { data: existing, error: existingError } = await supabase
+        .from("bot_conversations")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (existingError) throw existingError;
+
       if (!instance) {
-        if (showToast) toast.error("Configure a instância em CRM > Bot.");
+        if (showToast) toast.error("Conecte ou selecione sua instância do WhatsApp primeiro.");
         return;
       }
+
       const rawChats = await evolution.findChats(instance);
       const chats = asArray<EvolutionChat>(rawChats).filter(
         (c) => !!c?.remoteJid && !String(c.remoteJid).endsWith("@g.us")
@@ -328,19 +352,31 @@ function ConversasPage() {
       );
       const valid = rows.filter((r) => r.transcript.length > 0);
       if (valid.length > 0) {
-        await supabase.from("bot_conversations").upsert(valid, { onConflict: "user_id,contact_phone" });
+        const { error: upsertError } = await supabase
+          .from("bot_conversations")
+          .upsert(valid, { onConflict: "user_id,contact_phone" });
+        if (upsertError) throw upsertError;
       }
+
       await load();
       if (showToast) toast.success("Conversas sincronizadas.");
     } catch (e: any) {
+      console.error("Falha ao sincronizar WhatsApp", e);
       toast.error(e?.message ?? "Falha ao sincronizar.");
     } finally {
       setSyncing(false);
+      syncLockRef.current = false;
     }
   };
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (authLoading) return;
+
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+
     load();
     const ch = supabase
       .channel("conv:bot_conversations:" + user.id)
@@ -348,25 +384,45 @@ function ConversasPage() {
         "postgres_changes",
         { event: "*", schema: "public", table: "bot_conversations", filter: `user_id=eq.${user.id}` },
         (payload) => {
+          if (payload.eventType === "DELETE") {
+            setItems((prev) => prev.filter((c) => c.id !== (payload.old as any).id));
+            return;
+          }
+
+          const row = payload.new as any as Conversation;
           setItems((prev) => {
-            if (payload.eventType === "DELETE") {
-              return prev.filter((c) => c.id !== (payload.old as any).id);
-            }
-            const row = payload.new as any as Conversation;
             const next = [row, ...prev.filter((c) => c.id !== row.id)];
             next.sort((a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at));
             return next;
           });
+
+          maybeNotifyIncoming(row);
         }
       )
-      .subscribe();
-    const t = setTimeout(() => syncFromWhatsApp(false), 300);
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") readyForNotificationsRef.current = true;
+      });
+
+    const initialTimer = window.setTimeout(() => {
+      syncFromWhatsApp(false);
+    }, 300);
+
+    const poller = window.setInterval(() => {
+      syncFromWhatsApp(false);
+    }, 15000);
+
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().catch(() => undefined);
+    }
+
     return () => {
-      clearTimeout(t);
+      clearTimeout(initialTimer);
+      clearInterval(poller);
+      readyForNotificationsRef.current = false;
       supabase.removeChannel(ch);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [user?.id, authLoading]);
 
   const filtered = useMemo(
     () =>
