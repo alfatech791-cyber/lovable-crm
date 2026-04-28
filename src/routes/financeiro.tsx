@@ -17,7 +17,7 @@ import { useState } from "react";
      <div className="min-h-screen flex w-full bg-background">
        <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
        <div className="flex-1 flex flex-col min-w-0">
-         <Topbar title="Financeiro" subtitle="Gestão de Caixa e Bancos" toggleSidebar={() => setSidebarOpen(true)} />
+          <Topbar title="Dashboard Financeiro" subtitle="Visão geral e saúde financeira da empresa" toggleSidebar={() => setSidebarOpen(true)} />
          <main className="flex-1 overflow-y-auto p-6">
            <FinanceDashboard />
          </main>

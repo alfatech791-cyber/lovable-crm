@@ -3,62 +3,87 @@
  import { Topbar } from "@/components/layout/Topbar";
  import { Card } from "@/components/ui/card";
  import { Button } from "@/components/ui/button";
- import { Building2, Plus, Phone, Mail, Globe, Search } from "lucide-react";
- 
+  import { Building2, Plus, Phone, Mail, Globe, Search, MoreVertical, Filter, Download, MapPin, ExternalLink } from "lucide-react";
+  import { useState } from "react";
+
  export const Route = createFileRoute("/financeiro/fornecedores")({
    component: FinanceFornecedoresPage,
  });
- 
+
  function FinanceFornecedoresPage() {
+    const [sidebarOpen, setSidebarOpen] = useState(false);
    const suppliers = [
-     { id: 1, name: "Mega Distribuidora S.A", category: "Peças & Telas", contact: "(11) 98888-7777", email: "comercial@mega.com" },
-     { id: 2, name: "Apple Brasil", category: "Aparelhos", contact: "0800-761-0880", email: "apple@apple.com" },
-     { id: 3, name: "Tech Solutions", category: "Acessórios", contact: "(21) 3333-2222", email: "vendas@tech.com.br" },
+      { id: 1, name: "Mega Distribuidora S.A", category: "Peças & Telas", contact: "(11) 98888-7777", email: "comercial@mega.com", city: "São Paulo, SP" },
+      { id: 2, name: "Apple Brasil", category: "Aparelhos", contact: "0800-761-0880", email: "apple@apple.com", city: "Curitiba, PR" },
+      { id: 3, name: "Tech Solutions", category: "Acessórios", contact: "(21) 3333-2222", email: "vendas@tech.com.br", city: "Rio de Janeiro, RJ" },
+      { id: 4, name: "Global Electronics", category: "Importados", contact: "(31) 4444-5555", email: "global@electronics.com", city: "Belo Horizonte, MG" },
    ];
- 
+
    return (
      <div className="min-h-screen flex w-full bg-background">
-       <AppSidebar />
+        <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
        <div className="flex-1 flex flex-col min-w-0">
-         <Topbar title="Fornecedores" subtitle="Contas a Pagar" />
+          <Topbar title="Gestão de Fornecedores" subtitle="Cadastro e controle de parceiros comerciais" toggleSidebar={() => setSidebarOpen(true)} />
          <main className="flex-1 overflow-y-auto p-6">
-           <div className="flex justify-between items-center mb-8">
-             <div className="relative w-80">
-               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-               <input placeholder="Buscar fornecedor..." className="w-full h-11 pl-10 rounded-2xl bg-card border border-border outline-none focus:ring-2 focus:ring-primary/20 transition" />
-             </div>
-             <Button className="bg-gradient-primary shadow-glow h-11 rounded-xl font-bold">
-               <Plus className="h-5 w-5 mr-2" /> Adicionar Fornecedor
-             </Button>
-           </div>
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+              <div className="flex items-center gap-3 flex-1">
+                <div className="relative flex-1 md:max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input placeholder="Buscar fornecedor por nome ou categoria..." className="w-full h-11 pl-10 pr-4 rounded-xl bg-card border border-slate-200 text-sm font-medium outline-none focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 transition shadow-sm" />
+                </div>
+                <Button variant="outline" className="h-11 rounded-xl border-slate-200 font-bold px-5">
+                  <Filter className="h-4 w-4 mr-2" /> Filtros
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" className="h-11 rounded-xl border-slate-200 font-bold px-5">
+                  <Download className="h-4 w-4 mr-2" /> Exportar
+                </Button>
+                <Button className="h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-6 shadow-lg shadow-blue-200">
+                  <Plus className="h-4 w-4 mr-2" /> Novo Fornecedor
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
              {suppliers.map(s => (
-               <Card key={s.id} className="p-6 border-border/50 hover:shadow-card transition-all group overflow-hidden relative">
-                 <div className="absolute top-0 right-0 h-1.5 w-full bg-primary/20" />
-                 <div className="flex items-start gap-4 mb-6">
-                   <div className="h-12 w-12 rounded-xl bg-muted/50 grid place-items-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                     <Building2 className="h-6 w-6" />
+                <Card key={s.id} className="p-0 border-border shadow-sm hover:shadow-md transition-all group overflow-hidden rounded-2xl flex flex-col">
+                  <div className="p-5 flex-1">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="h-11 w-11 rounded-xl bg-slate-50 border border-slate-100 grid place-items-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                        <Building2 className="h-5 w-5" />
+                      </div>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    <h3 className="font-black text-slate-900 leading-tight mb-1 group-hover:text-blue-600 transition-colors">{s.name}</h3>
+                    <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider border border-blue-100">
+                      {s.category}
+                    </span>
+
+                    <div className="mt-5 space-y-2.5">
+                      <div className="flex items-center gap-3 text-xs font-bold text-slate-500">
+                        <Phone className="h-3.5 w-3.5 text-slate-400" /> {s.contact}
+                      </div>
+                      <div className="flex items-center gap-3 text-xs font-bold text-slate-500">
+                        <Mail className="h-3.5 w-3.5 text-slate-400" /> {s.email}
+                      </div>
+                      <div className="flex items-center gap-3 text-xs font-bold text-slate-500">
+                        <MapPin className="h-3.5 w-3.5 text-slate-400" /> {s.city}
+                      </div>
                    </div>
-                   <div>
-                     <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">{s.name}</h3>
-                     <p className="text-xs text-muted-foreground mt-1 uppercase font-black tracking-widest">{s.category}</p>
-                   </div>
-                 </div>
-                 <div className="space-y-3">
-                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                     <Phone className="h-4 w-4 text-primary/60" /> {s.contact}
-                   </div>
-                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                     <Mail className="h-4 w-4 text-primary/60" /> {s.email}
-                   </div>
-                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                     <Globe className="h-4 w-4 text-primary/60" /> www.website.com.br
-                   </div>
-                 </div>
-                 <div className="mt-6 pt-6 border-t border-border/50 flex gap-2">
-                   <Button variant="ghost" className="flex-1 h-9 text-xs">Histórico Compra</Button>
-                   <Button variant="outline" className="flex-1 h-9 text-xs">Ver Detalhes</Button>
-                 </div>
+                  </div>
+                  
+                  <div className="px-5 py-4 bg-slate-50/50 border-t border-slate-100 flex gap-2 group-hover:bg-slate-50 transition-colors">
+                    <Button variant="outline" className="flex-1 h-9 text-[10px] font-black uppercase tracking-widest rounded-lg border-slate-200 bg-white hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all">
+                      Histórico
+                    </Button>
+                    <Button variant="outline" className="h-9 w-9 p-0 rounded-lg border-slate-200 bg-white hover:bg-slate-100 transition-colors">
+                      <ExternalLink className="h-3.5 w-3.5 text-slate-500" />
+                    </Button>
+                  </div>
                </Card>
              ))}
            </div>
