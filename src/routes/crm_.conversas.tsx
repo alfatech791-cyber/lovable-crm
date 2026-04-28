@@ -21,8 +21,10 @@ import {
   Image as ImageIcon,
   Trash2,
   X,
+  Users,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow, format, isToday, isYesterday, isThisWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
