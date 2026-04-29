@@ -523,7 +523,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                            </div>
                          </div>
                        </div>
-                       <div className="pt-2">
+                       <div className="pt-2 space-y-3">
                           <div className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${grossProfit > 0 ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-destructive/10 border-destructive/20'}`}>
                              <div className="space-y-0.5">
                                 <span className={`text-[9px] font-black uppercase block ${grossProfit > 0 ? 'text-emerald-600' : 'text-destructive'}`}>Lucro Real por Unidade</span>
