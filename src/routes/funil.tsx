@@ -700,15 +700,38 @@ type Deal = {
                         <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
                       </Button>
                     </div>
-                    <div className="relative">
-                      <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                      <Input 
-                        placeholder="Filtrar conversas..." 
-                        className="pl-9 h-9 text-xs bg-muted/50 border-none rounded-lg"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
-                    </div>
+                     <div className="space-y-2">
+                       <div className="relative">
+                         <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                         <Input 
+                           placeholder="Filtrar conversas..." 
+                           className="pl-9 h-9 text-xs bg-muted/50 border-none rounded-lg"
+                           value={searchTerm}
+                           onChange={(e) => setSearchTerm(e.target.value)}
+                         />
+                       </div>
+                       <div className="flex flex-wrap gap-1">
+                         {[
+                           { id: 'all', label: 'Todas' },
+                           { id: 'bot', label: 'Bot' },
+                           { id: 'manual', label: 'Humano' },
+                           { id: 'unread', label: 'Não Lidas' }
+                         ].map((f) => (
+                           <button
+                             key={f.id}
+                             onClick={() => setStatusFilter(f.id as any)}
+                             className={cn(
+                               "px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter transition-all",
+                               statusFilter === f.id 
+                                 ? "bg-primary text-primary-foreground" 
+                                 : "bg-muted text-muted-foreground hover:bg-muted-foreground/10"
+                             )}
+                           >
+                             {f.label}
+                           </button>
+                         ))}
+                       </div>
+                     </div>
                   </div>
                   <div className="flex-1 overflow-y-auto">
                     {conversations.length === 0 ? (
