@@ -211,11 +211,12 @@ type Deal = {
       // Garante estágios padrão
       await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
       
-      const [stRes, dlRes, ldRes, convRes] = await Promise.all([
+      const [stRes, dlRes, ldRes, convRes, allDealsRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
         supabase.from("pipeline_leads").select("*, lead:leads(name, phone, source)").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("leads").select("id, name, phone").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("bot_conversations").select("*").eq("user_id", user.id).order("last_message_at", { ascending: false }),
+        supabase.from("pipeline_leads").select("lead_id")
       ]);
       
       if (stRes.error) toast.error("Erro ao carregar estágios: " + stRes.error.message);
@@ -224,7 +225,10 @@ type Deal = {
       if (convRes.error) toast.error("Erro ao carregar conversas: " + convRes.error.message);
 
       setStages((stRes.data as Stage[]) ?? []);
-      setConversations((convRes.data as any as Conversation[]) ?? []);
+      const convs = (convRes.data as any as Conversation[]) ?? [];
+      setConversations(convs);
+      
+      const existingLeadIds = new Set((allDealsRes.data as any[])?.map(d => d.lead_id) || []);
       
       const leadIds = (dlRes.data as any[])?.map(d => d.lead_id) || [];
       let lastMessagesMap: Record<string, { content: string, created_at: string }> = {};
@@ -248,7 +252,35 @@ type Deal = {
       })) ?? [];
       
       setDeals(dealsWithLastMessage);
-      setLeads((ldRes.data as any) ?? []);
+      const loadedLeads = (ldRes.data as any) ?? [];
+      setLeads(loadedLeads);
+
+      // Auto-create deals for conversations that don't have one yet
+      if (stRes.data && stRes.data.length > 0) {
+        const firstStageId = stRes.data[0].id;
+        for (const conv of convs) {
+          // Find lead for this conversation
+          const lead = loadedLeads.find((l: any) => l.phone === conv.contact_phone);
+          if (lead && !existingLeadIds.has(lead.id)) {
+            try {
+              await supabase.from("pipeline_leads").insert({
+                user_id: user.id,
+                lead_id: lead.id,
+                stage_id: firstStageId,
+                deal_value: 0
+              });
+              // Add to local state to avoid re-running or waiting for reload
+              existingLeadIds.add(lead.id);
+            } catch (e) {
+              console.error("Error auto-creating deal for lead:", lead.id, e);
+            }
+          }
+        }
+        // If we added new deals, reload once to get the full objects with lead data
+        if (convs.some(c => loadedLeads.find((l:any) => l.phone === c.contact_phone && !existingLeadIds.has(l.id)))) {
+          load(); 
+        }
+      }
     } catch (err) {
       console.error("Erro no load:", err);
       toast.error("Erro ao carregar dados do funil");
