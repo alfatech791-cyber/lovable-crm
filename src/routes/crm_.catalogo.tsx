@@ -16,7 +16,7 @@ import {
   Image as ImageIcon, Bot, ArrowLeft, Sparkles,
 } from "lucide-react";
 
-export const Route = createFileRoute("/crm/catalogo")({
+export const Route = createFileRoute("/crm_/catalogo")({
   head: () => ({
     meta: [
       { title: "Catálogo — ConectaCRM" },
