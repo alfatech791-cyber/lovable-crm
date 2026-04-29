@@ -37,6 +37,8 @@ export function LeadsTable() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [editing, setEditing] = useState<Partial<Lead> | null>(null);
   const [saving, setSaving] = useState(false);
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [quickLead, setQuickLead] = useState({ name: "", phone: "" });
 
   const load = async () => {
     if (!user?.id) return;
