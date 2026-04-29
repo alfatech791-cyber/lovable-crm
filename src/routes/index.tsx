@@ -135,7 +135,7 @@ function Dashboard() {
          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-6">
            <QuickActions />
  
-           <div className="flex flex-col xl:flex-row gap-6">
+            <div className="flex flex-col xl:flex-row gap-6">
              <div className="flex-1 flex flex-col gap-6 min-w-0">
                <div className="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-4">
                   {loading ? (
@@ -164,22 +164,21 @@ function Dashboard() {
                 <AutomationsCard />
               </div>
 
-               <div className="w-full xl:w-[380px] shrink-0 flex flex-col gap-6">
-                 <div className="xl:sticky xl:top-24">
+              <div className="w-full xl:w-[380px] shrink-0 flex flex-col gap-6">
+                <div className="xl:sticky xl:top-24">
                   <MessagesPanel />
                 </div>
-                 <div className="hidden xl:flex flex-col gap-6">
+                <div className="hidden xl:flex flex-col gap-6">
                   <AgendaCard />
                   <DispatchCard />
                 </div>
-                 <div className="xl:hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="xl:hidden grid grid-cols-1 md:grid-cols-2 gap-6">
                   <AgendaCard />
                   <DispatchCard />
                 </div>
               </div>
             </div>
-          </div>
-        </main>
+          </main>
       </div>
     </div>
   );
