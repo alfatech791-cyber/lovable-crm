@@ -1,4 +1,4 @@
-import { MessageSquare, Instagram, Zap, Smartphone, UserPlus, FileText } from "lucide-react";
+import { MessageSquare, Instagram, ShoppingBag, Smartphone, UserPlus, FileText } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 
 export function QuickActions() {
