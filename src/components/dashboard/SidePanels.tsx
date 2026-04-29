@@ -1,26 +1,67 @@
- import { agenda, automations, tasks } from "@/lib/mock";
- import { ArrowRight, Send, CheckCircle2, MessageSquare, Zap, ChevronLeft, ChevronRight } from "lucide-react";
- import { useState } from "react";
+import { ArrowRight, Send, CheckCircle2, MessageSquare, Zap, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
  import { useNavigate } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export function TasksCard() {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [tasksList, setTasksList] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    (async () => {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const { data } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("user_id", user.id)
+        .neq("status", "completed")
+        .limit(5);
+      
+      setTasksList(data || []);
+      setLoading(false);
+    })();
+  }, [user?.id]);
+
+  const toggleTask = async (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === "completed" ? "pending" : "completed";
+    await supabase.from("tasks").update({ status: newStatus }).eq("id", id);
+    setTasksList(prev => prev.filter(t => t.id !== id));
+  };
+
   return (
     <div className="rounded-2xl bg-card border border-border p-5 shadow-card">
       <h3 className="text-[15px] font-semibold mb-3">Tarefas do dia</h3>
-      <ul className="space-y-2">
-        {tasks.length > 0 ? tasks.map((t) => (
-          <li key={t.text} className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-muted/60 transition">
-            <input type="checkbox" className="h-4 w-4 rounded border-border accent-primary" />
-            <span className="flex-1 text-[13px]">{t.text}</span>
-            <span className="text-[11px] text-muted-foreground font-semibold">{t.count}</span>
-          </li>
-        )) : (
-          <li className="text-center py-6 text-xs text-muted-foreground italic">Sem tarefas para hoje</li>
-        )}
-      </ul>
+      {loading ? (
+        <div className="py-6 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground/20" /></div>
+      ) : (
+        <ul className="space-y-2">
+          {tasksList.length > 0 ? tasksList.map((t) => (
+            <li key={t.id} className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-muted/60 transition">
+              <input 
+                type="checkbox" 
+                checked={t.status === "completed"} 
+                onChange={() => toggleTask(t.id, t.status)}
+                className="h-4 w-4 rounded border-border accent-primary" 
+              />
+              <span className="flex-1 text-[13px] truncate">{t.title}</span>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${t.priority === 'high' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
+                {t.priority === 'high' ? 'Alta' : 'Normal'}
+              </span>
+            </li>
+          )) : (
+            <li className="text-center py-6 text-xs text-muted-foreground italic">Sem tarefas pendentes</li>
+          )}
+        </ul>
+      )}
        <button 
-        onClick={() => navigate({ to: "/_app/agendamentos/" as any })}
+        onClick={() => navigate({ to: "/atendimento" })}
          className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition"
        >
          Ver todas as tarefas <ArrowRight className="h-3.5 w-3.5" />
@@ -31,31 +72,51 @@ export function TasksCard() {
 
   export function AutomationsCard() {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const [automationList, setAutomationList] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      if (!user?.id) return;
+      (async () => {
+        const { data } = await supabase
+          .from("automations")
+          .select("*")
+          .eq("user_id", user.id)
+          .limit(3);
+        setAutomationList(data || []);
+        setLoading(false);
+      })();
+    }, [user?.id]);
+
    return (
      <div className="rounded-2xl bg-card border border-border p-5 shadow-card">
        <div className="flex items-center justify-between mb-3">
          <h3 className="text-[15px] font-semibold flex items-center gap-2"><Zap className="h-4 w-4 text-warning" /> Automação</h3>
-         <span className="text-[11px] font-semibold text-muted-foreground bg-muted/50 rounded-full px-2 py-0.5">{automations.length} Ativas</span>
+         <span className="text-[11px] font-semibold text-muted-foreground bg-muted/50 rounded-full px-2 py-0.5">{automationList.filter(a => a.is_active).length} Ativas</span>
        </div>
-       <ul className="space-y-2.5">
-         {automations.length > 0 ? automations.map((a) => (
-           <li key={a.name} className="flex items-center gap-3 rounded-xl border border-border p-3 hover:shadow-card transition">
-             <div className={`h-9 w-9 rounded-lg grid place-items-center shrink-0 ${a.status === "Ativo" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
-               {a.status === "Ativo" ? <CheckCircle2 className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
-             </div>
-             <div className="flex-1 min-w-0">
-               <div className="flex items-center gap-2">
-                 <span className="text-[13px] font-semibold truncate">{a.name}</span>
-                 <span className={`text-[10px] px-1.5 py-0.5 rounded ${a.status === "Ativo" ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"} font-semibold`}>{a.status}</span>
-               </div>
-               <div className="text-[11px] text-muted-foreground">Próximo: {a.next}</div>
-             </div>
-             <span className="text-[12px] font-bold font-display">{a.count}</span>
-           </li>
-         )) : (
-          <li className="text-center py-6 text-xs text-muted-foreground italic border border-dashed border-border rounded-xl">Nenhuma automação configurada</li>
-         )}
-       </ul>
+       {loading ? (
+         <div className="py-12 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground/20" /></div>
+       ) : (
+         <ul className="space-y-2.5">
+           {automationList.length > 0 ? automationList.map((a) => (
+              <li key={a.id} className="flex items-center gap-3 rounded-xl border border-border p-3 hover:shadow-card transition">
+                <div className={`h-9 w-9 rounded-lg grid place-items-center shrink-0 ${a.is_active ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                  {a.is_active ? <CheckCircle2 className="h-4 w-4" /> : <PauseCircle className="h-4 w-4" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-semibold truncate">{a.name}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${a.is_active ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"} font-semibold`}>{a.is_active ? 'Ativa' : 'Pausada'}</span>
+                  </div>
+                  <div className="text-[11px] text-muted-foreground uppercase tracking-tighter">{a.trigger_type}</div>
+                </div>
+              </li>
+            )) : (
+             <li className="text-center py-6 text-xs text-muted-foreground italic border border-dashed border-border rounded-xl">Nenhuma automação configurada</li>
+            )}
+         </ul>
+       )}
        <button 
          onClick={() => navigate({ to: "/automacao" })}
          className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition"
