@@ -113,8 +113,8 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
     }
   }, [product]);
 
-   const calculateFromPrice = (price: number, cost: number) => {
-     if (!cost || !price) return { margin: 0, markup: 0 };
+    const calculateFromPrice = (price: number, cost: number | undefined) => {
+      if (!cost || !price) return { margin: 0, markup: 0 };
      const grossProfit = price - cost;
      const margin = (grossProfit / price) * 100;
      const markup = (grossProfit / cost) * 100;
