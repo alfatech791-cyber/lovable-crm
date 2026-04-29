@@ -52,6 +52,7 @@ export type Database = {
       }
       bot_conversations: {
         Row: {
+          assigned_to: string | null
           contact_name: string | null
           contact_phone: string
           created_at: string
@@ -61,10 +62,12 @@ export type Database = {
           notes: string | null
           remote_jid: string | null
           status: string
+          tags: string[] | null
           transcript: Json
           user_id: string
         }
         Insert: {
+          assigned_to?: string | null
           contact_name?: string | null
           contact_phone: string
           created_at?: string
@@ -74,10 +77,12 @@ export type Database = {
           notes?: string | null
           remote_jid?: string | null
           status?: string
+          tags?: string[] | null
           transcript?: Json
           user_id: string
         }
         Update: {
+          assigned_to?: string | null
           contact_name?: string | null
           contact_phone?: string
           created_at?: string
@@ -87,6 +92,7 @@ export type Database = {
           notes?: string | null
           remote_jid?: string | null
           status?: string
+          tags?: string[] | null
           transcript?: Json
           user_id?: string
         }

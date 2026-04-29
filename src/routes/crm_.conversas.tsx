@@ -22,12 +22,16 @@ import {
   Trash2,
   X,
   Users,
-   Info,
-   Phone,
-   Clock,
-   Calendar,
-   Edit3,
-   ExternalLink,
+  Info,
+  Phone,
+  Clock,
+  Calendar,
+  Edit3,
+  ExternalLink,
+  Forward,
+  Tag as TagIcon,
+  UserPlus,
+  Plus,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -198,6 +202,12 @@ function ConversasPage() {
   const lastIncomingMessageRef = useRef(new Map<string, string>());
   const webhookCheckedRef = useRef<string | null>(null);
   const [readState, setReadState] = useState<Record<string, number>>({});
+  const [sideInfoOpen, setSideInfoOpen] = useState(true);
+  const [localNotes, setLocalNotes] = useState("");
+  const [forwardMsg, setForwardMsg] = useState<Msg | null>(null);
+  const [isForwarding, setIsForwarding] = useState(false);
+  const [userFilter, setUserFilter] = useState<"all" | "mine">("all");
+  const [tagInput, setTagInput] = useState("");
 
   const unreadCount = (c: Conversation) => {
     const seen = readState[c.id] ?? 0;
@@ -1107,14 +1117,16 @@ function ConversasPage() {
                             </span>
                           </div>
                         )}
-                        <div className={`flex gap-3.5 items-end ${isUser ? "justify-start" : "justify-end"} group`}>
+                        <div className={`flex gap-2 items-end ${isUser ? "justify-start" : "justify-end"} group`}>
                           {isUser && (
-                            <div className="h-8 w-8 rounded-full bg-muted border border-border/20 grid place-items-center shrink-0 shadow-sm overflow-hidden mb-1">
-                              {selected.profile_pic_url ? (
-                                <img src={selected.profile_pic_url} className="h-full w-full object-cover" alt="" />
-                              ) : (
-                                <User className="h-4 w-4 text-muted-foreground" />
-                              )}
+                            <div className="flex flex-col items-center gap-1 shrink-0 mb-1">
+                              <div className="h-8 w-8 rounded-full bg-muted border border-border/20 grid place-items-center shadow-sm overflow-hidden">
+                                {selected.profile_pic_url ? (
+                                  <img src={selected.profile_pic_url} className="h-full w-full object-cover" alt="" />
+                                ) : (
+                                  <User className="h-4 w-4 text-muted-foreground" />
+                                )}
+                              </div>
                             </div>
                           )}
                           <div
@@ -1145,27 +1157,47 @@ function ConversasPage() {
                               </div>
 ) : (
 <>
-{selected.is_group && isUser && m.sender && (
-<p className="text-[10px] font-bold text-primary mb-1 opacity-80 uppercase tracking-tighter">{m.sender}</p>
-)}
+                              {selected.is_group && isUser && m.sender && (
+                                <p className="text-[10px] font-black text-primary mb-1.5 opacity-90 uppercase tracking-widest flex items-center gap-1.5">
+                                  <span className="h-1 w-1 rounded-full bg-primary" />
+                                  {m.sender}
+                                </p>
+                              )}
 <span className="whitespace-pre-wrap break-words">{m.content}</span>
 </>
-                            )}
-                            {m.at && m.kind !== "sticker" && (
-                              <div className={`text-[10px] mt-2 flex justify-end font-medium opacity-70 ${isUser ? "text-muted-foreground" : "text-primary-foreground/90"}`}>
-                                {format(new Date(m.at), "HH:mm")}
-                                {!isUser && <span className="ml-1 text-[10px] shrink-0">✓✓</span>}
-                              </div>
-                            )}
-                          </div>
-                          {!isUser && (
-                            <div className="h-8 w-8 rounded-full bg-primary/10 text-primary border border-primary/20 grid place-items-center shrink-0 shadow-sm mb-1">
-                              <Bot className="h-4 w-4" />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
+                             )}
+
+                             <div className={`flex items-center gap-2 mt-1.5 ${isUser ? "justify-start ml-1" : "justify-end mr-1"}`}>
+                               {m.at && m.kind !== "sticker" && (
+                                 <div className={`text-[9px] font-bold opacity-30 uppercase tracking-tighter ${isUser ? "text-muted-foreground" : "text-primary-foreground/80"}`}>
+                                   {format(new Date(m.at), "HH:mm")}
+                                   {!isUser && (
+                                     <span className="ml-1 text-primary animate-in fade-in slide-in-from-left-1 duration-700 inline-block">
+                                       <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5">
+                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                       </svg>
+                                     </span>
+                                   )}
+                                 </div>
+                               )}
+                               <button
+                                 onClick={() => { setForwardMsg(m); setIsForwarding(true); }}
+                                 className="opacity-0 group-hover:opacity-40 transition-opacity hover:opacity-100 p-1 hover:bg-muted rounded-lg"
+                                 title="Encaminhar"
+                               >
+                                 <Forward className="h-3 w-3" />
+                               </button>
+                             </div>
+                           </div>
+
+                           {!isUser && (
+                             <div className="h-8 w-8 rounded-full bg-primary/10 text-primary border border-primary/20 grid place-items-center shrink-0 shadow-sm mb-1">
+                               <Bot className="h-4 w-4" />
+                             </div>
+                           )}
+                         </div>
+                       </div>
+                     );
                   })
                 )}
               </div>
@@ -1229,6 +1261,60 @@ function ConversasPage() {
                   </div>
 
                    <button onClick={recording ? () => stopRecording(false) : sendText} disabled={(!text.trim() && !recording) || sending} className={`h-[52px] w-[52px] rounded-2xl transition-all duration-500 flex items-center justify-center shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-95 group/send ${recording ? "bg-emerald-500 text-white animate-pulse" : "bg-primary text-primary-foreground disabled:opacity-50 disabled:grayscale"}`}> {sending ? ( <Loader2 className="h-5 w-5 animate-spin" /> ) : recording ? ( <Send className="h-5 w-5" /> ) : ( <Send className="h-5 w-5 transition-transform duration-300 group-hover/send:translate-x-0.5 group-hover/send:-translate-y-0.5" /> )} </button>
+
+                  {/* Overlay de Encaminhamento */}
+                  {isForwarding && forwardMsg && (
+                    <div className="absolute inset-0 z-[100] bg-background/95 backdrop-blur-xl animate-in fade-in duration-300 flex flex-col p-6">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                          <Forward className="h-4 w-4 text-primary" /> Encaminhar Mensagem
+                        </h3>
+                        <button onClick={() => { setIsForwarding(false); setForwardMsg(null); }} className="h-8 w-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors">
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="bg-muted/20 border border-border/10 rounded-2xl p-4 mb-6 text-xs italic text-muted-foreground line-clamp-3">
+                        "{forwardMsg.content}"
+                      </div>
+                      <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                        <p className="text-[10px] font-black text-muted-foreground uppercase mb-3 ml-1">Selecione o destino</p>
+                        {items.filter(c => c.id !== selected.id).map(c => (
+                          <button
+                            key={c.id}
+                            onClick={async () => {
+                              const target = c;
+                              setIsForwarding(false);
+                              setForwardMsg(null);
+                              toast.promise(
+                                (async () => {
+                                  // Re-use existing logic but for target
+                                  const res = await fetch(`/api/evolution/message/sendText/${resolvedInstance}`, {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                      number: target.contact_phone,
+                                      options: { delay: 1200, presence: "composing", linkPreview: true },
+                                      text: forwardMsg.content
+                                    }),
+                                  });
+                                  if (!res.ok) throw new Error("Erro ao encaminhar");
+                                  syncFromWhatsApp(false);
+                                })(),
+                                { loading: "Encaminhando...", success: "Encaminhado com sucesso!", error: "Erro ao encaminhar" }
+                              );
+                            }}
+                            className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 border border-transparent hover:border-border/10 transition-all text-left"
+                          >
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="text-[10px] bg-primary text-white">{(c.contact_name || c.contact_phone).slice(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs font-bold truncate">{c.contact_name || c.contact_phone}</span>
+                            <Plus className="h-3 w-3 ml-auto text-muted-foreground/30" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Stickers Popover Estilizado */}
                   {stickerOpen && (
