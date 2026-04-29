@@ -14,7 +14,6 @@ import { HeroHeader } from "@/components/dashboard/HeroHeader";
 import { GoalProgress } from "@/components/dashboard/GoalProgress";
 import { MonthComparison } from "@/components/dashboard/MonthComparison";
 import { useState, useEffect, useCallback } from "react";
-import { X, ShoppingBag, Clock, User, Wrench, Box, Users, TrendingUp, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -41,10 +40,11 @@ function Dashboard() {
     avgTicket: 0
   });
 
-   const [selectedKpi, setSelectedKpi] = useState<string | null>(null);
-
   const fetchStats = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const today = new Date();
