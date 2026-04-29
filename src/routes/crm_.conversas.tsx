@@ -551,12 +551,13 @@ function ConversasPage() {
           const isGroup = String(chat.remoteJid ?? "").endsWith("@g.us");
 
           const ex = byPhone.get(phone);
-          // Só busca o histórico completo se for a conversa selecionada ou se não tivermos transcript
-          const shouldFetchFull = chat.remoteJid === selected?.remote_jid || !ex?.transcript?.length;
-          const raw = shouldFetchFull ? await evolution.findMessages(instance, chat.remoteJid!) : [];
-          const transcript = normalizeTranscript(asArray<any>(raw));
-          const fallbackTranscript = normalizeTranscript(chat.lastMessage ? [chat.lastMessage] : []);
-          const mergedTranscript = transcript.length > 0 ? transcript : (ex?.transcript ?? fallbackTranscript); mergedTranscript.sort((a, b) => +new Date(a.at || 0) - +new Date(b.at || 0));
+           // Só busca o histórico completo se for a conversa selecionada (para performance)
+           const isSelected = chat.remoteJid === selected?.remote_jid || (selectedId?.split(':')[1] === phone);
+           const hasNoTranscript = !ex?.transcript?.length;
+           const raw = (isSelected || hasNoTranscript) ? await evolution.findMessages(instance, chat.remoteJid!).catch(() => []) : [];
+           const transcript = normalizeTranscript(asArray<any>(raw));
+           const mergedTranscript = transcript.length > 0 ? transcript : (ex?.transcript ?? normalizeTranscript(chat.lastMessage ? [chat.lastMessage] : [])); 
+           mergedTranscript.sort((a, b) => +new Date(a.at || 0) - +new Date(b.at || 0));
           const lastAt =
             mergedTranscript[mergedTranscript.length - 1]?.at ??
             normTs(chat.updatedAt ?? chat.lastMessageTime ?? chat.conversationTimestamp ?? chat.lastMessage?.messageTimestamp);
