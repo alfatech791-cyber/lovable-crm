@@ -130,61 +130,7 @@ export const Route = createFileRoute("/relatorios")({
       }
     }, [user?.id, profile?.display_name]);
 
-    useEffect(() => {
-      fetchReportsData();
-    }, [fetchReportsData]);
-     if (!user?.id) return;
-     setLoading(true);
-     try {
-       const now = new Date();
-       const firstDayMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-       
-       // Sales and Revenue
-       const { data: sales } = await supabase
-         .from("sales_orders")
-         .select("total_amount, status, created_at")
-         .eq("user_id", user.id);
- 
-       const concludedSales = (sales || []).filter(s => s.status === 'concluded');
-       const monthRevenue = concludedSales
-         .filter(s => new Date(s.created_at!) >= firstDayMonth)
-         .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
- 
-       const avgTicket = concludedSales.length > 0 
-         ? monthRevenue / concludedSales.filter(s => new Date(s.created_at!) >= firstDayMonth).length || 0
-         : 0;
- 
-       // Leads
-       const { data: leads } = await supabase
-         .from("leads")
-         .select("status, created_at")
-         .eq("user_id", user.id);
- 
-       const totalLeads = leads?.length || 0;
-       const wonLeads = leads?.filter(l => l.status === 'won').length || 0;
-       const conversionRate = totalLeads > 0 ? (wonLeads / totalLeads) * 100 : 0;
- 
-       setStats({
-         revenue: monthRevenue,
-         leads: totalLeads,
-         conversion: conversionRate,
-         avgTicket: avgTicket,
-         revenueTrend: "+0%",
-         leadsTrend: "+0%",
-         conversionTrend: "+0%",
-         avgTicketTrend: "+0%",
-       });
-     } catch (err) {
-       console.error("Error fetching reports:", err);
-     } finally {
-       setLoading(false);
-     }
-   }, [user?.id]);
- 
-   useEffect(() => {
-     fetchReportsData();
-   }, [fetchReportsData]);
- 
+
   const isAdmin = profile?.role === 'admin' || !profile;
 
   if (!isAdmin) {
