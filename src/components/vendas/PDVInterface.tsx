@@ -1,7 +1,9 @@
- import { useState, useMemo, useEffect } from "react";
- import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info } from "lucide-react";
- import { products, Product } from "@/lib/mock";
+ import { useState, useMemo, useEffect, useCallback } from "react";
+ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2 } from "lucide-react";
+ import { Product } from "@/lib/mock";
  import { toast } from "sonner";
+ import { supabase } from "@/integrations/supabase/client";
+ import { useAuth } from "@/contexts/AuthContext";
  import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
  import { Button } from "@/components/ui/button";
  import { Input } from "@/components/ui/input";
@@ -15,22 +17,79 @@
  }
  
  export function PDVInterface() {
+   const { user } = useAuth();
    const [cart, setCart] = useState<CartItem[]>([]);
    const [search, setSearch] = useState("");
+   const [allProducts, setAllProducts] = useState<Product[]>([]);
+   const [loadingProducts, setLoadingProducts] = useState(false);
    const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
    const [selectedCustomer, setSelectedCustomer] = useState<{ id: string; name: string } | null>(null);
+   const [customersList, setCustomersList] = useState<{ id: string; full_name: string }[]>([]);
    const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
    const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
    const [receivedAmount, setReceivedAmount] = useState<string>("");
    const [discountValue, setDiscountValue] = useState<number>(0);
+   const [isFinishing, setIsFinishing] = useState(false);
+ 
+   const fetchProducts = useCallback(async () => {
+     if (!user?.id) return;
+     setLoadingProducts(true);
+     try {
+       const { data, error } = await supabase
+         .from("products")
+         .select("*")
+         .eq("user_id", user.id);
+       
+       if (error) throw error;
+       
+       const formattedProducts: Product[] = (data || []).map(p => ({
+         id: p.id,
+         name: p.name,
+         category: p.category || "Geral",
+         price: p.price || 0,
+         stock: p.stock_quantity || 0,
+         description: p.description || "",
+         image: p.image_url || undefined
+       }));
+       
+       setAllProducts(formattedProducts);
+     } catch (error) {
+       console.error("Erro ao carregar produtos:", error);
+       toast.error("Erro ao carregar catálogo de produtos.");
+     } finally {
+       setLoadingProducts(false);
+     }
+   }, [user?.id]);
+ 
+   const fetchCustomers = useCallback(async () => {
+     if (!user?.id) return;
+     try {
+       const { data, error } = await supabase
+         .from("customers")
+         .select("id, full_name")
+         .eq("user_id", user.id)
+         .limit(50);
+       
+       if (error) throw error;
+       setCustomersList(data || []);
+     } catch (error) {
+       console.error("Erro ao carregar clientes:", error);
+     }
+   }, [user?.id]);
+ 
+   useEffect(() => {
+     fetchProducts();
+     fetchCustomers();
+   }, [fetchProducts, fetchCustomers]);
  
    const filteredProducts = useMemo(() => {
      if (!search) return [];
-     return products.filter(p => 
-       p.name.toLowerCase().includes(search.toLowerCase()) || 
-       p.imei?.includes(search)
+     const s = search.toLowerCase();
+     return allProducts.filter(p => 
+       p.name.toLowerCase().includes(s) || 
+       p.category.toLowerCase().includes(s)
      );
-   }, [search]);
+   }, [search, allProducts]);
  
    const addToCart = (product: Product) => {
      setCart(current => {
@@ -64,16 +123,68 @@
    
    const change = receivedAmount ? Math.max(0, parseFloat(receivedAmount) - total) : 0;
  
-   const handleFinishSale = () => {
-     toast.success("Venda finalizada com sucesso!", {
-       description: `Total de ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} em ${paymentMethod?.toUpperCase()}`,
-     });
-     setCart([]);
-     setPaymentMethod(null);
-     setSelectedCustomer(null);
-     setIsCheckoutModalOpen(false);
-     setReceivedAmount("");
-     setDiscountValue(0);
+   const handleFinishSale = async () => {
+     if (!user?.id) return;
+     setIsFinishing(true);
+     try {
+       // 1. Criar a ordem de venda
+       const { data: sale, error: saleError } = await supabase
+         .from("sales_orders")
+         .insert({
+           user_id: user.id,
+           customer_id: selectedCustomer?.id || null,
+           total_amount: total,
+           discount_amount: discountValue,
+           payment_method: paymentMethod,
+           status: "concluded"
+         })
+         .select()
+         .single();
+ 
+       if (saleError) throw saleError;
+ 
+       // 2. Atualizar estoque dos produtos
+       for (const item of cart) {
+         const product = allProducts.find(p => p.id === item.id);
+         if (product) {
+           const newStock = Math.max(0, product.stock - item.quantity);
+           await supabase
+             .from("products")
+             .update({ stock_quantity: newStock })
+             .eq("id", item.id);
+         }
+       }
+ 
+       // 3. Registrar no financeiro (Fluxo de Caixa)
+       await supabase
+         .from("finance_transactions")
+         .insert({
+           user_id: user.id,
+           type: "income",
+           amount: total,
+           description: `Venda PDV - #${sale.id.slice(0, 8)}`,
+           category: "Vendas",
+           status: "paid",
+           payment_date: new Date().toISOString()
+         });
+ 
+       toast.success("Venda finalizada com sucesso!", {
+         description: `Total de ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} em ${paymentMethod?.toUpperCase()}`,
+       });
+ 
+       setCart([]);
+       setPaymentMethod(null);
+       setSelectedCustomer(null);
+       setIsCheckoutModalOpen(false);
+       setReceivedAmount("");
+       setDiscountValue(0);
+       fetchProducts(); // Atualiza estoque na interface
+     } catch (error) {
+       console.error("Erro ao finalizar venda:", error);
+       toast.error("Erro ao processar a venda. Tente novamente.");
+     } finally {
+       setIsFinishing(false);
+     }
    };
  
    return (
