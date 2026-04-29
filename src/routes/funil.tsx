@@ -25,7 +25,19 @@ export const Route = createFileRoute("/funil")({
 });
 
 type Stage = { id: string; name: string; color: string | null; order_index: number };
-type Deal = { id: string; lead_id: string; stage_id: string; deal_value: number; priority: string | null; lead?: { name: string; phone: string | null } };
+type Deal = { 
+  id: string; 
+  lead_id: string; 
+  stage_id: string; 
+  deal_value: number; 
+  priority: string | null; 
+  last_message?: string;
+  lead?: { 
+    name: string; 
+    phone: string | null; 
+    source: string | null;
+  } 
+};
 
  function FunnelPage() {
    const { user } = useAuth();
