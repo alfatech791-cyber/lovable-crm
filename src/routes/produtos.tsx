@@ -293,7 +293,7 @@ function ProductsPage() {
                      {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
                      Cadastrar
                    </Button>
-                   <Button variant="outline" onClick={() => handleOpenModal()} className="h-11 px-4">
+                   <Button variant="outline" onClick={() => setIsAddOpen(true)} className="h-11 px-4">
                      Completo
                    </Button>
                 </div>
