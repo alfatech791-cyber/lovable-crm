@@ -767,85 +767,52 @@ function ConversasPage() {
     if (!selected) return;
     setSending(true);
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData?.session?.access_token;
-      if (!accessToken) {
-        toast.error("Sessão expirada. Faça login novamente.");
-        return;
+      let jid = selected.remote_jid || selected.contact_phone;
+      if (!jid.includes("@")) {
+        jid = selected.is_group ? `${jid}@g.us` : `${jid}@s.whatsapp.net`;
       }
-        let jid = selected.remote_jid || selected.contact_phone;
-        if (!jid.includes("@")) {
-          jid = selected.is_group ? `${jid}@g.us` : `${jid}@s.whatsapp.net`;
-        }
-       const instance = await resolveInstance();
-       
-       if (!instance) {
-         toast.error("Instância do WhatsApp não encontrada.");
-         return;
-       }
+      const instance = await resolveInstance();
+      if (!instance) throw new Error("Instância do WhatsApp não encontrada.");
 
-       let endpoint = "";
-       let body: any = { number: jid };
+      let endpoint = "";
+      let body: any = {};
 
-        if (payload.kind === "text") {
-          endpoint = `/api/evolution/message/sendText/${instance}`;
-          body = {
-            number: jid,
-            text: payload.text,
-            delay: 1200,
-            linkPreview: false,
-            presence: "composing"
-          };
-        } else if (payload.kind === "audio") {
-          endpoint = `/api/evolution/message/sendWhatsAppAudio/${instance}`;
-          body = {
-            number: jid,
-            audio: payload.media,
-            delay: 1200,
-            encoding: true,
-            presence: "composing"
-          };
-        } else if (payload.kind === "sticker") {
-          endpoint = `/api/evolution/message/sendSticker/${instance}`;
-          body = {
-            number: jid,
-            sticker: payload.media,
-            delay: 1200,
-            presence: "composing"
-          };
-        } else if (payload.kind === "image") {
-          endpoint = `/api/evolution/message/sendMedia/${instance}`;
-          body = {
-            number: jid,
-            mediatype: "image",
-            media: payload.media,
-            mimetype: payload.mimetype || "image/png",
-            caption: payload.text || "",
-            delay: 1200,
-            fileName: payload.fileName || "image.png",
-            presence: "composing"
-          };
-        }
+      if (payload.kind === "text") {
+        endpoint = `/api/evolution/message/sendText/${instance}`;
+        body = { number: jid, text: payload.text, delay: 1200, linkPreview: false, presence: "composing" };
+      } else if (payload.kind === "audio") {
+        endpoint = `/api/evolution/message/sendWhatsAppAudio/${instance}`;
+        body = { number: jid, audio: payload.media, delay: 1200, encoding: true, presence: "composing" };
+      } else if (payload.kind === "sticker") {
+        endpoint = `/api/evolution/message/sendSticker/${instance}`;
+        body = { number: jid, sticker: payload.media, delay: 1200, presence: "composing" };
+      } else if (payload.kind === "image") {
+        endpoint = `/api/evolution/message/sendMedia/${instance}`;
+        body = {
+          number: jid,
+          mediatype: "image",
+          media: payload.media,
+          mimetype: payload.mimetype || "image/png",
+          caption: payload.text || "",
+          delay: 1200,
+          fileName: payload.fileName || "image.png",
+          presence: "composing"
+        };
+      }
 
-       if (!endpoint) {
-         toast.error("Tipo de mensagem inválido.");
-         return;
-       }
+      if (!endpoint) throw new Error("Tipo de mensagem inválido.");
 
-        // Enviar para a API Evolution
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-        const data = await res.json();
-        
-        // Se a resposta não for OK, tentamos extrair o erro de várias formas comuns na Evolution API
-        if (!res.ok) {
-          const errorDetail = data?.message || data?.error || (typeof data === 'string' ? data : "Erro desconhecido");
-          throw new Error(`Falha no envio Evolution: ${errorDetail}`);
-        }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const errorDetail = data?.message || data?.error || (typeof data === 'string' ? data : `Erro ${res.status}`);
+        throw new Error(`Falha no envio Evolution: ${errorDetail}`);
+      }
 
        // Grava localmente no banco para manter o histórico
            const localConv = items.find(c => c.id === selected.id);
@@ -951,10 +918,7 @@ function ConversasPage() {
     setRecordSecs(0);
     const rec = recorderRef.current;
     if (!rec) return;
-    if (cancel) {
-      rec.ondataavailable = null;
-      rec.onstop = () => rec.stream.getTracks().forEach((t) => t.stop());
-    }
+    if (cancel) rec.ondataavailable = null;
     if (rec.state !== "inactive") rec.stop();
     recorderRef.current = null;
   };
