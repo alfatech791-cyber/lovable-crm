@@ -56,7 +56,7 @@ type Deal = {
 
  function FunnelPage() {
     const { user, loading: authLoading } = useAuth();
-   const [viewMode, setViewMode] = useState<"kanban" | "chat">("kanban");
+    const [viewMode, setViewMode] = useState<"kanban" | "chat">("kanban");
    const [stages, setStages] = useState<Stage[]>([]);
    const [deals, setDeals] = useState<Deal[]>([]);
    const [leads, setLeads] = useState<{ id: string; name: string }[]>([]);
@@ -453,8 +453,28 @@ type Deal = {
                 </Button>
               </div>
             </div>
+
+            {/* Seletor de Visualização */}
+            <div className="px-6 py-2 border-b border-border/40 bg-background/50 flex items-center gap-2">
+              <Button 
+                variant={viewMode === "kanban" ? "secondary" : "ghost"} 
+                size="sm" 
+                onClick={() => setViewMode("kanban")}
+                className={cn("gap-2 text-xs font-bold rounded-xl", viewMode === "kanban" && "bg-primary/10 text-primary hover:bg-primary/20")}
+              >
+                <LayoutGrid className="h-3.5 w-3.5" /> Kanban
+              </Button>
+              <Button 
+                variant={viewMode === "chat" ? "secondary" : "ghost"} 
+                size="sm" 
+                onClick={() => setViewMode("chat")}
+                className={cn("gap-2 text-xs font-bold rounded-xl", viewMode === "chat" && "bg-primary/10 text-primary hover:bg-primary/20")}
+              >
+                <MessageSquare className="h-3.5 w-3.5" /> Conversas
+              </Button>
+            </div>
  
-           {loading ? (
+            {loading ? (
              <div className="flex-1 grid place-items-center">
                <div className="flex flex-col items-center gap-4">
                  <div className="relative">
