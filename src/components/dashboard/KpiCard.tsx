@@ -1,4 +1,12 @@
- import * as Icons from "lucide-react";
+import { 
+  Activity, 
+  ShoppingBag, 
+  Wrench, 
+  Box, 
+  DollarSign, 
+  Users, 
+  TrendingUp 
+} from "lucide-react";
  import { useNavigate } from "@tanstack/react-router";
 
  type Tone = "info" | "success" | "warning" | "primary" | "destructive";
@@ -13,7 +21,15 @@
   export function KpiCard({
     label, value, trend, sub, icon, tone, onClick
   }: { label: string; value: string; trend: string; sub: string; icon: string; tone: string; onClick?: () => void }) {
-   const Icon = (Icons as any)[icon] ?? Icons.Activity;
+   const IconsMap: Record<string, any> = {
+     ShoppingBag,
+     Wrench,
+     Box,
+     DollarSign,
+     Users,
+     TrendingUp
+   };
+   const Icon = IconsMap[icon] ?? Activity;
    const navigate = useNavigate();
  
    const handleClick = () => {

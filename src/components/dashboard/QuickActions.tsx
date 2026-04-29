@@ -10,7 +10,7 @@ export function QuickActions() {
     { label: "Gerar Proposta", icon: FileText, color: "bg-info", url: "/vendas/orcamentos" },
     { label: "Atendimento WA", icon: MessageSquare, color: "bg-success", url: "/atendimento" },
     { label: "Direct IG", icon: Instagram, color: "bg-pink-500", url: "/atendimento" },
-    { label: "IA Resumo", icon: Zap, color: "bg-warning", url: "/automacao" },
+    { label: "Nova Venda", icon: ShoppingBag, color: "bg-primary", url: "/pdv" },
   ];
 
   return (
