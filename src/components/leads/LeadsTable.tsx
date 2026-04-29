@@ -135,6 +135,50 @@ export function LeadsTable() {
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar title="Leads" subtitle="Base unificada de contatos do CRM" />
         <main className="flex-1 overflow-y-auto p-6">
+          
+          {/* Quick Add Section */}
+          <div className={`mb-6 transition-all duration-300 overflow-hidden ${isQuickAddOpen ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}>
+            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 shadow-sm mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold flex items-center gap-2 text-primary">
+                  <Plus className="h-4 w-4" /> Cadastro Rápido de Lead
+                </h3>
+                <button onClick={() => setIsQuickAddOpen(false)} className="text-muted-foreground hover:text-foreground">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Nome Completo</Label>
+                  <Input 
+                    placeholder="Nome do lead..." 
+                    value={quickLead.name}
+                    onChange={(e) => setQuickLead({...quickLead, name: e.target.value})}
+                    className="bg-card h-11"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">WhatsApp / Telefone</Label>
+                  <Input 
+                    placeholder="55..." 
+                    value={quickLead.phone}
+                    onChange={(e) => setQuickLead({...quickLead, phone: e.target.value})}
+                    className="bg-card h-11"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={handleQuickSave} disabled={saving} className="flex-1 h-11 font-bold">
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                    Cadastrar Lead
+                  </Button>
+                  <Button variant="outline" onClick={() => setEditing({})} className="h-11 px-4">
+                    Formulário Completo
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-card border border-border rounded-2xl shadow-card overflow-hidden">
             <div className="p-5 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-1">
