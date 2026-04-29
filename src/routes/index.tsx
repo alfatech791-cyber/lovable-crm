@@ -10,6 +10,9 @@ import { MessagesPanel } from "@/components/dashboard/MessagesPanel";
 import { TasksCard, AutomationsCard, AgendaCard, DispatchCard } from "@/components/dashboard/SidePanels";
 import { RecentService, RecentLeads } from "@/components/dashboard/RecentPanels";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import { HeroHeader } from "@/components/dashboard/HeroHeader";
+import { GoalProgress } from "@/components/dashboard/GoalProgress";
+import { MonthComparison } from "@/components/dashboard/MonthComparison";
 import { useState, useEffect, useCallback } from "react";
 import { X, ShoppingBag, Clock, User, Wrench, Box, Users, TrendingUp, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -140,9 +143,16 @@ function Dashboard() {
           subtitle="Aqui está o resumo do seu negócio hoje." 
           toggleSidebar={() => setSidebarOpen(true)}
         />
-         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-6">
+         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+           <HeroHeader
+             userName={user?.user_metadata?.display_name || "Usuário"}
+             todaySales={stats.todaySales}
+             monthRevenue={stats.monthRevenue}
+             newLeads={stats.newLeads}
+           />
+
            <QuickActions />
- 
+
             <div className="flex flex-col xl:flex-row gap-6">
              <div className="flex-1 flex flex-col gap-6 min-w-0">
                <div className="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-4">
@@ -155,8 +165,15 @@ function Dashboard() {
                   ))}
                 </div>
 
-                 <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
+                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2">
                   <SalesChart />
+                  </div>
+                  <GoalProgress current={stats.monthRevenue} goal={50000} />
+                </div>
+
+                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <MonthComparison />
                   <OriginDonut />
                   <ChannelMini />
                 </div>
