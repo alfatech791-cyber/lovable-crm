@@ -594,30 +594,28 @@ export function UnifiedChat() {
 
                    <textarea
                      value={text}
-                  <textarea
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        send();
-                      }
-                    }}
-                    placeholder="Digite sua mensagem... (Enter envia, Shift+Enter quebra linha)"
-                    className="flex-1 bg-muted/50 rounded-2xl border border-border focus:border-primary/40 outline-none p-3 text-sm min-h-[48px] max-h-32 resize-none"
-                    rows={1}
-                  />
-                  <button
-                    onClick={send}
-                    disabled={sending || !text.trim()}
-                    className="h-12 w-12 shrink-0 rounded-xl bg-primary text-primary-foreground grid place-items-center hover:opacity-90 transition disabled:opacity-50"
-                  >
-                    {sending ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                      <Send className="h-5 w-5" />
-                    )}
-                  </button>
+                     onChange={(e) => setText(e.target.value)}
+                     onKeyDown={(e) => {
+                       if (e.key === "Enter" && !e.shiftKey) {
+                         e.preventDefault();
+                         send();
+                       }
+                     }}
+                     placeholder={selectedImage ? "Adicione uma legenda..." : "Digite sua mensagem..."}
+                     className="flex-1 bg-muted/50 rounded-2xl border border-border focus:border-primary/40 outline-none p-3 text-sm min-h-[48px] max-h-32 resize-none"
+                     rows={1}
+                   />
+                   <button
+                     onClick={send}
+                     disabled={sending || (!text.trim() && !selectedImage)}
+                     className="h-12 w-12 shrink-0 rounded-xl bg-primary text-primary-foreground grid place-items-center hover:opacity-90 transition disabled:opacity-50"
+                   >
+                     {sending ? (
+                       <Loader2 className="h-5 w-5 animate-spin" />
+                     ) : (
+                       <Send className="h-5 w-5" />
+                     )}
+                   </button>
                 </div>
               </div>
             </div>
