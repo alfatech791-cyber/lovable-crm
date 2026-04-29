@@ -14,15 +14,27 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-interface QrCodeModalProps {
-  instanceName: string;
-  onClose: () => void;
-  onSuccess: () => void;
-}
-
-const QR_LIFETIME = 40;
-
-export function QrCodeModal({ instanceName, onClose, onSuccess }: QrCodeModalProps) {
+ interface QrCodeModalProps {
+   open: boolean;
+   onOpenChange: (open: boolean) => void;
+   initialInstanceName?: string;
+ }
+ 
+ const QR_LIFETIME = 40;
+ 
+ export function QrCodeModal({ open, onOpenChange, initialInstanceName }: QrCodeModalProps) {
+   const [instanceName, setInstanceName] = useState(initialInstanceName || "");
+   const [step, setStep] = useState(initialInstanceName ? "qr" : "name");
+ 
+   useEffect(() => {
+     if (initialInstanceName) {
+       setInstanceName(initialInstanceName);
+       setStep("qr");
+     }
+   }, [initialInstanceName]);
+ 
+   const onClose = () => onOpenChange(false);
+   const onSuccess = () => onOpenChange(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [pairingCode, setPairingCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
