@@ -311,7 +311,7 @@ type Deal = {
     }
   };
 
-  useEffect(() => { load(); }, [user?.id]);
+   useEffect(() => { load(); }, [user?.id, authLoading]);
 
   const moveDeal = async (dealId: string, newStageId: string) => {
     setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, stage_id: newStageId } : d)));
