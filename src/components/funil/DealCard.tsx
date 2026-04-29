@@ -43,7 +43,7 @@
          )}
          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
            <Calendar className="h-3 w-3" />
-           <span>{new Date(deal.created_at).toLocaleDateString('pt-BR')}</span>
+           <span>{deal.created_at ? new Date(deal.created_at).toLocaleDateString('pt-BR') : "Data indisponível"}</span>
          </div>
        </div>
  
