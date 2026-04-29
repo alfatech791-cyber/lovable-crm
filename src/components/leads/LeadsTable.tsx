@@ -86,6 +86,26 @@ export function LeadsTable() {
     load();
   };
 
+  const handleQuickSave = async () => {
+    if (!user?.id) return;
+    if (!quickLead.name.trim()) { toast.error("Nome é obrigatório"); return; }
+    setSaving(true);
+    const payload = {
+      name: quickLead.name.trim(),
+      phone: quickLead.phone.trim() || null,
+      source: "manual",
+      status: "new",
+      user_id: user.id,
+    };
+    const { error } = await supabase.from("leads").insert(payload);
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Lead cadastrado com sucesso!");
+    setQuickLead({ name: "", phone: "" });
+    setIsQuickAddOpen(false);
+    load();
+  };
+
   const remove = async (id: string) => {
     if (!confirm("Excluir este lead?")) return;
     const { error } = await supabase.from("leads").delete().eq("id", id);
