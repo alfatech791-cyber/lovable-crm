@@ -1288,7 +1288,12 @@ function ConversasPage() {
                       rows={1} style={{ overflow: "hidden" }} onInput={(e) => { e.currentTarget.style.height = "auto"; e.currentTarget.style.height = e.currentTarget.scrollHeight + "px"; }}
                       placeholder={recording ? "Gravando áudio..." : "Digite uma mensagem..."}
                       value={text}
-                      onChange={(e) => setText(e.target.value)}
+                       onChange={(e) => {
+                         const val = e.target.value;
+                         setText(val);
+                         if (val.endsWith("/")) setQuickRepliesOpen(true);
+                         else if (!val.includes("/")) setQuickRepliesOpen(false);
+                       }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
