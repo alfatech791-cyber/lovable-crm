@@ -941,6 +941,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      call_pipeline_qualifier: {
+        Args: { _lead_id: string; _message: string; _user_id: string }
+        Returns: undefined
+      }
       dispatch_automation: {
         Args: { _payload: Json; _trigger_type: string; _user_id: string }
         Returns: undefined
