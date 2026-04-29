@@ -4,7 +4,7 @@ import { Topbar } from "@/components/layout/Topbar";
  import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-   import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp, MessageSquare, MessageCircle, X, Send, Bot, User, UserCog, PauseCircle, PlayCircle, RefreshCw, ChevronRight, Sparkles, CreditCard, Users, Clock, Wifi } from "lucide-react";
+    import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp, MessageSquare, MessageCircle, X, Send, Bot, User, UserCog, PauseCircle, PlayCircle, RefreshCw, ChevronRight, Sparkles, CreditCard, Users, Clock, Wifi, Image as ImageIcon, Smile, Type, Pencil, Download, Crop } from "lucide-react";
  import { formatDistanceToNow } from "date-fns";
  import { ptBR } from "date-fns/locale";
  import { evolution } from "@/lib/evolution";
@@ -169,8 +169,10 @@ type Deal = {
    const [chatOpen, setChatOpen] = useState(false);
    const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
    const [chatLoading, setChatLoading] = useState(false);
-   const [messageText, setMessageText] = useState("");
-   const [sending, setSending] = useState(false);
+    const [messageText, setMessageText] = useState("");
+    const [sending, setSending] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const addStage = () => setAddingStage(true);
@@ -206,22 +208,59 @@ type Deal = {
      }
    };
  
-   const sendMessage = async () => {
-     if (!currentConversation || !messageText.trim() || sending) return;
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file && file.type.startsWith("image/")) {
+        setSelectedImage(file);
+        const url = URL.createObjectURL(file);
+        setImagePreview(url);
+      } else if (file) {
+        toast.error("Por favor, selecione um arquivo de imagem.");
+      }
+    };
+
+    const clearImage = () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      setSelectedImage(null);
+      setImagePreview(null);
+    };
+
+    const sendMessage = async () => {
+      if (!currentConversation || (!messageText.trim() && !selectedImage) || sending) return;
      setSending(true);
-     try {
-       const { data, error } = await supabase.functions.invoke("send-whatsapp", {
-         body: {
-           phone: currentConversation.contact_phone,
-           text: messageText.trim(),
-           contactName: currentConversation.contact_name,
-         },
-       });
-       if (error) throw error;
-       setMessageText("");
-       // O Realtime deve atualizar a conversa, mas vamos recarregar para garantir
-       loadConversation(currentConversation.contact_phone);
-     } catch (e: any) {
+      try {
+        let body: any = {
+          phone: currentConversation.contact_phone,
+          text: messageText.trim(),
+          contactName: currentConversation.contact_name,
+        };
+
+        if (selectedImage) {
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve) => {
+            reader.onloadend = () => {
+              const base64 = (reader.result as string).split(",")[1];
+              resolve(base64);
+            };
+          });
+          reader.readAsDataURL(selectedImage);
+          const base64 = await base64Promise;
+
+          body = {
+            ...body,
+            kind: "image",
+            media: base64,
+            mimetype: selectedImage.type,
+            fileName: selectedImage.name,
+          };
+        }
+
+        const { data, error } = await supabase.functions.invoke("send-whatsapp", { body });
+        if (error) throw error;
+        setMessageText("");
+        clearImage();
+        loadConversation(currentConversation.contact_phone);
+      } catch (e: any) {
        toast.error(e?.message ?? "Erro ao enviar");
      } finally {
        setSending(false);
