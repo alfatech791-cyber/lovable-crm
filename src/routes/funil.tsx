@@ -206,43 +206,55 @@ type Deal = {
 
   const load = async () => {
     if (!user?.id) return;
-    setLoading(true);
-    await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
-       const [stRes, dlRes, ldRes, convRes] = await Promise.all([
+    try {
+      setLoading(true);
+      // Garante estágios padrão
+      await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
+      
+      const [stRes, dlRes, ldRes, convRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
         supabase.from("pipeline_leads").select("*, lead:leads(name, phone, source)").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("leads").select("id, name").eq("user_id", user.id).order("created_at", { ascending: false }),
-         supabase.from("bot_conversations").select("*").eq("user_id", user.id).order("last_message_at", { ascending: false }),
+        supabase.from("bot_conversations").select("*").eq("user_id", user.id).order("last_message_at", { ascending: false }),
       ]);
-     
-     if (stRes.error) toast.error("Erro ao carregar estágios: " + stRes.error.message);
-     if (dlRes.error) toast.error("Erro ao carregar negociações: " + dlRes.error.message);
-     if (ldRes.error) toast.error("Erro ao carregar leads: " + ldRes.error.message);
+      
+      if (stRes.error) toast.error("Erro ao carregar estágios: " + stRes.error.message);
+      if (dlRes.error) toast.error("Erro ao carregar negociações: " + dlRes.error.message);
+      if (ldRes.error) toast.error("Erro ao carregar leads: " + ldRes.error.message);
       if (convRes.error) toast.error("Erro ao carregar conversas: " + convRes.error.message);
 
-     setStages((stRes.data as Stage[]) ?? []);
+      setStages((stRes.data as Stage[]) ?? []);
       setConversations((convRes.data as any as Conversation[]) ?? []);
+      
       const leadIds = (dlRes.data as any[])?.map(d => d.lead_id) || [];
       let lastMessagesMap: Record<string, { content: string, created_at: string }> = {};
-       if (leadIds.length > 0) {
-         const filteredLeadIds = leadIds.filter(Boolean);
-         if (filteredLeadIds.length > 0) {
-           const { data: msgData } = await supabase.from("messages").select("lead_id, content, created_at").in("lead_id", filteredLeadIds).order("created_at", { ascending: false });
-           if (msgData) msgData.forEach(msg => { 
-             if (msg.lead_id && !lastMessagesMap[msg.lead_id]) {
-               lastMessagesMap[msg.lead_id] = { content: msg.content, created_at: msg.created_at }; 
-             }
-           });
-         }
-       }
-       const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => ({
-         ...deal,
-         last_message: deal.lead_id ? lastMessagesMap[deal.lead_id]?.content : undefined,
-         last_message_at: deal.lead_id ? lastMessagesMap[deal.lead_id]?.created_at : undefined
-       })) ?? [];
+      
+      if (leadIds.length > 0) {
+        const filteredLeadIds = leadIds.filter(Boolean);
+        if (filteredLeadIds.length > 0) {
+          const { data: msgData } = await supabase.from("messages").select("lead_id, content, created_at").in("lead_id", filteredLeadIds).order("created_at", { ascending: false });
+          if (msgData) msgData.forEach(msg => { 
+            if (msg.lead_id && !lastMessagesMap[msg.lead_id]) {
+              lastMessagesMap[msg.lead_id] = { content: msg.content, created_at: msg.created_at }; 
+            }
+          });
+        }
+      }
+      
+      const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => ({
+        ...deal,
+        last_message: deal.lead_id ? lastMessagesMap[deal.lead_id]?.content : undefined,
+        last_message_at: deal.lead_id ? lastMessagesMap[deal.lead_id]?.created_at : undefined
+      })) ?? [];
+      
       setDeals(dealsWithLastMessage);
-     setLeads((ldRes.data as any) ?? []);
-    setLoading(false);
+      setLeads((ldRes.data as any) ?? []);
+    } catch (err) {
+      console.error("Erro no load:", err);
+      toast.error("Erro ao carregar dados do funil");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, [user?.id]);
