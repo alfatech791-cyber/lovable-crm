@@ -1,4 +1,4 @@
-import { ArrowRight, Send, CheckCircle2, MessageSquare, Zap, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ArrowRight, Send, CheckCircle2, MessageSquare, Zap, ChevronLeft, ChevronRight, Loader2, PauseCircle } from "lucide-react";
 import { useState, useEffect } from "react";
  import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -129,10 +129,28 @@ export function TasksCard() {
 
  export function AgendaCard() {
    const navigate = useNavigate();
-  const [m] = useState(new Date(2026, 4, 24));
+   const { user } = useAuth();
+   const [events, setEvents] = useState<any[]>([]);
+   const [loading, setLoading] = useState(true);
+   const [m] = useState(new Date());
   const days = ["D","S","T","Q","Q","S","S"];
   const monthName = m.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
-  // build a static-ish grid
+
+   useEffect(() => {
+     if (!user?.id) return;
+     (async () => {
+       const { data } = await supabase
+         .from("calendar_events")
+         .select("*")
+         .eq("user_id", user.id)
+         .gte("start_time", new Date().toISOString())
+         .order("start_time", { ascending: true })
+         .limit(3);
+       setEvents(data || []);
+       setLoading(false);
+     })();
+   }, [user?.id]);
+
   const grid = Array.from({ length: 35 }, (_, i) => i - 3);
   return (
     <div className="rounded-2xl bg-card border border-border p-5 shadow-card">
@@ -157,20 +175,24 @@ export function TasksCard() {
           );
         })}
       </div>
-      <div className="mt-3 pt-3 border-t border-border">
-        <div className="text-[12px] font-semibold mb-2">Hoje · 24 de maio</div>
-        <ul className="space-y-1.5">
-          {agenda.length > 0 ? agenda.map((a) => (
-            <li key={a.title} className="flex items-center gap-2 text-[12px]">
-              <span className="text-primary font-semibold w-10">{a.time}</span>
-              <span className="text-foreground/85 truncate">{a.title}</span>
-            </li>
-          )) : (
-            <li className="text-center py-4 text-xs text-muted-foreground italic">Sem compromissos hoje</li>
-          )}
-        </ul>
+      <div className="mt-3 pt-3 border-t border-border min-h-[100px]">
+        <div className="text-[12px] font-semibold mb-2">Próximos Compromissos</div>
+        {loading ? (
+          <div className="py-4 flex justify-center"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground/20" /></div>
+        ) : (
+          <ul className="space-y-1.5">
+            {events.length > 0 ? events.map((a) => (
+              <li key={a.id} className="flex items-center gap-2 text-[12px]">
+                <span className="text-primary font-semibold w-10 shrink-0">{format(new Date(a.start_time), "HH:mm")}</span>
+                <span className="text-foreground/85 truncate">{a.title}</span>
+              </li>
+            )) : (
+              <li className="text-center py-4 text-xs text-muted-foreground italic">Sem compromissos hoje</li>
+            )}
+          </ul>
+        )}
          <button 
-           onClick={() => navigate({ to: "/_app/agendamentos/" as any })}
+            onClick={() => navigate({ to: "/atendimento" })}
            className="w-full mt-3 inline-flex items-center justify-center gap-1.5 text-xs font-medium text-primary hover:bg-muted rounded-lg py-2 transition"
          >
            Ver agenda completa <ArrowRight className="h-3.5 w-3.5" />
@@ -182,11 +204,26 @@ export function TasksCard() {
 
  export function DispatchCard() {
    const navigate = useNavigate();
-  const items = [
-    { icon: Send, label: "Total de mensagens", value: "0", color: "var(--color-primary)" },
-    { icon: CheckCircle2, label: "Entregues", value: "0", sub: "(0%)", color: "var(--color-success)" },
-    { icon: MessageSquare, label: "Respostas", value: "0", sub: "(0%)", color: "oklch(0.65 0.2 330)" },
-  ];
+   const { user } = useAuth();
+   const [stats, setStats] = useState({ total: 0, sent: 0, received: 0 });
+
+   useEffect(() => {
+     if (!user?.id) return;
+     (async () => {
+       const today = new Date();
+       today.setHours(0,0,0,0);
+       const { count: total } = await supabase.from("messages").select("*", { count: 'exact', head: true }).eq("user_id", user.id).gte("created_at", today.toISOString());
+       const { count: sent } = await supabase.from("messages").select("*", { count: 'exact', head: true }).eq("user_id", user.id).eq("direction", "outgoing").gte("created_at", today.toISOString());
+       const { count: received } = await supabase.from("messages").select("*", { count: 'exact', head: true }).eq("user_id", user.id).eq("direction", "incoming").gte("created_at", today.toISOString());
+       setStats({ total: total || 0, sent: sent || 0, received: received || 0 });
+     })();
+   }, [user?.id]);
+
+   const items = [
+     { icon: Send, label: "Total de hoje", value: String(stats.total), color: "var(--color-primary)" },
+     { icon: CheckCircle2, label: "Enviadas", value: String(stats.sent), sub: `(${stats.total > 0 ? Math.round((stats.sent/stats.total)*100) : 0}%)`, color: "var(--color-success)" },
+     { icon: MessageSquare, label: "Recebidas", value: String(stats.received), sub: `(${stats.total > 0 ? Math.round((stats.received/stats.total)*100) : 0}%)`, color: "oklch(0.65 0.2 330)" },
+   ];
   return (
     <div className="rounded-2xl bg-card border border-border p-5 shadow-card">
       <h3 className="text-[15px] font-semibold mb-3">Disparos de hoje</h3>
