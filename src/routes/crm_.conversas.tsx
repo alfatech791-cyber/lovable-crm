@@ -22,6 +22,12 @@ import {
   Trash2,
   X,
   Users,
+   Info,
+   Phone,
+   Clock,
+   Calendar,
+   Edit3,
+   ExternalLink,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
