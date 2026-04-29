@@ -1161,12 +1161,29 @@ function ConversasPage() {
 <span className="whitespace-pre-wrap break-words">{m.content}</span>
 </>
                             )}
-                            {m.at && m.kind !== "sticker" && (
-                              <div className={`text-[10px] mt-2 flex justify-end font-medium opacity-70 ${isUser ? "text-muted-foreground" : "text-primary-foreground/90"}`}>
-                                {format(new Date(m.at), "HH:mm")}
-                                {!isUser && <span className="ml-1 text-[10px] shrink-0">✓✓</span>}
-                              </div>
-                            )}
+                            </div>
+                            <div className={`flex items-center gap-2 mt-1.5 ${isUser ? "justify-start ml-1" : "justify-end mr-1"}`}>
+                              {m.at && m.kind !== "sticker" && (
+                                <div className={`text-[9px] font-bold opacity-30 uppercase tracking-tighter ${isUser ? "text-muted-foreground" : "text-primary-foreground/80"}`}>
+                                  {format(new Date(m.at), "HH:mm")}
+                                  {!isUser && (
+                                    <span className="ml-1 text-primary animate-in fade-in slide-in-from-left-1 duration-700 inline-block">
+                                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                      </svg>
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                              <button
+                                onClick={() => { setForwardMsg(m); setIsForwarding(true); }}
+                                className="opacity-0 group-hover:opacity-40 transition-opacity hover:opacity-100 p-1 hover:bg-muted rounded-lg"
+                                title="Encaminhar"
+                              >
+                                <Forward className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
                           </div>
                           {!isUser && (
                             <div className="h-8 w-8 rounded-full bg-primary/10 text-primary border border-primary/20 grid place-items-center shrink-0 shadow-sm mb-1">
