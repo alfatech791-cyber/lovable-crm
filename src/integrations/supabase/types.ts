@@ -963,6 +963,10 @@ export type Database = {
       }
       normalize_phone: { Args: { p_phone: string }; Returns: string }
       scan_no_reply_24h: { Args: never; Returns: undefined }
+      seed_default_automations: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

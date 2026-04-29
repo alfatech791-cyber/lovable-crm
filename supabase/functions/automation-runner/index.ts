@@ -25,6 +25,53 @@ function interpolate(tpl: string, vars: Record<string, any>) {
   });
 }
 
+function matchesKeywords(text: string, keywords: string[]): boolean {
+  if (!keywords?.length) return true;
+  const t = (text || "").toLowerCase();
+  return keywords.some((k) => t.includes(String(k).toLowerCase()));
+}
+
+function isOutsideBusinessHours(start = "08:00", end = "18:00"): boolean {
+  const now = new Date();
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  const cur = now.getHours() * 60 + now.getMinutes();
+  const s = sh * 60 + sm;
+  const e = eh * 60 + em;
+  return cur < s || cur >= e;
+}
+
+async function resolveStageId(
+  admin: any,
+  user_id: string,
+  cfg: Record<string, any>,
+): Promise<string | null> {
+  if (cfg.stage_id) return cfg.stage_id;
+  const name = cfg.target_stage_name || cfg.stage_name;
+  if (!name) return null;
+  const { data } = await admin
+    .from("funnel_stages")
+    .select("id")
+    .eq("user_id", user_id)
+    .ilike("name", name)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
+async function sendWhatsApp(user_id: string, phone: string, text: string, contactName?: string) {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${SERVICE_ROLE}`,
+      apikey: SERVICE_ROLE,
+      "x-user-id": user_id,
+    },
+    body: JSON.stringify({ phone, text, contactName }),
+  });
+  if (!res.ok) throw new Error(`send-whatsapp ${res.status}`);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -73,27 +120,65 @@ Deno.serve(async (req) => {
   let executed = 0;
   for (const a of automations) {
     const cfg = (a.config ?? {}) as Record<string, any>;
+    const cond = (cfg.condition ?? {}) as Record<string, any>;
     const vars = { ...payload, lead, nome: lead?.name, telefone: lead?.phone, mensagem: payload.content };
 
     try {
+      // ---- Avaliação de condições (skip se não bater) ----
+      if (cond.first_message_only && trigger_type === "message_received" && lead?.id) {
+        const { count } = await admin
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user_id)
+          .eq("lead_id", lead.id)
+          .eq("direction", "inbound");
+        if ((count ?? 0) > 1) {
+          await admin.from("automation_runs").insert({
+            user_id, automation_id: a.id, trigger_type, action_type: a.action_type,
+            status: "skipped", payload, error: "not first message",
+          });
+          continue;
+        }
+      }
+
+      if (cond.outside_business_hours && !isOutsideBusinessHours(cond.start, cond.end)) {
+        await admin.from("automation_runs").insert({
+          user_id, automation_id: a.id, trigger_type, action_type: a.action_type,
+          status: "skipped", payload, error: "within business hours",
+        });
+        continue;
+      }
+
+      if (Array.isArray(cond.keywords) && cond.keywords.length > 0) {
+        if (!matchesKeywords(payload.content ?? "", cond.keywords)) {
+          await admin.from("automation_runs").insert({
+            user_id, automation_id: a.id, trigger_type, action_type: a.action_type,
+            status: "skipped", payload, error: "no keyword match",
+          });
+          continue;
+        }
+      }
+
+      if (cond.target_stage_name && trigger_type === "stage_changed" && payload.to_stage_id) {
+        const { data: st } = await admin
+          .from("funnel_stages").select("name").eq("id", payload.to_stage_id).maybeSingle();
+        if (!st || String(st.name).toLowerCase() !== String(cond.target_stage_name).toLowerCase()) {
+          await admin.from("automation_runs").insert({
+            user_id, automation_id: a.id, trigger_type, action_type: a.action_type,
+            status: "skipped", payload, error: "stage mismatch",
+          });
+          continue;
+        }
+      }
+
+      // ---- Execução da ação principal ----
       switch (a.action_type) {
         case "send_message": {
           const phone = lead?.phone || payload.phone;
           if (!phone) throw new Error("lead sem telefone");
           const text = interpolate(cfg.message ?? "", vars);
           if (!text.trim()) throw new Error("mensagem vazia");
-
-          const res = await fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${SERVICE_ROLE}`,
-              apikey: SERVICE_ROLE,
-              "x-user-id": user_id,
-            },
-            body: JSON.stringify({ phone, text, contactName: lead?.name }),
-          });
-          if (!res.ok) throw new Error(`send-whatsapp ${res.status}`);
+          await sendWhatsApp(user_id, phone, text, lead?.name);
           break;
         }
 
@@ -101,9 +186,9 @@ Deno.serve(async (req) => {
           await admin.from("tasks").insert({
             user_id,
             lead_id: lead?.id ?? payload.lead_id ?? null,
-            title: interpolate(cfg.title ?? a.name ?? "Tarefa automática", vars),
-            description: interpolate(cfg.description ?? "", vars),
-            priority: cfg.priority ?? "medium",
+            title: interpolate(cfg.task_title ?? cfg.title ?? a.name ?? "Tarefa automática", vars),
+            description: interpolate(cfg.task_description ?? cfg.description ?? "", vars),
+            priority: cfg.task_priority ?? cfg.priority ?? "medium",
             status: "pending",
             due_date: cfg.due_in_hours
               ? new Date(Date.now() + Number(cfg.due_in_hours) * 3600_000).toISOString()
@@ -114,16 +199,7 @@ Deno.serve(async (req) => {
 
         case "move_pipeline": {
           if (!lead?.id) throw new Error("lead ausente");
-          let stageId: string | null = cfg.stage_id ?? null;
-          if (!stageId && cfg.stage_name) {
-            const { data: st } = await admin
-              .from("funnel_stages")
-              .select("id")
-              .eq("user_id", user_id)
-              .ilike("name", cfg.stage_name)
-              .maybeSingle();
-            stageId = st?.id ?? null;
-          }
+          const stageId = await resolveStageId(admin, user_id, cfg);
           if (!stageId) throw new Error("stage_id/stage_name não configurado");
           await admin.from("pipeline_leads").update({ stage_id: stageId }).eq("user_id", user_id).eq("lead_id", lead.id);
           break;
@@ -134,7 +210,7 @@ Deno.serve(async (req) => {
           await admin.from("tasks").insert({
             user_id,
             lead_id: lead?.id ?? payload.lead_id ?? null,
-            title: interpolate(cfg.title ?? `🔔 ${a.name}`, vars),
+            title: interpolate(cfg.task_title ?? cfg.title ?? `🔔 ${a.name}`, vars),
             description: interpolate(cfg.message ?? "Notificação automática do pipeline", vars),
             priority: "high",
             status: "pending",
@@ -144,6 +220,25 @@ Deno.serve(async (req) => {
 
         default:
           throw new Error(`ação desconhecida: ${a.action_type}`);
+      }
+
+      // ---- Ações secundárias (also_*) ----
+      if (cfg.also_send_message && cfg.message) {
+        const phone = lead?.phone || payload.phone;
+        if (phone) {
+          const text = interpolate(cfg.message, vars);
+          if (text.trim()) await sendWhatsApp(user_id, phone, text, lead?.name);
+        }
+      }
+      if (cfg.also_create_task && cfg.task_title) {
+        await admin.from("tasks").insert({
+          user_id,
+          lead_id: lead?.id ?? payload.lead_id ?? null,
+          title: interpolate(cfg.task_title, vars),
+          description: interpolate(cfg.task_description ?? "", vars),
+          priority: cfg.task_priority ?? "medium",
+          status: "pending",
+        });
       }
 
       await admin.from("automation_runs").insert({
