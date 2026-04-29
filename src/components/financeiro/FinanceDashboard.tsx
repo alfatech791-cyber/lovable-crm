@@ -108,15 +108,42 @@ export function FinanceDashboard() {
      })).sort((a, b) => b.value - a.value).slice(0, 5);
    }, [transactions]);
  
+   const [editingTransaction, setEditingTransaction] = useState<any>(null);
+ 
    const handleSave = async (data: any) => {
      if (!user?.id) return;
      try {
-       const { error } = await supabase.from("finance_transactions").insert([{ ...data, user_id: user.id }]);
+       if (editingTransaction) {
+         const { error } = await supabase
+           .from("finance_transactions")
+           .update(data)
+           .eq("id", editingTransaction.id);
+         if (error) throw error;
+         toast.success("Lançamento atualizado!");
+       } else {
+         const { error } = await supabase
+           .from("finance_transactions")
+           .insert([{ ...data, user_id: user.id }]);
+         if (error) throw error;
+         toast.success("Lançamento criado!");
+       }
+       fetchTransactions();
+       setIsFormOpen(false);
+       setEditingTransaction(null);
+     } catch (error) {
+       toast.error("Erro ao salvar lançamento");
+     }
+   };
+ 
+   const handleDelete = async (id: string) => {
+     if (!window.confirm("Deseja excluir este lançamento?")) return;
+     try {
+       const { error } = await supabase.from("finance_transactions").delete().eq("id", id);
        if (error) throw error;
-       toast.success("Lançamento criado!");
+       toast.success("Lançamento excluído!");
        fetchTransactions();
      } catch (error) {
-       toast.error("Erro ao criar lançamento");
+       toast.error("Erro ao excluir lançamento");
      }
    };
 
@@ -341,19 +368,35 @@ export function FinanceDashboard() {
            </CardHeader>
            <CardContent>
              <div className="space-y-3">
-               {transactions.slice(0, 3).map((t, i) => (
-                 <div key={i} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg transition-colors">
-                   <div className="flex items-center gap-3">
+                {transactions.slice(0, 5).map((t, i) => (
+                  <div key={i} className="group flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg transition-colors">
+                    <div className="flex items-center gap-3 flex-1 overflow-hidden">
                      <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${t.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                        {t.type === 'income' ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
                      </div>
-                     <div>
-                       <div className="text-xs font-bold text-slate-900">{t.description}</div>
-                       <div className="text-[10px] text-muted-foreground">{t.category}</div>
+                      <div className="truncate">
+                        <div className="text-xs font-bold text-slate-900 truncate">{t.description}</div>
+                        <div className="text-[10px] text-muted-foreground">{t.category} • {t.payment_date ? new Date(t.payment_date).toLocaleDateString('pt-BR') : 'Sem data'}</div>
                      </div>
                    </div>
-                   <div className={`text-xs font-black ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                     {t.type === 'income' ? '+' : '-'} R$ {t.amount.toLocaleString('pt-BR')}
+                    <div className="flex items-center gap-2">
+                      <div className={`text-xs font-black ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                        {t.type === 'income' ? '+' : '-'} R$ {t.amount.toLocaleString('pt-BR')}
+                      </div>
+                      <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => { setEditingTransaction(t); setIsFormOpen(true); }}
+                          className="p-1 hover:text-blue-600 transition-colors"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(t.id)}
+                          className="p-1 hover:text-red-600 transition-colors"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
                    </div>
                  </div>
                ))}
@@ -367,11 +410,12 @@ export function FinanceDashboard() {
          </Card>
        </div>
  
-       <TransactionForm 
-         open={isFormOpen} 
-         onOpenChange={setIsFormOpen} 
-         onSave={handleSave} 
-       />
+         <TransactionForm 
+           open={isFormOpen} 
+           onOpenChange={(open) => { setIsFormOpen(open); if (!open) setEditingTransaction(null); }} 
+           onSave={handleSave} 
+           transaction={editingTransaction}
+         />
      </div>
    );
  }
