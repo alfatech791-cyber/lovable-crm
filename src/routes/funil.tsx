@@ -488,7 +488,7 @@ type Deal = {
                  </p>
                </div>
              </div>
-            ) : (
+            ) : viewMode === "kanban" ? (
               <div className="flex-1 overflow-x-auto p-6 scrollbar-thin">
                 <div className="flex gap-6 h-full min-w-max">
                   {stages.map((stage) => (
@@ -520,6 +520,139 @@ type Deal = {
                     </div>
                     <span className="text-xs font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Nova Etapa</span>
                   </div>
+                </div>
+              </div>
+            ) : (
+              /* View de Chat Integrada */
+              <div className="flex-1 flex overflow-hidden bg-background">
+                {/* Lista de Conversas */}
+                <div className="w-80 border-r border-border flex flex-col bg-card/20">
+                  <div className="p-4 border-b border-border">
+                    <div className="relative">
+                      <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                      <Input 
+                        placeholder="Filtrar conversas..." 
+                        className="pl-9 h-9 text-xs bg-muted/50 border-none rounded-lg"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex-1 overflow-y-auto">
+                    {conversations.length === 0 ? (
+                      <div className="p-8 text-center">
+                        <MessageSquare className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Nenhuma conversa</p>
+                      </div>
+                    ) : (
+                      conversations
+                        .filter(c => 
+                          (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
+                          c.contact_phone.includes(searchTerm)
+                        )
+                        .map((conv) => (
+                        <button
+                          key={conv.id}
+                          onClick={() => {
+                            setCurrentConversation(conv);
+                            setChatOpen(true);
+                          }}
+                          className={cn(
+                            "w-full p-4 flex items-start gap-3 border-b border-border/50 hover:bg-primary/5 transition-all text-left relative",
+                            currentConversation?.id === conv.id && "bg-primary/5"
+                          )}
+                        >
+                          {currentConversation?.id === conv.id && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />}
+                          <div className="h-10 w-10 rounded-xl bg-primary/10 grid place-items-center shrink-0">
+                            <User className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between mb-0.5">
+                              <p className="text-xs font-black truncate text-foreground">{conv.contact_name || conv.contact_phone}</p>
+                              <span className="text-[9px] font-bold text-muted-foreground shrink-0 uppercase">
+                                {formatDistanceToNow(new Date(conv.last_message_at), { addSuffix: false, locale: ptBR })}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground truncate font-medium">
+                              {conv.transcript?.[conv.transcript.length - 1]?.content || "Inicie uma conversa"}
+                            </p>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Área de Chat Principal */}
+                <div className="flex-1 flex flex-col bg-muted/5">
+                  {currentConversation ? (
+                    <div className="flex-1 flex flex-col h-full overflow-hidden">
+                      {/* Header do Chat na View Principal */}
+                      <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-card">
+                        <div className="flex items-center gap-4">
+                          <div className="h-10 w-10 rounded-xl bg-primary/10 grid place-items-center border border-primary/20">
+                            <User className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-black text-foreground">{currentConversation.contact_name || currentConversation.contact_phone}</p>
+                            <div className="flex items-center gap-1.5">
+                              <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">WhatsApp Ativo</span>
+                            </div>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={toggleHandoff} className="h-9 px-4 rounded-xl font-bold text-[10px] uppercase tracking-wider">
+                          {currentConversation.status === "handed_off" ? "Reativar Bot" : "Pausar Bot"}
+                        </Button>
+                      </div>
+
+                      {/* Mensagens */}
+                      <div ref={scrollRef} className="flex-1 overflow-y-auto px-8 py-6 space-y-4">
+                        {currentConversation.transcript?.map((m, i) => {
+                          const mine = m.role === "agent" || m.sent;
+                          return (
+                            <div key={i} className={cn("flex flex-col max-w-[70%]", mine ? "ml-auto items-end" : "items-start")}>
+                              <div className={cn(
+                                "px-4 py-3 rounded-2xl text-sm shadow-sm",
+                                mine ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-card border border-border rounded-tl-none"
+                              )}>
+                                <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
+                              </div>
+                              {m.at && (
+                                <span className="text-[9px] font-bold text-muted-foreground/40 mt-1 uppercase">
+                                  {formatDistanceToNow(new Date(m.at), { addSuffix: true, locale: ptBR })}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Input Principal */}
+                      <div className="p-6 bg-background border-t border-border">
+                        <div className="flex items-end gap-3 bg-muted/30 p-2 rounded-2xl border border-border/50">
+                          <textarea
+                            placeholder="Escreva sua mensagem..."
+                            className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-3 px-2 resize-none max-h-32"
+                            rows={1}
+                            value={messageText}
+                            onChange={(e) => setMessageText(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), sendMessage())}
+                          />
+                          <Button size="icon" className="h-11 w-11 rounded-xl shadow-lg shadow-primary/20" onClick={sendMessage} disabled={!messageText.trim() || sending}>
+                            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex-1 grid place-items-center opacity-50">
+                      <div className="text-center">
+                        <MessageSquare className="h-16 w-16 mx-auto mb-4 text-muted-foreground/20" />
+                        <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Selecione uma conversa para começar</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
