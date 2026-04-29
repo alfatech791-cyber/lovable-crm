@@ -260,12 +260,12 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
 
     {/* Flyout: segundo painel dedicado */}
     {flyout && (
-      <aside className="relative z-40 w-[280px] shrink-0 bg-sidebar border-l border-sidebar-border/40 text-sidebar-foreground flex flex-col shadow-2xl animate-in slide-in-from-left-4 duration-200">
-          <div className="flex items-center justify-between px-5 h-[68px] border-b border-sidebar-border">
+      <aside className="relative z-40 w-[280px] shrink-0 bg-sidebar border-l border-sidebar-border/40 text-sidebar-foreground flex flex-col shadow-2xl animate-in slide-in-from-left-4 duration-300">
+          <div className="flex items-center justify-between px-5 h-[68px] border-b border-sidebar-border shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="h-9 w-9 rounded-xl bg-gradient-primary grid place-items-center shadow-glow">
                 {(() => {
-                  const FIcon = (Icons as any)[flyout.icon] || Icons.HelpCircle;
+                  const FIcon = (Icons as any)[flyout.icon] || HelpCircle;
                   return <FIcon className="h-4.5 w-4.5 text-white" strokeWidth={2.5} />;
                 })()}
               </div>
@@ -292,22 +292,23 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
                   key={child.url}
                   to={child.url}
                   onClick={() => setFlyout(null)}
-                  className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all
-                    ${isActive
+                  className={cn(
+                    "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all",
+                    isActive
                       ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-glow"
                       : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-white"
-                    }`}
+                  )}
                 >
                   {ChildIcon ? (
                     <ChildIcon className="h-[16px] w-[16px]" strokeWidth={isActive ? 2.4 : 2} />
                   ) : (
                     <span className="h-1.5 w-1.5 rounded-full bg-current opacity-50" />
                   )}
-                  <span className="flex-1">{child.title}</span>
+                  <span className="flex-1 truncate">{child.title}</span>
                   {child.badge && (
                     <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary/20 text-primary uppercase">{child.badge}</span>
                   )}
-                  <ChevronRight className={`h-3.5 w-3.5 transition-opacity ${isActive ? "opacity-80" : "opacity-0 group-hover:opacity-60"}`} />
+                  <ChevronRight className={cn("h-3.5 w-3.5 transition-opacity", isActive ? "opacity-80" : "opacity-0 group-hover:opacity-60")} />
                 </Link>
               );
             })}
@@ -327,6 +328,6 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
           </div>
       </aside>
     )}
-    </>
+    </TooltipProvider>
   );
 }
