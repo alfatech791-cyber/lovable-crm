@@ -212,9 +212,9 @@ export function TasksCard() {
      (async () => {
        const today = new Date();
        today.setHours(0,0,0,0);
-       const { count: total } = await supabase.from("messages").select("*", { count: 'exact', head: true }).eq("user_id", user.id).gte("created_at", today.toISOString());
+       const { count: total, error: totalErr } = await supabase.from("messages").select("*", { count: 'exact', head: true }).eq("user_id", user.id).gte("created_at", today.toISOString());
        const { count: sent } = await supabase.from("messages").select("*", { count: 'exact', head: true }).eq("user_id", user.id).eq("direction", "outgoing").gte("created_at", today.toISOString());
-       const { count: received } = await supabase.from("messages").select("*", { count: 'exact', head: true }).eq("user_id", user.id).eq("direction", "incoming").gte("created_at", today.toISOString());
+       const { count: received, error: recvErr } = await supabase.from("messages").select("*", { count: 'exact', head: true }).eq("user_id", user.id).eq("direction", "incoming").gte("created_at", today.toISOString());
        setStats({ total: total || 0, sent: sent || 0, received: received || 0 });
      })();
    }, [user?.id]);
