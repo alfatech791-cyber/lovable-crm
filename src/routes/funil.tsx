@@ -4,7 +4,7 @@ import { Topbar } from "@/components/layout/Topbar";
  import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-   import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp, MessageSquare, MessageCircle, X, Send, Bot, User, UserCog, PauseCircle, PlayCircle, RefreshCw, ChevronRight, Sparkles, CreditCard, Users, Clock, Wifi } from "lucide-react";
+    import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp, MessageSquare, MessageCircle, X, Send, Bot, User, UserCog, PauseCircle, PlayCircle, RefreshCw, ChevronRight, Sparkles, CreditCard, Users, Clock, Wifi, Image as ImageIcon, Smile, Type, Pencil, Download, Crop } from "lucide-react";
  import { formatDistanceToNow } from "date-fns";
  import { ptBR } from "date-fns/locale";
  import { evolution } from "@/lib/evolution";
@@ -169,8 +169,10 @@ type Deal = {
    const [chatOpen, setChatOpen] = useState(false);
    const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
    const [chatLoading, setChatLoading] = useState(false);
-   const [messageText, setMessageText] = useState("");
-   const [sending, setSending] = useState(false);
+    const [messageText, setMessageText] = useState("");
+    const [sending, setSending] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const addStage = () => setAddingStage(true);
@@ -206,22 +208,59 @@ type Deal = {
      }
    };
  
-   const sendMessage = async () => {
-     if (!currentConversation || !messageText.trim() || sending) return;
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file && file.type.startsWith("image/")) {
+        setSelectedImage(file);
+        const url = URL.createObjectURL(file);
+        setImagePreview(url);
+      } else if (file) {
+        toast.error("Por favor, selecione um arquivo de imagem.");
+      }
+    };
+
+    const clearImage = () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      setSelectedImage(null);
+      setImagePreview(null);
+    };
+
+    const sendMessage = async () => {
+      if (!currentConversation || (!messageText.trim() && !selectedImage) || sending) return;
      setSending(true);
-     try {
-       const { data, error } = await supabase.functions.invoke("send-whatsapp", {
-         body: {
-           phone: currentConversation.contact_phone,
-           text: messageText.trim(),
-           contactName: currentConversation.contact_name,
-         },
-       });
-       if (error) throw error;
-       setMessageText("");
-       // O Realtime deve atualizar a conversa, mas vamos recarregar para garantir
-       loadConversation(currentConversation.contact_phone);
-     } catch (e: any) {
+      try {
+        let body: any = {
+          phone: currentConversation.contact_phone,
+          text: messageText.trim(),
+          contactName: currentConversation.contact_name,
+        };
+
+        if (selectedImage) {
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve) => {
+            reader.onloadend = () => {
+              const base64 = (reader.result as string).split(",")[1];
+              resolve(base64);
+            };
+          });
+          reader.readAsDataURL(selectedImage);
+          const base64 = await base64Promise;
+
+          body = {
+            ...body,
+            kind: "image",
+            media: base64,
+            mimetype: selectedImage.type,
+            fileName: selectedImage.name,
+          };
+        }
+
+        const { data, error } = await supabase.functions.invoke("send-whatsapp", { body });
+        if (error) throw error;
+        setMessageText("");
+        clearImage();
+        loadConversation(currentConversation.contact_phone);
+      } catch (e: any) {
        toast.error(e?.message ?? "Erro ao enviar");
      } finally {
        setSending(false);
@@ -791,7 +830,52 @@ type Deal = {
                 </div>
 
                 {/* Área de Chat Principal */}
-                <div className="flex-1 flex flex-col bg-muted/5">
+                <div className="flex-1 flex flex-col bg-muted/5 relative">
+                  {imagePreview && (
+                    <div className="absolute inset-0 z-[60] bg-[#f0f2f5] flex flex-col animate-in fade-in duration-200">
+                      <div className="h-16 px-6 flex items-center justify-between bg-[#f0f2f5]">
+                        <div className="flex items-center gap-4">
+                          <button onClick={clearImage} className="p-2 hover:bg-black/5 rounded-full transition"><X className="h-5 w-5" /></button>
+                          <span className="text-sm font-medium">Enviar imagem</span>
+                        </div>
+                        <div className="flex items-center gap-6">
+                          <button className="p-2 hover:bg-black/5 rounded-full transition"><Crop className="h-5 w-5" /></button>
+                          <button className="p-2 hover:bg-black/5 rounded-full transition"><Smile className="h-5 w-5" /></button>
+                          <button className="p-2 hover:bg-black/5 rounded-full transition"><Type className="h-5 w-5" /></button>
+                          <button className="p-2 hover:bg-black/5 rounded-full transition"><Pencil className="h-5 w-5" /></button>
+                        </div>
+                      </div>
+                      <div className="flex-1 flex items-center justify-center p-8 bg-[#e9edef] overflow-hidden">
+                        <img src={imagePreview} alt="Preview" className="max-w-full max-h-full object-contain shadow-xl" />
+                      </div>
+                      <div className="p-4 bg-[#f0f2f5] flex flex-col items-center gap-4">
+                        <div className="w-full max-w-3xl relative">
+                          <input
+                            type="text"
+                            placeholder="Adicionar legenda..."
+                            className="w-full h-12 pl-4 pr-12 rounded-lg bg-white border-none text-sm outline-none shadow-sm"
+                            value={messageText}
+                            onChange={(e) => setMessageText(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                          />
+                          <button className="absolute right-3 top-1/2 -translate-y-1/2 text-[#54656f]"><Smile className="h-5 w-5" /></button>
+                        </div>
+                        <div className="flex items-center justify-between w-full px-4">
+                          <div className="flex gap-2">
+                            <div className="w-14 h-14 rounded-lg border-2 border-[#00a884] p-1 bg-white overflow-hidden"><img src={imagePreview} className="w-full h-full object-cover rounded-sm" /></div>
+                            <button className="w-14 h-14 rounded-lg border border-dashed border-gray-400 flex items-center justify-center text-gray-500 hover:bg-black/5 transition"><Plus className="h-5 w-5" /></button>
+                          </div>
+                          <button
+                            onClick={sendMessage}
+                            disabled={sending}
+                            className="w-14 h-14 rounded-full bg-[#00a884] hover:bg-[#008f6f] text-white flex items-center justify-center shadow-lg transition-transform active:scale-95 disabled:opacity-50"
+                          >
+                            {sending ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6 fill-current" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {currentConversation ? (
                     <div className="flex-1 flex flex-col h-full overflow-hidden">
                       {/* Header do Chat na View Principal */}
@@ -838,6 +922,12 @@ type Deal = {
                       {/* Input Principal */}
                       <div className="p-6 bg-background border-t border-border">
                         <div className="flex items-end gap-3 bg-muted/30 p-2 rounded-2xl border border-border/50">
+                          <div className="flex items-center gap-1 px-1">
+                            <button onClick={() => document.getElementById("funil-image-upload-main")?.click()} className="p-2 text-muted-foreground hover:text-primary transition-colors">
+                              <ImageIcon className="h-5 w-5" />
+                            </button>
+                            <input id="funil-image-upload-main" type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+                          </div>
                           <textarea
                             placeholder="Escreva sua mensagem..."
                             className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-3 px-2 resize-none max-h-32"
@@ -846,7 +936,7 @@ type Deal = {
                             onChange={(e) => setMessageText(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), sendMessage())}
                           />
-                          <Button size="icon" className="h-11 w-11 rounded-xl shadow-lg shadow-primary/20" onClick={sendMessage} disabled={!messageText.trim() || sending}>
+                          <Button size="icon" className="h-11 w-11 rounded-xl shadow-lg shadow-primary/20" onClick={sendMessage} disabled={(!messageText.trim() && !selectedImage) || sending}>
                             {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                           </Button>
                         </div>
@@ -868,6 +958,51 @@ type Deal = {
        {/* Painel Lateral de Chat Refinado */}
        {viewMode === "kanban" && chatOpen && (
          <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[450px] bg-background border-l border-border shadow-[0_0_50px_rgba(0,0,0,0.15)] flex flex-col z-[100] animate-in slide-in-from-right duration-300">
+            {imagePreview && (
+              <div className="absolute inset-0 z-[110] bg-[#f0f2f5] flex flex-col animate-in fade-in duration-200">
+                <div className="h-16 px-6 flex items-center justify-between bg-[#f0f2f5]">
+                  <div className="flex items-center gap-4">
+                    <button onClick={clearImage} className="p-2 hover:bg-black/5 rounded-full transition"><X className="h-5 w-5" /></button>
+                    <span className="text-sm font-medium">Enviar imagem</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button className="p-1.5 hover:bg-black/5 rounded-full transition"><Crop className="h-4 w-4" /></button>
+                    <button className="p-1.5 hover:bg-black/5 rounded-full transition"><Smile className="h-4 w-4" /></button>
+                    <button className="p-1.5 hover:bg-black/5 rounded-full transition"><Type className="h-4 w-4" /></button>
+                    <button className="p-1.5 hover:bg-black/5 rounded-full transition"><Pencil className="h-4 w-4" /></button>
+                  </div>
+                </div>
+                <div className="flex-1 flex items-center justify-center p-4 bg-[#e9edef] overflow-hidden">
+                  <img src={imagePreview} alt="Preview" className="max-w-full max-h-full object-contain shadow-xl" />
+                </div>
+                <div className="p-4 bg-[#f0f2f5] flex flex-col items-center gap-4">
+                  <div className="w-full relative">
+                    <input
+                      type="text"
+                      placeholder="Adicionar legenda..."
+                      className="w-full h-11 pl-4 pr-10 rounded-lg bg-white border-none text-sm outline-none shadow-sm"
+                      value={messageText}
+                      onChange={(e) => setMessageText(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                    />
+                    <button className="absolute right-3 top-1/2 -translate-y-1/2 text-[#54656f]"><Smile className="h-4 w-4" /></button>
+                  </div>
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex gap-2">
+                      <div className="w-12 h-12 rounded-lg border-2 border-[#00a884] p-1 bg-white overflow-hidden"><img src={imagePreview} className="w-full h-full object-cover rounded-sm" /></div>
+                      <button className="w-12 h-12 rounded-lg border border-dashed border-gray-400 flex items-center justify-center text-gray-500 hover:bg-black/5 transition"><Plus className="h-4 w-4" /></button>
+                    </div>
+                    <button
+                      onClick={sendMessage}
+                      disabled={sending}
+                      className="w-12 h-12 rounded-full bg-[#00a884] hover:bg-[#008f6f] text-white flex items-center justify-center shadow-lg transition-transform active:scale-95 disabled:opacity-50"
+                    >
+                      {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5 fill-current" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Header do Chat */}
             <div className="px-6 py-4 border-b border-border flex flex-col gap-3 bg-card/50 backdrop-blur-md sticky top-0 z-10">
               <div className="flex items-center justify-between">
@@ -968,32 +1103,38 @@ type Deal = {
              )}
            </div>
  
-           {/* Input de Mensagem */}
-           <div className="p-6 border-t border-border bg-background shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
-             <div className="relative flex items-end gap-3 bg-muted/30 p-2 rounded-2xl border border-border/50 focus-within:border-primary/30 transition-all">
-               <textarea
-                 placeholder="Digite sua mensagem aqui..."
-                 value={messageText}
-                 onChange={(e) => setMessageText(e.target.value)}
-                 onKeyDown={(e) => { 
-                   if (e.key === "Enter" && !e.shiftKey) { 
-                     e.preventDefault(); 
-                     sendMessage(); 
-                   } 
-                 }}
-                 rows={1}
-                 disabled={!currentConversation || sending}
-                 className="flex-1 max-h-32 min-h-[44px] bg-transparent border-none focus:ring-0 text-sm py-3 px-2 resize-none scrollbar-hide"
-               />
-               <Button 
-                size="icon" 
-                className="h-11 w-11 rounded-xl shrink-0 shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all" 
-                onClick={sendMessage} 
-                disabled={!currentConversation || sending || !messageText.trim()}
-               >
-                 {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-               </Button>
-             </div>
+            {/* Input de Mensagem */}
+            <div className="p-6 border-t border-border bg-background shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
+              <div className="relative flex items-end gap-3 bg-muted/30 p-2 rounded-2xl border border-border/50 focus-within:border-primary/30 transition-all">
+                <div className="flex items-center gap-1 px-1">
+                  <button onClick={() => document.getElementById("funil-image-upload-sidebar")?.click()} className="p-2 text-muted-foreground hover:text-primary transition-colors">
+                    <ImageIcon className="h-5 w-5" />
+                  </button>
+                  <input id="funil-image-upload-sidebar" type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
+                </div>
+                <textarea
+                  placeholder="Digite sua mensagem aqui..."
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  onKeyDown={(e) => { 
+                    if (e.key === "Enter" && !e.shiftKey) { 
+                      e.preventDefault(); 
+                      sendMessage(); 
+                    } 
+                  }}
+                  rows={1}
+                  disabled={!currentConversation || sending}
+                  className="flex-1 max-h-32 min-h-[44px] bg-transparent border-none focus:ring-0 text-sm py-3 px-2 resize-none scrollbar-hide"
+                />
+                <Button 
+                 size="icon" 
+                 className="h-11 w-11 rounded-xl shrink-0 shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all" 
+                 onClick={sendMessage} 
+                 disabled={!currentConversation || sending || (!messageText.trim() && !selectedImage)}
+                >
+                  {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                </Button>
+              </div>
              <div className="flex items-center justify-between mt-3 px-1">
                <p className="text-[10px] text-muted-foreground/60 font-medium">
                  Pressione <span className="font-bold">Enter</span> para enviar
