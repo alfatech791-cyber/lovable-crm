@@ -1136,7 +1136,19 @@ function ConversasPage() {
                 </button>
               </div>
 
-              <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto space-y-4 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-fixed bg-opacity-5 scroll-smooth custom-scrollbar relative">
+               <div 
+                 ref={scrollRef} 
+                 onScroll={handleScroll}
+                 className="flex-1 p-6 overflow-y-auto space-y-4 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-fixed bg-opacity-5 scroll-smooth custom-scrollbar relative"
+               >
+                   {showScrollBottom && (
+                     <button
+                       onClick={() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" })}
+                       className="fixed bottom-24 right-8 z-50 h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center animate-in zoom-in-50 duration-300 hover:scale-110 active:scale-95"
+                     >
+                       <ChevronDown className="h-5 w-5" />
+                     </button>
+                   )}
                 <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background/80 pointer-events-none" />
                 {(selected.transcript ?? []).length === 0 ? (
                   <div className="text-xs text-center text-muted-foreground py-10">Sem mensagens registradas.</div>
