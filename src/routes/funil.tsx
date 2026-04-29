@@ -399,8 +399,8 @@ type Deal = {
            if (hasA !== hasB) return hasB - hasA;
          }
          // Default to recent (last message or creation date)
-         const dateA = a.last_message_at || (a as any).created_at || "";
-         const dateB = b.last_message_at || (b as any).created_at || "";
+          const dateA = a.last_message_at || (a as any).updated_at || (a as any).created_at || "";
+          const dateB = b.last_message_at || (b as any).updated_at || (b as any).created_at || "";
          return new Date(dateB).getTime() - new Date(dateA).getTime();
        });
  
