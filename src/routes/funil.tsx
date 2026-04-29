@@ -981,11 +981,11 @@ type Deal = {
                   </button>
                 </div>
              </div>
-           </div>
-         </div>
-       )}
+            </div>
+          </div>
+        )}
 
-      <AddDealDialog 
+        <AddDealDialog 
          open={!!adding} 
          onOpenChange={(o) => !o && setAdding(null)}
          initialStageId={adding?.stage_id || ""}
