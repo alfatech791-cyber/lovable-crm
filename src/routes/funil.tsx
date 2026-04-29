@@ -496,74 +496,145 @@ type Deal = {
           </main>
       </div>
 
-      {/* Painel Lateral de Chat (Apenas no modo Kanban) */}
-      {viewMode === "kanban" && chatOpen && (
-        <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[420px] bg-card border-l border-border shadow-2xl flex flex-col z-50">
-          <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-muted/30">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="h-9 w-9 rounded-full bg-primary/10 grid place-items-center shrink-0">
-                <User className="h-4 w-4 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-bold truncate">
-                  {currentConversation?.contact_name || currentConversation?.contact_phone || "Conversa"}
-                </p>
-                <p className="text-[10px] text-muted-foreground truncate">
-                  {currentConversation?.contact_phone}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1">
-              {currentConversation && (
-                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={toggleHandoff} title={currentConversation.status === "handed_off" ? "Reativar bot" : "Pausar bot"}>
-                  {currentConversation.status === "handed_off" ? <PlayCircle className="h-4 w-4" /> : <PauseCircle className="h-4 w-4" />}
-                </Button>
-              )}
-              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setChatOpen(false)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/10">
-            {chatLoading ? (
-              <div className="grid place-items-center h-full">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : !currentConversation ? (
-              <div className="grid place-items-center h-full text-center text-xs text-muted-foreground px-6">
-                Nenhuma conversa encontrada para este lead. Envie uma mensagem para iniciar.
-              </div>
-            ) : (
-              currentConversation.transcript?.map((m, i) => {
-                const mine = m.role === "agent" || m.sent;
-                return (
-                  <div key={i} className={cn("flex", mine ? "justify-end" : "justify-start")}>
-                    <div className={cn("max-w-[80%] rounded-2xl px-3 py-2 text-sm shadow-sm", mine ? "bg-primary text-primary-foreground" : "bg-card border border-border")}>
-                      <p className="whitespace-pre-wrap break-words">{m.content}</p>
-                      {m.at && <p className="text-[9px] opacity-60 mt-1">{formatDistanceToNow(new Date(m.at), { addSuffix: true, locale: ptBR })}</p>}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-
-          <div className="p-3 border-t border-border bg-background flex items-center gap-2">
-            <Input
-              placeholder="Escreva uma mensagem..."
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-              disabled={!currentConversation || sending}
-              className="flex-1 h-9 text-sm"
-            />
-            <Button size="icon" className="h-9 w-9" onClick={sendMessage} disabled={!currentConversation || sending || !messageText.trim()}>
-              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-            </Button>
-          </div>
-        </div>
-      )}
+       {/* Painel Lateral de Chat Refinado */}
+       {viewMode === "kanban" && chatOpen && (
+         <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[450px] bg-background border-l border-border shadow-[0_0_50px_rgba(0,0,0,0.15)] flex flex-col z-[100] animate-in slide-in-from-right duration-300">
+           {/* Header do Chat */}
+           <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-card/50 backdrop-blur-md sticky top-0 z-10">
+             <div className="flex items-center gap-4 min-w-0">
+               <div className="relative">
+                 <div className="h-11 w-11 rounded-2xl bg-primary/10 grid place-items-center shrink-0 border border-primary/20">
+                   <User className="h-5 w-5 text-primary" />
+                 </div>
+                 {currentConversation?.status !== "handed_off" && (
+                   <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 border-2 border-background flex items-center justify-center">
+                     <Bot className="h-2 w-2 text-white" />
+                   </div>
+                 )}
+               </div>
+               <div className="min-w-0">
+                 <p className="text-sm font-black truncate text-foreground tracking-tight">
+                   {currentConversation?.contact_name || currentConversation?.contact_phone || "Lead Sem Nome"}
+                 </p>
+                 <div className="flex items-center gap-1.5">
+                   <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                   <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                     Online via WhatsApp
+                   </p>
+                 </div>
+               </div>
+             </div>
+             <div className="flex items-center gap-2">
+               {currentConversation && (
+                 <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className={cn("h-9 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all", 
+                    currentConversation.status === "handed_off" ? "border-amber-500/50 text-amber-600 bg-amber-500/5" : "border-primary/30 text-primary bg-primary/5")} 
+                  onClick={toggleHandoff}
+                 >
+                   {currentConversation.status === "handed_off" ? (
+                     <><PlayCircle className="h-3.5 w-3.5" /> Reativar Bot</>
+                   ) : (
+                     <><PauseCircle className="h-3.5 w-3.5" /> Pausar Bot</>
+                   )}
+                 </Button>
+               )}
+               <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl hover:bg-muted" onClick={() => setChatOpen(false)}>
+                 <X className="h-5 w-5" />
+               </Button>
+             </div>
+           </div>
+ 
+           {/* Área de Mensagens */}
+           <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-6 bg-muted/5 scrollbar-thin">
+             {chatLoading ? (
+               <div className="grid place-items-center h-full">
+                 <div className="flex flex-col items-center gap-3">
+                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Carregando conversa...</span>
+                 </div>
+               </div>
+             ) : !currentConversation ? (
+               <div className="grid place-items-center h-full text-center px-10">
+                 <div className="bg-muted/30 p-8 rounded-[40px] border-2 border-dashed border-border/50">
+                   <MessageSquare className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+                   <p className="text-xs font-bold text-muted-foreground leading-relaxed">
+                     Nenhuma conversa encontrada. Inicie um atendimento agora mesmo enviando uma mensagem.
+                   </p>
+                 </div>
+               </div>
+             ) : (
+               <div className="flex flex-col gap-4">
+                 {currentConversation.transcript?.map((m, i) => {
+                   const mine = m.role === "agent" || m.sent;
+                   const isBot = m.role === "assistant";
+                   
+                   return (
+                     <div key={i} className={cn("flex flex-col max-w-[85%]", mine ? "ml-auto items-end" : "items-start")}>
+                       <div className={cn(
+                         "relative px-4 py-3 rounded-2xl text-sm shadow-sm transition-all hover:shadow-md",
+                         mine ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-card border border-border rounded-tl-none",
+                         isBot && "border-primary/30 bg-primary/5 text-foreground"
+                       )}>
+                         {isBot && (
+                           <div className="flex items-center gap-1 mb-1 opacity-60">
+                             <Bot className="h-3 w-3" />
+                             <span className="text-[9px] font-black uppercase">Auto-Atendimento</span>
+                           </div>
+                         )}
+                         <p className="whitespace-pre-wrap break-words leading-relaxed font-medium">{m.content}</p>
+                       </div>
+                       {m.at && (
+                         <span className="text-[9px] font-bold text-muted-foreground/50 mt-1.5 px-1 uppercase tracking-tighter">
+                           {formatDistanceToNow(new Date(m.at), { addSuffix: true, locale: ptBR })}
+                         </span>
+                       )}
+                     </div>
+                   );
+                 })}
+               </div>
+             )}
+           </div>
+ 
+           {/* Input de Mensagem */}
+           <div className="p-6 border-t border-border bg-background shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
+             <div className="relative flex items-end gap-3 bg-muted/30 p-2 rounded-2xl border border-border/50 focus-within:border-primary/30 transition-all">
+               <textarea
+                 placeholder="Digite sua mensagem aqui..."
+                 value={messageText}
+                 onChange={(e) => setMessageText(e.target.value)}
+                 onKeyDown={(e) => { 
+                   if (e.key === "Enter" && !e.shiftKey) { 
+                     e.preventDefault(); 
+                     sendMessage(); 
+                   } 
+                 }}
+                 rows={1}
+                 disabled={!currentConversation || sending}
+                 className="flex-1 max-h-32 min-h-[44px] bg-transparent border-none focus:ring-0 text-sm py-3 px-2 resize-none scrollbar-hide"
+               />
+               <Button 
+                size="icon" 
+                className="h-11 w-11 rounded-xl shrink-0 shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all" 
+                onClick={sendMessage} 
+                disabled={!currentConversation || sending || !messageText.trim()}
+               >
+                 {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+               </Button>
+             </div>
+             <div className="flex items-center justify-between mt-3 px-1">
+               <p className="text-[10px] text-muted-foreground/60 font-medium">
+                 Pressione <span className="font-bold">Enter</span> para enviar
+               </p>
+               <div className="flex gap-2">
+                 <button className="text-[10px] font-black text-primary/70 uppercase tracking-widest hover:text-primary transition-colors">Templates</button>
+                 <button className="text-[10px] font-black text-primary/70 uppercase tracking-widest hover:text-primary transition-colors">Anexar</button>
+               </div>
+             </div>
+           </div>
+         </div>
+       )}
 
       <Dialog open={!!adding} onOpenChange={(o) => !o && setAdding(null)}>
         <DialogContent>
