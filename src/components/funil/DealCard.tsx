@@ -39,9 +39,12 @@
        </div>
 
         {/* Preview da última mensagem */}
-        <div className="mb-3 px-2 py-1.5 bg-muted/30 rounded-lg border border-border/40">
-          <p className="text-[10px] text-muted-foreground line-clamp-2 italic">
-            {deal.last_message || "Sem mensagens recentes..."}
+        <div className="mb-3 px-2 py-1.5 bg-muted/30 rounded-lg border border-border/40 hover:bg-muted/50 transition-colors cursor-pointer">
+          <div className="flex items-center gap-1 mb-1">
+            <span className="text-[9px] font-bold uppercase text-muted-foreground/70">Última interação:</span>
+          </div>
+          <p className="text-[10px] text-foreground/80 line-clamp-2 leading-relaxed">
+            {deal.last_message || "Aguardando primeira mensagem..."}
           </p>
         </div>
  
