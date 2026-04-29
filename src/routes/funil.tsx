@@ -4,7 +4,7 @@ import { Topbar } from "@/components/layout/Topbar";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
- import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown } from "lucide-react";
+  import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp } from "lucide-react";
  import { StageColumn } from "@/components/funil/StageColumn";
  import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -43,13 +43,6 @@ type Deal = { id: string; lead_id: string; stage_id: string; deal_value: number;
    );
  
    const totalPipeline = deals.reduce((sum, d) => sum + Number(d.deal_value ?? 0), 0);
-  const { user } = useAuth();
-  const [stages, setStages] = useState<Stage[]>([]);
-  const [deals, setDeals] = useState<Deal[]>([]);
-  const [leads, setLeads] = useState<{ id: string; name: string }[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [dragId, setDragId] = useState<string | null>(null);
-  const [adding, setAdding] = useState<{ stage_id: string; lead_id: string; deal_value: string } | null>(null);
 
   const load = async () => {
     if (!user?.id) return;
