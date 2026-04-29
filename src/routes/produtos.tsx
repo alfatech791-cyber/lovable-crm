@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { ShoppingBag, Plus, MoreVertical, Search, Filter, Loader2, Package, Trash2, Edit3 } from "lucide-react";
+import { X } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
