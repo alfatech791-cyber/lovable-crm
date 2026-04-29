@@ -141,7 +141,19 @@ function WhatsAppPage() {
           )}
         </main>
       </div>
-      <QrCodeModal open={modalOpen} onOpenChange={setModalOpen} initialInstanceName={selectedInstance || undefined} />
+       {modalOpen && (
+         <QrCodeModal 
+           open={modalOpen} 
+           onOpenChange={(val) => {
+             setModalOpen(val);
+             if (!val) {
+               setSelectedInstance(null);
+               load();
+             }
+           }} 
+           initialInstanceName={selectedInstance || undefined} 
+         />
+       )}
     </div>
   );
 }

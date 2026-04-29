@@ -203,11 +203,22 @@ export const evolution = {
     return res.json();
   },
 
-  async deleteInstance(instanceName: string) {
-    const res = await fetch(`${API_URL}/instance/delete/${instanceName}`, {
-      method: "DELETE",
-    });
-    return res.json();
-  }
+   async deleteInstance(instanceName: string) {
+     const res = await fetch(`${API_URL}/instance/delete/${instanceName}`, {
+       method: "DELETE",
+     });
+     return res.json();
+   },
+
+   async getConnectionState(instanceName: string) {
+     try {
+       const res = await fetch(`${API_URL}/instance/connectionState/${instanceName}`);
+       if (!res.ok) return "disconnected";
+       const data = await res.json();
+       return (data?.instance?.state || data?.state || "disconnected") as "open" | "close" | "connecting" | "disconnected";
+     } catch {
+       return "disconnected";
+     }
+   }
 };
 
