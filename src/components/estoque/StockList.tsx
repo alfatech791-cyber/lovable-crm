@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { 
   Package, Search, Plus, Filter, MoreHorizontal, ArrowUpDown, 
   AlertTriangle, Edit, Trash2, History, Layers, TrendingUp, 
-  Clock, FileDown, Smartphone, Tablet, Watch, Loader2
+  Clock, FileDown, Smartphone, Tablet, Watch, Loader2, X
 } from "lucide-react";
  import { ProductForm } from "./ProductForm";
  import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
