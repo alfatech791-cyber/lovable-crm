@@ -887,12 +887,13 @@ type Deal = {
                    )}
                  </Button>
                )}
-               <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl hover:bg-muted" onClick={() => setChatOpen(false)}>
-                 <X className="h-5 w-5" />
-               </Button>
-             </div>
-           </div>
- 
+                <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl hover:bg-muted" onClick={() => setChatOpen(false)}>
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
            {/* Área de Mensagens */}
            <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-6 bg-muted/5 scrollbar-thin">
              {chatLoading ? (
