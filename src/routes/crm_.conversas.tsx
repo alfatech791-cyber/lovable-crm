@@ -736,9 +736,6 @@ function ConversasPage() {
           endpoint = `/api/evolution/message/sendSticker/${instance}`;
           body.sticker = payload.media;
         } else if (payload.kind === "image") {
-         endpoint = `/api/evolution/message/sendSticker/${instance}`;
-         body.sticker = payload.media;
-       } else if (payload.kind === "image") {
          endpoint = `/api/evolution/message/sendMedia/${instance}`;
          body.mediatype = "image";
          body.media = payload.media;
