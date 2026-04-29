@@ -55,11 +55,6 @@ import { Search, Plus, FileText, Send, Printer, User } from "lucide-react";
      );
    });
 
-  const quotations = [
-    { id: "ORC-001", customer: "Marcos Vinicius", date: "2024-04-20", value: 3200, status: "pending", items: 2 },
-    { id: "ORC-002", customer: "Julia Mendes", date: "2024-04-19", value: 150, status: "approved", items: 1 },
-    { id: "ORC-003", customer: "Fernanda Lima", date: "2024-04-18", value: 4500, status: "expired", items: 3 },
-  ];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
