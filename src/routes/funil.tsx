@@ -413,8 +413,10 @@ type Deal = {
                    <span className="text-xs font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Nova Etapa</span>
                  </div>
                </div>
-             </div>
-         </main>
+                </div>
+              </div>
+            )}
+          </main>
       </div>
 
       {/* Painel Lateral de Chat (Apenas no modo Kanban) */}
