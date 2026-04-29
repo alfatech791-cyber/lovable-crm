@@ -787,23 +787,40 @@ function ConversasPage() {
        let endpoint = "";
        let body: any = { number: jid };
 
-       if (payload.kind === "text") {
-         endpoint = `/api/evolution/message/sendText/${instance}`;
-         body.text = payload.text;
+        if (payload.kind === "text") {
+          endpoint = `/api/evolution/message/sendText/${instance}`;
+          body = {
+            number: jid,
+            text: payload.text,
+            linkPreview: false,
+          };
         } else if (payload.kind === "audio") {
           endpoint = `/api/evolution/message/sendWhatsAppAudio/${instance}`;
-          body.audio = payload.media;
+          body = {
+            number: jid,
+            audio: payload.media,
+            delay: 1200,
+            encoding: true,
+          };
         } else if (payload.kind === "sticker") {
           endpoint = `/api/evolution/message/sendSticker/${instance}`;
-          body.sticker = payload.media;
+          body = {
+            number: jid,
+            sticker: payload.media,
+            delay: 1200,
+          };
         } else if (payload.kind === "image") {
-         endpoint = `/api/evolution/message/sendMedia/${instance}`;
-         body.mediatype = "image";
-         body.media = payload.media;
-         body.mimetype = payload.mimetype;
-         if (payload.fileName) body.fileName = payload.fileName;
-         if (payload.text) body.caption = payload.text;
-       }
+          endpoint = `/api/evolution/message/sendMedia/${instance}`;
+          body = {
+            number: jid,
+            mediatype: "image",
+            media: payload.media,
+            mimetype: payload.mimetype || "image/png",
+            caption: payload.text || "",
+            delay: 1200,
+          };
+          if (payload.fileName) body.fileName = payload.fileName;
+        }
 
        if (!endpoint) {
          toast.error("Tipo de mensagem inválido.");
