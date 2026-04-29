@@ -158,8 +158,8 @@ type Deal = {
    const [loading, setLoading] = useState(true);
    const [dragId, setDragId] = useState<string | null>(null);
    const [adding, setAdding] = useState<{ stage_id: string; lead_id: string; deal_value: string } | null>(null);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [sortBy, setSortBy] = useState<"recent" | "value">("recent");
+     const [searchTerm, setSearchTerm] = useState("");
+     const [sortBy, setSortBy] = useState<"recent" | "value" | "whatsapp">("recent");
    const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
    const [chatOpen, setChatOpen] = useState(false);
    const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
@@ -361,13 +361,18 @@ type Deal = {
         const search = searchTerm.toLowerCase();
         return leadName.includes(search) || leadPhone.includes(searchTerm);
       })
-      .sort((a, b) => {
-        if (sortBy === "value") return Number(b.deal_value || 0) - Number(a.deal_value || 0);
-        // Default to recent (last message or creation date)
-        const dateA = a.last_message_at || (a as any).created_at || "";
-        const dateB = b.last_message_at || (b as any).created_at || "";
-        return new Date(dateB).getTime() - new Date(dateA).getTime();
-      });
+       .sort((a, b) => {
+         if (sortBy === "value") return Number(b.deal_value || 0) - Number(a.deal_value || 0);
+         if (sortBy === "whatsapp") {
+           const hasA = a.lead?.source === 'whatsapp' ? 1 : 0;
+           const hasB = b.lead?.source === 'whatsapp' ? 1 : 0;
+           if (hasA !== hasB) return hasB - hasA;
+         }
+         // Default to recent (last message or creation date)
+         const dateA = a.last_message_at || (a as any).created_at || "";
+         const dateB = b.last_message_at || (b as any).created_at || "";
+         return new Date(dateB).getTime() - new Date(dateA).getTime();
+       });
  
    const totalPipeline = deals.reduce((sum, d) => sum + Number(d.deal_value ?? 0), 0);
 
@@ -584,14 +589,23 @@ type Deal = {
                    >
                     Recentes
                    </Button>
-                   <Button 
-                    variant={sortBy === "value" ? "secondary" : "ghost"} 
-                    size="sm" 
-                    className="h-8 px-3 text-[10px] font-black uppercase tracking-wider rounded-lg"
-                    onClick={() => setSortBy("value")}
-                   >
-                    Maior Valor
-                   </Button>
+                    <Button 
+                     variant={sortBy === "value" ? "secondary" : "ghost"} 
+                     size="sm" 
+                     className="h-8 px-3 text-[10px] font-black uppercase tracking-wider rounded-lg"
+                     onClick={() => setSortBy("value")}
+                    >
+                     Maior Valor
+                    </Button>
+                    <Button 
+                     variant={sortBy === "whatsapp" ? "secondary" : "ghost"} 
+                     size="sm" 
+                     className="h-8 px-3 text-[10px] font-black uppercase tracking-wider rounded-lg gap-2"
+                     onClick={() => setSortBy("whatsapp")}
+                    >
+                     <MessageCircle className="h-3 w-3" />
+                     WhatsApp
+                    </Button>
                 </div>
               </div>
   
