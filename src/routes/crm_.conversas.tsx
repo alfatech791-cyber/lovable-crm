@@ -202,6 +202,12 @@ function ConversasPage() {
   const lastIncomingMessageRef = useRef(new Map<string, string>());
   const webhookCheckedRef = useRef<string | null>(null);
   const [readState, setReadState] = useState<Record<string, number>>({});
+  const [sideInfoOpen, setSideInfoOpen] = useState(true);
+  const [localNotes, setLocalNotes] = useState("");
+  const [forwardMsg, setForwardMsg] = useState<Msg | null>(null);
+  const [isForwarding, setIsForwarding] = useState(false);
+  const [userFilter, setUserFilter] = useState<"all" | "mine">("all");
+  const [tagInput, setTagInput] = useState("");
 
   const unreadCount = (c: Conversation) => {
     const seen = readState[c.id] ?? 0;
