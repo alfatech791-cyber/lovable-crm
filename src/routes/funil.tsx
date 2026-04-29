@@ -52,7 +52,7 @@ type Deal = { id: string; lead_id: string; stage_id: string; deal_value: number;
     await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
       const [stRes, dlRes, ldRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
-        supabase.from("pipeline_leads").select("*, lead:leads(name, phone, source)").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("pipeline_leads").select("*, lead:leads(name, phone, source, messages(content, created_at))").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("leads").select("id, name").eq("user_id", user.id).order("created_at", { ascending: false }),
       ]);
      
@@ -61,7 +61,19 @@ type Deal = { id: string; lead_id: string; stage_id: string; deal_value: number;
      if (ldRes.error) toast.error("Erro ao carregar leads: " + ldRes.error.message);
 
      setStages((stRes.data as Stage[]) ?? []);
-     setDeals((dlRes.data as Deal[]) ?? []);
+      const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => {
+        const messages = deal.lead?.messages || [];
+        const lastMessage = messages.sort((a: any, b: any) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )[0]?.content;
+        
+        return {
+          ...deal,
+          last_message: lastMessage
+        };
+      }) ?? [];
+
+      setDeals(dealsWithLastMessage);
      setLeads((ldRes.data as any) ?? []);
     setLoading(false);
   };
