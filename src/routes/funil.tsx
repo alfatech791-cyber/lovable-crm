@@ -478,11 +478,22 @@ type Deal = {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button size="icon" variant="ghost" onClick={toggleHandoff}>
-                            {currentConversation.status === "handed_off" ? <PlayCircle className="h-4 w-4" /> : <PauseCircle className="h-4 w-4" />}
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-9 w-9 text-muted-foreground hover:text-primary transition-colors"
+                            onClick={toggleHandoff}
+                            title={currentConversation.status === "handed_off" ? "Reativar bot" : "Pausar bot"}
+                          >
+                            {currentConversation.status === "handed_off" ? <PlayCircle className="h-5 w-5" /> : <PauseCircle className="h-5 w-5" />}
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={() => setChatOpen(false)}>
-                            <X className="h-4 w-4" />
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-9 w-9 text-muted-foreground hover:text-destructive transition-colors"
+                            onClick={() => setChatOpen(false)}
+                          >
+                            <X className="h-5 w-5" />
                           </Button>
                         </div>
                       </div>
