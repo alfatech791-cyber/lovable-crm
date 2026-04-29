@@ -827,9 +827,8 @@ type Deal = {
                 </div>
               </div>
             )}
-          </main>
-      </div>
-
+           </main>
+ 
        {/* Painel Lateral de Chat Refinado */}
        {viewMode === "kanban" && chatOpen && (
          <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[450px] bg-background border-l border-border shadow-[0_0_50px_rgba(0,0,0,0.15)] flex flex-col z-[100] animate-in slide-in-from-right duration-300">
