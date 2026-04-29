@@ -1,4 +1,4 @@
-import { DollarSign, ArrowUpRight, ArrowDownRight, Wallet, Building2, Receipt, ArrowRight, TrendingUp, TrendingDown, PieChart, Plus, Calendar } from "lucide-react";
+ import { DollarSign, ArrowUpRight, ArrowDownRight, Wallet, Building2, Receipt, ArrowRight, TrendingUp, TrendingDown, PieChart, Plus, Calendar, Loader2 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { 
   AreaChart, 
@@ -13,14 +13,112 @@ import {
   Cell
 } from 'recharts';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-
-  const data: { name: string; receitas: number; despesas: number }[] = [];
-  
-  const despesasPorCategoria: { name: string; value: number; color: string }[] = [];
+ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+ import { useState, useEffect, useMemo } from "react";
+ import { supabase } from "@/integrations/supabase/client";
+ import { useAuth } from "@/contexts/AuthContext";
+ import { startOfMonth, endOfMonth, subMonths, format, isWithinInterval } from "date-fns";
+ import { ptBR } from "date-fns/locale";
+ import { TransactionForm } from "./TransactionForm";
+ import { toast } from "sonner";
 
 export function FinanceDashboard() {
   const navigate = useNavigate();
+   const { user } = useAuth();
+   const [transactions, setTransactions] = useState<any[]>([]);
+   const [loading, setLoading] = useState(true);
+   const [isFormOpen, setIsFormOpen] = useState(false);
+ 
+   const fetchTransactions = async () => {
+     if (!user?.id) return;
+     setLoading(true);
+     try {
+       const { data, error } = await supabase
+         .from("finance_transactions")
+         .select("*")
+         .eq("user_id", user.id);
+       if (error) throw error;
+       setTransactions(data || []);
+     } catch (error) {
+       console.error("Erro:", error);
+     } finally {
+       setLoading(false);
+     }
+   };
+ 
+   useEffect(() => {
+     fetchTransactions();
+   }, [user?.id]);
+ 
+   const stats = useMemo(() => {
+     const now = new Date();
+     const currentMonthStart = startOfMonth(now);
+     const currentMonthEnd = endOfMonth(now);
+     
+     const monthIncome = transactions
+       .filter(t => t.type === 'income' && t.payment_date && isWithinInterval(new Date(t.payment_date), { start: currentMonthStart, end: currentMonthEnd }))
+       .reduce((acc, t) => acc + (t.amount || 0), 0);
+       
+     const monthExpense = transactions
+       .filter(t => t.type === 'expense' && t.payment_date && isWithinInterval(new Date(t.payment_date), { start: currentMonthStart, end: currentMonthEnd }))
+       .reduce((acc, t) => acc + (t.amount || 0), 0);
+ 
+     const totalBalance = transactions
+       .reduce((acc, t) => acc + (t.type === 'income' ? (t.amount || 0) : -(t.amount || 0)), 0);
+ 
+     return { monthIncome, monthExpense, totalBalance };
+   }, [transactions]);
+ 
+   const chartData = useMemo(() => {
+     const data = [];
+     for (let i = 5; i >= 0; i--) {
+       const date = subMonths(new Date(), i);
+       const start = startOfMonth(date);
+       const end = endOfMonth(date);
+       const monthName = format(date, "MMM", { locale: ptBR });
+       
+       const receitas = transactions
+         .filter(t => t.type === 'income' && t.payment_date && isWithinInterval(new Date(t.payment_date), { start, end }))
+         .reduce((acc, t) => acc + (t.amount || 0), 0);
+         
+       const despesas = transactions
+         .filter(t => t.type === 'expense' && t.payment_date && isWithinInterval(new Date(t.payment_date), { start, end }))
+         .reduce((acc, t) => acc + (t.amount || 0), 0);
+         
+       data.push({ name: monthName, receitas, despesas });
+     }
+     return data;
+   }, [transactions]);
+ 
+   const despesasPorCategoria = useMemo(() => {
+     const cats: Record<string, number> = {};
+     const colors = ["#2563eb", "#ef4444", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899"];
+     
+     transactions
+       .filter(t => t.type === 'expense')
+       .forEach(t => {
+         const cat = t.category || "Geral";
+         cats[cat] = (cats[cat] || 0) + (t.amount || 0);
+       });
+       
+     return Object.entries(cats).map(([name, value], i) => ({
+       name,
+       value,
+       color: colors[i % colors.length]
+     })).sort((a, b) => b.value - a.value).slice(0, 5);
+   }, [transactions]);
+ 
+   const handleSave = async (data: any) => {
+     if (!user?.id) return;
+     try {
+       const { error } = await supabase.from("finance_transactions").insert([{ ...data, user_id: user.id }]);
+       if (error) throw error;
+       toast.success("Lançamento criado!");
+       fetchTransactions();
+     } catch (error) {
+       toast.error("Erro ao criar lançamento");
+     }
+   };
 
   return (
     <div className="space-y-6">
@@ -33,7 +131,7 @@ export function FinanceDashboard() {
           <Button variant="outline" size="sm" className="h-9 gap-2 font-bold rounded-xl border-slate-200 shadow-sm">
             <Calendar className="h-4 w-4" /> Últimos 30 dias
           </Button>
-          <Button size="sm" className="h-9 gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200">
+           <Button onClick={() => setIsFormOpen(true)} size="sm" className="h-9 gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200">
             <Plus className="h-4 w-4" /> Novo Lançamento
           </Button>
         </div>
@@ -49,10 +147,12 @@ export function FinanceDashboard() {
               <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-full uppercase tracking-tighter">+15.2% vs mês ant.</span>
             </div>
             <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Receitas (Mês)</div>
-            <div className="text-3xl font-black mt-1 flex items-baseline gap-1 text-slate-900">
-              <span className="text-sm font-bold text-muted-foreground">R$</span>
-                0,00
-            </div>
+             {loading ? <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/20" /> : (
+               <div className="text-3xl font-black mt-1 flex items-baseline gap-1 text-slate-900">
+                 <span className="text-sm font-bold text-muted-foreground">R$</span>
+                 {stats.monthIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+               </div>
+             )}
           </CardContent>
         </Card>
 
@@ -65,10 +165,12 @@ export function FinanceDashboard() {
               <span className="text-[10px] font-black text-red-600 bg-red-50 px-2 py-1 rounded-full uppercase tracking-tighter">-2.4% vs mês ant.</span>
             </div>
             <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Despesas (Mês)</div>
-            <div className="text-3xl font-black mt-1 flex items-baseline gap-1 text-slate-900">
-              <span className="text-sm font-bold text-muted-foreground">R$</span>
-                0,00
-            </div>
+             {loading ? <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/20" /> : (
+               <div className="text-3xl font-black mt-1 flex items-baseline gap-1 text-slate-900">
+                 <span className="text-sm font-bold text-muted-foreground">R$</span>
+                 {stats.monthExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+               </div>
+             )}
           </CardContent>
         </Card>
 
@@ -81,10 +183,12 @@ export function FinanceDashboard() {
               <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-full uppercase tracking-tighter">Meta: 92% atingida</span>
             </div>
             <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Saldo Projetado</div>
-            <div className="text-3xl font-black mt-1 text-blue-600 flex items-baseline gap-1">
-              <span className="text-sm font-bold">R$</span>
-                0,00
-            </div>
+             {loading ? <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/20" /> : (
+               <div className="text-3xl font-black mt-1 text-blue-600 flex items-baseline gap-1">
+                 <span className="text-sm font-bold">R$</span>
+                 {stats.totalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+               </div>
+             )}
           </CardContent>
         </Card>
       </div>
@@ -112,7 +216,7 @@ export function FinanceDashboard() {
           <CardContent>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data}>
+                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorReceitas" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1}/>
@@ -203,57 +307,11 @@ export function FinanceDashboard() {
             <CardTitle className="text-base font-black flex items-center gap-2 text-slate-900">
               <Building2 className="h-4 w-4 text-blue-600" /> Contas e Bancos
             </CardTitle>
-            <button 
-              onClick={() => navigate({ to: "/financeiro/caixa" })}
-              className="text-[11px] font-black text-blue-600 hover:underline flex items-center gap-1 uppercase tracking-wider"
-            >
-              Ver Tudo <ArrowRight className="h-3 w-3" />
-            </button>
-          </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-center text-xs text-muted-foreground py-8 italic border border-dashed border-slate-100 rounded-xl">
-                Nenhuma conta cadastrada
-              </div>
-            </CardContent>
-        </Card>
-
-        <Card className="border-border shadow-sm flex flex-col rounded-2xl">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-black flex items-center gap-2 text-slate-900">
-              <Receipt className="h-4 w-4 text-blue-600" /> Contas a Pagar/Receber
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <button 
-                onClick={() => navigate({ to: "/financeiro" })}
-                className="p-4 rounded-2xl border border-blue-100 bg-blue-50/50 hover:bg-blue-50 transition text-left group"
-              >
-                <div className="text-[10px] font-black text-blue-600 uppercase mb-1 flex items-center justify-between tracking-widest">
-                  <span>A Receber</span>
-                  <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition" />
-                </div>
-                <div className="text-lg font-black text-blue-700">R$ 0,00</div>
-              </button>
-              <button 
-                onClick={() => navigate({ to: "/financeiro" })}
-                className="p-4 rounded-2xl border border-red-100 bg-red-50/50 hover:bg-red-50 transition text-left group"
-              >
-                <div className="text-[10px] font-black text-red-600 uppercase mb-1 flex items-center justify-between tracking-widest">
-                  <span>A Pagar</span>
-                  <ArrowDownRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition" />
-                </div>
-                <div className="text-lg font-black text-red-700">R$ 0,00</div>
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div className="text-center text-xs text-muted-foreground py-8 italic border border-dashed border-slate-100 rounded-xl">
-                Nenhum lançamento recente
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+       <TransactionForm 
+         open={isFormOpen} 
+         onOpenChange={setIsFormOpen} 
+         onSave={handleSave} 
+       />
     </div>
   );
 }
