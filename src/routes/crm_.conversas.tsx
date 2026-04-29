@@ -626,11 +626,12 @@ function ConversasPage() {
           })
       : null;
 
-    const initialTimer = window.setTimeout(() => {
-      syncFromWhatsApp(false);
-    }, 300);
+    // Removido o setInterval agressivo que causava saltos na UI
+    // syncFromWhatsApp(false) já é chamado pelo Realtime e visibilitychange
+    const initialTimer = window.setTimeout(() => syncFromWhatsApp(false), 300);
 
-     const poller = window.setInterval(() => syncFromWhatsApp(false), 5000);
+    // Sincronização automática menos frequente para não sobrecarregar
+    const poller = window.setInterval(() => syncFromWhatsApp(false), 30000);
 
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
