@@ -37,10 +37,12 @@ type Deal = { id: string; lead_id: string; stage_id: string; deal_value: number;
    const [adding, setAdding] = useState<{ stage_id: string; lead_id: string; deal_value: string } | null>(null);
    const [searchTerm, setSearchTerm] = useState("");
  
-   const filteredDeals = deals.filter(d => 
-     d.lead?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     d.lead?.phone?.includes(searchTerm)
-   );
+    const filteredDeals = deals.filter(d => {
+      const leadName = d.lead?.name?.toLowerCase() || "";
+      const leadPhone = d.lead?.phone || "";
+      const search = searchTerm.toLowerCase();
+      return leadName.includes(search) || leadPhone.includes(searchTerm);
+    });
  
    const totalPipeline = deals.reduce((sum, d) => sum + Number(d.deal_value ?? 0), 0);
 
@@ -48,14 +50,19 @@ type Deal = { id: string; lead_id: string; stage_id: string; deal_value: number;
     if (!user?.id) return;
     setLoading(true);
     await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
-    const [{ data: st }, { data: dl }, { data: ld }] = await Promise.all([
-      supabase.from("funnel_stages").select("*").eq("user_id", user.id).order("order_index"),
-      supabase.from("pipeline_leads").select("*, lead:leads(name, phone)").eq("user_id", user.id),
-      supabase.from("leads").select("id, name").eq("user_id", user.id).order("created_at", { ascending: false }),
-    ]);
-    setStages((st as Stage[]) ?? []);
-    setDeals((dl as Deal[]) ?? []);
-    setLeads((ld as any) ?? []);
+     const [stRes, dlRes, ldRes] = await Promise.all([
+       supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
+       supabase.from("pipeline_leads").select("*, lead:leads(name, phone)").eq("user_id", user.id).order("created_at", { ascending: false }),
+       supabase.from("leads").select("id, name").eq("user_id", user.id).order("created_at", { ascending: false }),
+     ]);
+     
+     if (stRes.error) toast.error("Erro ao carregar estágios: " + stRes.error.message);
+     if (dlRes.error) toast.error("Erro ao carregar negociações: " + dlRes.error.message);
+     if (ldRes.error) toast.error("Erro ao carregar leads: " + ldRes.error.message);
+
+     setStages((stRes.data as Stage[]) ?? []);
+     setDeals((dlRes.data as Deal[]) ?? []);
+     setLeads((ldRes.data as any) ?? []);
     setLoading(false);
   };
 
