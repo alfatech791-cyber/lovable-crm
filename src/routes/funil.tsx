@@ -804,7 +804,7 @@ type Deal = {
                       size="sm" 
                       disabled={syncing}
                       className={cn("h-8 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all", syncing ? "bg-primary/20 text-primary animate-pulse" : "hover:bg-primary/10 hover:text-primary")}
-                      onClick={syncFromWhatsApp}
+                      onClick={() => syncFromWhatsApp(true)}
                     >
                       {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wifi className="h-3 w-3" />}
                       {syncing ? "Sincronizando..." : "Sincronizar WhatsApp"}
