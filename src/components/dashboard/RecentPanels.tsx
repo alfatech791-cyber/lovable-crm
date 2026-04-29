@@ -162,13 +162,6 @@ const etapaStyle = (e: string) => {
           </table>
         )}
       </div>
-              <tr>
-                <td colSpan={5} className="py-8 text-center text-xs text-muted-foreground italic">Sem leads captados recentemente</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }
