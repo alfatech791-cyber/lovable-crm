@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
- import { Users, Plus, MoreVertical, Search, Filter, Loader2, User, Trash2, Edit3, Phone, Mail, MapPin, DollarSign, Wrench } from "lucide-react";
+ import { Users, Plus, MoreVertical, Search, Filter, Loader2, User, Trash2, Edit3, Phone, Mail, MapPin, DollarSign, Wrench, X } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,6 +33,7 @@ function CustomersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<any | null>(null);
    const [saving, setSaving] = useState(false);
    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -301,6 +302,50 @@ function CustomersPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar title="Base de Clientes" subtitle="Gestão centralizada de contatos" />
         <main className="flex-1 overflow-y-auto p-6">
+          
+          {/* Quick Add Section */}
+          <div className={`mb-6 transition-all duration-300 overflow-hidden ${isQuickAddOpen ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}>
+            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 shadow-sm mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold flex items-center gap-2 text-primary">
+                  <Plus className="h-4 w-4" /> Cadastro Rápido de Cliente
+                </h3>
+                <button onClick={() => setIsQuickAddOpen(false)} className="text-muted-foreground hover:text-foreground">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Nome Completo</Label>
+                  <Input 
+                    placeholder="Nome do cliente..." 
+                    value={formData.full_name}
+                    onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+                    className="bg-card h-11"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">WhatsApp / Telefone</Label>
+                  <Input 
+                    placeholder="(11) 99999-9999" 
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className="bg-card h-11"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={handleSave} disabled={saving} className="flex-1 h-11 font-bold">
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                    Cadastrar Cliente
+                  </Button>
+                  <Button variant="outline" onClick={() => handleOpenModal()} className="h-11 px-4">
+                    Formulário Completo
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4 flex-1">
               <div className="relative max-w-sm w-full">
@@ -314,8 +359,8 @@ function CustomersPage() {
               </div>
             </div>
             <button 
-              onClick={() => handleOpenModal()}
-              className="h-10 px-4 rounded-xl bg-gradient-primary text-white text-sm font-semibold shadow-elegant hover:opacity-95 transition flex items-center gap-2"
+              onClick={() => setIsQuickAddOpen(!isQuickAddOpen)}
+              className={`h-10 px-4 rounded-xl text-sm font-semibold shadow-elegant transition flex items-center gap-2 ${isQuickAddOpen ? "bg-muted text-foreground hover:bg-muted/80" : "bg-gradient-primary text-white hover:opacity-95"}`}
             >
               <Plus className="h-4 w-4" /> Novo Cliente
             </button>

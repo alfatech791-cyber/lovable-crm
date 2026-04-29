@@ -2,11 +2,12 @@ import { useState, useMemo, useEffect } from "react";
 import { 
   Package, Search, Plus, Filter, MoreHorizontal, ArrowUpDown, 
   AlertTriangle, Edit, Trash2, History, Layers, TrendingUp, 
-  Clock, FileDown, Smartphone, Tablet, Watch, Loader2
+  Clock, FileDown, Smartphone, Tablet, Watch, Loader2, X
 } from "lucide-react";
  import { ProductForm } from "./ProductForm";
  import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,8 @@ import { toast } from "sonner";
    const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [viewTab, setViewTab] = useState("all");
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [quickProduct, setQuickProduct] = useState({ name: "", price: "", stock: "" });
 
     useEffect(() => {
       if (!user?.id) return;
@@ -138,8 +141,89 @@ import { toast } from "sonner";
      toast.success("Produto excluído.");
    };
 
+    const handleQuickAdd = async () => {
+      if (!user?.id) return;
+      if (!quickProduct.name.trim()) { toast.error("Nome é obrigatório"); return; }
+      setLoading(true);
+      const payload: any = {
+        user_id: user.id,
+        name: quickProduct.name.trim(),
+        price: Number(quickProduct.price || 0),
+        stock_quantity: Number(quickProduct.stock || 0),
+        category: "Acessórios",
+      };
+      const { data: row, error } = await supabase.from("products").insert(payload).select().single();
+      setLoading(false);
+      if (error) return toast.error("Erro ao criar: " + error.message);
+      setLocalProducts((prev) => [{ ...row, stock: row.stock_quantity }, ...prev]);
+      toast.success("Produto cadastrado com sucesso!");
+      setQuickProduct({ name: "", price: "", stock: "" });
+      setIsQuickAddOpen(false);
+    };
+
    return (
      <div className="space-y-6">
+        
+        {/* Quick Add Section */}
+        <div className={`transition-all duration-300 overflow-hidden ${isQuickAddOpen ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}>
+          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 shadow-sm mb-2">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold flex items-center gap-2 text-primary">
+                <Plus className="h-4 w-4" /> Cadastro Rápido de Produto
+              </h3>
+              <button onClick={() => setIsQuickAddOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              <div className="space-y-1.5 md:col-span-1">
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Nome do Produto</Label>
+                <input 
+                  placeholder="Ex: Carregador USB-C" 
+                  value={quickProduct.name}
+                  onChange={(e) => setQuickProduct({...quickProduct, name: e.target.value})}
+                  className="w-full h-11 px-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Preço (R$)</Label>
+                <input 
+                  type="number"
+                  placeholder="0,00" 
+                  value={quickProduct.price}
+                  onChange={(e) => setQuickProduct({...quickProduct, price: e.target.value})}
+                  className="w-full h-11 px-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Estoque Inicial</Label>
+                <input 
+                  type="number"
+                  placeholder="0" 
+                  value={quickProduct.stock}
+                  onChange={(e) => setQuickProduct({...quickProduct, stock: e.target.value})}
+                  className="w-full h-11 px-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleQuickAdd} 
+                  disabled={loading}
+                  className="flex-1 h-11 bg-primary text-primary-foreground rounded-xl font-bold text-sm shadow-glow hover:opacity-90 transition disabled:opacity-50"
+                >
+                  Cadastrar
+                </button>
+                <button 
+                  onClick={() => setIsAddOpen(true)}
+                  className="h-11 px-4 rounded-xl border border-border bg-card text-sm font-medium hover:bg-muted transition"
+                >
+                  Completo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-sidebar-border bg-sidebar/30">
@@ -229,7 +313,7 @@ import { toast } from "sonner";
           >
             <FileDown className="h-4 w-4" /> Exportar
           </button>
-          <button onClick={() => setIsAddOpen(true)} className="h-10 px-5 rounded-xl bg-gradient-primary text-white flex items-center gap-2 text-sm font-bold shadow-glow hover:opacity-95 transition">
+          <button onClick={() => setIsQuickAddOpen(!isQuickAddOpen)} className={`h-10 px-5 rounded-xl flex items-center gap-2 text-sm font-bold shadow-glow transition ${isQuickAddOpen ? "bg-muted text-foreground hover:bg-muted/80" : "bg-gradient-primary text-white hover:opacity-95"}`}>
             <Plus className="h-4 w-4" /> Novo Produto
           </button>
         </div>
