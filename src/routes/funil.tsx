@@ -77,8 +77,7 @@ type Deal = {
 
         if (!settings?.webhook_secret) return;
 
-        const projectRef = window.location.hostname.split('.')[0];
-        const expectedUrl = `https://${projectRef}.supabase.co/functions/v1/bot-webhook?uid=${user.id}&secret=${settings.webhook_secret}`;
+        const expectedUrl = `https://htsjkvczxlrsfapkbidq.supabase.co/functions/v1/bot-webhook?uid=${user.id}&secret=${settings.webhook_secret}`;
 
         const current = await evolution.getWebhook(instance);
         const currentUrl = current?.url ?? current?.webhook?.url ?? "";
