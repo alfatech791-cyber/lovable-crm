@@ -1322,7 +1322,7 @@ function ConversasPage() {
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey && !sending) {
                           e.preventDefault();
-                          sendText();
+                          if (text.trim()) sendText();
                         }
                       }}
                       className="flex-1 min-h-[40px] max-h-32 bg-transparent border-none outline-none shadow-none resize-none transition-all py-2 px-0 text-[14px] leading-relaxed"
