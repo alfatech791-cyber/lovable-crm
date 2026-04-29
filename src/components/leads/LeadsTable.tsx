@@ -203,7 +203,7 @@ export function LeadsTable() {
                 <Button variant="outline" onClick={exportCsv} className="gap-2">
                   <Download className="h-4 w-4" /> Exportar
                 </Button>
-                <Button onClick={() => setEditing({})} className="gap-2">
+                <Button onClick={() => setIsQuickAddOpen(!isQuickAddOpen)} className={`gap-2 ${isQuickAddOpen ? "bg-muted text-foreground hover:bg-muted/80" : ""}`}>
                   <Plus className="h-4 w-4" strokeWidth={3} /> Novo Lead
                 </Button>
               </div>
