@@ -879,8 +879,8 @@ function ConversasPage() {
           {/* Sidebar conversas */}
           <div className="w-[380px] border-r border-border/20 flex flex-col bg-card/50 backdrop-blur-xl">
             <div className="p-4 border-b border-border/20 space-y-4">
-              <div className="flex items-center justify-between px-1">
-                <div className="flex items-center gap-2.5">
+               <div className="flex items-center justify-between px-1 mb-2">
+                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
                     <MessageSquare className="h-4 w-4 text-primary" />
                   </div>
