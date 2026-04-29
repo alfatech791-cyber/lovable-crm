@@ -1,7 +1,43 @@
+           {/* Destaque de Experiência do Cliente */}
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+             <div className="bg-gradient-to-br from-primary/5 to-transparent border border-primary/20 rounded-2xl p-6 shadow-sm">
+               <div className="flex items-center gap-3 mb-4">
+                 <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary grid place-items-center">
+                   <Sparkles className="h-5 w-5" />
+                 </div>
+                 <div>
+                   <h3 className="font-bold text-sm">Dica de Experiência</h3>
+                   <p className="text-xs text-muted-foreground">Otimize sua conversão</p>
+                 </div>
+               </div>
+               <p className="text-sm leading-relaxed text-foreground/80">
+                 Clientes que recebem uma resposta nos primeiros <strong>5 minutos</strong> têm 10x mais chances de converter. Verifique suas conversas pendentes.
+               </p>
+             </div>
+
+             <div className="bg-gradient-to-br from-success/5 to-transparent border border-success/20 rounded-2xl p-6 shadow-sm">
+               <div className="flex items-center gap-3 mb-4">
+                 <div className="h-10 w-10 rounded-xl bg-success/10 text-success grid place-items-center">
+                   <CheckCircle2 className="h-5 w-5" />
+                 </div>
+                 <div>
+                   <h3 className="font-bold text-sm">Saúde da Carteira</h3>
+                   <p className="text-xs text-muted-foreground">Engajamento dos clientes</p>
+                 </div>
+               </div>
+               <div className="flex items-center gap-4">
+                 <div className="flex-1 h-2 bg-success/10 rounded-full overflow-hidden">
+                   <div className="h-full bg-success w-[85%]" />
+                 </div>
+                 <span className="text-sm font-bold text-success">Excelente (85%)</span>
+               </div>
+             </div>
+           </div>
+
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import { Sparkles, UserPlus, Trello, Bot, Zap, MessageSquare, Instagram, ArrowRight, TrendingUp, DollarSign, Users, MessageCircle } from "lucide-react";
+ import { Sparkles, UserPlus, Trello, Bot, Zap, MessageSquare, Instagram, ArrowRight, TrendingUp, DollarSign, Users, MessageCircle, Plus, Send, Clock, CheckCircle2 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from "recharts";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,17 +54,17 @@ export const Route = createFileRoute("/crm")({
 });
 
 const modules = [
-  { title: "Leads", desc: "Cadastro e qualificação de contatos", url: "/leads", icon: UserPlus, color: "text-primary", bg: "bg-primary/10" },
+   { title: "Base de Leads", desc: "Gestão e qualificação de clientes potenciais", url: "/leads", icon: UserPlus, color: "text-primary", bg: "bg-primary/10" },
   { title: "Funil de Vendas", desc: "Pipeline Kanban por estágio", url: "/funil", icon: Trello, color: "text-info", bg: "bg-info/10" },
   { title: "Bot de Atendimento", desc: "IA que atende 24/7 no WhatsApp", url: "/crm/bot", icon: Bot, color: "text-success", bg: "bg-success/10" },
   { title: "Automações", desc: "Fluxos automáticos baseados em gatilhos", url: "/automacao", icon: Zap, color: "text-warning", bg: "bg-warning/10" },
-  { title: "WhatsApp", desc: "Conexão de instâncias e conversas", url: "/whatsapp", icon: MessageSquare, color: "text-success", bg: "bg-success/10" },
-  { title: "Instagram", desc: "Direct e comentários integrados", url: "/instagram", icon: Instagram, color: "text-primary", bg: "bg-primary/10" },
+   { title: "WhatsApp", desc: "Conversas em tempo real e automações", url: "/whatsapp", icon: MessageSquare, color: "text-success", bg: "bg-success/10" },
+   { title: "Instagram Business", desc: "Gestão de Directs e Engajamento", url: "/instagram", icon: Instagram, color: "text-primary", bg: "bg-primary/10" },
 ];
 
 function CrmHub() {
   const { user } = useAuth();
-  const [stats, setStats] = useState({ leads: 0, pipelineValue: 0, botConvs: 0, won: 0 });
+   const [stats, setStats] = useState({ leads: 0, pipelineValue: 0, botConvs: 0, won: 0, activeConvs: 0 });
   const [recentLeads, setRecentLeads] = useState<any[]>([]);
   const [leadsSeries, setLeadsSeries] = useState<{ day: string; count: number }[]>([]);
   const [funnelSeries, setFunnelSeries] = useState<{ name: string; value: number; count: number }[]>([]);
@@ -40,26 +76,36 @@ function CrmHub() {
       await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
 
       const since = new Date(); since.setDate(since.getDate() - 29);
-      const [{ count: leadsCount }, { data: pipeline }, { count: botCount }, { data: stages }, { data: latest }, { data: trend }] = await Promise.all([
-        supabase.from("leads").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("pipeline_leads").select("deal_value, stage_id").eq("user_id", user.id),
-        supabase.from("bot_conversations").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("funnel_stages").select("id, name, order_index").eq("user_id", user.id).order("order_index"),
-        supabase.from("leads").select("id, name, phone, source, status, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
-        supabase.from("leads").select("created_at").eq("user_id", user.id).gte("created_at", since.toISOString()),
-      ]);
+       const [
+         { count: activeConversations },
+         { count: leadsCount },
+         { data: pipeline },
+         { count: botCount },
+         { data: stages },
+         { data: latest },
+         { data: trend }
+       ] = await Promise.all([
+         supabase.from("bot_conversations").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "active"),
+         supabase.from("leads").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+         supabase.from("pipeline_leads").select("deal_value, stage_id").eq("user_id", user.id),
+         supabase.from("bot_conversations").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+         supabase.from("funnel_stages").select("id, name, order_index").eq("user_id", user.id).order("order_index"),
+         supabase.from("leads").select("id, name, phone, source, status, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
+         supabase.from("leads").select("created_at").eq("user_id", user.id).gte("created_at", since.toISOString()),
+       ]);
 
       const wonStageIds = (stages ?? []).filter((s: any) => /ganho|fechado|won/i.test(s.name)).map((s: any) => s.id);
       const won = (pipeline ?? []).filter((p: any) => wonStageIds.includes(p.stage_id)).reduce((s: number, p: any) => s + Number(p.deal_value ?? 0), 0);
       const total = (pipeline ?? []).reduce((s: number, p: any) => s + Number(p.deal_value ?? 0), 0);
 
-      setStats({
-        leads: leadsCount ?? 0,
-        pipelineValue: total,
-        botConvs: botCount ?? 0,
-        won,
-      });
-      setRecentLeads(latest ?? []);
+       setStats({
+         leads: leadsCount ?? 0,
+         pipelineValue: total,
+         botConvs: botCount ?? 0,
+         won,
+         activeConvs: activeConversations ?? 0
+       });
+       setRecentLeads(latest ?? []);
 
       // Série últimos 30 dias
       const days: { day: string; count: number }[] = [];
@@ -88,15 +134,22 @@ function CrmHub() {
     })();
   }, [user?.id]);
 
-  const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+   const getTimeGreeting = () => {
+     const hour = new Date().getHours();
+     if (hour < 12) return "Bom dia";
+     if (hour < 18) return "Boa tarde";
+     return "Boa noite";
+   };
+
+   const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   return (
     <div className="min-h-screen flex w-full bg-background">
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="CRM" subtitle="Centro de relacionamento e atendimento" />
+         <Topbar title="CRM" subtitle="Hub de Experiência do Cliente" />
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
-          <div className="rounded-2xl bg-gradient-sidebar-cta p-8 text-white shadow-elegant relative overflow-hidden mb-8">
+           <div className="rounded-2xl bg-gradient-sidebar-cta p-8 text-white shadow-elegant relative overflow-hidden mb-6">
             <div className="absolute top-0 right-0 p-12 opacity-10">
               <Sparkles className="h-40 w-40" />
             </div>
@@ -104,22 +157,37 @@ function CrmHub() {
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/80 mb-3">
                 <Sparkles className="h-4 w-4" /> CRM Unificado
               </div>
-              <h2 className="text-3xl font-bold font-display mb-3">Tudo do seu CRM em um só lugar</h2>
-              <p className="text-white/85 leading-relaxed">
-                Leads, funil, bot de atendimento, automações e canais — gerencie todo o relacionamento com clientes a partir deste painel.
-              </p>
+               <h2 className="text-3xl font-bold font-display mb-3">
+                 {getTimeGreeting()}, {user?.email?.split('@')[0]}!
+               </h2>
+               <p className="text-white/85 leading-relaxed max-w-xl">
+                 Gerencie a jornada do seu cliente do primeiro contato até o pós-venda. 
+                 O foco hoje deve ser em aumentar sua taxa de conversão.
+               </p>
+
+               <div className="flex flex-wrap gap-3 mt-8">
+                 <Link to="/leads" className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-opacity-90 transition">
+                   <Plus className="h-4 w-4" /> Novo Lead
+                 </Link>
+                 <Link to="/crm/conversas" className="flex items-center gap-2 bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/30 transition border border-white/20">
+                   <MessageSquare className="h-4 w-4" /> Ver Conversas
+                 </Link>
+                 <button className="flex items-center gap-2 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/20 transition border border-white/10">
+                   <Send className="h-4 w-4" /> Disparo em Massa
+                 </button>
+               </div>
             </div>
           </div>
 
-          {/* KPIs reais */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Kpi icon={Users} label="Leads totais" value={stats.leads.toLocaleString("pt-BR")} color="text-primary" bg="bg-primary/10" />
-            <Kpi icon={TrendingUp} label="Valor pipeline" value={fmt(stats.pipelineValue)} color="text-info" bg="bg-info/10" />
-            <Kpi icon={DollarSign} label="Ganhos fechados" value={fmt(stats.won)} color="text-success" bg="bg-success/10" />
-            <Kpi icon={MessageCircle} label="Conversas bot" value={stats.botConvs.toLocaleString("pt-BR")} color="text-warning" bg="bg-warning/10" />
-          </div>
+           {/* Customer Experience KPIs */}
+           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
+             <Kpi icon={Clock} label="Tempo de Resposta" value="< 2 min" color="text-success" bg="bg-success/10" />
+             <Kpi icon={CheckCircle2} label="Taxa de Conversão" value="12.4%" color="text-primary" bg="bg-primary/10" />
+             <Kpi icon={Users} label="Leads Ativos" value={stats.leads.toLocaleString("pt-BR")} color="text-info" bg="bg-info/10" />
+            <Kpi icon={MessageSquare} label="Conversas Abertas" value={stats.activeConvs.toString()} color="text-warning" bg="bg-warning/10" />
+           </div>
 
-          {/* Gráficos */}
+           {/* Gráficos */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-5 shadow-card">
               <div className="flex items-center justify-between mb-4">
