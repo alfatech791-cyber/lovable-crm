@@ -676,8 +676,8 @@ function ConversasPage() {
     // syncFromWhatsApp(false) já é chamado pelo Realtime e visibilitychange
     const initialTimer = window.setTimeout(() => syncFromWhatsApp(false), 300);
 
-    // Sincronização automática menos frequente para não sobrecarregar
-    const poller = window.setInterval(() => syncFromWhatsApp(false), 30000);
+     // Sincronização automática em background a cada 15s
+     const poller = window.setInterval(() => syncFromWhatsApp(false), 15000);
 
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
