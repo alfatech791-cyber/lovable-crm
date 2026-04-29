@@ -25,7 +25,19 @@ export const Route = createFileRoute("/funil")({
 });
 
 type Stage = { id: string; name: string; color: string | null; order_index: number };
-type Deal = { id: string; lead_id: string; stage_id: string; deal_value: number; priority: string | null; lead?: { name: string; phone: string | null } };
+type Deal = { 
+  id: string; 
+  lead_id: string; 
+  stage_id: string; 
+  deal_value: number; 
+  priority: string | null; 
+  last_message?: string;
+  lead?: { 
+    name: string; 
+    phone: string | null; 
+    source: string | null;
+  } 
+};
 
  function FunnelPage() {
    const { user } = useAuth();
@@ -50,18 +62,30 @@ type Deal = { id: string; lead_id: string; stage_id: string; deal_value: number;
     if (!user?.id) return;
     setLoading(true);
     await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
-     const [stRes, dlRes, ldRes] = await Promise.all([
-       supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
-       supabase.from("pipeline_leads").select("*, lead:leads(name, phone)").eq("user_id", user.id).order("created_at", { ascending: false }),
-       supabase.from("leads").select("id, name").eq("user_id", user.id).order("created_at", { ascending: false }),
-     ]);
+      const [stRes, dlRes, ldRes] = await Promise.all([
+        supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
+        supabase.from("pipeline_leads").select("*, lead:leads(name, phone, source, messages(content, created_at))").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("leads").select("id, name").eq("user_id", user.id).order("created_at", { ascending: false }),
+      ]);
      
      if (stRes.error) toast.error("Erro ao carregar estágios: " + stRes.error.message);
      if (dlRes.error) toast.error("Erro ao carregar negociações: " + dlRes.error.message);
      if (ldRes.error) toast.error("Erro ao carregar leads: " + ldRes.error.message);
 
      setStages((stRes.data as Stage[]) ?? []);
-     setDeals((dlRes.data as Deal[]) ?? []);
+      const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => {
+        const messages = deal.lead?.messages || [];
+        const lastMessage = messages.sort((a: any, b: any) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )[0]?.content;
+        
+        return {
+          ...deal,
+          last_message: lastMessage
+        };
+      }) ?? [];
+
+      setDeals(dealsWithLastMessage);
      setLeads((ldRes.data as any) ?? []);
     setLoading(false);
   };
