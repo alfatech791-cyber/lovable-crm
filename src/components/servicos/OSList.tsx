@@ -15,13 +15,25 @@ type OSRow = {
   customer?: { full_name: string | null } | null;
 };
  
- const statusColors = {
-   "Aguardando": "bg-slate-100 text-slate-700 border-slate-200",
-   "Em Análise": "bg-blue-50 text-blue-700 border-blue-200",
-   "Aprovado": "bg-amber-50 text-amber-700 border-amber-200",
-   "Pronto": "bg-green-50 text-green-700 border-green-200",
-   "Entregue": "bg-purple-50 text-purple-700 border-purple-200",
- };
+  const statusColors: Record<string, string> = {
+    "open": "bg-slate-100 text-slate-700 border-slate-200",
+    "in_progress": "bg-blue-50 text-blue-700 border-blue-200",
+    "waiting_approval": "bg-amber-50 text-amber-700 border-amber-200",
+    "approved": "bg-green-50 text-green-700 border-green-200",
+    "ready": "bg-emerald-50 text-emerald-700 border-emerald-200",
+    "delivered": "bg-purple-50 text-purple-700 border-purple-200",
+    "cancelled": "bg-red-50 text-red-700 border-red-200",
+  };
+ 
+  const statusLabels: Record<string, string> = {
+    "open": "Aberto",
+    "in_progress": "Em Andamento",
+    "waiting_approval": "Aguardando Aprovação",
+    "approved": "Aprovado",
+    "ready": "Pronto",
+    "delivered": "Entregue",
+    "cancelled": "Cancelado",
+  };
  
  const priorityColors = {
    "Baixa": "text-slate-500",
@@ -136,11 +148,11 @@ type OSRow = {
                    <td className="px-6 py-4 text-sm text-muted-foreground">
                       {os.problem_description ?? "—"}
                    </td>
-                   <td className="px-6 py-4">
-                      <span className="px-2.5 py-1 rounded-full text-[11px] font-bold border bg-muted">
-                        {os.status ?? "open"}
-                      </span>
-                   </td>
+                    <td className="px-6 py-4">
+                       <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tight border ${statusColors[os.status || "open"] || "bg-muted"}`}>
+                         {statusLabels[os.status || "open"] || "Aberto"}
+                       </span>
+                    </td>
                    <td className="px-6 py-4 text-xs">
                       {(os.estimated_cost ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                    </td>
