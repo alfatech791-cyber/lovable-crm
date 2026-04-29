@@ -296,10 +296,12 @@ function ConversasPage() {
         
         // Update if more recent or has more messages
         if (currentAt > previousAt || (currentAt === previousAt && currentLen >= previousLen)) {
+          const hasActuallyChanged = currentAt > previousAt || currentLen > previousLen;
+          if (hasActuallyChanged) changed = true;
+
           dedupMap.set(key, {
             ...previous,
             ...conversation,
-            // Preserve transcript if the new one is shorter (unless it's a forced full fetch)
             transcript: currentLen >= previousLen ? conversation.transcript : previous.transcript
           });
         }
@@ -332,7 +334,7 @@ function ConversasPage() {
         return match?.id ?? currentId;
       });
 
-      return sorted;
+      return changed ? sorted : prev;
     });
   };
 
