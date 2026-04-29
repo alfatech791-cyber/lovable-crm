@@ -4,12 +4,14 @@ import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wallet, ArrowUpCircle, ArrowDownCircle, Search, Filter, MoreHorizontal, Plus, Download, Calendar, ArrowUpRight, ArrowDownLeft, Loader2 } from "lucide-react";
+ import { Wallet, ArrowUpCircle, ArrowDownCircle, Search, Filter, MoreHorizontal, Plus, Download, Calendar, ArrowUpRight, ArrowDownLeft, Loader2, Trash2, Edit } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+ import { TransactionForm } from "@/components/financeiro/TransactionForm";
+ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/financeiro/caixa")({
   component: FinanceCaixaPage,
@@ -21,6 +23,8 @@ function FinanceCaixaPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+   const [isFormOpen, setIsFormOpen] = useState(false);
+   const [editingTransaction, setEditingTransaction] = useState<any>(null);
 
   const fetchTransactions = useCallback(async () => {
     if (!user?.id) return;
@@ -45,6 +49,57 @@ function FinanceCaixaPage() {
   useEffect(() => {
     fetchTransactions();
   }, [fetchTransactions]);
+ 
+   const handleSave = async (data: any) => {
+     if (!user?.id) return;
+     
+     try {
+       if (editingTransaction) {
+         const { error } = await supabase
+           .from("finance_transactions")
+           .update({
+             ...data,
+             updated_at: new Date().toISOString()
+           })
+           .eq("id", editingTransaction.id);
+         
+         if (error) throw error;
+         toast.success("Lançamento atualizado!");
+       } else {
+         const { error } = await supabase
+           .from("finance_transactions")
+           .insert([{
+             ...data,
+             user_id: user.id
+           }]);
+         
+         if (error) throw error;
+         toast.success("Lançamento criado!");
+       }
+       fetchTransactions();
+     } catch (error) {
+       console.error("Erro ao salvar:", error);
+       toast.error("Erro ao salvar lançamento.");
+     }
+   };
+ 
+   const handleDelete = async (id: string) => {
+     if (!confirm("Deseja realmente excluir este lançamento?")) return;
+     
+     try {
+       const { error } = await supabase
+         .from("finance_transactions")
+         .delete()
+         .eq("id", id);
+       
+       if (error) throw error;
+       toast.success("Lançamento excluído!");
+       fetchTransactions();
+     } catch (error) {
+       console.error("Erro ao excluir:", error);
+       toast.error("Erro ao excluir lançamento.");
+     }
+   };
 
   const filteredTransactions = transactions.filter(t => 
     t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -133,7 +188,13 @@ function FinanceCaixaPage() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button className="h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-6 shadow-lg shadow-blue-200">
+             <Button 
+               onClick={() => {
+                 setEditingTransaction(null);
+                 setIsFormOpen(true);
+               }}
+               className="h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-6 shadow-lg shadow-blue-200"
+             >
                 <Plus className="h-4 w-4 mr-2" /> Novo Lançamento
               </Button>
             </div>
@@ -186,7 +247,24 @@ function FinanceCaixaPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all text-slate-400 hover:text-slate-600"><MoreHorizontal className="h-4 w-4" /></Button>
+                     <DropdownMenu>
+                       <DropdownMenuTrigger asChild>
+                         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg group-hover:bg-white group-hover:shadow-sm transition-all text-slate-400 hover:text-slate-600">
+                           <MoreHorizontal className="h-4 w-4" />
+                         </Button>
+                       </DropdownMenuTrigger>
+                       <DropdownMenuContent align="end">
+                         <DropdownMenuItem onClick={() => {
+                           setEditingTransaction(t);
+                           setIsFormOpen(true);
+                         }}>
+                           <Edit className="h-4 w-4 mr-2" /> Editar
+                         </DropdownMenuItem>
+                         <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(t.id)}>
+                           <Trash2 className="h-4 w-4 mr-2" /> Excluir
+                         </DropdownMenuItem>
+                       </DropdownMenuContent>
+                     </DropdownMenu>
                     </td>
                   </tr>
                 )) : (
@@ -200,6 +278,13 @@ function FinanceCaixaPage() {
             </table>
           </Card>
         </main>
+ 
+       <TransactionForm 
+         open={isFormOpen} 
+         onOpenChange={setIsFormOpen} 
+         onSave={handleSave} 
+         transaction={editingTransaction}
+       />
       </div>
     </div>
   );
