@@ -76,7 +76,6 @@ function CrmHub() {
      return "Boa noite";
    };
 
-
       setRecentLeads(latest ?? []);
 
       // Série últimos 30 dias
