@@ -539,15 +539,26 @@
              <span>{subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
            </div>
            <div className="flex items-center justify-between text-sm">
-              <button 
-                onClick={() => {
-                  const val = prompt("Valor do desconto (R$):", "0");
-                  if (val) setDiscountValue(parseFloat(val));
-                }}
-                className="text-muted-foreground hover:text-primary underline underline-offset-4 decoration-dotted transition"
-              >
-                Aplicar Desconto
-              </button>
+               <div className="flex items-center gap-2">
+                 <button 
+                   onClick={() => {
+                     const val = prompt("Valor do desconto (R$):", "0");
+                     if (val !== null) setDiscountValue(Math.max(0, parseFloat(val) || 0));
+                   }}
+                   className="text-muted-foreground hover:text-primary underline underline-offset-4 decoration-dotted transition"
+                 >
+                   Aplicar Desconto
+                 </button>
+                 {discountValue > 0 && (
+                   <button 
+                     onClick={() => setDiscountValue(0)}
+                     className="text-destructive hover:text-destructive/80"
+                     title="Remover desconto"
+                   >
+                     <X className="h-3 w-3" />
+                   </button>
+                 )}
+               </div>
               <span className="text-success font-medium">
                 - {discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </span>
