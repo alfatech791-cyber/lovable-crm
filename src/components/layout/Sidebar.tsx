@@ -221,7 +221,16 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
           </div>
         )}
 
-        {!isSmall && (
+        {isSmall ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="h-10 w-10 flex items-center justify-center rounded-lg text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-white transition-colors">
+                <HelpCircle className="h-5 w-5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">Central de Ajuda</TooltipContent>
+          </Tooltip>
+        ) : (
           <button className="flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent transition-colors">
             <HelpCircle className="h-4 w-4" />
             <span className="text-[13px]">Central de Ajuda</span>
