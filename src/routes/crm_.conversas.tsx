@@ -1406,8 +1406,9 @@ function ConversasPage() {
                      </div>
                    )}
 
-                   {/* Stickers Popover Estilizado */}
-                    <div className="absolute bottom-[calc(100%+12px)] left-0 z-50 bg-popover/95 backdrop-blur-xl border border-border/20 rounded-[24px] shadow-2xl p-4 w-[320px] animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+                    {/* Stickers Popover Estilizado */}
+                    {stickerOpen && (
+                      <div className="absolute bottom-[calc(100%+12px)] left-0 z-50 bg-popover/95 backdrop-blur-xl border border-border/20 rounded-[24px] shadow-2xl p-4 w-[320px] animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
                       <div className="flex items-center justify-between mb-3 px-1">
                         <span className="text-[11px] font-black text-muted-foreground/60 uppercase tracking-widest">Emojis & Stickers</span>
                         <button onClick={() => setStickerOpen(false)} className="h-6 w-6 rounded-full hover:bg-muted transition-colors flex items-center justify-center">
