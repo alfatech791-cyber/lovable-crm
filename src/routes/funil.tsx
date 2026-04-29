@@ -25,18 +25,19 @@ export const Route = createFileRoute("/funil")({
 });
 
 type Stage = { id: string; name: string; color: string | null; order_index: number };
-type Deal = { 
-  id: string; 
-  lead_id: string; 
-  stage_id: string; 
-  deal_value: number; 
-  priority: string | null; 
+type Deal = {
+  id: string;
+  lead_id: string;
+  stage_id: string;
+  deal_value: number;
+  priority: string | null;
   last_message?: string;
-  lead?: { 
-    name: string; 
-    phone: string | null; 
+  last_message_at?: string;
+  lead?: {
+    name: string;
+    phone: string | null;
     source: string | null;
-  } 
+  }
 };
 
  function FunnelPage() {
@@ -64,7 +65,7 @@ type Deal = {
     await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
       const [stRes, dlRes, ldRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
-        supabase.from("pipeline_leads").select("*, lead:leads(name, phone, source, messages(content, created_at))").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("pipeline_leads").select("*, lead:leads(name, phone, source)").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("leads").select("id, name").eq("user_id", user.id).order("created_at", { ascending: false }),
       ]);
      
@@ -73,18 +74,17 @@ type Deal = {
      if (ldRes.error) toast.error("Erro ao carregar leads: " + ldRes.error.message);
 
      setStages((stRes.data as Stage[]) ?? []);
-      const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => {
-        const messages = deal.lead?.messages || [];
-        const lastMessage = messages.sort((a: any, b: any) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        )[0]?.content;
-        
-        return {
-          ...deal,
-          last_message: lastMessage
-        };
-      }) ?? [];
-
+      const leadIds = (dlRes.data as any[])?.map(d => d.lead_id) || [];
+      let lastMessagesMap: Record<string, { content: string, created_at: string }> = {};
+      if (leadIds.length > 0) {
+        const { data: msgData } = await supabase.from("messages").select("lead_id, content, created_at").in("lead_id", leadIds).order("created_at", { ascending: false });
+        if (msgData) msgData.forEach(msg => { if (!lastMessagesMap[msg.lead_id]) lastMessagesMap[msg.lead_id] = { content: msg.content, created_at: msg.created_at }; });
+      }
+      const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => ({
+        ...deal,
+        last_message: lastMessagesMap[deal.lead_id]?.content,
+        last_message_at: lastMessagesMap[deal.lead_id]?.created_at
+      })) ?? [];
       setDeals(dealsWithLastMessage);
      setLeads((ldRes.data as any) ?? []);
     setLoading(false);
