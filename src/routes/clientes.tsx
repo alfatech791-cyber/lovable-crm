@@ -153,11 +153,11 @@ function CustomersPage() {
      setLoadingHistory(true);
      try {
        const [salesRes, servicesRes] = await Promise.all([
-         supabase.from("sales").select("*").eq("customer_id", customerId).order("created_at", { ascending: false }),
+         supabase.from("sales_orders").select("*").eq("customer_id", customerId).order("created_at", { ascending: false }),
          supabase.from("service_orders").select("*").eq("customer_id", customerId).order("created_at", { ascending: false })
        ]);
        setCustomerHistory({
-         sales: salesRes.data || [],
+         sales: (salesRes.data || []).map((s: any) => ({ ...s, total_amount: s.total_amount || 0 })),
          services: servicesRes.data || []
        });
      } catch (error) {
