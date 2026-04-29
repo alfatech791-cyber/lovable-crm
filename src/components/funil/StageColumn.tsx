@@ -2,6 +2,7 @@
  import { Trash2 } from "lucide-react";
  import { Plus, MoreVertical, TrendingUp, ChevronRight } from "lucide-react";
  import { DealCard } from "./DealCard";
+ import { motion, AnimatePresence } from "framer-motion";
  import { cn } from "@/lib/utils";
  
  interface StageColumnProps {
@@ -83,21 +84,23 @@
          </button>
        </div>
  
-       {/* Lista de Cards */}
-       <div className={cn(
-         "flex-1 overflow-y-auto px-4 pb-4 space-y-3.5 scrollbar-hide min-h-[200px] transition-all",
-         dragId && "pb-20"
-       )}>
-         {deals.map((d) => (
-           <DealCard
-             key={d.id}
-             deal={d}
-             onRemove={onRemoveDeal}
-             onDragStart={setDragId}
-             onDragEnd={() => setDragId(null)}
-             onClick={() => onSelectDeal?.(d)}
-           />
-         ))}
+        {/* Lista de Cards */}
+        <div className={cn(
+          "flex-1 overflow-y-auto px-4 pb-4 space-y-3.5 scrollbar-hide min-h-[200px] transition-all",
+          dragId && "pb-20"
+        )}>
+          <AnimatePresence mode="popLayout">
+            {deals.map((d) => (
+              <DealCard
+                key={d.id}
+                deal={d}
+                onRemove={onRemoveDeal}
+                onDragStart={setDragId}
+                onDragEnd={() => setDragId(null)}
+                onClick={() => onSelectDeal?.(d)}
+              />
+            ))}
+          </AnimatePresence>
          
          {deals.length === 0 && !dragId && (
            <div className="h-full flex flex-col items-center justify-center pt-12 opacity-20">
