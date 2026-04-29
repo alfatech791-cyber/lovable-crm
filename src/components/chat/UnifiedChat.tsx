@@ -9,7 +9,9 @@ import {
   UserCog,
   PauseCircle,
   PlayCircle,
-  RefreshCw,
+   RefreshCw,
+   Image as ImageIcon,
+   X,
 } from "lucide-react";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
@@ -100,6 +102,8 @@ export function UnifiedChat() {
   const [search, setSearch] = useState("");
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "active" | "handed_off">("all");
   const [syncing, setSyncing] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -257,17 +261,57 @@ export function UnifiedChat() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [selected?.transcript?.length, selectedId]);
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      setSelectedImage(file);
+      const url = URL.createObjectURL(file);
+      setImagePreview(url);
+    } else if (file) {
+      toast.error("Por favor, selecione um arquivo de imagem.");
+    }
+  };
+
+  const clearImage = () => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setSelectedImage(null);
+    setImagePreview(null);
+  };
+
   const send = async () => {
-    if (!selected || !text.trim() || sending) return;
+    if (!selected || sending) return;
+    if (!text.trim() && !selectedImage) return;
+    
     setSending(true);
     try {
-      const { data, error } = await supabase.functions.invoke("send-whatsapp", {
-        body: {
-          phone: selected.contact_phone,
-          text: text.trim(),
-          contactName: selected.contact_name,
-        },
-      });
+      let body: any = {
+        phone: selected.contact_phone,
+        text: text.trim(),
+        contactName: selected.contact_name,
+      };
+
+      if (selectedImage) {
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve) => {
+          reader.onloadend = () => {
+            const base64 = (reader.result as string).split(",")[1];
+            resolve(base64);
+          };
+        });
+        reader.readAsDataURL(selectedImage);
+        const base64 = await base64Promise;
+
+        body = {
+          ...body,
+          kind: "image",
+          media: base64,
+          mimetype: selectedImage.type,
+          fileName: selectedImage.name,
+        };
+      }
+
+      const { data, error } = await supabase.functions.invoke("send-whatsapp", { body });
+      
       if (error) throw error;
       if (data?.error) {
         toast.error("Mensagem registrada, mas Evolution falhou: " + data.error);
@@ -277,6 +321,7 @@ export function UnifiedChat() {
         toast.success("Enviada!");
       }
       setText("");
+      clearImage();
     } catch (e: any) {
       toast.error(e?.message ?? "Erro ao enviar");
     } finally {
@@ -492,7 +537,63 @@ export function UnifiedChat() {
               </div>
 
               <div className="p-4 bg-card border-t border-border">
-                <div className="flex items-end gap-3">
+               <div className="relative">
+                 {imagePreview && (
+                   <div className="absolute bottom-full left-0 mb-4 p-4 bg-card border border-border rounded-2xl shadow-xl animate-in fade-in slide-in-from-bottom-2 z-10 flex flex-col gap-3 min-w-[240px]">
+                     <div className="flex items-center justify-between">
+                       <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Confirmar envio de imagem</span>
+                       <button 
+                         onClick={clearImage}
+                         className="p-1 hover:bg-muted rounded-full transition"
+                       >
+                         <X className="h-4 w-4" />
+                       </button>
+                     </div>
+                     <div className="relative group overflow-hidden rounded-xl border border-border bg-muted">
+                       <img 
+                         src={imagePreview} 
+                         alt="Preview" 
+                         className="max-h-48 w-full object-contain"
+                       />
+                     </div>
+                     <div className="flex gap-2">
+                       <button
+                         onClick={clearImage}
+                         className="flex-1 py-2 text-xs font-bold rounded-lg border border-border hover:bg-muted transition"
+                       >
+                         Cancelar
+                       </button>
+                       <button
+                         onClick={send}
+                         disabled={sending}
+                         className="flex-1 py-2 text-xs font-bold rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition flex items-center justify-center gap-2"
+                       >
+                         {sending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                         Enviar Agora
+                       </button>
+                     </div>
+                   </div>
+                 )}
+                 
+                 <div className="flex items-end gap-3">
+                   <div className="relative">
+                     <input
+                       type="file"
+                       accept="image/*"
+                       id="image-upload"
+                       className="hidden"
+                       onChange={handleImageSelect}
+                     />
+                     <label
+                       htmlFor="image-upload"
+                       className="h-12 w-12 shrink-0 rounded-xl bg-muted/50 border border-border flex items-center justify-center hover:bg-muted transition cursor-pointer"
+                     >
+                       <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                     </label>
+                   </div>
+
+                   <textarea
+                     value={text}
                   <textarea
                     value={text}
                     onChange={(e) => setText(e.target.value)}
