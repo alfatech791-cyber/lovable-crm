@@ -855,32 +855,32 @@ type Deal = {
                       <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
                       <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                         Online via WhatsApp
-                    </p>
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2">
-               {currentConversation && (
-                 <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className={cn("h-9 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all", 
-                    currentConversation.status === "handed_off" ? "border-amber-500/50 text-amber-600 bg-amber-500/5" : "border-primary/30 text-primary bg-primary/5")} 
-                  onClick={toggleHandoff}
-                 >
-                   {currentConversation.status === "handed_off" ? (
-                     <><PlayCircle className="h-3.5 w-3.5" /> Reativar Bot</>
-                   ) : (
-                     <><PauseCircle className="h-3.5 w-3.5" /> Pausar Bot</>
-                   )}
-                 </Button>
-               )}
-                <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl hover:bg-muted" onClick={() => setChatOpen(false)}>
-                  <X className="h-5 w-5" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  {currentConversation && (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className={cn("h-9 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all", 
+                        currentConversation.status === "handed_off" ? "border-amber-500/50 text-amber-600 bg-amber-500/5" : "border-primary/30 text-primary bg-primary/5")} 
+                      onClick={toggleHandoff}
+                    >
+                      {currentConversation.status === "handed_off" ? (
+                        <><PlayCircle className="h-3.5 w-3.5" /> Reativar Bot</>
+                      ) : (
+                        <><PauseCircle className="h-3.5 w-3.5" /> Pausar Bot</>
+                      )}
+                    </Button>
+                  )}
+                  <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl hover:bg-muted" onClick={() => setChatOpen(false)}>
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
 
            {/* Área de Mensagens */}
            <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-6 bg-muted/5 scrollbar-thin">
@@ -997,8 +997,8 @@ type Deal = {
          onOpenChange={setAddingStage}
          onSuccess={load}
          stagesCount={stages.length}
-        />
-      </div>
+       />
+     </div>
     </div>
   );
 }
