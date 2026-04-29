@@ -65,17 +65,45 @@ type Deal = {
     const { user, loading: authLoading } = useAuth();
     const [syncing, setSyncing] = useState(false);
 
+    // Garante que o webhook está configurado para receber mensagens em tempo real
+    const ensureWebhook = async (instance: string) => {
+      if (!user?.id || !instance) return;
+      try {
+        const { data: settings } = await supabase
+          .from("bot_settings")
+          .select("webhook_secret")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (!settings?.webhook_secret) return;
+
+        const expectedUrl = `https://htsjkvczxlrsfapkbidq.supabase.co/functions/v1/bot-webhook?uid=${user.id}&secret=${settings.webhook_secret}`;
+
+        const current = await evolution.getWebhook(instance);
+        const currentUrl = current?.url ?? current?.webhook?.url ?? "";
+        if (currentUrl === expectedUrl) return;
+
+        await evolution.setWebhook(instance, expectedUrl);
+        console.log("Webhook sincronizado no Funil:", expectedUrl);
+      } catch (e) {
+        console.warn("Erro ao sincronizar webhook no Funil:", e);
+      }
+    };
+
     const syncFromWhatsApp = async () => {
       if (!user?.id || syncing) return;
       setSyncing(true);
       try {
         const instances = await evolution.getInstances();
-        const instance = instances.find(i => i.status === 'open' || (i as any).status === 'connected')?.instanceName;
+        const instanceObj = instances.find(i => i.status === 'open' || (i as any).status === 'connected');
+        const instance = instanceObj?.instanceName;
         
         if (!instance) {
           toast.error("Nenhuma instância do WhatsApp conectada");
           return;
         }
+
+        await ensureWebhook(instance);
 
         const rawChats = await evolution.findChats(instance);
         const chats = Array.isArray(rawChats) ? rawChats : (rawChats?.records || rawChats?.chats || []);
@@ -325,14 +353,20 @@ type Deal = {
        return;
      }
      
-     try {
-       if (!silent) setLoading(true);
-       // Garante estágios padrão chamando o RPC (agora criado no banco)
-       try {
-         await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
-       } catch (rpcErr) {
-         console.warn("RPC ensure_default_funnel_stages falhou, continuando...", rpcErr);
-       }
+      try {
+        if (!silent) setLoading(true);
+        
+        // Inicializa configurações do bot e estágios
+        const { data: settings } = await supabase.from("bot_settings").select("id").eq("user_id", user.id).maybeSingle();
+        if (!settings) {
+          await supabase.from("bot_settings").insert({ user_id: user.id });
+        }
+        
+        try {
+          await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
+        } catch (rpcErr) {
+          console.warn("RPC ensure_default_funnel_stages falhou, continuando...", rpcErr);
+        }
 
       const [stRes, dlRes, ldRes, convRes, allDealsRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
@@ -413,7 +447,13 @@ type Deal = {
     }
   };
 
-   useEffect(() => { load(); }, [user?.id, authLoading]);
+    useEffect(() => { 
+      load(); 
+      // Se não houver negociações, tenta um sync automático
+      if (user?.id && !loading && deals.length === 0) {
+        syncFromWhatsApp();
+      }
+    }, [user?.id, authLoading]);
 
   const moveDeal = async (dealId: string, newStageId: string) => {
     setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, stage_id: newStageId } : d)));
