@@ -876,9 +876,9 @@ function ConversasPage() {
       rec.ondataavailable = (e) => e.data.size > 0 && chunksRef.current.push(e.data);
       rec.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        const b64 = await blobToBase64(blob); // Retorna base64 limpo sem prefixo
-        await sendPayload({ kind: "audio", media: b64, mimetype: "audio/mp4" }); // Evolution prefere audio/mp4 ou audio/ogg
+         const blob = new Blob(chunksRef.current, { type: "audio/ogg; codecs=opus" });
+         const b64 = await blobToBase64(blob);
+         await sendPayload({ kind: "audio", media: b64, mimetype: "audio/ogg" });
       };
       rec.start();
       recorderRef.current = rec;
