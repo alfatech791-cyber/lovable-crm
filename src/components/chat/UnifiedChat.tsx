@@ -60,9 +60,13 @@ const getMessageText = (message: any) =>
   message?.message?.extendedTextMessage?.text ??
   message?.message?.imageMessage?.caption ??
   message?.message?.videoMessage?.caption ??
-  message?.text ??
-  message?.body ??
-  "";
+  message?.text ||
+  message?.body ||
+  (message?.message?.imageMessage ? "🖼️ Imagem" : 
+   message?.message?.videoMessage ? "🎥 Vídeo" : 
+   message?.message?.audioMessage ? "🎤 Áudio" : 
+   message?.message?.stickerMessage ? "🟦 Figurinha" : 
+   message?.message?.documentMessage ? "📄 Documento" : "");
 
 const normalizeTimestamp = (value: unknown) => {
   if (typeof value === "number") {
