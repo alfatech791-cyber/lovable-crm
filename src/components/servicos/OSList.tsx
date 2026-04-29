@@ -1,5 +1,15 @@
-import { Wrench, Clock, CheckCircle2, AlertCircle, MoreHorizontal, Plus, Search, Filter, Loader2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+ import { Wrench, Clock, CheckCircle2, AlertCircle, MoreHorizontal, Plus, Search, Filter, Loader2, FileDown, Trash2 } from "lucide-react";
+ import { useEffect, useMemo, useState } from "react";
+ import { 
+   DropdownMenu, 
+   DropdownMenuContent, 
+   DropdownMenuItem, 
+   DropdownMenuTrigger,
+   DropdownMenuSub,
+   DropdownMenuSubTrigger,
+   DropdownMenuSubContent,
+   DropdownMenuPortal
+ } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -11,9 +21,9 @@ type OSRow = {
   equipment: string | null;
   estimated_cost: number | null;
   created_at: string | null;
-  customer_id: string;
-  customer?: { full_name: string | null } | null;
-};
+   customer_id: string;
+   customer?: { full_name: string | null, phone: string | null } | null;
+ };
  
   const statusColors: Record<string, string> = {
     "open": "bg-slate-100 text-slate-700 border-slate-200",
@@ -44,19 +54,21 @@ type OSRow = {
  
  export function OSList() {
     const { user } = useAuth();
-    const [rows, setRows] = useState<OSRow[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [search, setSearch] = useState("");
+     const [rows, setRows] = useState<OSRow[]>([]);
+     const [loading, setLoading] = useState(false);
+     const [search, setSearch] = useState("");
+     const [editingOS, setEditingOS] = useState<any>(null);
+     const [isEditOpen, setIsEditOpen] = useState(false);
 
     useEffect(() => {
       if (!user?.id) return;
       setLoading(true);
       (async () => {
-        const { data, error } = await supabase
-          .from("service_orders")
-          .select("id,status,problem_description,equipment,estimated_cost,created_at,customer_id,customer:customers(full_name)")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
+         const { data, error } = await supabase
+           .from("service_orders")
+           .select("id,status,problem_description,equipment,estimated_cost,created_at,customer_id,customer:customers(full_name, phone)")
+           .eq("user_id", user.id)
+           .order("created_at", { ascending: false });
         if (error) toast.error("Erro ao carregar OS: " + error.message);
         setRows((data as any) ?? []);
         setLoading(false);
@@ -73,12 +85,78 @@ type OSRow = {
       );
     }, [rows, search]);
 
-    const stats = useMemo(() => ({
-      total: rows.length,
-      open: rows.filter((r) => r.status === "open").length,
-      progress: rows.filter((r) => r.status === "in_progress").length,
-      done: rows.filter((r) => r.status === "done").length,
-    }), [rows]);
+     const stats = useMemo(() => ({
+       total: rows.length,
+       open: rows.filter((r) => r.status === "open").length,
+       progress: rows.filter((r) => r.status === "in_progress").length,
+       done: rows.filter((r) => r.status === "delivered" || r.status === "ready").length,
+     }), [rows]);
+ 
+     const handleUpdateStatus = async (id: string, newStatus: string) => {
+       try {
+         const { error } = await supabase
+           .from("service_orders")
+           .update({ status: newStatus })
+           .eq("id", id);
+         if (error) throw error;
+         setRows(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
+         toast.success(`Status atualizado para ${statusLabels[newStatus]}`);
+       } catch (error) {
+         toast.error("Erro ao atualizar status");
+       }
+     };
+ 
+     const handleDeleteOS = async (id: string) => {
+       if (!window.confirm("Deseja excluir esta Ordem de Serviço?")) return;
+       try {
+         const { error } = await supabase.from("service_orders").delete().eq("id", id);
+         if (error) throw error;
+         setRows(prev => prev.filter(r => r.id !== id));
+         toast.success("OS excluída com sucesso");
+       } catch (error) {
+         toast.error("Erro ao excluir OS");
+       }
+     };
+ 
+     const handlePrintTerm = (os: OSRow) => {
+       const printWindow = window.open('', '_blank');
+       if (!printWindow) return;
+       
+       const content = `
+         <html>
+           <head>
+             <title>Termo de Recebimento - OS ${os.id.slice(0, 8)}</title>
+             <style>
+               body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+               .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+               .info { margin-bottom: 15px; }
+               .footer { margin-top: 50px; text-align: center; }
+               .signature { margin-top: 30px; border-top: 1px solid #000; width: 300px; margin-left: auto; margin-right: auto; }
+             </style>
+           </head>
+           <body>
+             <div class="header">
+               <h1>TERMO DE RECEBIMENTO</h1>
+               <p>OS #${os.id.slice(0, 8)} - Data: ${new Date().toLocaleDateString('pt-BR')}</p>
+             </div>
+             <div class="info"><strong>Cliente:</strong> ${os.customer?.full_name || '---'}</div>
+             <div class="info"><strong>Aparelho:</strong> ${os.equipment || '---'}</div>
+             <div class="info"><strong>Problema Relatado:</strong> ${os.problem_description || '---'}</div>
+             <div class="info"><strong>Orçamento Estimado:</strong> R$ ${(os.estimated_cost || 0).toFixed(2)}</div>
+             <div style="margin-top: 30px;">
+               <p>Declaro estar ciente dos termos de serviço e autorizo a análise técnica do equipamento acima descrito.</p>
+             </div>
+             <div class="footer">
+               <div class="signature"></div>
+               <p>Assinatura do Cliente</p>
+             </div>
+           </body>
+         </html>
+       `;
+       printWindow.document.write(content);
+       printWindow.document.close();
+       printWindow.print();
+     };
 
    return (
      <div className="space-y-6">
@@ -156,14 +234,40 @@ type OSRow = {
                    <td className="px-6 py-4 text-xs">
                       {(os.estimated_cost ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                    </td>
-                   <td className="px-6 py-4 text-xs text-muted-foreground">
-                      {os.created_at ? new Date(os.created_at).toLocaleDateString("pt-BR") : "—"}
-                   </td>
-                   <td className="px-6 py-4">
-                     <button className="p-2 rounded-lg hover:bg-muted transition">
-                       <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                     </button>
-                   </td>
+                    <td className="px-6 py-4 text-xs text-muted-foreground">
+                       {os.created_at ? new Date(os.created_at).toLocaleDateString("pt-BR") : "—"}
+                    </td>
+                    <td className="px-6 py-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="p-2 rounded-lg hover:bg-muted transition">
+                            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger className="gap-2">
+                              <Clock className="h-4 w-4" /> Alterar Status
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuPortal>
+                              <DropdownMenuSubContent>
+                                {Object.entries(statusLabels).map(([key, label]) => (
+                                  <DropdownMenuItem key={key} onClick={() => handleUpdateStatus(os.id, key)}>
+                                    {label}
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuSubContent>
+                            </DropdownMenuPortal>
+                          </DropdownMenuSub>
+                          <DropdownMenuItem onClick={() => handlePrintTerm(os)} className="gap-2">
+                            <FileDown className="h-4 w-4" /> Imprimir Termo
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeleteOS(os.id)} className="gap-2 text-destructive focus:text-destructive">
+                            <Trash2 className="h-4 w-4" /> Excluir OS
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
                  </tr>
                ))}
              </tbody>
