@@ -23,7 +23,6 @@ import { Route as FiscalRouteImport } from './routes/fiscal'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
 import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as EquipeRouteImport } from './routes/equipe'
-import { Route as CrmRouteImport } from './routes/crm'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as AutomacaoRouteImport } from './routes/automacao'
@@ -124,11 +123,6 @@ const EstoqueRoute = EstoqueRouteImport.update({
 const EquipeRoute = EquipeRouteImport.update({
   id: '/equipe',
   path: '/equipe',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CrmRoute = CrmRouteImport.update({
-  id: '/crm',
-  path: '/crm',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
@@ -294,7 +288,6 @@ export interface FileRoutesByFullPath {
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
-  '/crm': typeof CrmRoute
   '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRouteWithChildren
   '/financeiro': typeof FinanceiroRouteWithChildren
@@ -342,7 +335,6 @@ export interface FileRoutesByTo {
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
-  '/crm': typeof CrmRoute
   '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRouteWithChildren
   '/financeiro': typeof FinanceiroRouteWithChildren
@@ -391,7 +383,6 @@ export interface FileRoutesById {
   '/automacao': typeof AutomacaoRoute
   '/clientes': typeof ClientesRoute
   '/configuracoes': typeof ConfiguracoesRoute
-  '/crm': typeof CrmRoute
   '/equipe': typeof EquipeRoute
   '/estoque': typeof EstoqueRouteWithChildren
   '/financeiro': typeof FinanceiroRouteWithChildren
@@ -441,7 +432,6 @@ export interface FileRouteTypes {
     | '/automacao'
     | '/clientes'
     | '/configuracoes'
-    | '/crm'
     | '/equipe'
     | '/estoque'
     | '/financeiro'
@@ -489,7 +479,6 @@ export interface FileRouteTypes {
     | '/automacao'
     | '/clientes'
     | '/configuracoes'
-    | '/crm'
     | '/equipe'
     | '/estoque'
     | '/financeiro'
@@ -537,7 +526,6 @@ export interface FileRouteTypes {
     | '/automacao'
     | '/clientes'
     | '/configuracoes'
-    | '/crm'
     | '/equipe'
     | '/estoque'
     | '/financeiro'
@@ -586,7 +574,6 @@ export interface RootRouteChildren {
   AutomacaoRoute: typeof AutomacaoRoute
   ClientesRoute: typeof ClientesRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
-  CrmRoute: typeof CrmRoute
   EquipeRoute: typeof EquipeRoute
   EstoqueRoute: typeof EstoqueRouteWithChildren
   FinanceiroRoute: typeof FinanceiroRouteWithChildren
@@ -704,13 +691,6 @@ declare module '@tanstack/react-router' {
       path: '/equipe'
       fullPath: '/equipe'
       preLoaderRoute: typeof EquipeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/crm': {
-      id: '/crm'
-      path: '/crm'
-      fullPath: '/crm'
-      preLoaderRoute: typeof CrmRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/configuracoes': {
@@ -1022,7 +1002,6 @@ const rootRouteChildren: RootRouteChildren = {
   AutomacaoRoute: AutomacaoRoute,
   ClientesRoute: ClientesRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
-  CrmRoute: CrmRoute,
   EquipeRoute: EquipeRoute,
   EstoqueRoute: EstoqueRouteWithChildren,
   FinanceiroRoute: FinanceiroRouteWithChildren,
