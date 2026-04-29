@@ -299,18 +299,33 @@ type Deal = {
      if (!user?.id || !phone) return;
      setChatLoading(true);
      try {
-       const { data, error } = await supabase
+       // Normaliza: tira tudo que não é dígito
+       const normalized = phone.replace(/\D/g, "");
+       // Tenta exato primeiro, depois por sufixo (cobre variações com/sem DDI)
+       let { data, error } = await supabase
          .from("bot_conversations")
          .select("*")
          .eq("user_id", user.id)
-         .eq("contact_phone", phone)
+         .or(`contact_phone.eq.${normalized},contact_phone.eq.${phone},contact_phone.like.%${normalized.slice(-10)}`)
+         .order("last_message_at", { ascending: false })
+         .limit(1)
          .maybeSingle();
- 
+
        if (error) throw error;
        if (data) {
          setCurrentConversation(data as any as Conversation);
        } else {
-         setCurrentConversation(null);
+         // Cria uma conversa vazia local pra permitir enviar a primeira mensagem
+         setCurrentConversation({
+           id: "",
+           user_id: user.id,
+           contact_phone: normalized,
+           contact_name: null,
+           transcript: [],
+           status: "active",
+           messages_count: 0,
+           last_message_at: new Date().toISOString(),
+         } as any as Conversation);
        }
      } catch (err) {
        console.error("Erro ao carregar conversa:", err);
