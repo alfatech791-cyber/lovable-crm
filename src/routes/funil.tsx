@@ -192,9 +192,32 @@ type Deal = {
        )
        .subscribe();
        
-     return () => { supabase.removeChannel(ch); };
-   }, [user?.id]);
- 
+      return () => { supabase.removeChannel(ch); };
+    }, [user?.id]);
+
+    // Realtime para Negócios (Deals)
+    useEffect(() => {
+      if (!user?.id) return;
+      
+      const ch = supabase
+        .channel("funil_pipeline_leads")
+        .on(
+          "postgres_changes",
+          { 
+            event: "*", 
+            schema: "public", 
+            table: "pipeline_leads", 
+            filter: `user_id=eq.${user.id}` 
+          },
+          () => {
+            load(); // Recarrega quando houver qualquer mudança no pipeline
+          }
+        )
+        .subscribe();
+        
+      return () => { supabase.removeChannel(ch); };
+    }, [user?.id]);
+
     const filteredDeals = deals.filter(d => {
       const leadName = d.lead?.name?.toLowerCase() || "";
       const leadPhone = d.lead?.phone || "";
