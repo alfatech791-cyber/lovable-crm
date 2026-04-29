@@ -51,59 +51,44 @@ function Dashboard() {
       today.setHours(0, 0, 0, 0);
       const firstDayMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-      // Fetch sales
-      const { data: sales, error: salesError } = await supabase
-        .from("sales_orders")
-        .select("total_amount, created_at, status")
-        .eq("user_id", user.id);
-      
-      if (salesError) throw salesError;
+      // Run all queries in parallel; never throw — log errors and continue
+      const [salesRes, productsRes, leadsRes, osRes] = await Promise.all([
+        supabase.from("sales_orders").select("total_amount, created_at, status").eq("user_id", user.id),
+        supabase.from("products").select("stock_quantity, min_stock").eq("user_id", user.id),
+        supabase.from("leads").select("created_at").eq("user_id", user.id),
+        supabase.from("service_orders").select("status").eq("user_id", user.id),
+      ]);
+      if (salesRes.error) console.warn("[dashboard] sales:", salesRes.error.message);
+      if (productsRes.error) console.warn("[dashboard] products:", productsRes.error.message);
+      if (leadsRes.error) console.warn("[dashboard] leads:", leadsRes.error.message);
+      if (osRes.error) console.warn("[dashboard] service_orders:", osRes.error.message);
 
-      // Fetch products for stock
-      const { data: products, error: productsError } = await supabase
-        .from("products")
-        .select("stock_quantity, min_stock")
-        .eq("user_id", user.id);
+      const sales = salesRes.data || [];
+      const products = productsRes.data || [];
+      const leads = leadsRes.data || [];
+      const os = osRes.data || [];
 
-      if (productsError) throw productsError;
-
-      // Fetch leads
-      const { data: leads, error: leadsError } = await supabase
-        .from("leads")
-        .select("created_at")
-        .eq("user_id", user.id);
-
-      if (leadsError) throw leadsError;
-
-      // Fetch OS
-      const { data: os, error: osError } = await supabase
-        .from("service_orders")
-        .select("status")
-        .eq("user_id", user.id);
-
-      if (osError) throw osError;
-
-      const todaySales = (sales || [])
+      const todaySales = sales
         .filter(s => new Date(s.created_at!) >= today && s.status === 'concluded')
         .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
 
-      const monthRevenue = (sales || [])
+      const monthRevenue = sales
         .filter(s => new Date(s.created_at!) >= firstDayMonth && s.status === 'concluded')
         .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
 
-      const lowStockCount = (products || [])
+      const lowStockCount = products
         .filter(p => (p.stock_quantity || 0) <= (p.min_stock || 5))
         .length;
 
-      const newLeadsCount = (leads || [])
+      const newLeadsCount = leads
         .filter(l => new Date(l.created_at) >= today)
         .length;
 
-      const activeOSCount = (os || [])
+      const activeOSCount = os
         .filter(o => o.status !== 'delivered' && o.status !== 'canceled')
         .length;
 
-       const monthSales = (sales || []).filter(s => new Date(s.created_at!) >= firstDayMonth && s.status === 'concluded');
+       const monthSales = sales.filter(s => new Date(s.created_at!) >= firstDayMonth && s.status === 'concluded');
        const avgTicket = monthSales.length > 0 ? monthRevenue / monthSales.length : 0;
 
       setStats({
