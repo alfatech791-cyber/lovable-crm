@@ -170,6 +170,45 @@ async function persist(
     },
     { onConflict: "user_id,contact_phone" }
   );
+
+  // Garante lead + card no pipeline
+  await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
+    _user_id: userId,
+    _phone: phone,
+    _name: name,
+  });
+
+  // Pega lead_id e insere as últimas mensagens em public.messages (para pipeline ver)
+  const { data: lead } = await supabase
+    .from("leads")
+    .select("id")
+    .eq("user_id", userId)
+    .ilike("phone", `%${phone}%`)
+    .maybeSingle();
+
+  if (lead?.id && transcript.length > 0) {
+    // Pega só as 2 últimas (a recém adicionada do user e/ou assistant)
+    const recent = transcript.slice(-2);
+    for (const m of recent) {
+      const direction = m.role === "user" ? "inbound" : "outbound";
+      // Evita duplicar: usa external_id baseado no timestamp
+      const externalId = `${userId}:${phone}:${m.at}:${m.role}`;
+      await supabase
+        .from("messages")
+        .upsert(
+          {
+            user_id: userId,
+            lead_id: lead.id,
+            content: m.content,
+            direction,
+            status: "delivered",
+            external_id: externalId,
+            created_at: m.at ?? new Date().toISOString(),
+          },
+          { onConflict: "external_id", ignoreDuplicates: true },
+        );
+    }
+  }
 }
 
 function json(body: unknown, status = 200) {
