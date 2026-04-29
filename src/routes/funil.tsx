@@ -526,8 +526,8 @@ type Deal = {
          </main>
       </div>
 
-      {/* Painel Lateral de Chat */}
-      {chatOpen && (
+      {/* Painel Lateral de Chat (Apenas no modo Kanban) */}
+      {viewMode === "kanban" && chatOpen && (
         <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[420px] bg-card border-l border-border shadow-2xl flex flex-col z-50">
           <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-muted/30">
             <div className="flex items-center gap-3 min-w-0">
