@@ -28,7 +28,7 @@ const modules = [
 
 function CrmHub() {
   const { user } = useAuth();
-  const [stats, setStats] = useState({ leads: 0, pipelineValue: 0, botConvs: 0, won: 0 });
+   const [stats, setStats] = useState({ leads: 0, pipelineValue: 0, botConvs: 0, won: 0, activeConvs: 0 });
   const [recentLeads, setRecentLeads] = useState<any[]>([]);
   const [leadsSeries, setLeadsSeries] = useState<{ day: string; count: number }[]>([]);
   const [funnelSeries, setFunnelSeries] = useState<{ name: string; value: number; count: number }[]>([]);
@@ -40,15 +40,23 @@ function CrmHub() {
       await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
 
       const since = new Date(); since.setDate(since.getDate() - 29);
-   const [{ count: leadsCount }, { data: pipeline }, { count: botCount }, { data: stages }, { data: latest }, { data: trend }, { count: activeConversations }] = await Promise.all([
+       const [
+         { count: activeConversations },
+         { count: leadsCount },
+         { data: pipeline },
+         { count: botCount },
+         { data: stages },
+         { data: latest },
+         { data: trend }
+       ] = await Promise.all([
          supabase.from("bot_conversations").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "active"),
-        supabase.from("leads").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("pipeline_leads").select("deal_value, stage_id").eq("user_id", user.id),
-        supabase.from("bot_conversations").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("funnel_stages").select("id, name, order_index").eq("user_id", user.id).order("order_index"),
-        supabase.from("leads").select("id, name, phone, source, status, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
-        supabase.from("leads").select("created_at").eq("user_id", user.id).gte("created_at", since.toISOString()),
-      ]);
+         supabase.from("leads").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+         supabase.from("pipeline_leads").select("deal_value, stage_id").eq("user_id", user.id),
+         supabase.from("bot_conversations").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+         supabase.from("funnel_stages").select("id, name, order_index").eq("user_id", user.id).order("order_index"),
+         supabase.from("leads").select("id, name, phone, source, status, created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
+         supabase.from("leads").select("created_at").eq("user_id", user.id).gte("created_at", since.toISOString()),
+       ]);
 
       const wonStageIds = (stages ?? []).filter((s: any) => /ganho|fechado|won/i.test(s.name)).map((s: any) => s.id);
       const won = (pipeline ?? []).filter((p: any) => wonStageIds.includes(p.stage_id)).reduce((s: number, p: any) => s + Number(p.deal_value ?? 0), 0);
@@ -140,11 +148,10 @@ function CrmHub() {
              <Kpi icon={Clock} label="Tempo de Resposta" value="< 2 min" color="text-success" bg="bg-success/10" />
              <Kpi icon={CheckCircle2} label="Taxa de Conversão" value="12.4%" color="text-primary" bg="bg-primary/10" />
              <Kpi icon={Users} label="Leads Ativos" value={stats.leads.toLocaleString("pt-BR")} color="text-info" bg="bg-info/10" />
-             <Kpi icon={MessageSquare} label="Conversas Abertas" value="24" color="text-warning" bg="bg-warning/10" />
+            <Kpi icon={MessageSquare} label="Conversas Abertas" value={stats.activeConvs.toString()} color="text-warning" bg="bg-warning/10" />
            </div>
-          </div>
 
-          {/* Gráficos */}
+           {/* Gráficos */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-5 shadow-card">
               <div className="flex items-center justify-between mb-4">
