@@ -324,14 +324,16 @@ type Deal = {
                  <span className="text-sm font-black text-primary">{fmt(totalPipeline)}</span>
                </div>
                <div className="h-8 w-[1px] bg-border/50 hidden md:block" />
-               <div className="flex bg-muted p-1 rounded-lg border border-border/50">
-                 <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md bg-background shadow-sm text-primary">
-                   <LayoutGrid className="h-4 w-4" />
-                 </Button>
-                 <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground">
-                   <List className="h-4 w-4" />
-                 </Button>
-               </div>
+                {viewMode === "kanban" && (
+                  <div className="flex bg-muted p-1 rounded-lg border border-border/50">
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md bg-background shadow-sm text-primary">
+                      <LayoutGrid className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground">
+                      <List className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
                <Button className="h-9 gap-2 text-xs font-black shadow-lg shadow-primary/20" onClick={() => setAdding({ stage_id: stages[0]?.id || "", lead_id: "", deal_value: "" })}>
                  <Plus className="h-4 w-4" /> NOVO NEGÓCIO
                </Button>
