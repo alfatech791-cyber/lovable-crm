@@ -43,12 +43,40 @@ import { toast } from "sonner";
       })();
     }, [user?.id]);
 
-    const stats = useMemo(() => {
-      const totalValue = localProducts.reduce((acc, p) => acc + (p.price * (p.stock || 0)), 0);
-      const lowStock = localProducts.filter(p => (p.stock || 0) <= 3 && (p.stock || 0) > 0).length;
-      const outOfStock = localProducts.filter(p => (p.stock || 0) === 0).length;
-      return { totalValue, lowStock, outOfStock, totalItems: localProducts.length };
-    }, [localProducts]);
+   const stats = useMemo(() => {
+     const totalValue = localProducts.reduce((acc, p) => acc + (p.price * (p.stock || 0)), 0);
+     const totalCost = localProducts.reduce((acc, p) => acc + ((p.cost_price || 0) * (p.stock || 0)), 0);
+     const lowStock = localProducts.filter(p => (p.stock || 0) <= 3 && (p.stock || 0) > 0).length;
+     const outOfStock = localProducts.filter(p => (p.stock || 0) === 0).length;
+     return { totalValue, totalCost, lowStock, outOfStock, totalItems: localProducts.length };
+   }, [localProducts]);
+ 
+   const handleExport = () => {
+     const headers = ["ID", "Nome", "Referência", "Categoria", "Estoque", "Preço", "Preço de Custo", "Total Venda", "Total Custo"];
+     const rows = filteredProducts.map(p => [
+       p.id,
+       p.name,
+       p.reference || p.sku || "",
+       p.category || "",
+       p.stock || 0,
+       p.price,
+       p.cost_price || 0,
+       (p.price * (p.stock || 0)).toFixed(2),
+       ((p.cost_price || 0) * (p.stock || 0)).toFixed(2)
+     ]);
+ 
+     const csvContent = "data:text/csv;charset=utf-8," 
+       + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+ 
+     const encodedUri = encodeURI(csvContent);
+     const link = document.createElement("a");
+     link.setAttribute("href", encodedUri);
+     link.setAttribute("download", `estoque_${new Date().toISOString().split('T')[0]}.csv`);
+     document.body.appendChild(link);
+     link.click();
+     document.body.removeChild(link);
+     toast.success("Relatório exportado!");
+   };
  
    const filteredProducts = useMemo(() => {
      return localProducts.filter(product => {
@@ -195,13 +223,16 @@ import { toast } from "sonner";
          </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <button className="h-10 px-4 rounded-xl border border-border bg-card text-sm font-medium hover:bg-muted transition flex items-center gap-2">
+          <button 
+            onClick={handleExport}
+            className="h-10 px-4 rounded-xl border border-border bg-card text-sm font-medium hover:bg-muted transition flex items-center gap-2"
+          >
             <FileDown className="h-4 w-4" /> Exportar
-           </button>
-            <button onClick={() => setIsAddOpen(true)} className="h-10 px-5 rounded-xl bg-gradient-primary text-white flex items-center gap-2 text-sm font-bold shadow-glow hover:opacity-95 transition">
-             <Plus className="h-4 w-4" /> Novo Produto
-           </button>
-         </div>
+          </button>
+          <button onClick={() => setIsAddOpen(true)} className="h-10 px-5 rounded-xl bg-gradient-primary text-white flex items-center gap-2 text-sm font-bold shadow-glow hover:opacity-95 transition">
+            <Plus className="h-4 w-4" /> Novo Produto
+          </button>
+        </div>
        </div>
  
        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-card">
