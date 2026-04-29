@@ -945,10 +945,23 @@ type Deal = {
                <p className="text-[10px] text-muted-foreground/60 font-medium">
                  Pressione <span className="font-bold">Enter</span> para enviar
                </p>
-               <div className="flex gap-2">
-                 <button className="text-[10px] font-black text-primary/70 uppercase tracking-widest hover:text-primary transition-colors">Templates</button>
-                 <button className="text-[10px] font-black text-primary/70 uppercase tracking-widest hover:text-primary transition-colors">Anexar</button>
-               </div>
+                <div className="flex gap-2">
+                  <button 
+                    className="text-[10px] font-black text-primary/70 uppercase tracking-widest hover:text-primary transition-colors"
+                    onClick={() => {
+                      const templates = ["Olá, como posso ajudar?", "Agradecemos o seu contato!", "Um momento, por favor."];
+                      const choice = prompt("Escolha um template:\n" + templates.map((t, i) => `${i + 1}: ${t}`).join("\n"));
+                      if (choice && templates[parseInt(choice) - 1]) {
+                        setMessageText(templates[parseInt(choice) - 1]);
+                      }
+                    }}
+                  >
+                    Templates
+                  </button>
+                  <button className="text-[10px] font-black text-primary/70 uppercase tracking-widest hover:text-primary transition-colors" onClick={() => toast.info("Anexos em breve!")}>
+                    Anexar
+                  </button>
+                </div>
              </div>
            </div>
          </div>
