@@ -1,6 +1,7 @@
  import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
- import { Sparkles, Mail, Lock, ArrowRight, MessageSquare, Users, Zap } from "lucide-react";
+ import { Sparkles, Mail, Lock, ArrowRight } from "lucide-react";
  import { useState } from "react";
+ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -15,11 +16,27 @@ export const Route = createFileRoute("/login")({
  function Login() {
    const navigate = useNavigate();
    const [loading, setLoading] = useState(false);
+   const [email, setEmail] = useState("renato@conectacrm.com");
+   const [password, setPassword] = useState("demo1234");
+   const [error, setError] = useState("");
  
-   const handle = (e: React.FormEvent) => {
+   const handle = async (e: React.FormEvent) => {
      e.preventDefault();
+      setError("");
      setLoading(true);
-     setTimeout(() => navigate({ to: "/" }), 600);
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (signInError) {
+        setError(signInError.message);
+        setLoading(false);
+        return;
+      }
+
+      navigate({ to: "/funil" });
    };
  
    return (
@@ -44,7 +61,7 @@ export const Route = createFileRoute("/login")({
                <label className="text-[12.5px] font-medium text-foreground/80">E-mail</label>
                <div className="relative mt-1.5">
                  <Mail className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                 <input type="email" defaultValue="renato@conectacrm.com" className="w-full h-11 pl-10 pr-3 rounded-xl bg-muted/50 border border-border focus:bg-card focus:border-ring outline-none text-sm transition" />
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-11 pl-10 pr-3 rounded-xl bg-muted/50 border border-border focus:bg-card focus:border-ring outline-none text-sm transition" />
                </div>
              </div>
              <div>
@@ -54,9 +71,15 @@ export const Route = createFileRoute("/login")({
                </div>
                <div className="relative mt-1.5">
                  <Lock className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                 <input type="password" defaultValue="demo1234" className="w-full h-11 pl-10 pr-3 rounded-xl bg-muted/50 border border-border focus:bg-card focus:border-ring outline-none text-sm transition" />
+                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-11 pl-10 pr-3 rounded-xl bg-muted/50 border border-border focus:bg-card focus:border-ring outline-none text-sm transition" />
                </div>
              </div>
+
+              {error && (
+                <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                  {error}
+                </div>
+              )}
  
              <label className="flex items-center gap-2 text-[12.5px] text-foreground/80">
                <input type="checkbox" className="h-4 w-4 rounded border-border accent-primary" defaultChecked />
@@ -72,9 +95,9 @@ export const Route = createFileRoute("/login")({
              Não tem uma conta? <a className="text-primary font-semibold hover:text-primary-glow cursor-pointer">Criar conta grátis</a>
            </div>
  
-           <p className="mt-8 text-[11px] text-muted-foreground text-center">
-             🔒 Auth real será ativado quando você habilitar o Lovable Cloud.
-           </p>
+            <p className="mt-8 text-[11px] text-muted-foreground text-center">
+              Entre com sua conta Supabase para liberar os dados protegidos do CRM.
+            </p>
          </div>
        </div>
  
