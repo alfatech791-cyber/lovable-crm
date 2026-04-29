@@ -112,7 +112,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto custom-scrollbar">
         {filteredItems.map((item: any, idx: number) => {
           if (item.type === "header") {
-            if (flyout) return null;
+            if (isSmall) return <div key={`header-${idx}`} className="h-px bg-sidebar-border/30 my-4 mx-2" />;
             return (
               <div key={`header-${idx}`} className="px-3 pt-4 pb-2 text-[10px] font-black uppercase tracking-widest text-sidebar-foreground/30">
                 {item.title}
@@ -120,58 +120,59 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
             );
           }
 
-          const Icon = (Icons as any)[item.icon] || Icons.HelpCircle;
+          const Icon = (Icons as any)[item.icon] || HelpCircle;
           const active = location.pathname === item.url || (item.children?.some((child: any) => location.pathname === child.url));
 
-          // Item com flyout: abre segundo painel ao clicar
-          if (item.flyout) {
-            const isOpen = flyout?.url === item.url;
-            return (
-              <button
-                key={item.url}
-                onClick={() => setFlyout(isOpen ? null : item)}
-                title={flyout ? item.title : undefined}
-                className={`group w-full relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all text-left ${flyout ? "justify-center" : ""}
-                  ${active || isOpen
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-glow"
-                    : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-white"
-                  }`}
-              >
-                <Icon className="h-[18px] w-[18px]" strokeWidth={active || isOpen ? 2.4 : 2} />
-                {!flyout && <span>{item.title}</span>}
-                {!flyout && <ChevronRight className={`h-4 w-4 ml-auto transition-transform ${isOpen ? "translate-x-0.5" : ""}`} />}
-              </button>
-            );
-          }
-
-          return (
+          const NavItem = (
             <div key={item.url} className="space-y-1">
-              <Link
-                to={item.url}
-                title={flyout ? item.title : undefined}
-                className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all ${flyout ? "justify-center" : ""}
-                  ${active
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-glow"
-                    : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-white"
-                  }`}
-              >
-                <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.4 : 2} />
-                {!flyout && <span>{item.title}</span>}
-                {!flyout && active && !item.children && <ChevronRight className="h-4 w-4 ml-auto opacity-80" />}
-                {!flyout && item.children && <Icons.ChevronDown className={`h-3.5 w-3.5 ml-auto transition-transform ${active ? "rotate-180" : ""}`} />}
-              </Link>
+              {item.flyout ? (
+                <button
+                  onClick={() => setFlyout(flyout?.url === item.url ? null : item)}
+                  className={cn(
+                    "group w-full relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all text-left",
+                    isSmall ? "justify-center" : "",
+                    active || flyout?.url === item.url
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-glow"
+                      : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-white"
+                  )}
+                >
+                  <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.4 : 2} />
+                  {!isSmall && <span className="flex-1 truncate">{item.title}</span>}
+                  {!isSmall && <ChevronRight className={cn("h-4 w-4 ml-auto transition-transform", flyout?.url === item.url ? "rotate-90" : "")} />}
+                  {item.badge && !isSmall && (
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary/20 text-primary uppercase ml-1 shrink-0">{item.badge}</span>
+                  )}
+                </button>
+              ) : (
+                <Link
+                  to={item.url}
+                  className={cn(
+                    "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
+                    isSmall ? "justify-center" : "",
+                    active
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-glow"
+                      : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-white"
+                  )}
+                >
+                  <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.4 : 2} />
+                  {!isSmall && <span className="flex-1 truncate">{item.title}</span>}
+                  {!isSmall && active && !item.children && <ChevronRight className="h-4 w-4 ml-auto opacity-80" />}
+                  {!isSmall && item.children && <ChevronDown className={cn("h-3.5 w-3.5 ml-auto transition-transform", active ? "rotate-180" : "")} />}
+                </Link>
+              )}
               
-              {!flyout && item.children && active && (
-                <div className="ml-9 space-y-1 border-l border-sidebar-border/50 pl-2 py-1">
+              {!isSmall && item.children && active && (
+                <div className="ml-9 space-y-1 border-l border-sidebar-border/50 pl-2 py-1 animate-in fade-in slide-in-from-top-1 duration-200">
                   {item.children.map((child: any) => (
                     <Link
                       key={child.url}
                       to={child.url}
-                      className={`block rounded-md px-3 py-1.5 text-[12.5px] transition-colors
-                        ${location.pathname === child.url 
+                      className={cn(
+                        "block rounded-md px-3 py-1.5 text-[12.5px] transition-colors",
+                        location.pathname === child.url 
                           ? "text-white font-medium bg-white/10" 
                           : "text-sidebar-foreground/60 hover:text-white hover:bg-white/5"
-                        }`}
+                      )}
                     >
                       {child.title}
                     </Link>
@@ -180,6 +181,22 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
               )}
             </div>
           );
+
+          if (isSmall) {
+            return (
+              <Tooltip key={item.url}>
+                <TooltipTrigger asChild>
+                  {NavItem}
+                </TooltipTrigger>
+                <TooltipContent side="right" className="flex items-center gap-2">
+                  {item.title}
+                  {item.badge && <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-white/20 uppercase">{item.badge}</span>}
+                </TooltipContent>
+              </Tooltip>
+            );
+          }
+
+          return NavItem;
         })}
       </nav>
 
