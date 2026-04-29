@@ -55,7 +55,11 @@ type Deal = {
   }
 };
 
- const normalizePhone = (p: string | null) => p ? p.replace(/\D/g, "") : "";
+  const normalizePhone = (p: string | null) => {
+    if (!p) return "";
+    // Remove tudo que não é dígito e remove o sufixo do whatsapp se existir
+    return p.split("@")[0].replace(/\D/g, "");
+  };
  
  function FunnelPage() {
     const { user, loading: authLoading } = useAuth();

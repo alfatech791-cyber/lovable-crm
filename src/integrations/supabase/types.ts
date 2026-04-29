@@ -769,6 +769,11 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      handle_new_bot_conversation_direct: {
+        Args: { p_name: string; p_phone: string; p_user_id: string }
+        Returns: undefined
+      }
+      normalize_phone: { Args: { p_phone: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
