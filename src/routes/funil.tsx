@@ -318,10 +318,12 @@ type Deal = {
                      <TrendingUp className="h-5 w-5 text-primary/50" />
                    </div>
                  </div>
-                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground animate-pulse">Carregando Funil...</p>
+                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground animate-pulse">
+                   {viewMode === "kanban" ? "Carregando Funil..." : "Carregando Conversas..."}
+                 </p>
                </div>
              </div>
-           ) : (
+            ) : viewMode === "kanban" ? (
              <div className="flex-1 overflow-x-auto p-6 scrollbar-thin">
                <div className="flex gap-6 h-full min-w-max">
                  {stages.map((stage) => (
@@ -355,6 +357,66 @@ type Deal = {
                  </div>
                </div>
              </div>
+            ) : (
+              <div className="flex-1 flex flex-col md:flex-row overflow-hidden bg-background">
+                {/* Lista de Conversas Lateral */}
+                <div className="w-full md:w-80 border-r border-border flex flex-col bg-muted/5">
+                  <div className="p-4 border-b border-border bg-background/50">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-primary mb-1">Conversas Ativas</h3>
+                    <p className="text-[10px] text-muted-foreground">Clique para abrir o atendimento</p>
+                  </div>
+                  <div className="flex-1 overflow-y-auto">
+                    {conversations.length === 0 ? (
+                      <div className="p-8 text-center">
+                        <MessageSquare className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+                        <p className="text-xs text-muted-foreground">Nenhuma conversa recente</p>
+                      </div>
+                    ) : (
+                      conversations.map((conv) => (
+                        <button
+                          key={conv.id}
+                          onClick={() => {
+                            setCurrentConversation(conv);
+                            setChatOpen(true);
+                          }}
+                          className={cn(
+                            "w-full p-4 flex items-center gap-3 border-b border-border/50 hover:bg-primary/5 transition-all text-left",
+                            currentConversation?.id === conv.id && "bg-primary/5 border-l-4 border-l-primary"
+                          )}
+                        >
+                          <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center shrink-0">
+                            <User className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex justify-between items-start gap-2">
+                              <p className="text-sm font-bold truncate">{conv.contact_name || conv.contact_phone}</p>
+                              {conv.last_message_at && (
+                                <span className="text-[9px] text-muted-foreground shrink-0">
+                                  {formatDistanceToNow(new Date(conv.last_message_at), { locale: ptBR })}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate italic">
+                              {conv.transcript?.[conv.transcript.length - 1]?.content || "Inicie uma conversa..."}
+                            </p>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Espaço Vazio / Ilustração quando nada selecionado */}
+                <div className="hidden md:flex flex-1 flex-col items-center justify-center p-12 text-center bg-muted/5">
+                  <div className="h-20 w-20 rounded-full bg-primary/5 grid place-items-center mb-6">
+                    <Bot className="h-10 w-10 text-primary/40" />
+                  </div>
+                  <h2 className="text-xl font-black text-foreground mb-2">Central de Atendimento</h2>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                    Selecione uma conversa na lista ao lado ou clique em um card no Funil para iniciar o atendimento comercial em tempo real.
+                  </p>
+                </div>
+              </div>
            )}
          </main>
       </div>
