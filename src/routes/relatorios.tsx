@@ -266,7 +266,7 @@ export const Route = createFileRoute("/relatorios")({
                 <div className="p-6">
                   <div className="h-[300px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                       <BarChart layout="vertical" data={mockFunnelData} margin={{ left: 40, right: 40 }}>
+                       <BarChart layout="vertical" data={funnelData} margin={{ left: 40, right: 40 }}>
                         <XAxis type="number" hide />
                         <YAxis 
                           dataKey="name" 
@@ -289,8 +289,8 @@ export const Route = createFileRoute("/relatorios")({
                             return null;
                           }}
                         />
-                         <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={32}>
-                           {mockFunnelData.length > 0 && mockFunnelData.map((entry: any, index: number) => (
+                          <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={32}>
+                            {funnelData.length > 0 && funnelData.map((entry: any, index: number) => (
                              <Cell key={`cell-${index}`} fill={entry.color} />
                            ))}
                          </Bar>
@@ -322,8 +322,8 @@ export const Route = createFileRoute("/relatorios")({
                   <h3 className="text-lg font-bold">Top Agentes</h3>
                   <button className="text-primary hover:underline text-xs font-bold">Ver tudo</button>
                 </div>
-                   <div className="p-4 space-y-2">
-                     {mockTopPerformers.length > 0 ? mockTopPerformers.map((agent: any, i: number) => (
+                    <div className="p-4 space-y-2">
+                      {topAgents.length > 0 ? topAgents.map((agent: any, i: number) => (
                        <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-border">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
@@ -362,16 +362,16 @@ export const Route = createFileRoute("/relatorios")({
                   <div className="h-[220px] w-full relative">
                     <ResponsiveContainer width="100%" height="100%">
                       <RePieChart>
-                         <Pie
-                           data={mockOriginData.length > 0 ? mockOriginData : [{ name: 'Sem dados', value: 100, color: '#e2e8f0' }]}
-                           cx="50%"
-                           cy="50%"
-                           innerRadius={60}
-                           outerRadius={85}
-                           paddingAngle={8}
-                           dataKey="value"
-                         >
-                           {mockOriginData.length > 0 ? mockOriginData.map((entry: any, index: number) => (
+                          <Pie
+                            data={originData.length > 0 ? originData : [{ name: 'Sem dados', value: 100, color: '#e2e8f0' }]}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={85}
+                            paddingAngle={8}
+                            dataKey="value"
+                          >
+                            {originData.length > 0 ? originData.map((entry: any, index: number) => (
                              <Cell key={`cell-${index}`} fill={entry.color} />
                            )) : (
                              <Cell fill="#e2e8f0" />
@@ -396,8 +396,8 @@ export const Route = createFileRoute("/relatorios")({
                       <span className="text-xs font-bold text-muted-foreground uppercase">Mix</span>
                     </div>
                   </div>
-                   <div className="space-y-3 mt-4">
-                     {mockOriginData.length > 0 ? mockOriginData.map((item: any, i: number) => (
+                    <div className="space-y-3 mt-4">
+                      {originData.length > 0 ? originData.map((item: any, i: number) => (
                        <div key={i} className="flex items-center justify-between group cursor-default">
                         <div className="flex items-center gap-2">
                           <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
