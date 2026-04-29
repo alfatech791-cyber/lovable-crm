@@ -1,24 +1,91 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import { 
-  BarChart3, TrendingUp, Users, DollarSign, Calendar, Download, 
-  Filter, ArrowUpRight, Shield, PieChart, Target, Zap, 
-  ArrowDownRight, ChevronRight, MoreHorizontal, UserCheck, Sparkles,
-  Lightbulb, AlertCircle
-} from "lucide-react";
+ import { 
+   BarChart3, TrendingUp, Users, DollarSign, Calendar, Download, 
+   Filter, ArrowUpRight, Shield, PieChart, Target, Zap, 
+   ArrowDownRight, ChevronRight, MoreHorizontal, UserCheck, Sparkles,
+   Lightbulb, AlertCircle, Loader2
+ } from "lucide-react";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart as RePieChart, Pie } from "recharts";
-import { funnelData, originData, topPerformers } from "@/lib/mock";
+ import { funnelData as mockFunnelData, originData as mockOriginData, topPerformers as mockTopPerformers } from "@/lib/mock";
 import { useAuth } from "@/contexts/AuthContext";
+ import { useState, useEffect, useCallback } from "react";
+ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/relatorios")({
   head: () => ({ meta: [{ title: "Relatórios — ConectaCRM" }, { name: "description", content: "Métricas avançadas de vendas" }] }),
   component: ReportsPage,
 });
 
-function ReportsPage() {
-  const { profile } = useAuth();
+ function ReportsPage() {
+   const { user, profile } = useAuth();
+   const [loading, setLoading] = useState(true);
+   const [stats, setStats] = useState({
+     revenue: 0,
+     leads: 0,
+     conversion: 0,
+     avgTicket: 0,
+     revenueTrend: "+0%",
+     leadsTrend: "+0%",
+     conversionTrend: "+0%",
+     avgTicketTrend: "+0%",
+   });
+ 
+   const fetchReportsData = useCallback(async () => {
+     if (!user?.id) return;
+     setLoading(true);
+     try {
+       const now = new Date();
+       const firstDayMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+       
+       // Sales and Revenue
+       const { data: sales } = await supabase
+         .from("sales_orders")
+         .select("total_amount, status, created_at")
+         .eq("user_id", user.id);
+ 
+       const concludedSales = (sales || []).filter(s => s.status === 'concluded');
+       const monthRevenue = concludedSales
+         .filter(s => new Date(s.created_at!) >= firstDayMonth)
+         .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+ 
+       const avgTicket = concludedSales.length > 0 
+         ? monthRevenue / concludedSales.filter(s => new Date(s.created_at!) >= firstDayMonth).length || 0
+         : 0;
+ 
+       // Leads
+       const { data: leads } = await supabase
+         .from("leads")
+         .select("status, created_at")
+         .eq("user_id", user.id);
+ 
+       const totalLeads = leads?.length || 0;
+       const wonLeads = leads?.filter(l => l.status === 'won').length || 0;
+       const conversionRate = totalLeads > 0 ? (wonLeads / totalLeads) * 100 : 0;
+ 
+       setStats({
+         revenue: monthRevenue,
+         leads: totalLeads,
+         conversion: conversionRate,
+         avgTicket: avgTicket,
+         revenueTrend: "+0%",
+         leadsTrend: "+0%",
+         conversionTrend: "+0%",
+         avgTicketTrend: "+0%",
+       });
+     } catch (err) {
+       console.error("Error fetching reports:", err);
+     } finally {
+       setLoading(false);
+     }
+   }, [user?.id]);
+ 
+   useEffect(() => {
+     fetchReportsData();
+   }, [fetchReportsData]);
+ 
   const isAdmin = profile?.role === 'admin' || !profile;
 
   if (!isAdmin) {
@@ -102,29 +169,33 @@ function ReportsPage() {
             </div>
           </div>
 
-          {/* Main Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {[
-              { label: "Faturamento", value: "R$ 0,00", trend: "0%", isUp: true, icon: DollarSign, bg: "bg-primary/10", text: "text-primary" },
-              { label: "Leads Totais", value: "0", trend: "0%", isUp: true, icon: Users, bg: "bg-info/10", text: "text-info" },
-              { label: "Conversão", value: "0,0%", trend: "0%", isUp: true, icon: Target, bg: "bg-success/10", text: "text-success" },
-              { label: "Ticket Médio", value: "R$ 0,00", trend: "0%", isUp: true, icon: TrendingUp, bg: "bg-warning/10", text: "text-warning" },
-            ].map((stat, i) => (
-              <div key={i} className="bg-white border border-border rounded-2xl p-5 shadow-card hover:border-primary/20 transition-colors group">
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`h-11 w-11 rounded-xl ${stat.bg} ${stat.text} flex items-center justify-center`}>
-                    <stat.icon className="h-5 w-5" />
-                  </div>
-                  <div className={`flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-lg ${stat.isUp ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                    {stat.isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                    {stat.trend}
-                  </div>
-                </div>
-                <p className="text-[13px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{stat.label}</p>
-                <h3 className="text-2xl font-bold font-display tracking-tight group-hover:text-primary transition-colors">{stat.value}</h3>
-              </div>
-            ))}
-          </div>
+           {/* Main Stats Cards */}
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+             {[
+               { label: "Faturamento", value: stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.revenueTrend, isUp: true, icon: DollarSign, bg: "bg-primary/10", text: "text-primary" },
+               { label: "Leads Totais", value: stats.leads.toString(), trend: stats.leadsTrend, isUp: true, icon: Users, bg: "bg-info/10", text: "text-info" },
+               { label: "Conversão", value: stats.conversion.toFixed(1) + "%", trend: stats.conversionTrend, isUp: true, icon: Target, bg: "bg-success/10", text: "text-success" },
+               { label: "Ticket Médio", value: stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.avgTicketTrend, isUp: true, icon: TrendingUp, bg: "bg-warning/10", text: "text-warning" },
+             ].map((stat, i) => (
+               <div key={i} className="bg-white border border-border rounded-2xl p-5 shadow-card hover:border-primary/20 transition-colors group">
+                 <div className="flex items-start justify-between mb-4">
+                   <div className={`h-11 w-11 rounded-xl ${stat.bg} ${stat.text} flex items-center justify-center`}>
+                     <stat.icon className="h-5 w-5" />
+                   </div>
+                   <div className={`flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-lg ${stat.isUp ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+                     {stat.isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                     {stat.trend}
+                   </div>
+                 </div>
+                 <p className="text-[13px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{stat.label}</p>
+                 {loading ? (
+                   <div className="h-8 w-24 bg-muted animate-pulse rounded-lg" />
+                 ) : (
+                   <h3 className="text-2xl font-bold font-display tracking-tight group-hover:text-primary transition-colors">{stat.value}</h3>
+                 )}
+               </div>
+             ))}
+           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             {/* Sales performance - Larger card */}
@@ -150,7 +221,7 @@ function ReportsPage() {
                 <div className="p-6">
                   <div className="h-[300px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart layout="vertical" data={funnelData} margin={{ left: 40, right: 40 }}>
+                       <BarChart layout="vertical" data={mockFunnelData} margin={{ left: 40, right: 40 }}>
                         <XAxis type="number" hide />
                         <YAxis 
                           dataKey="name" 
@@ -173,11 +244,11 @@ function ReportsPage() {
                             return null;
                           }}
                         />
-                        <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={32}>
-                          {funnelData.length > 0 && funnelData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Bar>
+                         <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={32}>
+                           {mockFunnelData.length > 0 && mockFunnelData.map((entry: any, index: number) => (
+                             <Cell key={`cell-${index}`} fill={entry.color} />
+                           ))}
+                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -206,9 +277,9 @@ function ReportsPage() {
                   <h3 className="text-lg font-bold">Top Agentes</h3>
                   <button className="text-primary hover:underline text-xs font-bold">Ver tudo</button>
                 </div>
-                  <div className="p-4 space-y-2">
-                    {topPerformers.length > 0 ? topPerformers.map((agent, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-border">
+                   <div className="p-4 space-y-2">
+                     {mockTopPerformers.length > 0 ? mockTopPerformers.map((agent: any, i: number) => (
+                       <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-border">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
                             {agent.avatar}
@@ -246,21 +317,21 @@ function ReportsPage() {
                   <div className="h-[220px] w-full relative">
                     <ResponsiveContainer width="100%" height="100%">
                       <RePieChart>
-                        <Pie
-                          data={originData.length > 0 ? originData : [{ name: 'Sem dados', value: 100, color: '#e2e8f0' }]}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={85}
-                          paddingAngle={8}
-                          dataKey="value"
-                        >
-                          {originData.length > 0 ? originData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          )) : (
-                            <Cell fill="#e2e8f0" />
-                          )}
-                        </Pie>
+                         <Pie
+                           data={mockOriginData.length > 0 ? mockOriginData : [{ name: 'Sem dados', value: 100, color: '#e2e8f0' }]}
+                           cx="50%"
+                           cy="50%"
+                           innerRadius={60}
+                           outerRadius={85}
+                           paddingAngle={8}
+                           dataKey="value"
+                         >
+                           {mockOriginData.length > 0 ? mockOriginData.map((entry: any, index: number) => (
+                             <Cell key={`cell-${index}`} fill={entry.color} />
+                           )) : (
+                             <Cell fill="#e2e8f0" />
+                           )}
+                         </Pie>
                         <Tooltip 
                           content={({ active, payload }) => {
                             if (active && payload && payload.length) {
@@ -280,9 +351,9 @@ function ReportsPage() {
                       <span className="text-xs font-bold text-muted-foreground uppercase">Mix</span>
                     </div>
                   </div>
-                  <div className="space-y-3 mt-4">
-                    {originData.length > 0 ? originData.map((item, i) => (
-                      <div key={i} className="flex items-center justify-between group cursor-default">
+                   <div className="space-y-3 mt-4">
+                     {mockOriginData.length > 0 ? mockOriginData.map((item: any, i: number) => (
+                       <div key={i} className="flex items-center justify-between group cursor-default">
                         <div className="flex items-center gap-2">
                           <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
                           <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{item.name}</span>
