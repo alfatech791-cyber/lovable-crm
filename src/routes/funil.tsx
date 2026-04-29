@@ -296,22 +296,32 @@ type Deal = {
            <div className="px-6 py-4 border-b border-border/50 bg-background/50 flex flex-wrap items-center justify-between gap-4">
              <div className="flex items-center gap-4">
                <div className="flex bg-muted p-1 rounded-lg border border-border/50 mr-2">
-                 <Button 
-                   variant="ghost" 
-                   size="sm" 
-                   className={cn("h-8 gap-2 text-xs font-bold", viewMode === "kanban" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}
-                   onClick={() => setViewMode("kanban")}
-                 >
-                   <LayoutGrid className="h-3.5 w-3.5" /> FUNIL
-                 </Button>
-                 <Button 
-                   variant="ghost" 
-                   size="sm" 
-                   className={cn("h-8 gap-2 text-xs font-bold", viewMode === "chat" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}
-                   onClick={() => setViewMode("chat")}
-                 >
-                   <MessageSquare className="h-3.5 w-3.5" /> CONVERSAS
-                 </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "h-8 gap-2 text-xs font-bold px-3 transition-all",
+                      viewMode === "kanban" 
+                        ? "bg-background shadow-sm text-primary" 
+                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                    )}
+                    onClick={() => setViewMode("kanban")}
+                  >
+                    <LayoutGrid className="h-3.5 w-3.5" /> MODO FUNIL
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "h-8 gap-2 text-xs font-bold px-3 transition-all",
+                      viewMode === "chat" 
+                        ? "bg-background shadow-sm text-primary" 
+                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                    )}
+                    onClick={() => setViewMode("chat")}
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" /> MODO CONVERSAS
+                  </Button>
                </div>
                <div className="relative w-64">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
