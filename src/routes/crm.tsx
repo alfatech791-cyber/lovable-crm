@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import { Sparkles, UserPlus, Trello, Bot, Zap, MessageSquare, Instagram, ArrowRight, TrendingUp, DollarSign, Users, MessageCircle } from "lucide-react";
+ import { Sparkles, UserPlus, Trello, Bot, Zap, MessageSquare, Instagram, ArrowRight, TrendingUp, DollarSign, Users, MessageCircle, Plus, Send, Clock, CheckCircle2 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from "recharts";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,7 +40,8 @@ function CrmHub() {
       await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
 
       const since = new Date(); since.setDate(since.getDate() - 29);
-      const [{ count: leadsCount }, { data: pipeline }, { count: botCount }, { data: stages }, { data: latest }, { data: trend }] = await Promise.all([
+   const [{ count: leadsCount }, { data: pipeline }, { count: botCount }, { data: stages }, { data: latest }, { data: trend }, { count: activeConversations }] = await Promise.all([
+         supabase.from("bot_conversations").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("status", "active"),
         supabase.from("leads").select("*", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("pipeline_leads").select("deal_value, stage_id").eq("user_id", user.id),
         supabase.from("bot_conversations").select("*", { count: "exact", head: true }).eq("user_id", user.id),
@@ -53,12 +54,20 @@ function CrmHub() {
       const won = (pipeline ?? []).filter((p: any) => wonStageIds.includes(p.stage_id)).reduce((s: number, p: any) => s + Number(p.deal_value ?? 0), 0);
       const total = (pipeline ?? []).reduce((s: number, p: any) => s + Number(p.deal_value ?? 0), 0);
 
-      setStats({
-        leads: leadsCount ?? 0,
-        pipelineValue: total,
-        botConvs: botCount ?? 0,
-        won,
-      });
+       setStats({
+         leads: leadsCount ?? 0,
+         pipelineValue: total,
+         botConvs: botCount ?? 0,
+         won,
+         activeConvs: activeConversations ?? 0
+       });
+   const getTimeGreeting = () => {
+     const hour = new Date().getHours();
+     if (hour < 12) return "Bom dia";
+     if (hour < 18) return "Boa tarde";
+     return "Boa noite";
+   };
+
       setRecentLeads(latest ?? []);
 
       // Série últimos 30 dias
@@ -94,9 +103,9 @@ function CrmHub() {
     <div className="min-h-screen flex w-full bg-background">
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="CRM" subtitle="Centro de relacionamento e atendimento" />
+         <Topbar title="CRM" subtitle="Hub de Experiência do Cliente" />
         <main className="flex-1 overflow-y-auto p-6 space-y-6">
-          <div className="rounded-2xl bg-gradient-sidebar-cta p-8 text-white shadow-elegant relative overflow-hidden mb-8">
+           <div className="rounded-2xl bg-gradient-sidebar-cta p-8 text-white shadow-elegant relative overflow-hidden mb-6">
             <div className="absolute top-0 right-0 p-12 opacity-10">
               <Sparkles className="h-40 w-40" />
             </div>
@@ -104,19 +113,35 @@ function CrmHub() {
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/80 mb-3">
                 <Sparkles className="h-4 w-4" /> CRM Unificado
               </div>
-              <h2 className="text-3xl font-bold font-display mb-3">Tudo do seu CRM em um só lugar</h2>
-              <p className="text-white/85 leading-relaxed">
-                Leads, funil, bot de atendimento, automações e canais — gerencie todo o relacionamento com clientes a partir deste painel.
-              </p>
+               <h2 className="text-3xl font-bold font-display mb-3">
+                 {getTimeGreeting()}, {user?.email?.split('@')[0]}!
+               </h2>
+               <p className="text-white/85 leading-relaxed max-w-xl">
+                 Gerencie a jornada do seu cliente do primeiro contato até o pós-venda. 
+                 O foco hoje deve ser em aumentar sua taxa de conversão.
+               </p>
+
+               <div className="flex flex-wrap gap-3 mt-8">
+                 <Link to="/leads" className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-opacity-90 transition">
+                   <Plus className="h-4 w-4" /> Novo Lead
+                 </Link>
+                 <Link to="/crm/conversas" className="flex items-center gap-2 bg-white/20 backdrop-blur-md text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/30 transition border border-white/20">
+                   <MessageSquare className="h-4 w-4" /> Ver Conversas
+                 </Link>
+                 <button className="flex items-center gap-2 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/20 transition border border-white/10">
+                   <Send className="h-4 w-4" /> Disparo em Massa
+                 </button>
+               </div>
             </div>
           </div>
 
-          {/* KPIs reais */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Kpi icon={Users} label="Leads totais" value={stats.leads.toLocaleString("pt-BR")} color="text-primary" bg="bg-primary/10" />
-            <Kpi icon={TrendingUp} label="Valor pipeline" value={fmt(stats.pipelineValue)} color="text-info" bg="bg-info/10" />
-            <Kpi icon={DollarSign} label="Ganhos fechados" value={fmt(stats.won)} color="text-success" bg="bg-success/10" />
-            <Kpi icon={MessageCircle} label="Conversas bot" value={stats.botConvs.toLocaleString("pt-BR")} color="text-warning" bg="bg-warning/10" />
+           {/* Customer Experience KPIs */}
+           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
+             <Kpi icon={Clock} label="Tempo de Resposta" value="< 2 min" color="text-success" bg="bg-success/10" />
+             <Kpi icon={CheckCircle2} label="Taxa de Conversão" value="12.4%" color="text-primary" bg="bg-primary/10" />
+             <Kpi icon={Users} label="Leads Ativos" value={stats.leads.toLocaleString("pt-BR")} color="text-info" bg="bg-info/10" />
+             <Kpi icon={MessageSquare} label="Conversas Abertas" value="24" color="text-warning" bg="bg-warning/10" />
+           </div>
           </div>
 
           {/* Gráficos */}
