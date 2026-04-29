@@ -8,9 +8,10 @@ import { ptBR } from "date-fns/locale";
    onRemove: (id: string) => void;
    onDragStart: (id: string) => void;
    onDragEnd: () => void;
+   onClick?: () => void;
  }
  
- export function DealCard({ deal, onRemove, onDragStart, onDragEnd }: DealCardProps) {
+ export function DealCard({ deal, onRemove, onDragStart, onDragEnd, onClick }: DealCardProps) {
    const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
  
    return (
@@ -18,7 +19,8 @@ import { ptBR } from "date-fns/locale";
        draggable
        onDragStart={() => onDragStart(deal.id)}
        onDragEnd={onDragEnd}
-       className="bg-card border border-border rounded-xl p-3 shadow-sm hover:shadow-md hover:border-primary/40 transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden"
+       onClick={onClick}
+       className="bg-card border border-border rounded-xl p-3 shadow-sm hover:shadow-md hover:border-primary/40 transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden active:scale-[0.98]"
      >
        {/* Indicador de prioridade opcional */}
        {deal.priority === 'high' && <div className="absolute top-0 left-0 w-1 h-full bg-destructive" />}
