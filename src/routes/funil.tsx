@@ -433,23 +433,26 @@ type Deal = {
                             setChatOpen(true);
                           }}
                           className={cn(
-                            "w-full p-4 flex items-center gap-3 border-b border-border/50 hover:bg-primary/5 transition-all text-left",
-                            currentConversation?.id === conv.id && "bg-primary/5 border-l-4 border-l-primary"
+                            "w-full p-3 flex items-center gap-3 border-b border-border/50 hover:bg-primary/5 transition-all text-left relative overflow-hidden group",
+                            currentConversation?.id === conv.id ? "bg-primary/5" : ""
                           )}
                         >
-                          <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center shrink-0">
+                          {currentConversation?.id === conv.id && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
+                          )}
+                          <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center shrink-0 group-hover:scale-105 transition-transform">
                             <User className="h-5 w-5 text-primary" />
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex justify-between items-start gap-2">
-                              <p className="text-sm font-bold truncate">{conv.contact_name || conv.contact_phone}</p>
+                              <p className="text-sm font-bold truncate text-foreground/90">{conv.contact_name || conv.contact_phone}</p>
                               {conv.last_message_at && (
-                                <span className="text-[9px] text-muted-foreground shrink-0">
+                                <span className="text-[9px] text-muted-foreground shrink-0 font-medium">
                                   {formatDistanceToNow(new Date(conv.last_message_at), { locale: ptBR })}
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-muted-foreground truncate italic">
+                            <p className="text-[11px] text-muted-foreground truncate italic mt-0.5">
                               {conv.transcript?.[conv.transcript.length - 1]?.content || "Inicie uma conversa..."}
                             </p>
                           </div>
