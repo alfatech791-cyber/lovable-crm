@@ -281,8 +281,8 @@ function ProductsPage() {
               </div>
             </div>
             <button 
-              onClick={() => handleOpenModal()}
-              className="h-10 px-4 rounded-xl bg-gradient-primary text-white text-sm font-semibold shadow-elegant hover:opacity-95 transition flex items-center gap-2"
+              onClick={() => setIsQuickAddOpen(!isQuickAddOpen)}
+              className={`h-10 px-4 rounded-xl text-sm font-semibold shadow-elegant transition flex items-center gap-2 ${isQuickAddOpen ? "bg-muted text-foreground hover:bg-muted/80" : "bg-gradient-primary text-white hover:opacity-95"}`}
             >
               <Plus className="h-4 w-4" /> Novo Produto
             </button>
