@@ -1,23 +1,51 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import * as Icons from "lucide-react";
-import { Sparkles, ChevronRight, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Sparkles, ChevronRight, X, Search, PanelLeftClose, PanelLeftOpen, LogOut, HelpCircle, ChevronDown } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-
 import { sidebarItems } from "@/lib/mock";
+import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
 
 export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: boolean) => void }) {
   const location = useLocation();
   const { user, logout } = useAuth();
   const [flyout, setFlyout] = useState<any | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fecha flyout ao trocar de rota
   useEffect(() => { setFlyout(null); }, [location.pathname]);
 
-  const filteredItems = sidebarItems;
+  // Efeito para sincronizar flyout com colapso
+  useEffect(() => {
+    if (flyout) setIsCollapsed(true);
+  }, [flyout]);
+
+  const filteredItems = useMemo(() => {
+    if (!searchQuery) return sidebarItems;
+    
+    const query = searchQuery.toLowerCase();
+    return sidebarItems.filter((item: any) => {
+      if (item.type === "header") return false;
+      const matchesTitle = item.title.toLowerCase().includes(query);
+      const matchesChildren = item.children?.some((child: any) => 
+        child.title.toLowerCase().includes(query)
+      );
+      return matchesTitle || matchesChildren;
+    });
+  }, [searchQuery]);
+
+  const isSmall = isCollapsed || !!flyout;
 
   return (
-    <>
+    <TooltipProvider delayDuration={0}>
       {/* Mobile Overlay */}
       {open && (
         <div 
