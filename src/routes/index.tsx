@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import { kpis } from "@/lib/mock";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { OriginDonut } from "@/components/dashboard/OriginDonut";
@@ -11,8 +10,10 @@ import { MessagesPanel } from "@/components/dashboard/MessagesPanel";
 import { TasksCard, AutomationsCard, AgendaCard, DispatchCard } from "@/components/dashboard/SidePanels";
 import { RecentService, RecentLeads } from "@/components/dashboard/RecentPanels";
 import { QuickActions } from "@/components/dashboard/QuickActions";
-import { useState } from "react";
-import { X, ShoppingBag, Clock, User, Wrench, Box, Users, TrendingUp } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { X, ShoppingBag, Clock, User, Wrench, Box, Users, TrendingUp, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,7 +26,18 @@ export const Route = createFileRoute("/")({
 });
 
 function Dashboard() {
+  const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    todaySales: 0,
+    monthRevenue: 0,
+    activeOS: 0,
+    lowStock: 0,
+    newLeads: 0,
+    avgTicket: 0
+  });
+
   const [modalContent, setModalContent] = useState<{
     title: string;
     subtitle: string;
@@ -33,6 +45,82 @@ function Dashboard() {
     color: string;
     items: any[];
   } | null>(null);
+
+  const fetchStats = useCallback(async () => {
+    if (!user?.id) return;
+    setLoading(true);
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const firstDayMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+      // Fetch sales
+      const { data: sales } = await supabase
+        .from("sales_orders")
+        .select("total_amount, created_at, status")
+        .eq("user_id", user.id);
+
+      // Fetch products for stock
+      const { data: products } = await supabase
+        .from("products")
+        .select("stock_quantity, min_stock")
+        .eq("user_id", user.id);
+
+      // Fetch leads
+      const { data: leads } = await supabase
+        .from("leads")
+        .select("created_at")
+        .eq("user_id", user.id);
+
+      // Fetch OS
+      const { data: os } = await supabase
+        .from("service_orders")
+        .select("status")
+        .eq("user_id", user.id);
+
+      const todaySales = (sales || [])
+        .filter(s => new Date(s.created_at!) >= today && s.status === 'concluded')
+        .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+
+      const monthRevenue = (sales || [])
+        .filter(s => new Date(s.created_at!) >= firstDayMonth && s.status === 'concluded')
+        .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+
+      const lowStockCount = (products || [])
+        .filter(p => (p.stock_quantity || 0) <= (p.min_stock || 5))
+        .length;
+
+      const newLeadsCount = (leads || [])
+        .filter(l => new Date(l.created_at) >= today)
+        .length;
+
+      const activeOSCount = (os || [])
+        .filter(o => o.status !== 'delivered' && o.status !== 'canceled')
+        .length;
+
+      const concludedSales = (sales || []).filter(s => s.status === 'concluded');
+      const avgTicket = concludedSales.length > 0 
+        ? monthRevenue / concludedSales.filter(s => new Date(s.created_at!) >= firstDayMonth).length || 0
+        : 0;
+
+      setStats({
+        todaySales,
+        monthRevenue,
+        activeOS: activeOSCount,
+        lowStock: lowStockCount,
+        newLeads: newLeadsCount,
+        avgTicket
+      });
+    } catch (error) {
+      console.error("Erro dashboard:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   const openModal = (label: string) => {
     const l = label.toLowerCase();
@@ -72,6 +160,15 @@ function Dashboard() {
     });
   };
 
+  const kpis = [
+    { label: "Vendas do Dia", value: stats.todaySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "+0%", sub: "Total vendido hoje", icon: "ShoppingBag", tone: "success" },
+    { label: "OS Abertas", value: String(stats.activeOS), trend: "0", sub: "Em andamento", icon: "Wrench", tone: "warning" },
+    { label: "Estoque Baixo", value: String(stats.lowStock), trend: "0", sub: "Produtos críticos", icon: "Box", tone: "destructive" },
+    { label: "Faturamento Mês", value: stats.monthRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "+0%", sub: "Meta: R$ 50k", icon: "DollarSign", tone: "primary" },
+    { label: "Novos Leads", value: String(stats.newLeads), trend: "0", sub: "Captados hoje", icon: "Users", tone: "info" },
+    { label: "Ticket Médio", value: stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "+0%", sub: "Média mensal", icon: "TrendingUp", tone: "success" },
+  ];
+
   return (
     <div className="min-h-screen flex w-full bg-background">
       {modalContent && (() => {
@@ -96,43 +193,12 @@ function Dashboard() {
             </div>
             <div className="p-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
               <div className="space-y-3">
-                {modalContent.items.length > 0 ? modalContent.items.map((item) => (
-                   <div key={item.id} className="p-4 rounded-2xl bg-muted/40 border border-border/50 hover:bg-muted transition-colors group">
-                     <div className="flex items-start justify-between mb-2">
-                       <div className="flex items-center gap-3">
-                         <div className="h-9 w-9 rounded-full bg-gradient-primary text-white flex items-center justify-center text-xs font-bold">
-                           {item.title.split(" ").map((n: string) => n[0]).join("")}
-                         </div>
-                         <div>
-                           <div className="text-[13px] font-bold">{item.title}</div>
-                           <div className="text-[11px] text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                             <Clock className="h-3 w-3" /> {item.time} · {item.meta}
-                           </div>
-                         </div>
-                       </div>
-                       <div className="text-right">
-                         <div className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                           item.badge === "Crítico" || item.badge === "Esgotado" ? "bg-destructive/10 text-destructive" :
-                           item.badge === "Urgente" ? "bg-warning/10 text-warning" : "bg-success/10 text-success"
-                         }`}>
-                           {item.badge}
-                         </div>
-                       </div>
-                     </div>
-                     <div className="pl-12">
-                       <div className="text-[12px] text-foreground/80 bg-background/50 rounded-lg p-2 border border-border/30">
-                         {item.desc}
-                       </div>
-                     </div>
-                   </div>
-                 )) : (
-                  <div className="py-12 text-center">
-                    <div className="h-12 w-12 rounded-2xl bg-muted/50 grid place-items-center mx-auto mb-3">
-                      <ModalIcon className="h-6 w-6 text-muted-foreground/40" />
-                    </div>
-                    <p className="text-sm font-medium text-muted-foreground italic">Sem registros para exibir</p>
+                <div className="py-12 text-center">
+                  <div className="h-12 w-12 rounded-2xl bg-muted/50 grid place-items-center mx-auto mb-3">
+                    <ModalIcon className="h-6 w-6 text-muted-foreground/40" />
                   </div>
-                 )}
+                  <p className="text-sm font-medium text-muted-foreground italic">Sem registros detalhados para exibir</p>
+                </div>
               </div>
             </div>
             <div className="p-4 border-t border-border bg-muted/20">
@@ -148,7 +214,7 @@ function Dashboard() {
       <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar 
-          title="Olá, Renato! 👋" 
+          title={`Olá, ${user?.user_metadata?.display_name || 'Usuário'}! 👋`}
           subtitle="Aqui está o resumo do seu negócio hoje." 
           toggleSidebar={() => setSidebarOpen(true)}
         />
@@ -158,7 +224,11 @@ function Dashboard() {
             <div className="flex flex-col xl:flex-row gap-5">
               <div className="flex-1 flex flex-col gap-5 min-w-0">
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 2xl:grid-cols-6 gap-3">
-                  {kpis.map((k) => (
+                  {loading ? (
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="h-28 rounded-2xl bg-card border border-border animate-pulse" />
+                    ))
+                  ) : kpis.map((k) => (
                     <KpiCard 
                       key={k.label} 
                       {...k} 
