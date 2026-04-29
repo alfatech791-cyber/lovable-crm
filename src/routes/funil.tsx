@@ -227,10 +227,14 @@ type Deal = {
  
    const totalPipeline = deals.reduce((sum, d) => sum + Number(d.deal_value ?? 0), 0);
 
-  const load = async () => {
-    if (!user?.id) return;
-    try {
-      setLoading(true);
+   const load = async (silent = false) => {
+     if (!user?.id) {
+       if (!authLoading) setLoading(false);
+       return;
+     }
+     
+     try {
+       if (!silent) setLoading(true);
        // Garante estágios padrão chamando o RPC (agora criado no banco)
        try {
          await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
