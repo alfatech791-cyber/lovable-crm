@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
  import { useEffect, useState, useRef } from "react";
@@ -67,6 +67,7 @@ type Deal = {
  
  function FunnelPage() {
     const { user, loading: authLoading } = useAuth();
+    const navigate = useNavigate();
     const [syncing, setSyncing] = useState(false);
    const syncLockRef = useRef(false);
    const webhookCheckedRef = useRef<string | null>(null);
@@ -710,6 +711,12 @@ type Deal = {
       setLoading(false);
     }
   };
+
+    useEffect(() => {
+      if (!authLoading && !user) {
+        navigate({ to: "/login" });
+      }
+    }, [authLoading, user, navigate]);
 
     useEffect(() => {
       if (authLoading) return;
