@@ -9,7 +9,6 @@ import { Topbar } from "@/components/layout/Topbar";
  } from "lucide-react";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart as RePieChart, Pie } from "recharts";
- import { funnelData as mockFunnelData, originData as mockOriginData, topPerformers as mockTopPerformers } from "@/lib/mock";
 import { useAuth } from "@/contexts/AuthContext";
  import { useState, useEffect, useCallback } from "react";
  import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +21,7 @@ export const Route = createFileRoute("/relatorios")({
  function ReportsPage() {
    const { user, profile } = useAuth();
    const [loading, setLoading] = useState(true);
-   const [stats, setStats] = useState({
+    const [stats, setStats] = useState<any>({
      revenue: 0,
      leads: 0,
      conversion: 0,
@@ -33,59 +32,105 @@ export const Route = createFileRoute("/relatorios")({
      avgTicketTrend: "+0%",
    });
  
-   const fetchReportsData = useCallback(async () => {
-     if (!user?.id) return;
-     setLoading(true);
-     try {
-       const now = new Date();
-       const firstDayMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-       
-       // Sales and Revenue
-       const { data: sales } = await supabase
-         .from("sales_orders")
-         .select("total_amount, status, created_at")
-         .eq("user_id", user.id);
- 
-       const concludedSales = (sales || []).filter(s => s.status === 'concluded');
-       const monthRevenue = concludedSales
-         .filter(s => new Date(s.created_at!) >= firstDayMonth)
-         .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
- 
-       const avgTicket = concludedSales.length > 0 
-         ? monthRevenue / concludedSales.filter(s => new Date(s.created_at!) >= firstDayMonth).length || 0
-         : 0;
- 
-       // Leads
-       const { data: leads } = await supabase
-         .from("leads")
-         .select("status, created_at")
-         .eq("user_id", user.id);
- 
-       const totalLeads = leads?.length || 0;
-       const wonLeads = leads?.filter(l => l.status === 'won').length || 0;
-       const conversionRate = totalLeads > 0 ? (wonLeads / totalLeads) * 100 : 0;
- 
-       setStats({
-         revenue: monthRevenue,
-         leads: totalLeads,
-         conversion: conversionRate,
-         avgTicket: avgTicket,
-         revenueTrend: "+0%",
-         leadsTrend: "+0%",
-         conversionTrend: "+0%",
-         avgTicketTrend: "+0%",
-       });
-     } catch (err) {
-       console.error("Error fetching reports:", err);
-     } finally {
-       setLoading(false);
-     }
-   }, [user?.id]);
- 
-   useEffect(() => {
-     fetchReportsData();
-   }, [fetchReportsData]);
- 
+    const [funnelData, setFunnelData] = useState<any[]>([]);
+    const [originData, setOriginData] = useState<any[]>([]);
+    const [topAgents, setTopAgents] = useState<any[]>([]);
+
+    const fetchReportsData = useCallback(async () => {
+      if (!user?.id) return;
+      setLoading(true);
+      try {
+        const now = new Date();
+        const firstDayMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        
+        // Sales and Revenue
+        const { data: sales } = await supabase
+          .from("sales_orders")
+          .select("total_amount, status, created_at, user_id")
+          .eq("user_id", user.id);
+
+        const concludedSales = (sales || []).filter(s => s.status === 'concluded');
+        const monthRevenue = concludedSales
+          .filter(s => new Date(s.created_at!) >= firstDayMonth)
+          .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+
+        const avgTicket = concludedSales.length > 0 
+          ? monthRevenue / concludedSales.filter(s => new Date(s.created_at!) >= firstDayMonth).length || 0
+          : 0;
+
+        // Leads
+        const { data: leads } = await supabase
+          .from("leads")
+          .select("source, status, created_at")
+          .eq("user_id", user.id);
+
+        const totalLeads = leads?.length || 0;
+        const wonLeads = leads?.filter(l => l.status === 'won' || l.status === 'concluded').length || 0;
+        const conversionRate = totalLeads > 0 ? (wonLeads / totalLeads) * 100 : 0;
+
+        setStats({
+          revenue: monthRevenue,
+          leads: totalLeads,
+          conversion: conversionRate,
+          avgTicket: avgTicket,
+          revenueTrend: "+0%",
+          leadsTrend: "+0%",
+          conversionTrend: "+0%",
+          avgTicketTrend: "+0%",
+        });
+
+        // Funnel Data
+        const { data: stages } = await supabase
+          .from("funnel_stages")
+          .select("name, color, id")
+          .eq("user_id", user.id)
+          .order("order_index");
+        
+        const { data: pipeline } = await supabase
+          .from("pipeline_leads")
+          .select("stage_id")
+          .eq("user_id", user.id);
+
+        const fData = (stages || []).map(s => ({
+          name: s.name,
+          value: (pipeline || []).filter(p => p.stage_id === s.id).length,
+          color: s.color || "#64748b"
+        }));
+        setFunnelData(fData);
+
+        // Origin Data
+        const counts: Record<string, number> = {};
+        (leads || []).forEach(l => {
+          const src = l.source || "Direto";
+          counts[src] = (counts[src] || 0) + 1;
+        });
+        const oData = Object.entries(counts).map(([name, value]) => ({
+          name,
+          value,
+          color: name === 'WhatsApp' ? '#25D366' : name === 'Instagram' ? '#E1306C' : '#64748b'
+        }));
+        setOriginData(oData);
+
+        // Top Agents (using mock if only one user, or fetch other users if team module active)
+        // For now, let's just show the current user as top agent if they have sales
+        if (concludedSales.length > 0) {
+          setTopAgents([{
+            name: profile?.display_name || "Você",
+            avatar: (profile?.display_name || "V")[0],
+            sales: concludedSales.length,
+            revenue: monthRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+            trend: "+0%"
+          }]);
+        }
+
+      } catch (err) {
+        console.error("Error fetching reports:", err);
+      } finally {
+        setLoading(false);
+      }
+    }, [user?.id, profile?.display_name]);
+
+
   const isAdmin = profile?.role === 'admin' || !profile;
 
   if (!isAdmin) {
@@ -221,7 +266,7 @@ export const Route = createFileRoute("/relatorios")({
                 <div className="p-6">
                   <div className="h-[300px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                       <BarChart layout="vertical" data={mockFunnelData} margin={{ left: 40, right: 40 }}>
+                       <BarChart layout="vertical" data={funnelData} margin={{ left: 40, right: 40 }}>
                         <XAxis type="number" hide />
                         <YAxis 
                           dataKey="name" 
@@ -244,8 +289,8 @@ export const Route = createFileRoute("/relatorios")({
                             return null;
                           }}
                         />
-                         <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={32}>
-                           {mockFunnelData.length > 0 && mockFunnelData.map((entry: any, index: number) => (
+                          <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={32}>
+                            {funnelData.length > 0 && funnelData.map((entry: any, index: number) => (
                              <Cell key={`cell-${index}`} fill={entry.color} />
                            ))}
                          </Bar>
@@ -277,8 +322,8 @@ export const Route = createFileRoute("/relatorios")({
                   <h3 className="text-lg font-bold">Top Agentes</h3>
                   <button className="text-primary hover:underline text-xs font-bold">Ver tudo</button>
                 </div>
-                   <div className="p-4 space-y-2">
-                     {mockTopPerformers.length > 0 ? mockTopPerformers.map((agent: any, i: number) => (
+                    <div className="p-4 space-y-2">
+                      {topAgents.length > 0 ? topAgents.map((agent: any, i: number) => (
                        <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-border">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
@@ -317,16 +362,16 @@ export const Route = createFileRoute("/relatorios")({
                   <div className="h-[220px] w-full relative">
                     <ResponsiveContainer width="100%" height="100%">
                       <RePieChart>
-                         <Pie
-                           data={mockOriginData.length > 0 ? mockOriginData : [{ name: 'Sem dados', value: 100, color: '#e2e8f0' }]}
-                           cx="50%"
-                           cy="50%"
-                           innerRadius={60}
-                           outerRadius={85}
-                           paddingAngle={8}
-                           dataKey="value"
-                         >
-                           {mockOriginData.length > 0 ? mockOriginData.map((entry: any, index: number) => (
+                          <Pie
+                            data={originData.length > 0 ? originData : [{ name: 'Sem dados', value: 100, color: '#e2e8f0' }]}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={85}
+                            paddingAngle={8}
+                            dataKey="value"
+                          >
+                            {originData.length > 0 ? originData.map((entry: any, index: number) => (
                              <Cell key={`cell-${index}`} fill={entry.color} />
                            )) : (
                              <Cell fill="#e2e8f0" />
@@ -351,8 +396,8 @@ export const Route = createFileRoute("/relatorios")({
                       <span className="text-xs font-bold text-muted-foreground uppercase">Mix</span>
                     </div>
                   </div>
-                   <div className="space-y-3 mt-4">
-                     {mockOriginData.length > 0 ? mockOriginData.map((item: any, i: number) => (
+                    <div className="space-y-3 mt-4">
+                      {originData.length > 0 ? originData.map((item: any, i: number) => (
                        <div key={i} className="flex items-center justify-between group cursor-default">
                         <div className="flex items-center gap-2">
                           <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
