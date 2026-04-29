@@ -4,7 +4,7 @@ import { Topbar } from "@/components/layout/Topbar";
  import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
- import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp, MessageSquare, X, Send, Bot, User, UserCog, PauseCircle, PlayCircle, RefreshCw } from "lucide-react";
+ import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp, MessageSquare, X, Send, Bot, User, UserCog, PauseCircle, PlayCircle, RefreshCw, ChevronRight, Sparkles, CreditCard, Users } from "lucide-react";
  import { formatDistanceToNow } from "date-fns";
  import { ptBR } from "date-fns/locale";
  import { evolution } from "@/lib/evolution";
@@ -64,7 +64,8 @@ type Deal = {
    const [loading, setLoading] = useState(true);
    const [dragId, setDragId] = useState<string | null>(null);
    const [adding, setAdding] = useState<{ stage_id: string; lead_id: string; deal_value: string } | null>(null);
-   const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [sortBy, setSortBy] = useState<"recent" | "value">("recent");
    const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
    const [chatOpen, setChatOpen] = useState(false);
    const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
@@ -218,12 +219,20 @@ type Deal = {
       return () => { supabase.removeChannel(ch); };
     }, [user?.id]);
 
-    const filteredDeals = deals.filter(d => {
-      const leadName = d.lead?.name?.toLowerCase() || "";
-      const leadPhone = d.lead?.phone || "";
-      const search = searchTerm.toLowerCase();
-      return leadName.includes(search) || leadPhone.includes(searchTerm);
-    });
+    const filteredDeals = deals
+      .filter(d => {
+        const leadName = d.lead?.name?.toLowerCase() || "";
+        const leadPhone = d.lead?.phone || "";
+        const search = searchTerm.toLowerCase();
+        return leadName.includes(search) || leadPhone.includes(searchTerm);
+      })
+      .sort((a, b) => {
+        if (sortBy === "value") return Number(b.deal_value || 0) - Number(a.deal_value || 0);
+        // Default to recent (last message or creation date)
+        const dateA = a.last_message_at || (a as any).created_at || "";
+        const dateB = b.last_message_at || (b as any).created_at || "";
+        return new Date(dateB).getTime() - new Date(dateA).getTime();
+      });
  
    const totalPipeline = deals.reduce((sum, d) => sum + Number(d.deal_value ?? 0), 0);
 
@@ -340,53 +349,100 @@ type Deal = {
 
   const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  return (
-     <div className="min-h-screen flex w-full bg-background overflow-hidden relative">
-      <AppSidebar />
-      <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Funil de Vendas" subtitle="Arraste cards entre estágios para atualizar" />
-         <main className="flex-1 overflow-hidden flex flex-col bg-muted/10">
-           {/* Toolbar Superior */}
-           <div className="px-6 py-4 border-b border-border/50 bg-background/50 flex flex-wrap items-center justify-between gap-4">
-             <div className="flex items-center gap-4">
-               <div className="relative w-64">
-                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                 <Input 
-                   placeholder="Buscar lead ou telefone..." 
-                   className="pl-9 bg-background border-border/50 focus:border-primary/50 transition-all text-sm h-9"
-                   value={searchTerm}
-                   onChange={(e) => setSearchTerm(e.target.value)}
-                 />
-               </div>
-               <Button variant="outline" size="sm" className="h-9 gap-2 text-xs font-bold border-border/50">
-                 <Filter className="h-3.5 w-3.5" /> FILTROS
-               </Button>
-               <Button variant="outline" size="sm" className="h-9 gap-2 text-xs font-bold border-border/50">
-                 <ArrowUpDown className="h-3.5 w-3.5" /> ORDENAR
-               </Button>
-             </div>
- 
-             <div className="flex items-center gap-6">
-               <div className="hidden md:flex flex-col items-end">
-                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Valor Total do Funil</span>
-                 <span className="text-sm font-black text-primary">{fmt(totalPipeline)}</span>
-               </div>
-               <div className="h-8 w-[1px] bg-border/50 hidden md:block" />
-                {viewMode === "kanban" && (
-                  <div className="flex bg-muted p-1 rounded-lg border border-border/50">
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md bg-background shadow-sm text-primary">
-                      <LayoutGrid className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground">
-                      <List className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-               <Button className="h-9 gap-2 text-xs font-black shadow-lg shadow-primary/20" onClick={() => setAdding({ stage_id: stages[0]?.id || "", lead_id: "", deal_value: "" })}>
-                 <Plus className="h-4 w-4" /> NOVO NEGÓCIO
-               </Button>
-             </div>
-           </div>
+   return (
+      <div className="min-h-screen flex w-full bg-background overflow-hidden relative">
+       <AppSidebar />
+       <div className="flex-1 flex flex-col min-w-0">
+         <Topbar title="Funil de Vendas" subtitle="Gerencie seus leads e converta mais vendas" />
+          <main className="flex-1 overflow-hidden flex flex-col bg-muted/5">
+            {/* Stats Summary Panel */}
+            <div className="px-6 py-4 bg-background border-b border-border/40 grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-primary/5 rounded-2xl p-3 border border-primary/10 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <CreditCard className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Total em Pipeline</p>
+                  <p className="text-lg font-black text-primary leading-none">{fmt(totalPipeline)}</p>
+                </div>
+              </div>
+              
+              <div className="bg-muted/30 rounded-2xl p-3 border border-border/50 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-background flex items-center justify-center text-muted-foreground">
+                  <Users className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Total de Leads</p>
+                  <p className="text-lg font-black text-foreground leading-none">{deals.length}</p>
+                </div>
+              </div>
+
+              <div className="bg-amber-500/5 rounded-2xl p-3 border border-amber-500/10 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600">
+                  <Clock className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Aguardando Resposta</p>
+                  <p className="text-lg font-black text-amber-600 leading-none">{deals.filter(d => d.last_message_at && (new Date().getTime() - new Date(d.last_message_at).getTime() > 24 * 60 * 60 * 1000)).length}</p>
+                </div>
+              </div>
+
+              <div className="bg-green-500/5 rounded-2xl p-3 border border-green-500/10 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600">
+                  <TrendingUp className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Taxa de Conversão</p>
+                  <p className="text-lg font-black text-green-600 leading-none">12.5%</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Toolbar Superior Melhorada */}
+            <div className="px-6 py-4 border-b border-border/40 bg-background/80 backdrop-blur-md flex flex-wrap items-center justify-between gap-4 sticky top-0 z-10">
+              <div className="flex items-center gap-3">
+                <div className="relative group">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <Input 
+                    placeholder="Buscar lead ou telefone..." 
+                    className="pl-9 w-72 bg-muted/30 border-transparent focus:bg-background focus:border-primary/30 transition-all text-sm h-10 rounded-xl"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <div className="flex bg-muted/30 p-1 rounded-xl border border-border/20">
+                   <Button 
+                    variant={sortBy === "recent" ? "secondary" : "ghost"} 
+                    size="sm" 
+                    className="h-8 px-3 text-[10px] font-black uppercase tracking-wider rounded-lg"
+                    onClick={() => setSortBy("recent")}
+                   >
+                    Recentes
+                   </Button>
+                   <Button 
+                    variant={sortBy === "value" ? "secondary" : "ghost"} 
+                    size="sm" 
+                    className="h-8 px-3 text-[10px] font-black uppercase tracking-wider rounded-lg"
+                    onClick={() => setSortBy("value")}
+                   >
+                    Maior Valor
+                   </Button>
+                </div>
+              </div>
+  
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-full">
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  <span className="text-[10px] font-black text-primary uppercase tracking-widest">IA Ativa</span>
+                </div>
+                
+                <div className="h-8 w-[1px] bg-border/40" />
+                
+                <Button className="h-10 px-6 gap-2 text-xs font-black shadow-lg shadow-primary/20 rounded-xl hover:scale-105 transition-all" onClick={() => setAdding({ stage_id: stages[0]?.id || "", lead_id: "", deal_value: "" })}>
+                  <Plus className="h-4 w-4" /> NOVO NEGÓCIO
+                </Button>
+              </div>
+            </div>
  
            {loading ? (
              <div className="flex-1 grid place-items-center">
