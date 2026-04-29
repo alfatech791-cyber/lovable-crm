@@ -728,7 +728,15 @@ type Deal = {
          };
        }) ?? [];
       
-      setDeals(dealsWithLastMessage);
+      // Dedupe por lead_id — mantém apenas o card mais recente por lead
+      const seenLead = new Set<string>();
+      const uniqueDeals = dealsWithLastMessage.filter((d: any) => {
+        if (!d.lead_id) return true;
+        if (seenLead.has(d.lead_id)) return false;
+        seenLead.add(d.lead_id);
+        return true;
+      });
+      setDeals(uniqueDeals);
       const loadedLeads = (ldRes.data as any) ?? [];
       setLeads(loadedLeads);
 
