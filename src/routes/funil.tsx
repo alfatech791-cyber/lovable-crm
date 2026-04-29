@@ -166,7 +166,31 @@ type Deal = {
    const [chatLoading, setChatLoading] = useState(false);
    const [messageText, setMessageText] = useState("");
    const [sending, setSending] = useState(false);
-   const scrollRef = useRef<HTMLDivElement>(null);
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    const addStage = async () => {
+      if (!user?.id) return;
+      const name = prompt("Nome da nova etapa:");
+      if (!name) return;
+      const nextIndex = stages.length > 0 ? Math.max(...stages.map(s => s.order_index)) + 1 : 0;
+      const colors = ["#8B5CF6", "#EC4899", "#3B82F6", "#10B981", "#F59E0B"];
+      const color = colors[stages.length % colors.length];
+      const { error } = await supabase.from("funnel_stages").insert({
+        user_id: user.id,
+        name,
+        order_index: nextIndex,
+        color
+      });
+      if (error) toast.error("Erro ao criar etapa: " + error.message);
+      else load();
+    };
+
+    const deleteStage = async (id: string) => {
+      if (!confirm("Tem certeza que deseja remover esta etapa? Todas as negociações nela serão perdidas.")) return;
+      const { error } = await supabase.from("funnel_stages").delete().eq("id", id);
+      if (error) toast.error("Erro ao remover etapa: " + error.message);
+      else load();
+    };
    const loadConversation = async (phone: string) => {
      if (!user?.id || !phone) return;
      setChatLoading(true);
@@ -645,6 +669,7 @@ type Deal = {
                       onMoveDeal={moveDeal}
                       dragId={dragId}
                       setDragId={setDragId}
+                      onDeleteStage={deleteStage}
                       onSelectDeal={(deal) => {
                         if (deal.lead?.phone) {
                           setSelectedDealId(deal.id);
@@ -658,7 +683,10 @@ type Deal = {
                   ))}
                   
                    {/* Coluna de "Adicionar Etapa" Melhorada */}
-                   <div className="w-[310px] shrink-0 h-[calc(100vh-280px)] rounded-2xl border-2 border-dashed border-border/40 flex flex-col items-center justify-center gap-4 opacity-40 hover:opacity-100 hover:border-primary/30 hover:bg-primary/5 transition-all group cursor-pointer">
+                    <div 
+                      onClick={addStage}
+                      className="w-[310px] shrink-0 h-[calc(100vh-280px)] rounded-2xl border-2 border-dashed border-border/40 flex flex-col items-center justify-center gap-4 opacity-40 hover:opacity-100 hover:border-primary/30 hover:bg-primary/5 transition-all group cursor-pointer"
+                    >
                      <div className="h-14 w-14 rounded-2xl bg-muted grid place-items-center group-hover:bg-primary/10 group-hover:scale-110 group-hover:rotate-90 transition-all">
                       <Plus className="h-6 w-6 text-muted-foreground group-hover:text-primary" />
                     </div>
