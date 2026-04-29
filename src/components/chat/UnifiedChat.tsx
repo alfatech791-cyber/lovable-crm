@@ -464,7 +464,88 @@ export function UnifiedChat() {
 
           {/* Área de chat */}
           {selected ? (
-            <div className="flex-1 flex flex-col bg-card/20 min-w-0">
+            <div className="flex-1 flex flex-col bg-card/20 min-w-0 relative">
+              {imagePreview && (
+                <div className="absolute inset-0 z-[60] bg-[#f0f2f5] flex flex-col animate-in fade-in duration-200">
+                  {/* Header */}
+                  <div className="h-16 px-6 flex items-center justify-between bg-[#f0f2f5]">
+                    <div className="flex items-center gap-4">
+                      <button 
+                        onClick={clearImage}
+                        className="p-2 hover:bg-black/5 rounded-full transition"
+                      >
+                        <X className="h-6 w-6 text-muted-foreground" />
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <button className="p-2.5 hover:bg-black/5 rounded-lg transition"><Crop className="h-5 w-5" /></button>
+                      <button className="p-2.5 hover:bg-black/5 rounded-lg transition"><Smile className="h-5 w-5" /></button>
+                      <button className="p-2.5 hover:bg-black/5 rounded-lg transition"><Pencil className="h-5 w-5" /></button>
+                      <button className="p-2.5 hover:bg-black/5 rounded-lg transition"><Type className="h-5 w-5" /></button>
+                      <button className="p-2.5 hover:bg-black/5 rounded-lg transition ml-2 border-l border-muted-foreground/20 pl-4"><Download className="h-5 w-5" /></button>
+                    </div>
+                  </div>
+
+                  {/* Main Preview */}
+                  <div className="flex-1 flex items-center justify-center p-4 md:p-12 overflow-hidden bg-[#e9edef]">
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      className="max-h-full max-w-full object-contain shadow-2xl rounded-sm transition-transform duration-300"
+                    />
+                  </div>
+
+                  {/* Footer Area */}
+                  <div className="bg-[#f0f2f5] pt-2 pb-8 px-6 space-y-6">
+                    <div className="max-w-3xl mx-auto space-y-6">
+                      {/* Caption Input */}
+                      <div className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-sm border border-black/5">
+                        <button className="text-muted-foreground hover:text-foreground transition">
+                          <Smile className="h-6 w-6" />
+                        </button>
+                        <input 
+                          value={text}
+                          onChange={(e) => setText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                              e.preventDefault();
+                              send();
+                            }
+                          }}
+                          placeholder="Adicione uma legenda..."
+                          className="flex-1 outline-none text-[15px] bg-transparent"
+                          autoFocus
+                        />
+                      </div>
+
+                      {/* Thumbnails and Send */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 overflow-x-auto py-2">
+                          <div className="h-14 w-14 rounded-lg border-2 border-[#00a884] overflow-hidden shrink-0 shadow-md">
+                            <img src={imagePreview} className="h-full w-full object-cover" />
+                          </div>
+                          <button className="h-14 w-14 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center text-muted-foreground hover:bg-black/5 transition hover:border-muted-foreground/50">
+                            <Plus className="h-6 w-6" />
+                          </button>
+                        </div>
+                        
+                        <button 
+                          onClick={send}
+                          disabled={sending}
+                          className="h-14 w-14 rounded-full bg-[#00a884] text-white flex items-center justify-center shadow-lg hover:brightness-105 active:scale-95 transition disabled:opacity-50 disabled:scale-100"
+                        >
+                          {sending ? (
+                            <Loader2 className="h-6 w-6 animate-spin" />
+                          ) : (
+                            <Send className="h-6 w-6 fill-current translate-x-0.5" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="h-[68px] px-6 border-b border-border flex items-center justify-between bg-card">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary/60 grid place-items-center font-bold text-sm text-white shrink-0">
@@ -551,45 +632,8 @@ export function UnifiedChat() {
               </div>
 
               <div className="p-4 bg-card border-t border-border">
-               <div className="relative">
-                 {imagePreview && (
-                   <div className="absolute bottom-full left-0 mb-4 p-4 bg-card border border-border rounded-2xl shadow-xl animate-in fade-in slide-in-from-bottom-2 z-10 flex flex-col gap-3 min-w-[240px]">
-                     <div className="flex items-center justify-between">
-                       <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Confirmar envio de imagem</span>
-                       <button 
-                         onClick={clearImage}
-                         className="p-1 hover:bg-muted rounded-full transition"
-                       >
-                         <X className="h-4 w-4" />
-                       </button>
-                     </div>
-                     <div className="relative group overflow-hidden rounded-xl border border-border bg-muted">
-                       <img 
-                         src={imagePreview} 
-                         alt="Preview" 
-                         className="max-h-48 w-full object-contain"
-                       />
-                     </div>
-                     <div className="flex gap-2">
-                       <button
-                         onClick={clearImage}
-                         className="flex-1 py-2 text-xs font-bold rounded-lg border border-border hover:bg-muted transition"
-                       >
-                         Cancelar
-                       </button>
-                       <button
-                         onClick={send}
-                         disabled={sending}
-                         className="flex-1 py-2 text-xs font-bold rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition flex items-center justify-center gap-2"
-                       >
-                         {sending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
-                         Enviar Agora
-                       </button>
-                     </div>
-                   </div>
-                 )}
-                 
-                 <div className="flex items-end gap-3">
+                <div className="relative">
+                  <div className="flex items-end gap-3">
                    <div className="relative">
                      <input
                        type="file"
