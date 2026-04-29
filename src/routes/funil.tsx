@@ -214,7 +214,7 @@ type Deal = {
       const [stRes, dlRes, ldRes, convRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
         supabase.from("pipeline_leads").select("*, lead:leads(name, phone, source)").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("leads").select("id, name").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("leads").select("id, name, phone").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("bot_conversations").select("*").eq("user_id", user.id).order("last_message_at", { ascending: false }),
       ]);
       
@@ -296,22 +296,32 @@ type Deal = {
            <div className="px-6 py-4 border-b border-border/50 bg-background/50 flex flex-wrap items-center justify-between gap-4">
              <div className="flex items-center gap-4">
                <div className="flex bg-muted p-1 rounded-lg border border-border/50 mr-2">
-                 <Button 
-                   variant="ghost" 
-                   size="sm" 
-                   className={cn("h-8 gap-2 text-xs font-bold", viewMode === "kanban" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}
-                   onClick={() => setViewMode("kanban")}
-                 >
-                   <LayoutGrid className="h-3.5 w-3.5" /> FUNIL
-                 </Button>
-                 <Button 
-                   variant="ghost" 
-                   size="sm" 
-                   className={cn("h-8 gap-2 text-xs font-bold", viewMode === "chat" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}
-                   onClick={() => setViewMode("chat")}
-                 >
-                   <MessageSquare className="h-3.5 w-3.5" /> CONVERSAS
-                 </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "h-8 gap-2 text-xs font-bold px-3 transition-all",
+                      viewMode === "kanban" 
+                        ? "bg-background shadow-sm text-primary" 
+                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                    )}
+                    onClick={() => setViewMode("kanban")}
+                  >
+                    <LayoutGrid className="h-3.5 w-3.5" /> MODO FUNIL
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "h-8 gap-2 text-xs font-bold px-3 transition-all",
+                      viewMode === "chat" 
+                        ? "bg-background shadow-sm text-primary" 
+                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                    )}
+                    onClick={() => setViewMode("chat")}
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" /> MODO CONVERSAS
+                  </Button>
                </div>
                <div className="relative w-64">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -423,23 +433,26 @@ type Deal = {
                             setChatOpen(true);
                           }}
                           className={cn(
-                            "w-full p-4 flex items-center gap-3 border-b border-border/50 hover:bg-primary/5 transition-all text-left",
-                            currentConversation?.id === conv.id && "bg-primary/5 border-l-4 border-l-primary"
+                            "w-full p-3 flex items-center gap-3 border-b border-border/50 hover:bg-primary/5 transition-all text-left relative overflow-hidden group",
+                            currentConversation?.id === conv.id ? "bg-primary/5" : ""
                           )}
                         >
-                          <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center shrink-0">
+                          {currentConversation?.id === conv.id && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
+                          )}
+                          <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center shrink-0 group-hover:scale-105 transition-transform">
                             <User className="h-5 w-5 text-primary" />
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex justify-between items-start gap-2">
-                              <p className="text-sm font-bold truncate">{conv.contact_name || conv.contact_phone}</p>
+                              <p className="text-sm font-bold truncate text-foreground/90">{conv.contact_name || conv.contact_phone}</p>
                               {conv.last_message_at && (
-                                <span className="text-[9px] text-muted-foreground shrink-0">
+                                <span className="text-[9px] text-muted-foreground shrink-0 font-medium">
                                   {formatDistanceToNow(new Date(conv.last_message_at), { locale: ptBR })}
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-muted-foreground truncate italic">
+                            <p className="text-[11px] text-muted-foreground truncate italic mt-0.5">
                               {conv.transcript?.[conv.transcript.length - 1]?.content || "Inicie uma conversa..."}
                             </p>
                           </div>
@@ -465,11 +478,22 @@ type Deal = {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button size="icon" variant="ghost" onClick={toggleHandoff}>
-                            {currentConversation.status === "handed_off" ? <PlayCircle className="h-4 w-4" /> : <PauseCircle className="h-4 w-4" />}
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-9 w-9 text-muted-foreground hover:text-primary transition-colors"
+                            onClick={toggleHandoff}
+                            title={currentConversation.status === "handed_off" ? "Reativar bot" : "Pausar bot"}
+                          >
+                            {currentConversation.status === "handed_off" ? <PlayCircle className="h-5 w-5" /> : <PauseCircle className="h-5 w-5" />}
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={() => setChatOpen(false)}>
-                            <X className="h-4 w-4" />
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-9 w-9 text-muted-foreground hover:text-destructive transition-colors"
+                            onClick={() => setChatOpen(false)}
+                          >
+                            <X className="h-5 w-5" />
                           </Button>
                         </div>
                       </div>
