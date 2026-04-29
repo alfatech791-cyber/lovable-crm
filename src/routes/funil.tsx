@@ -68,91 +68,201 @@ type Deal = {
  function FunnelPage() {
     const { user, loading: authLoading } = useAuth();
     const [syncing, setSyncing] = useState(false);
+   const syncLockRef = useRef(false);
+   const webhookCheckedRef = useRef<string | null>(null);
 
-    // Garante que o webhook está configurado para receber mensagens em tempo real
-    const ensureWebhook = async (instance: string) => {
-      if (!user?.id || !instance) return;
-      try {
-        const { data: settings } = await supabase
-          .from("bot_settings")
-          .select("webhook_secret")
-          .eq("user_id", user.id)
-          .maybeSingle();
+   const resolveInstance = async () => {
+     if (!user?.id) return null;
 
-        if (!settings?.webhook_secret) return;
+     const statusPriority = ["open", "connected", "active", "online", "connecting"];
+     const [{ data: settings, error: settingsError }, { data: savedInstances, error: instancesError }] = await Promise.all([
+       supabase.from("bot_settings").select("whatsapp_instance, webhook_secret").eq("user_id", user.id).maybeSingle(),
+       supabase
+         .from("whatsapp_instances")
+         .select("instance_name, status, created_at")
+         .eq("user_id", user.id)
+         .order("created_at", { ascending: false }),
+     ]);
 
-        const expectedUrl = `https://htsjkvczxlrsfapkbidq.supabase.co/functions/v1/bot-webhook?uid=${user.id}&secret=${settings.webhook_secret}`;
+     if (settingsError) throw settingsError;
+     if (instancesError) throw instancesError;
 
-        const current = await evolution.getWebhook(instance);
-        const currentUrl = current?.url ?? current?.webhook?.url ?? "";
-        if (currentUrl === expectedUrl) return;
+     const configured = settings?.whatsapp_instance?.trim();
+     if (configured) return configured;
 
-        await evolution.setWebhook(instance, expectedUrl);
-        console.log("Webhook sincronizado no Funil:", expectedUrl);
-      } catch (e) {
-        console.warn("Erro ao sincronizar webhook no Funil:", e);
-      }
-    };
+     const dbCandidate = (savedInstances ?? []).find((instance: any) =>
+       statusPriority.includes(String(instance.status ?? "").toLowerCase())
+     )?.instance_name;
 
-    const syncFromWhatsApp = async () => {
-      if (!user?.id || syncing) return;
-      setSyncing(true);
-      try {
-        const instances = await evolution.getInstances();
-        const instanceObj = instances.find(i => i.status === 'open' || (i as any).status === 'connected');
-        const instance = instanceObj?.instanceName;
-        
-        if (!instance) {
-          toast.error("Nenhuma instância do WhatsApp conectada");
-          return;
-        }
+     if (dbCandidate) {
+       await supabase.from("bot_settings").upsert({ user_id: user.id, whatsapp_instance: dbCandidate }, { onConflict: "user_id" });
+       return dbCandidate;
+     }
 
-        await ensureWebhook(instance);
+     const remoteInstances = await evolution.getInstances();
+     const remoteCandidate =
+       remoteInstances.find((instance) => statusPriority.includes(String(instance.status ?? "").toLowerCase()))?.instanceName ??
+       remoteInstances[0]?.instanceName ??
+       null;
 
-        const rawChats = await evolution.findChats(instance);
-        const chats = Array.isArray(rawChats) ? rawChats : (rawChats?.records || rawChats?.chats || []);
-        
-        if (!Array.isArray(chats) || chats.length === 0) {
-          toast.info("Nenhuma conversa encontrada na instância");
-          return;
-        }
+     if (remoteCandidate) {
+       await supabase.from("bot_settings").upsert({ user_id: user.id, whatsapp_instance: remoteCandidate }, { onConflict: "user_id" });
+     } else if (!settings) {
+       await supabase.from("bot_settings").upsert({ user_id: user.id }, { onConflict: "user_id" });
+     }
 
-        toast.info(`Sincronizando ${chats.length} conversas...`);
+     return remoteCandidate;
+   };
 
-        for (const chat of chats.slice(0, 50)) {
-          const remoteJid = chat.remoteJid || chat.id || "";
-          if (!remoteJid || remoteJid.endsWith("@g.us")) continue;
-          
-          const phone = remoteJid.split("@")[0].replace(/\D/g, "");
-          const name = chat.name || chat.pushName || chat.verifiedName || null;
-          
-          const lastMsg = chat.lastMessage;
-          const transcript = lastMsg ? [{
-            role: lastMsg.key?.fromMe ? "assistant" : "user",
-            content: lastMsg.message?.conversation || lastMsg.message?.extendedTextMessage?.text || "Nova conversa",
-            at: new Date(lastMsg.messageTimestamp ? lastMsg.messageTimestamp * 1000 : Date.now()).toISOString()
-          }] : [];
+   const ensureWebhook = async (instance: string) => {
+     if (!user?.id || !instance) return;
+     if (webhookCheckedRef.current === instance) return;
 
-          await supabase.from("bot_conversations").upsert({
-            user_id: user.id,
-            contact_phone: phone,
-            contact_name: name,
-            transcript,
-            status: "active",
-            messages_count: transcript.length,
-            last_message_at: transcript[0]?.at || new Date().toISOString()
-          }, { onConflict: "user_id,contact_phone" });
-        }
+     try {
+       let { data: settings, error: fetchError } = await supabase
+         .from("bot_settings")
+         .select("webhook_secret, whatsapp_instance")
+         .eq("user_id", user.id)
+         .maybeSingle();
 
-        toast.success("Sincronização concluída");
-        load();
-      } catch (err: any) {
-        console.error("Erro na sincronização:", err);
-        toast.error("Erro ao sincronizar WhatsApp: " + err.message);
-      } finally {
-        setSyncing(false);
-      }
-    };
+       if (!settings && !fetchError) {
+         const { data: inserted, error: insertError } = await supabase
+           .from("bot_settings")
+           .insert({ user_id: user.id, whatsapp_instance: instance })
+           .select()
+           .single();
+
+         if (insertError) throw insertError;
+         settings = inserted;
+       }
+
+       const secret = settings?.webhook_secret;
+       const projectRef = (import.meta.env.VITE_SUPABASE_PROJECT_ID as string | undefined) ?? null;
+       if (!secret || !projectRef) return;
+
+       const expectedUrl = `https://${projectRef}.supabase.co/functions/v1/bot-webhook?uid=${user.id}&secret=${secret}`;
+       const current = await evolution.getWebhook(instance);
+       const currentUrl = current?.url ?? current?.webhook?.url ?? "";
+
+       webhookCheckedRef.current = instance;
+       if (currentUrl === expectedUrl) return;
+
+       await evolution.setWebhook(instance, expectedUrl);
+       console.log("Webhook sincronizado no Funil:", expectedUrl);
+     } catch (e) {
+       webhookCheckedRef.current = null;
+       console.warn("Erro ao sincronizar webhook no Funil:", e);
+     }
+   };
+
+   const syncFromWhatsApp = async (showToast = true) => {
+     if (!user?.id || syncLockRef.current) return;
+
+     syncLockRef.current = true;
+     setSyncing(true);
+
+     try {
+       const instance = await resolveInstance();
+       if (!instance) {
+         if (showToast) toast.error("Nenhuma instância do WhatsApp conectada");
+         return;
+       }
+
+       await ensureWebhook(instance);
+
+       const { data: existingRows, error: existingError } = await supabase
+         .from("bot_conversations")
+         .select("id, contact_phone, contact_name, transcript, status, last_message_at")
+         .eq("user_id", user.id);
+
+       if (existingError) throw existingError;
+
+       const existingByPhone = new Map(
+         ((existingRows as any[]) ?? []).map((row) => [normalizePhone(row.contact_phone), row])
+       );
+
+       const rawChats = await evolution.findChats(instance);
+       const chats = Array.isArray(rawChats) ? rawChats : (rawChats?.records || rawChats?.chats || []);
+
+       if (!Array.isArray(chats) || chats.length === 0) {
+         if (showToast) toast.info("Nenhuma conversa encontrada na instância");
+         return;
+       }
+
+       const upsertRows = chats
+         .slice(0, 50)
+         .map((chat: any) => {
+           const remoteJid = chat.remoteJid || chat.id || "";
+           if (!remoteJid || remoteJid.endsWith("@g.us")) return null;
+
+           const phone = normalizePhone(remoteJid);
+           if (!phone) return null;
+
+           const existing = existingByPhone.get(phone);
+           const lastMsg = chat.lastMessage;
+           const fallbackContent =
+             lastMsg?.message?.conversation ||
+             lastMsg?.message?.extendedTextMessage?.text ||
+             existing?.transcript?.[existing.transcript.length - 1]?.content ||
+             "Nova conversa";
+
+           const previewTranscript = Array.isArray(existing?.transcript) && existing.transcript.length > 0
+             ? existing.transcript
+             : [{
+                 role: lastMsg?.key?.fromMe ? "assistant" : "user",
+                 content: fallbackContent,
+                 at: new Date(lastMsg?.messageTimestamp ? lastMsg.messageTimestamp * 1000 : Date.now()).toISOString(),
+               }];
+
+           const lastAt =
+             previewTranscript[previewTranscript.length - 1]?.at ||
+             existing?.last_message_at ||
+             new Date().toISOString();
+
+           return {
+             ...(existing?.id ? { id: existing.id } : {}),
+             user_id: user.id,
+             contact_phone: phone,
+             contact_name: chat.name || chat.pushName || chat.verifiedName || existing?.contact_name || null,
+             transcript: previewTranscript,
+             status: existing?.status ?? "active",
+             messages_count: previewTranscript.length,
+             last_message_at: lastAt,
+           };
+         })
+         .filter(Boolean);
+
+       if (upsertRows.length === 0) {
+         if (showToast) toast.info("Nenhuma conversa válida encontrada");
+         return;
+       }
+
+       const { error: upsertError } = await supabase
+         .from("bot_conversations")
+         .upsert(upsertRows as any[], { onConflict: "user_id,contact_phone" });
+
+       if (upsertError) throw upsertError;
+
+       await Promise.all(
+         upsertRows.map((row: any) =>
+           supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
+             _user_id: user.id,
+             _phone: row.contact_phone,
+             _name: row.contact_name,
+           } as any)
+         )
+       );
+
+       await load(true);
+       if (showToast) toast.success("Sincronização concluída");
+     } catch (err: any) {
+       console.error("Erro na sincronização:", err);
+       if (showToast) toast.error("Erro ao sincronizar WhatsApp: " + err.message);
+     } finally {
+       syncLockRef.current = false;
+       setSyncing(false);
+     }
+   };
 
     const [viewMode, setViewMode] = useState<"kanban" | "chat">("kanban");
    const [stages, setStages] = useState<Stage[]>([]);
@@ -604,9 +714,22 @@ type Deal = {
     useEffect(() => {
       if (authLoading) return;
       load();
+      const initialTimer = window.setTimeout(() => syncFromWhatsApp(false), 300);
+      const poller = window.setInterval(() => syncFromWhatsApp(false), 15000);
+      const handleVisibility = () => {
+        if (document.visibilityState === "visible") {
+          syncFromWhatsApp(false);
+        }
+      };
+      document.addEventListener("visibilitychange", handleVisibility);
       // Timeout de segurança: garante que o loading termine mesmo se algo travar
       const safety = setTimeout(() => setLoading(false), 8000);
-      return () => clearTimeout(safety);
+      return () => {
+        clearTimeout(safety);
+        clearTimeout(initialTimer);
+        clearInterval(poller);
+        document.removeEventListener("visibilitychange", handleVisibility);
+      };
     }, [user?.id, authLoading]);
 
   const moveDeal = async (dealId: string, newStageId: string) => {
@@ -694,7 +817,7 @@ type Deal = {
                       size="sm" 
                       disabled={syncing}
                       className={cn("h-8 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all", syncing ? "bg-primary/20 text-primary animate-pulse" : "hover:bg-primary/10 hover:text-primary")}
-                      onClick={syncFromWhatsApp}
+                      onClick={() => syncFromWhatsApp(true)}
                     >
                       {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wifi className="h-3 w-3" />}
                       {syncing ? "Sincronizando..." : "Sincronizar WhatsApp"}
