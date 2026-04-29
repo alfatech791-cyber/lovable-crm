@@ -1,5 +1,15 @@
-import { Wrench, Clock, CheckCircle2, AlertCircle, MoreHorizontal, Plus, Search, Filter, Loader2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+ import { Wrench, Clock, CheckCircle2, AlertCircle, MoreHorizontal, Plus, Search, Filter, Loader2, FileDown, Trash2 } from "lucide-react";
+ import { useEffect, useMemo, useState } from "react";
+ import { 
+   DropdownMenu, 
+   DropdownMenuContent, 
+   DropdownMenuItem, 
+   DropdownMenuTrigger,
+   DropdownMenuSub,
+   DropdownMenuSubTrigger,
+   DropdownMenuSubContent,
+   DropdownMenuPortal
+ } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
