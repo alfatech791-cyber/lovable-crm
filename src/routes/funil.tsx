@@ -188,8 +188,31 @@ type Deal = {
        )
        .subscribe();
        
-      return () => { supabase.removeChannel(ch); };
-    }, [user?.id]);
+       return () => { supabase.removeChannel(ch); };
+     }, [user?.id]);
+ 
+     // Realtime para Mensagens Individuais
+     useEffect(() => {
+       if (!user?.id) return;
+       
+       const ch = supabase
+         .channel("funil_messages_updates")
+         .on(
+           "postgres_changes",
+           { 
+             event: "INSERT", 
+             schema: "public", 
+             table: "messages", 
+             filter: `user_id=eq.${user.id}` 
+           },
+           () => {
+             load(true);
+           }
+         )
+         .subscribe();
+         
+       return () => { supabase.removeChannel(ch); };
+     }, [user?.id]);
 
     // Realtime para Negócios (Deals)
     useEffect(() => {
