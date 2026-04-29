@@ -11,8 +11,7 @@ export const sidebarItems = [
     flyout: true,
     children: [
       { title: "Visão Geral", url: "/crm", icon: "LayoutDashboard" },
-      { title: "Leads", url: "/leads", icon: "UserPlus" },
-      { title: "Funil de Vendas", url: "/funil", icon: "Trello" },
+      { title: "Pipeline de Vendas", url: "/funil", icon: "Trello" },
       { title: "Bot de Atendimento", url: "/crm/bot", icon: "Bot", badge: "IA" },
       { title: "Conversas", url: "/crm/conversas", icon: "MessageSquare", badge: "Live" },
       { title: "Automações", url: "/automacao", icon: "Zap" },
