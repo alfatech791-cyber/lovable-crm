@@ -80,7 +80,17 @@ export const sidebarItems = [
 
   { type: "header", title: "Configurações" },
   { title: "Equipe", url: "/equipe", icon: "ShieldCheck" as const },
-  { title: "Parametrização", url: "/configuracoes", icon: "Settings" as const },
+   { title: "Parametrização", url: "/configuracoes", icon: "Settings" as const, flyout: true, children: [
+     { title: "Perfil da Conta", url: "/configuracoes", icon: "User" },
+     { title: "Notificações", url: "/configuracoes", icon: "Bell" },
+     { title: "Aparência", url: "/configuracoes", icon: "Palette" },
+     { title: "Catálogo de Celulares", url: "/configuracoes", icon: "Smartphone" },
+     { title: "IA DeepSeek", url: "/configuracoes", icon: "Zap" },
+     { title: "Evolution API", url: "/configuracoes", icon: "Database" },
+     { title: "Equipe & Permissões", url: "/configuracoes", icon: "Shield" },
+     { title: "Segurança & Login", url: "/configuracoes", icon: "Lock" },
+     { title: "Webhooks", url: "/configuracoes", icon: "Globe" },
+   ]},
 ] as any;
 
  export interface ServiceOrder {
