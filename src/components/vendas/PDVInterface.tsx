@@ -27,6 +27,9 @@
    const [customersList, setCustomersList] = useState<{ id: string; full_name: string }[]>([]);
    const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
    const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+   const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false);
+   const [newCustomerName, setNewCustomerName] = useState("");
+   const [newCustomerPhone, setNewCustomerPhone] = useState("");
    const [receivedAmount, setReceivedAmount] = useState<string>("");
    const [discountValue, setDiscountValue] = useState<number>(0);
    const [isFinishing, setIsFinishing] = useState(false);
@@ -193,12 +196,12 @@
          description: `Total de ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} em ${paymentMethod?.toUpperCase()}`,
        });
  
-       setCart([]);
-       setPaymentMethod(null);
-       setSelectedCustomer(null);
-       setIsCheckoutModalOpen(false);
-       setReceivedAmount("");
-       setDiscountValue(0);
+         setCart([]);
+         setPaymentMethod(null);
+         setSelectedCustomer(null);
+         setIsCheckoutModalOpen(false);
+         setReceivedAmount("");
+         setDiscountValue(0);
        fetchProducts(); // Atualiza estoque na interface
      } catch (error) {
        console.error("Erro ao finalizar venda:", error);
@@ -208,6 +211,32 @@
      }
    };
  
+   const handleCreateCustomer = async () => {
+     if (!user?.id || !newCustomerName) return;
+     try {
+       const { data, error } = await supabase
+         .from("customers")
+         .insert({
+           user_id: user.id,
+           full_name: newCustomerName,
+           phone: newCustomerPhone,
+         })
+         .select()
+         .single();
+
+       if (error) throw error;
+
+       toast.success("Cliente cadastrado com sucesso!");
+       setSelectedCustomer({ id: data.id, name: data.full_name });
+       setIsNewCustomerModalOpen(false);
+       setIsCustomerModalOpen(false);
+       fetchCustomers();
+     } catch (error: any) {
+       console.error("Erro ao criar cliente:", error);
+       toast.error("Erro ao cadastrar cliente.");
+     }
+   };
+
    return (
      <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-6 h-[calc(100vh-160px)]">
        <Dialog open={isCheckoutModalOpen} onOpenChange={setIsCheckoutModalOpen}>
@@ -323,12 +352,52 @@
                    )}
                  </div>
               </ScrollArea>
-             <Button variant="secondary" className="w-full gap-2">
-               <UserPlus className="h-4 w-4" /> Cadastrar Novo Cliente
-             </Button>
+              <Button 
+                variant="secondary" 
+                className="w-full gap-2"
+                onClick={() => {
+                  setIsNewCustomerModalOpen(true);
+                  setNewCustomerName(customerSearch);
+                }}
+              >
+                <UserPlus className="h-4 w-4" /> Cadastrar Novo Cliente
+              </Button>
            </div>
          </DialogContent>
        </Dialog>
+
+        <Dialog open={isNewCustomerModalOpen} onOpenChange={setIsNewCustomerModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Novo Cliente</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Nome Completo</Label>
+                <Input 
+                  placeholder="Ex: João Silva" 
+                  value={newCustomerName}
+                  onChange={(e) => setNewCustomerName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>WhatsApp</Label>
+                <Input 
+                  placeholder="Ex: 11999999999" 
+                  value={newCustomerPhone}
+                  onChange={(e) => setNewCustomerPhone(e.target.value)}
+                />
+              </div>
+              <Button 
+                className="w-full bg-primary" 
+                onClick={handleCreateCustomer}
+                disabled={!newCustomerName}
+              >
+                Salvar e Vincular
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
  
        {/* Left Side: Product Selection */}
        <div className="flex flex-col gap-6 overflow-hidden">
@@ -401,18 +470,29 @@
                      )
                      .slice(0, 12)
                      .map(product => (
-                       <button 
-                         key={product.id} 
+                       <button
+                         key={product.id}
                          onClick={() => addToCart(product)}
-                         className="h-28 rounded-2xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition flex flex-col items-center justify-center gap-2 font-medium group"
+                         disabled={product.stock <= 0}
+                         className={`h-28 rounded-2xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition flex flex-col items-center justify-center gap-2 font-medium group relative ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                        >
                          <div className="h-10 w-10 rounded-full bg-muted group-hover:bg-primary/10 grid place-items-center transition">
                            <Package className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
                          </div>
                          <span className="text-xs text-center px-2 line-clamp-2">{product.name}</span>
-                         <span className="text-[10px] font-bold text-primary">
-                           {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                         </span>
+                         <div className="flex flex-col items-center">
+                           <span className="text-[10px] font-bold text-primary">
+                             {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                           </span>
+                           <span className={`text-[8px] uppercase font-bold ${product.stock <= 5 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                             Estoque: {product.stock}
+                           </span>
+                         </div>
+                         {product.stock <= 0 && (
+                           <div className="absolute inset-0 bg-background/60 flex items-center justify-center rounded-2xl">
+                             <span className="bg-destructive text-white text-[8px] font-bold px-2 py-0.5 rounded-full uppercase">Esgotado</span>
+                           </div>
+                         )}
                        </button>
                      ))}
                  </div>
@@ -470,15 +550,26 @@
              <span>{subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
            </div>
            <div className="flex items-center justify-between text-sm">
-              <button 
-                onClick={() => {
-                  const val = prompt("Valor do desconto (R$):", "0");
-                  if (val) setDiscountValue(parseFloat(val));
-                }}
-                className="text-muted-foreground hover:text-primary underline underline-offset-4 decoration-dotted transition"
-              >
-                Aplicar Desconto
-              </button>
+               <div className="flex items-center gap-2">
+                 <button 
+                   onClick={() => {
+                     const val = prompt("Valor do desconto (R$):", "0");
+                     if (val !== null) setDiscountValue(Math.max(0, parseFloat(val) || 0));
+                   }}
+                   className="text-muted-foreground hover:text-primary underline underline-offset-4 decoration-dotted transition"
+                 >
+                   Aplicar Desconto
+                 </button>
+                 {discountValue > 0 && (
+                   <button 
+                     onClick={() => setDiscountValue(0)}
+                     className="text-destructive hover:text-destructive/80"
+                     title="Remover desconto"
+                   >
+                     <X className="h-3 w-3" />
+                   </button>
+                 )}
+               </div>
               <span className="text-success font-medium">
                 - {discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </span>
