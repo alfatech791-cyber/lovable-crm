@@ -1,7 +1,9 @@
- import { useState, useMemo, useEffect } from "react";
- import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info } from "lucide-react";
- import { products, Product } from "@/lib/mock";
+ import { useState, useMemo, useEffect, useCallback } from "react";
+ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2 } from "lucide-react";
+ import { Product } from "@/lib/mock";
  import { toast } from "sonner";
+ import { supabase } from "@/integrations/supabase/client";
+ import { useAuth } from "@/contexts/AuthContext";
  import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
  import { Button } from "@/components/ui/button";
  import { Input } from "@/components/ui/input";
@@ -15,22 +17,79 @@
  }
  
  export function PDVInterface() {
+   const { user } = useAuth();
    const [cart, setCart] = useState<CartItem[]>([]);
    const [search, setSearch] = useState("");
+   const [allProducts, setAllProducts] = useState<Product[]>([]);
+   const [loadingProducts, setLoadingProducts] = useState(false);
    const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
    const [selectedCustomer, setSelectedCustomer] = useState<{ id: string; name: string } | null>(null);
+   const [customersList, setCustomersList] = useState<{ id: string; full_name: string }[]>([]);
    const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
    const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
    const [receivedAmount, setReceivedAmount] = useState<string>("");
    const [discountValue, setDiscountValue] = useState<number>(0);
+   const [isFinishing, setIsFinishing] = useState(false);
+ 
+   const fetchProducts = useCallback(async () => {
+     if (!user?.id) return;
+     setLoadingProducts(true);
+     try {
+       const { data, error } = await supabase
+         .from("products")
+         .select("*")
+         .eq("user_id", user.id);
+       
+       if (error) throw error;
+       
+       const formattedProducts: Product[] = (data || []).map(p => ({
+         id: p.id,
+         name: p.name,
+         category: p.category || "Geral",
+         price: p.price || 0,
+         stock: p.stock_quantity || 0,
+         description: p.description || "",
+         image: p.image_url || undefined
+       }));
+       
+       setAllProducts(formattedProducts);
+     } catch (error) {
+       console.error("Erro ao carregar produtos:", error);
+       toast.error("Erro ao carregar catálogo de produtos.");
+     } finally {
+       setLoadingProducts(false);
+     }
+   }, [user?.id]);
+ 
+   const fetchCustomers = useCallback(async () => {
+     if (!user?.id) return;
+     try {
+       const { data, error } = await supabase
+         .from("customers")
+         .select("id, full_name")
+         .eq("user_id", user.id)
+         .limit(50);
+       
+       if (error) throw error;
+       setCustomersList(data || []);
+     } catch (error) {
+       console.error("Erro ao carregar clientes:", error);
+     }
+   }, [user?.id]);
+ 
+   useEffect(() => {
+     fetchProducts();
+     fetchCustomers();
+   }, [fetchProducts, fetchCustomers]);
  
    const filteredProducts = useMemo(() => {
      if (!search) return [];
-     return products.filter(p => 
-       p.name.toLowerCase().includes(search.toLowerCase()) || 
-       p.imei?.includes(search)
+     const s = search.toLowerCase();
+     return allProducts.filter(p => 
+       p.name.toLowerCase().includes(s) || 
+       p.category.toLowerCase().includes(s)
      );
-   }, [search]);
+   }, [search, allProducts]);
  
    const addToCart = (product: Product) => {
      setCart(current => {
@@ -64,16 +123,68 @@
    
    const change = receivedAmount ? Math.max(0, parseFloat(receivedAmount) - total) : 0;
  
-   const handleFinishSale = () => {
-     toast.success("Venda finalizada com sucesso!", {
-       description: `Total de ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} em ${paymentMethod?.toUpperCase()}`,
-     });
-     setCart([]);
-     setPaymentMethod(null);
-     setSelectedCustomer(null);
-     setIsCheckoutModalOpen(false);
-     setReceivedAmount("");
-     setDiscountValue(0);
+   const handleFinishSale = async () => {
+     if (!user?.id) return;
+     setIsFinishing(true);
+     try {
+       // 1. Criar a ordem de venda
+       const { data: sale, error: saleError } = await supabase
+         .from("sales_orders")
+         .insert({
+           user_id: user.id,
+           customer_id: selectedCustomer?.id || null,
+           total_amount: total,
+           discount_amount: discountValue,
+           payment_method: paymentMethod,
+           status: "concluded"
+         })
+         .select()
+         .single();
+ 
+       if (saleError) throw saleError;
+ 
+       // 2. Atualizar estoque dos produtos
+       for (const item of cart) {
+         const product = allProducts.find(p => p.id === item.id);
+         if (product) {
+           const newStock = Math.max(0, product.stock - item.quantity);
+           await supabase
+             .from("products")
+             .update({ stock_quantity: newStock })
+             .eq("id", item.id);
+         }
+       }
+ 
+       // 3. Registrar no financeiro (Fluxo de Caixa)
+       await supabase
+         .from("finance_transactions")
+         .insert({
+           user_id: user.id,
+           type: "income",
+           amount: total,
+           description: `Venda PDV - #${sale.id.slice(0, 8)}`,
+           category: "Vendas",
+           status: "paid",
+           payment_date: new Date().toISOString()
+         });
+ 
+       toast.success("Venda finalizada com sucesso!", {
+         description: `Total de ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} em ${paymentMethod?.toUpperCase()}`,
+       });
+ 
+       setCart([]);
+       setPaymentMethod(null);
+       setSelectedCustomer(null);
+       setIsCheckoutModalOpen(false);
+       setReceivedAmount("");
+       setDiscountValue(0);
+       fetchProducts(); // Atualiza estoque na interface
+     } catch (error) {
+       console.error("Erro ao finalizar venda:", error);
+       toast.error("Erro ao processar a venda. Tente novamente.");
+     } finally {
+       setIsFinishing(false);
+     }
    };
  
    return (
@@ -132,16 +243,23 @@
                </div>
              </div>
            </div>
-           <DialogFooter>
-             <Button variant="outline" onClick={() => setIsCheckoutModalOpen(false)}>Voltar</Button>
-             <Button 
-               className="bg-primary hover:bg-primary/90 min-w-[150px]" 
-               onClick={handleFinishSale}
-               disabled={!receivedAmount || parseFloat(receivedAmount) < total}
-             >
-               Confirmar Recebimento
-             </Button>
-           </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCheckoutModalOpen(false)} disabled={isFinishing}>Voltar</Button>
+              <Button 
+                className="bg-primary hover:bg-primary/90 min-w-[150px]" 
+                onClick={handleFinishSale}
+                disabled={!receivedAmount || parseFloat(receivedAmount) < total || isFinishing}
+              >
+                {isFinishing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processando...
+                  </>
+                ) : (
+                  "Confirmar Recebimento"
+                )}
+              </Button>
+            </DialogFooter>
          </DialogContent>
        </Dialog>
  
@@ -156,22 +274,28 @@
                <Input placeholder="Buscar cliente por nome ou CPF..." className="pl-9" />
              </div>
              <ScrollArea className="h-[200px] rounded-md border p-4">
-               <div className="space-y-2">
-                 {['João Silva', 'Maria Oliveira', 'Pedro Santos'].map((name, i) => (
-                   <button
-                     key={i}
-                     onClick={() => {
-                       setSelectedCustomer({ id: String(i), name });
-                       setIsCustomerModalOpen(false);
-                       toast.info(`Cliente ${name} vinculado.`);
-                     }}
-                     className="w-full text-left p-3 hover:bg-muted rounded-lg border border-transparent hover:border-border transition flex items-center justify-between group"
-                   >
-                     <div className="font-medium">{name}</div>
-                     <Plus className="h-4 w-4 opacity-0 group-hover:opacity-100 transition" />
-                   </button>
-                 ))}
-               </div>
+                <div className="space-y-2">
+                  {customersList.length > 0 ? (
+                    customersList.map((customer) => (
+                      <button
+                        key={customer.id}
+                        onClick={() => {
+                          setSelectedCustomer({ id: customer.id, name: customer.full_name });
+                          setIsCustomerModalOpen(false);
+                          toast.info(`Cliente ${customer.full_name} vinculado.`);
+                        }}
+                        className="w-full text-left p-3 hover:bg-muted rounded-lg border border-transparent hover:border-border transition flex items-center justify-between group"
+                      >
+                        <div className="font-medium">{customer.full_name}</div>
+                        <Plus className="h-4 w-4 opacity-0 group-hover:opacity-100 transition" />
+                      </button>
+                    ))
+                  ) : (
+                    <div className="text-center py-4 text-muted-foreground text-sm">
+                      Nenhum cliente encontrado.
+                    </div>
+                  )}
+                </div>
              </ScrollArea>
              <Button variant="secondary" className="w-full gap-2">
                <UserPlus className="h-4 w-4" /> Cadastrar Novo Cliente
@@ -195,37 +319,42 @@
              />
            </div>
  
-           {search && (
-             <div className="mt-4 border border-border rounded-xl overflow-hidden max-h-[400px] overflow-y-auto">
-               {filteredProducts.length > 0 ? (
-                 filteredProducts.map(product => (
-                   <button
-                     key={product.id}
-                     onClick={() => addToCart(product)}
-                     className="w-full flex items-center gap-4 p-4 hover:bg-muted transition text-left border-b border-border last:border-none"
-                   >
-                     <div className="h-12 w-12 rounded-lg bg-primary/10 grid place-items-center shrink-0">
-                       <Package className="h-6 w-6 text-primary" />
-                     </div>
-                     <div className="flex-1 min-w-0">
-                       <div className="font-semibold truncate">{product.name}</div>
-                       <div className="text-sm text-muted-foreground">
-                         {product.category} • Estoque: {product.stock}
-                         {product.imei && ` • IMEI: ${product.imei}`}
-                       </div>
-                     </div>
-                     <div className="text-right">
-                       <div className="font-bold text-primary">
-                         {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                       </div>
-                     </div>
-                   </button>
-                 ))
-               ) : (
-                 <div className="p-8 text-center text-muted-foreground">Nenhum produto encontrado.</div>
-               )}
-             </div>
-           )}
+            {(search || loadingProducts) && (
+              <div className="mt-4 border border-border rounded-xl overflow-hidden max-h-[400px] overflow-y-auto bg-card">
+                {loadingProducts ? (
+                  <div className="p-8 flex items-center justify-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Carregando produtos...
+                  </div>
+                ) : filteredProducts.length > 0 ? (
+                  filteredProducts.map(product => (
+                    <button
+                      key={product.id}
+                      onClick={() => addToCart(product)}
+                      disabled={product.stock <= 0}
+                      className={`w-full flex items-center gap-4 p-4 hover:bg-muted transition text-left border-b border-border last:border-none ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <div className="h-12 w-12 rounded-lg bg-primary/10 grid place-items-center shrink-0">
+                        <Package className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold truncate">{product.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {product.category} • Estoque: {product.stock}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-primary">
+                          {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </div>
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-muted-foreground text-sm">Nenhum produto encontrado.</div>
+                )}
+              </div>
+            )}
          </div>
  
           <div className="flex-1 flex flex-col min-h-0">

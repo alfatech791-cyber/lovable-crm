@@ -1,5 +1,6 @@
- import { Search, Filter, Download, MoreHorizontal, ShoppingBag, Eye, Printer, Calendar, ArrowUpRight, ArrowDownRight, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
- import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+ import { useState, useEffect, useCallback } from "react";
+ import { Search, Filter, Download, MoreHorizontal, ShoppingBag, Eye, Printer, Calendar, ArrowUpRight, ArrowDownRight, CheckCircle2, XCircle, AlertCircle, Loader2 } from "lucide-react";
+ import { Card, CardContent } from "@/components/ui/card";
  import { Badge } from "@/components/ui/badge";
  import { Button } from "@/components/ui/button";
  import { Input } from "@/components/ui/input";
@@ -18,7 +19,67 @@
    { id: "V1004", customer: "Ana Souza", date: "2024-03-26 10:20", total: 259.80, method: "Cartão de Débito", status: "Concluída", items: 3 },
  ];
  
+ import { supabase } from "@/integrations/supabase/client";
+ import { useAuth } from "@/contexts/AuthContext";
+ import { toast } from "sonner";
+ import { format } from "date-fns";
+ import { ptBR } from "date-fns/locale";
+ 
  export function SalesHistory() {
+   const { user } = useAuth();
+   const [sales, setSales] = useState<any[]>([]);
+   const [loading, setLoading] = useState(true);
+   const [searchTerm, setSearchTerm] = useState("");
+ 
+   const fetchSales = useCallback(async () => {
+     if (!user?.id) return;
+     setLoading(true);
+     try {
+       const { data, error } = await supabase
+         .from("sales_orders")
+         .select(`
+           *,
+           customers (
+             full_name
+           )
+         `)
+         .eq("user_id", user.id)
+         .order("created_at", { ascending: false });
+ 
+       if (error) throw error;
+       setSales(data || []);
+     } catch (error) {
+       console.error("Erro ao carregar vendas:", error);
+       toast.error("Erro ao carregar histórico de vendas.");
+     } finally {
+       setLoading(false);
+     }
+   }, [user?.id]);
+ 
+   useEffect(() => {
+     fetchSales();
+   }, [fetchSales]);
+ 
+   const filteredSales = sales.filter(sale => {
+     const s = searchTerm.toLowerCase();
+     return (
+       sale.id.toLowerCase().includes(s) ||
+       sale.customers?.full_name?.toLowerCase().includes(s) ||
+       sale.payment_method?.toLowerCase().includes(s)
+     );
+   });
+ 
+   const stats = {
+     todayTotal: sales
+       .filter(s => new Date(s.created_at).toDateString() === new Date().toDateString())
+       .reduce((acc, curr) => acc + (curr.total_amount || 0), 0),
+     todayCount: sales.filter(s => new Date(s.created_at).toDateString() === new Date().toDateString()).length,
+     avgTicket: sales.length > 0 
+       ? sales.reduce((acc, curr) => acc + (curr.total_amount || 0), 0) / sales.length 
+       : 0,
+     canceledCount: sales.filter(s => s.status === 'canceled').length
+   };
+ 
    return (
      <div className="space-y-6">
        {/* Resumo de Vendas */}
@@ -29,13 +90,10 @@
                <p className="text-sm font-medium">Vendas Hoje</p>
                <ShoppingBag className="h-4 w-4 text-muted-foreground" />
              </div>
-             <div className="flex items-baseline gap-2">
-               <div className="text-2xl font-bold">R$ 8.048,90</div>
-               <span className="text-xs font-medium text-success flex items-center gap-1">
-                 <ArrowUpRight className="h-3 w-3" /> +12%
-               </span>
-             </div>
-             <p className="text-xs text-muted-foreground mt-1">2 vendas concluídas</p>
+              <div className="text-2xl font-bold">
+                {stats.todayTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{stats.todayCount} vendas concluídas hoje</p>
            </CardContent>
          </Card>
          <Card>
@@ -44,7 +102,9 @@
                <p className="text-sm font-medium">Ticket Médio</p>
                <div className="h-4 w-4 text-muted-foreground flex items-center justify-center font-bold text-[10px]">R$</div>
              </div>
-             <div className="text-2xl font-bold">R$ 4.024,45</div>
+              <div className="text-2xl font-bold">
+                {stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </div>
              <p className="text-xs text-muted-foreground mt-1">Baseado em 30 dias</p>
            </CardContent>
          </Card>
@@ -54,7 +114,7 @@
                <p className="text-sm font-medium">Vendas Canceladas</p>
                <XCircle className="h-4 w-4 text-destructive" />
              </div>
-             <div className="text-2xl font-bold text-destructive">1</div>
+              <div className="text-2xl font-bold text-destructive">{stats.canceledCount}</div>
              <p className="text-xs text-muted-foreground mt-1">Últimos 7 dias</p>
            </CardContent>
          </Card>
@@ -74,10 +134,12 @@
          <div className="flex items-center gap-3">
            <div className="relative flex-1 md:w-80">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-             <input 
-               placeholder="Buscar por ID, cliente ou status..." 
-               className="w-full h-10 pl-9 pr-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20 transition"
-             />
+              <input 
+                placeholder="Buscar por ID, cliente ou status..." 
+                className="w-full h-10 pl-9 pr-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20 transition"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
            </div>
            <button className="h-10 px-4 rounded-xl border border-border bg-card flex items-center gap-2 text-sm font-medium hover:bg-muted transition">
              <Calendar className="h-4 w-4" /> Período
@@ -105,39 +167,54 @@
                  <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider text-right">Ações</th>
                </tr>
              </thead>
-             <tbody className="divide-y divide-border">
-               {mockSales.map((sale) => (
-                 <tr key={sale.id} className="hover:bg-muted/30 transition-colors group">
-                   <td className="px-6 py-4">
-                     <span className="font-mono text-xs font-bold text-primary">{sale.id}</span>
-                   </td>
-                   <td className="px-6 py-4">
-                     <div className="text-sm font-semibold">{sale.customer}</div>
-                   </td>
-                   <td className="px-6 py-4 text-xs text-muted-foreground">
-                     {sale.date}
-                   </td>
-                   <td className="px-6 py-4 text-sm">
-                     {sale.items}
-                   </td>
-                   <td className="px-6 py-4 text-xs">
-                     <span className="bg-muted px-2 py-1 rounded font-medium">{sale.method}</span>
-                   </td>
-                   <td className="px-6 py-4">
-                     <span className="text-sm font-bold">
-                       {sale.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                     </span>
-                   </td>
-                   <td className="px-6 py-4">
-                     <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${
-                       sale.status === 'Concluída' 
-                          ? 'bg-success/10 text-success border-success/20' 
-                          : 'bg-destructive/10 text-destructive border-destructive/20'
-                     }`}>
-                       {sale.status === 'Concluída' ? <CheckCircle2 className="inline h-3 w-3 mr-1" /> : <XCircle className="inline h-3 w-3 mr-1" />}
-                       {sale.status.toUpperCase()}
-                     </span>
-                   </td>
+              <tbody className="divide-y divide-border">
+                {loading ? (
+                  <tr>
+                    <td colSpan={8} className="px-6 py-10 text-center">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                      <p className="text-xs text-muted-foreground mt-2">Carregando histórico...</p>
+                    </td>
+                  </tr>
+                ) : filteredSales.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-6 py-10 text-center text-muted-foreground text-sm">
+                      Nenhuma venda encontrada.
+                    </td>
+                  </tr>
+                ) : filteredSales.map((sale) => (
+                  <tr key={sale.id} className="hover:bg-muted/30 transition-colors group">
+                    <td className="px-6 py-4">
+                      <span className="font-mono text-[10px] font-bold text-primary">{sale.id.slice(0, 8)}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-semibold">{sale.customers?.full_name || 'Consumidor Final'}</div>
+                    </td>
+                    <td className="px-6 py-4 text-xs text-muted-foreground">
+                      {format(new Date(sale.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      -
+                    </td>
+                    <td className="px-6 py-4 text-xs">
+                      <span className="bg-muted px-2 py-1 rounded font-medium uppercase">{sale.payment_method}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-bold">
+                        {(sale.total_amount || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold border flex items-center w-fit gap-1 ${
+                        sale.status === 'concluded' 
+                           ? 'bg-success/10 text-success border-success/20' 
+                           : sale.status === 'pending'
+                           ? 'bg-warning/10 text-warning border-warning/20'
+                           : 'bg-destructive/10 text-destructive border-destructive/20'
+                      }`}>
+                        {sale.status === 'concluded' ? <CheckCircle2 className="h-3 w-3" /> : sale.status === 'pending' ? <AlertCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                        {sale.status === 'concluded' ? 'CONCLUÍDA' : sale.status === 'pending' ? 'PENDENTE' : 'CANCELADA'}
+                      </span>
+                    </td>
                    <td className="px-6 py-4 text-right">
                      <DropdownMenu>
                        <DropdownMenuTrigger asChild>
