@@ -22,6 +22,8 @@ import { toast } from "sonner";
    const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [viewTab, setViewTab] = useState("all");
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [quickProduct, setQuickProduct] = useState({ name: "", price: "", stock: "" });
 
     useEffect(() => {
       if (!user?.id) return;
