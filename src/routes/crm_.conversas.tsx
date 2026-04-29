@@ -1328,7 +1328,19 @@ function ConversasPage() {
                     </div>
                   </div>
 
-                   <button onClick={recording ? () => stopRecording(false) : sendText} disabled={(!text.trim() && !recording) || sending} className={`h-[52px] w-[52px] rounded-2xl transition-all duration-500 flex items-center justify-center shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-95 group/send ${recording ? "bg-emerald-500 text-white animate-pulse" : "bg-primary text-primary-foreground disabled:opacity-50 disabled:grayscale"}`}> {sending ? ( <Loader2 className="h-5 w-5 animate-spin" /> ) : recording ? ( <Send className="h-5 w-5" /> ) : ( <Send className="h-5 w-5 transition-transform duration-300 group-hover/send:translate-x-0.5 group-hover/send:-translate-y-0.5" /> )} </button>
+                  <button
+                    onClick={recording ? () => stopRecording(false) : sendText}
+                    disabled={(!text.trim() && !recording) || sending}
+                    className={`h-[52px] w-[52px] rounded-2xl transition-all duration-500 flex items-center justify-center shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:scale-95 group/send ${recording ? "bg-emerald-500 text-white animate-pulse" : "bg-primary text-primary-foreground disabled:opacity-50 disabled:grayscale"}`}
+                  >
+                    {sending ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : recording ? (
+                      <Send className="h-5 w-5" />
+                    ) : (
+                      <Send className="h-5 w-5 transition-transform duration-300 group-hover/send:translate-x-0.5 group-hover/send:-translate-y-0.5" />
+                    )}
+                  </button>
 
                   {/* Overlay de Encaminhamento */}
                   {isForwarding && forwardMsg && (
