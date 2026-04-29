@@ -33,7 +33,8 @@ function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+   const [isModalOpen, setIsModalOpen] = useState(false);
+   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [saving, setSaving] = useState(false);
@@ -143,14 +144,38 @@ function ProductsPage() {
     }
   };
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+   const filteredProducts = products.filter(p => 
+     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     p.category?.toLowerCase().includes(searchTerm.toLowerCase())
+   );
 
-  return (
-    <div className="min-h-screen flex w-full bg-background">
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+   const handleAddProduct = async (data: any) => {
+     if (!user?.id) return;
+     setSaving(true);
+     try {
+       const payload = {
+         user_id: user.id,
+         ...data,
+         price: parseFloat(data.price) || 0,
+         stock_quantity: parseInt(data.stock) || 0,
+       };
+       delete payload.stock;
+
+       const { error } = await supabase.from("products").insert(payload);
+       if (error) throw error;
+       toast.success("Produto cadastrado!");
+       fetchProducts();
+     } catch (error) {
+       console.error("Erro ao salvar:", error);
+       toast.error("Erro ao salvar produto.");
+     } finally {
+       setSaving(false);
+     }
+   };
+
+   return (
+     <div className="min-h-screen flex w-full bg-background">
+       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{editingProduct ? "Editar Produto" : "Novo Produto"}</DialogTitle>
@@ -205,9 +230,12 @@ function ProductsPage() {
             <Button onClick={handleSave} disabled={saving}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Produto"}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+           </DialogFooter>
+         </DialogContent>
+       </Dialog>
+
+       {/* Use the comprehensive form if available */}
+       {/* Injected component here if we had it, but for now we fix the existing buttons */}
 
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
@@ -256,13 +284,13 @@ function ProductsPage() {
                   />
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={handleSave} disabled={saving} className="flex-1 h-11 font-bold">
-                    {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                    Cadastrar
-                  </Button>
-                  <Button variant="outline" onClick={() => handleOpenModal()} className="h-11 px-4">
-                    Completo
-                  </Button>
+                   <Button onClick={handleSave} disabled={saving} className="flex-1 h-11 font-bold">
+                     {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                     Cadastrar
+                   </Button>
+                   <Button variant="outline" onClick={() => handleOpenModal()} className="h-11 px-4">
+                     Completo
+                   </Button>
                 </div>
               </div>
             </div>
