@@ -27,6 +27,9 @@
    const [customersList, setCustomersList] = useState<{ id: string; full_name: string }[]>([]);
    const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
    const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+   const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false);
+   const [newCustomerName, setNewCustomerName] = useState("");
+   const [newCustomerPhone, setNewCustomerPhone] = useState("");
    const [receivedAmount, setReceivedAmount] = useState<string>("");
    const [discountValue, setDiscountValue] = useState<number>(0);
    const [isFinishing, setIsFinishing] = useState(false);
@@ -193,12 +196,12 @@
          description: `Total de ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} em ${paymentMethod?.toUpperCase()}`,
        });
  
-       setCart([]);
-       setPaymentMethod(null);
-       setSelectedCustomer(null);
-       setIsCheckoutModalOpen(false);
-       setReceivedAmount("");
-       setDiscountValue(0);
+         setCart([]);
+         setPaymentMethod(null);
+         setSelectedCustomer(null);
+         setIsCheckoutModalOpen(false);
+         setReceivedAmount("");
+         setDiscountValue(0);
        fetchProducts(); // Atualiza estoque na interface
      } catch (error) {
        console.error("Erro ao finalizar venda:", error);
@@ -208,6 +211,32 @@
      }
    };
  
+   const handleCreateCustomer = async () => {
+     if (!user?.id || !newCustomerName) return;
+     try {
+       const { data, error } = await supabase
+         .from("customers")
+         .insert({
+           user_id: user.id,
+           full_name: newCustomerName,
+           phone: newCustomerPhone,
+         })
+         .select()
+         .single();
+
+       if (error) throw error;
+
+       toast.success("Cliente cadastrado com sucesso!");
+       setSelectedCustomer({ id: data.id, name: data.full_name });
+       setIsNewCustomerModalOpen(false);
+       setIsCustomerModalOpen(false);
+       fetchCustomers();
+     } catch (error: any) {
+       console.error("Erro ao criar cliente:", error);
+       toast.error("Erro ao cadastrar cliente.");
+     }
+   };
+
    return (
      <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-6 h-[calc(100vh-160px)]">
        <Dialog open={isCheckoutModalOpen} onOpenChange={setIsCheckoutModalOpen}>
@@ -323,12 +352,52 @@
                    )}
                  </div>
               </ScrollArea>
-             <Button variant="secondary" className="w-full gap-2">
-               <UserPlus className="h-4 w-4" /> Cadastrar Novo Cliente
-             </Button>
+              <Button 
+                variant="secondary" 
+                className="w-full gap-2"
+                onClick={() => {
+                  setIsNewCustomerModalOpen(true);
+                  setNewCustomerName(customerSearch);
+                }}
+              >
+                <UserPlus className="h-4 w-4" /> Cadastrar Novo Cliente
+              </Button>
            </div>
          </DialogContent>
        </Dialog>
+
+        <Dialog open={isNewCustomerModalOpen} onOpenChange={setIsNewCustomerModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Novo Cliente</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Nome Completo</Label>
+                <Input 
+                  placeholder="Ex: João Silva" 
+                  value={newCustomerName}
+                  onChange={(e) => setNewCustomerName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>WhatsApp</Label>
+                <Input 
+                  placeholder="Ex: 11999999999" 
+                  value={newCustomerPhone}
+                  onChange={(e) => setNewCustomerPhone(e.target.value)}
+                />
+              </div>
+              <Button 
+                className="w-full bg-primary" 
+                onClick={handleCreateCustomer}
+                disabled={!newCustomerName}
+              >
+                Salvar e Vincular
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
  
        {/* Left Side: Product Selection */}
        <div className="flex flex-col gap-6 overflow-hidden">
