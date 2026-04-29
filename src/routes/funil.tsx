@@ -255,30 +255,57 @@ type Deal = {
       const loadedLeads = (ldRes.data as any) ?? [];
       setLeads(loadedLeads);
 
-      // Auto-create deals for conversations that don't have one yet
+      // Auto-create deals and leads for conversations that don't have one yet
       if (stRes.data && stRes.data.length > 0) {
         const firstStageId = stRes.data[0].id;
+        let needsReload = false;
+
         for (const conv of convs) {
-          // Find lead for this conversation
-          const lead = loadedLeads.find((l: any) => l.phone === conv.contact_phone);
-          if (lead && !existingLeadIds.has(lead.id)) {
+          let leadId = loadedLeads.find((l: any) => l.phone === conv.contact_phone)?.id;
+          
+          // If no lead exists for this phone, create one
+          if (!leadId) {
+            try {
+              const { data: newLead, error: leadError } = await supabase
+                .from("leads")
+                .insert({
+                  user_id: user.id,
+                  name: conv.contact_name || conv.contact_phone,
+                  phone: conv.contact_phone,
+                  source: 'whatsapp'
+                })
+                .select()
+                .single();
+
+              if (leadError) throw leadError;
+              leadId = newLead.id;
+              needsReload = true;
+            } catch (e) {
+              console.error("Erro ao criar lead automático:", e);
+              continue;
+            }
+          }
+
+          // If lead exists but no deal exists, create one
+          if (leadId && !existingLeadIds.has(leadId)) {
             try {
               await supabase.from("pipeline_leads").insert({
                 user_id: user.id,
-                lead_id: lead.id,
+                lead_id: leadId,
                 stage_id: firstStageId,
                 deal_value: 0
               });
-              // Add to local state to avoid re-running or waiting for reload
-              existingLeadIds.add(lead.id);
+              existingLeadIds.add(leadId);
+              needsReload = true;
             } catch (e) {
-              console.error("Error auto-creating deal for lead:", lead.id, e);
+              console.error("Erro ao criar negócio automático:", e);
             }
           }
         }
-        // If we added new deals, reload once to get the full objects with lead data
-        if (convs.some(c => loadedLeads.find((l:any) => l.phone === c.contact_phone && !existingLeadIds.has(l.id)))) {
-          load(); 
+        
+        if (needsReload) {
+          load();
+          return;
         }
       }
     } catch (err) {
