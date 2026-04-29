@@ -1,7 +1,8 @@
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+ import { formatDistanceToNow } from "date-fns";
+ import { ptBR } from "date-fns/locale";
  import { Trash2, Phone, Calendar, DollarSign, GripVertical, Instagram, MessageCircle, MessageSquare, Clock, AlertCircle, ExternalLink } from "lucide-react";
  import { cn } from "@/lib/utils";
+ import { motion } from "framer-motion";
  
  interface DealCardProps {
    deal: any;
@@ -18,18 +19,23 @@ import { ptBR } from "date-fns/locale";
     const isStale = deal.last_message_at && (new Date().getTime() - new Date(deal.last_message_at).getTime() > 24 * 60 * 60 * 1000);
     const isNewFromUser = deal.last_message_role === 'user';
     
-   return (
-     <div
-       draggable
-       onDragStart={() => onDragStart(deal.id)}
-       onDragEnd={onDragEnd}
-       onClick={onClick}
+    return (
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        whileHover={{ y: -2 }}
+        draggable
+        onDragStart={() => onDragStart(deal.id)}
+        onDragEnd={onDragEnd}
+        onClick={onClick}
         className={cn(
           "bg-card border border-border rounded-xl p-3 shadow-sm hover:shadow-lg hover:border-primary/40 transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden active:scale-[0.98]",
           isStale && "border-l-4 border-l-amber-400",
           isNewFromUser && "ring-2 ring-green-500/20 bg-green-500/[0.02]"
         )}
-     >
+      >
        {/* Indicador de prioridade opcional */}
        {deal.priority === 'high' && <div className="absolute top-0 right-0 w-20 h-20 bg-destructive/5 rounded-bl-full -mr-10 -mt-10" />}
        
@@ -151,6 +157,6 @@ import { ptBR } from "date-fns/locale";
            </div>
          </div>
        </div>
-     </div>
-   );
- }
+      </motion.div>
+    );
+  }

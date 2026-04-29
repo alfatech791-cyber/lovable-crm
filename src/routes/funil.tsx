@@ -20,6 +20,9 @@ import { useAuth } from "@/contexts/AuthContext";
  };
  
  import { StageColumn } from "@/components/funil/StageColumn";
+import { AddDealDialog } from "@/components/funil/AddDealDialog";
+import { AddStageDialog } from "@/components/funil/AddStageDialog";
+
  import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -157,7 +160,8 @@ type Deal = {
    const [conversations, setConversations] = useState<Conversation[]>([]);
    const [loading, setLoading] = useState(true);
    const [dragId, setDragId] = useState<string | null>(null);
-   const [adding, setAdding] = useState<{ stage_id: string; lead_id: string; deal_value: string } | null>(null);
+   const [adding, setAdding] = useState<{ stage_id: string; initial: boolean } | null>(null);
+  const [addingStage, setAddingStage] = useState(false);
      const [searchTerm, setSearchTerm] = useState("");
      const [sortBy, setSortBy] = useState<"recent" | "value" | "whatsapp">("recent");
    const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
@@ -168,22 +172,7 @@ type Deal = {
    const [sending, setSending] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    const addStage = async () => {
-      if (!user?.id) return;
-      const name = prompt("Nome da nova etapa:");
-      if (!name) return;
-      const nextIndex = stages.length > 0 ? Math.max(...stages.map(s => s.order_index)) + 1 : 0;
-      const colors = ["#8B5CF6", "#EC4899", "#3B82F6", "#10B981", "#F59E0B"];
-      const color = colors[stages.length % colors.length];
-      const { error } = await supabase.from("funnel_stages").insert({
-        user_id: user.id,
-        name,
-        order_index: nextIndex,
-        color
-      });
-      if (error) toast.error("Erro ao criar etapa: " + error.message);
-      else load();
-    };
+    const addStage = () => setAddingStage(true);
 
     const deleteStage = async (id: string) => {
       if (!confirm("Tem certeza que deseja remover esta etapa? Todas as negociações nela serão perdidas.")) return;
@@ -487,18 +476,6 @@ type Deal = {
     if (error) { toast.error(error.message); load(); }
   };
 
-  const addDeal = async () => {
-    if (!user?.id || !adding?.lead_id) { toast.error("Selecione um lead"); return; }
-    const { error } = await supabase.from("pipeline_leads").insert({
-      user_id: user.id,
-      lead_id: adding.lead_id,
-      stage_id: adding.stage_id,
-      deal_value: Number(adding.deal_value || 0),
-    });
-    if (error) toast.error(error.message);
-    else { toast.success("Negociação criada"); setAdding(null); load(); }
-  };
-
   const removeDeal = async (id: string) => {
     if (!confirm("Remover esta negociação?")) return;
     const { error } = await supabase.from("pipeline_leads").delete().eq("id", id);
@@ -627,7 +604,7 @@ type Deal = {
                    <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
                  </Button>
                 
-                <Button className="h-10 px-6 gap-2 text-xs font-black shadow-lg shadow-primary/20 rounded-xl hover:scale-105 transition-all" onClick={() => setAdding({ stage_id: stages[0]?.id || "", lead_id: "", deal_value: "" })}>
+                <Button className="h-10 px-6 gap-2 text-xs font-black shadow-lg shadow-primary/20 rounded-xl hover:scale-105 transition-all" onClick={() => setAdding({ stage_id: stages[0]?.id || "", initial: true })}>
                   <Plus className="h-4 w-4" /> NOVO NEGÓCIO
                 </Button>
               </div>
@@ -675,7 +652,7 @@ type Deal = {
                       key={stage.id}
                       stage={stage}
                       deals={filteredDeals.filter((d) => d.stage_id === stage.id)}
-                      onAddDeal={(stageId) => setAdding({ stage_id: stageId, lead_id: "", deal_value: "" })}
+                      onAddDeal={(stageId) => setAdding({ stage_id: stageId, initial: true })}
                       onRemoveDeal={removeDeal}
                       onMoveDeal={moveDeal}
                       dragId={dragId}
@@ -850,59 +827,60 @@ type Deal = {
                 </div>
               </div>
             )}
-          </main>
-      </div>
-
+           </main>
+ 
        {/* Painel Lateral de Chat Refinado */}
        {viewMode === "kanban" && chatOpen && (
          <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[450px] bg-background border-l border-border shadow-[0_0_50px_rgba(0,0,0,0.15)] flex flex-col z-[100] animate-in slide-in-from-right duration-300">
-           {/* Header do Chat */}
-           <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-card/50 backdrop-blur-md sticky top-0 z-10">
-             <div className="flex items-center gap-4 min-w-0">
-               <div className="relative">
-                 <div className="h-11 w-11 rounded-2xl bg-primary/10 grid place-items-center shrink-0 border border-primary/20">
-                   <User className="h-5 w-5 text-primary" />
-                 </div>
-                 {currentConversation?.status !== "handed_off" && (
-                   <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 border-2 border-background flex items-center justify-center">
-                     <Bot className="h-2 w-2 text-white" />
-                   </div>
-                 )}
-               </div>
-               <div className="min-w-0">
-                 <p className="text-sm font-black truncate text-foreground tracking-tight">
-                   {currentConversation?.contact_name || currentConversation?.contact_phone || "Lead Sem Nome"}
-                 </p>
-                 <div className="flex items-center gap-1.5">
-                   <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                   <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                     Online via WhatsApp
-                   </p>
-                 </div>
-               </div>
-             </div>
-             <div className="flex items-center gap-2">
-               {currentConversation && (
-                 <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className={cn("h-9 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all", 
-                    currentConversation.status === "handed_off" ? "border-amber-500/50 text-amber-600 bg-amber-500/5" : "border-primary/30 text-primary bg-primary/5")} 
-                  onClick={toggleHandoff}
-                 >
-                   {currentConversation.status === "handed_off" ? (
-                     <><PlayCircle className="h-3.5 w-3.5" /> Reativar Bot</>
-                   ) : (
-                     <><PauseCircle className="h-3.5 w-3.5" /> Pausar Bot</>
-                   )}
-                 </Button>
-               )}
-               <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl hover:bg-muted" onClick={() => setChatOpen(false)}>
-                 <X className="h-5 w-5" />
-               </Button>
-             </div>
-           </div>
- 
+            {/* Header do Chat */}
+            <div className="px-6 py-4 border-b border-border flex flex-col gap-3 bg-card/50 backdrop-blur-md sticky top-0 z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="relative">
+                    <div className="h-11 w-11 rounded-2xl bg-primary/10 grid place-items-center shrink-0 border border-primary/20">
+                      <User className="h-5 w-5 text-primary" />
+                    </div>
+                    {currentConversation?.status !== "handed_off" && (
+                      <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 border-2 border-background flex items-center justify-center">
+                        <Bot className="h-2 w-2 text-white" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-black truncate text-foreground tracking-tight">
+                      {currentConversation?.contact_name || currentConversation?.contact_phone || "Lead Sem Nome"}
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                        Online via WhatsApp
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {currentConversation && (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className={cn("h-9 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all", 
+                        currentConversation.status === "handed_off" ? "border-amber-500/50 text-amber-600 bg-amber-500/5" : "border-primary/30 text-primary bg-primary/5")} 
+                      onClick={toggleHandoff}
+                    >
+                      {currentConversation.status === "handed_off" ? (
+                        <><PlayCircle className="h-3.5 w-3.5" /> Reativar Bot</>
+                      ) : (
+                        <><PauseCircle className="h-3.5 w-3.5" /> Pausar Bot</>
+                      )}
+                    </Button>
+                  )}
+                  <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl hover:bg-muted" onClick={() => setChatOpen(false)}>
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
            {/* Área de Mensagens */}
            <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-6 bg-muted/5 scrollbar-thin">
              {chatLoading ? (
@@ -1002,36 +980,24 @@ type Deal = {
                   </button>
                 </div>
              </div>
-           </div>
-         </div>
-       )}
-
-      <Dialog open={!!adding} onOpenChange={(o) => !o && setAdding(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Nova negociação</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Lead</Label>
-              <Select value={adding?.lead_id ?? ""} onValueChange={(v) => setAdding((p) => p ? { ...p, lead_id: v } : p)}>
-                <SelectTrigger><SelectValue placeholder="Selecione um lead" /></SelectTrigger>
-                <SelectContent>
-                  {leads.length === 0 ? (
-                    <div className="px-2 py-3 text-xs text-muted-foreground">Cadastre leads primeiro.</div>
-                  ) : leads.map((l) => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Valor (R$)</Label>
-              <Input type="number" min={0} value={adding?.deal_value ?? ""} onChange={(e) => setAdding((p) => p ? { ...p, deal_value: e.target.value } : p)} />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAdding(null)}>Cancelar</Button>
-            <Button onClick={addDeal}>Criar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        )}
+
+        <AddDealDialog 
+         open={!!adding} 
+         onOpenChange={(o) => !o && setAdding(null)}
+         initialStageId={adding?.stage_id || ""}
+         leads={leads}
+         onSuccess={load}
+       />
+       <AddStageDialog
+         open={addingStage}
+         onOpenChange={setAddingStage}
+         onSuccess={load}
+         stagesCount={stages.length}
+       />
+     </div>
     </div>
   );
 }
