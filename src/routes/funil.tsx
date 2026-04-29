@@ -476,18 +476,6 @@ type Deal = {
     if (error) { toast.error(error.message); load(); }
   };
 
-  const addDeal = async () => {
-    if (!user?.id || !adding?.lead_id) { toast.error("Selecione um lead"); return; }
-    const { error } = await supabase.from("pipeline_leads").insert({
-      user_id: user.id,
-      lead_id: adding.lead_id,
-      stage_id: adding.stage_id,
-      deal_value: Number(adding.deal_value || 0),
-    });
-    if (error) toast.error(error.message);
-    else { toast.success("Negociação criada"); setAdding(null); load(); }
-  };
-
   const removeDeal = async (id: string) => {
     if (!confirm("Remover esta negociação?")) return;
     const { error } = await supabase.from("pipeline_leads").delete().eq("id", id);
