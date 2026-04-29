@@ -4,7 +4,21 @@ import { Topbar } from "@/components/layout/Topbar";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-  import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp } from "lucide-react";
+ import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp, MessageSquare, X, Send, Bot, User, UserCog, PauseCircle, PlayCircle, RefreshCw } from "lucide-react";
+ import { formatDistanceToNow } from "date-fns";
+ import { ptBR } from "date-fns/locale";
+ import { evolution } from "@/lib/evolution";
+ type Msg = { role: "user" | "assistant" | "agent"; content: string; at?: string; sent?: boolean };
+ type Conversation = {
+   id: string;
+   contact_name: string | null;
+   contact_phone: string;
+   status: string;
+   messages_count: number;
+   last_message_at: string;
+   transcript: Msg[];
+ };
+ 
  import { StageColumn } from "@/components/funil/StageColumn";
  import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -49,6 +63,106 @@ type Deal = {
    const [dragId, setDragId] = useState<string | null>(null);
    const [adding, setAdding] = useState<{ stage_id: string; lead_id: string; deal_value: string } | null>(null);
    const [searchTerm, setSearchTerm] = useState("");
+   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
+   const [chatOpen, setChatOpen] = useState(false);
+   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
+   const [chatLoading, setChatLoading] = useState(false);
+   const [messageText, setMessageText] = useState("");
+   const [sending, setSending] = useState(false);
+   const scrollRef = useRef<HTMLDivElement>(null);
+   const loadConversation = async (phone: string) => {
+     if (!user?.id || !phone) return;
+     setChatLoading(true);
+     try {
+       const { data, error } = await supabase
+         .from("bot_conversations")
+         .select("*")
+         .eq("user_id", user.id)
+         .eq("contact_phone", phone)
+         .maybeSingle();
+ 
+       if (error) throw error;
+       if (data) {
+         setCurrentConversation(data as any as Conversation);
+       } else {
+         setCurrentConversation(null);
+       }
+     } catch (err) {
+       console.error("Erro ao carregar conversa:", err);
+       toast.error("Erro ao carregar conversa");
+     } finally {
+       setChatLoading(false);
+     }
+   };
+ 
+   const sendMessage = async () => {
+     if (!currentConversation || !messageText.trim() || sending) return;
+     setSending(true);
+     try {
+       const { data, error } = await supabase.functions.invoke("send-whatsapp", {
+         body: {
+           phone: currentConversation.contact_phone,
+           text: messageText.trim(),
+           contactName: currentConversation.contact_name,
+         },
+       });
+       if (error) throw error;
+       setMessageText("");
+       // O Realtime deve atualizar a conversa, mas vamos recarregar para garantir
+       loadConversation(currentConversation.contact_phone);
+     } catch (e: any) {
+       toast.error(e?.message ?? "Erro ao enviar");
+     } finally {
+       setSending(false);
+     }
+   };
+ 
+   const toggleHandoff = async () => {
+     if (!currentConversation) return;
+     const newStatus = currentConversation.status === "handed_off" ? "active" : "handed_off";
+     const { error } = await supabase
+       .from("bot_conversations")
+       .update({ status: newStatus })
+       .eq("id", currentConversation.id);
+     
+     if (error) toast.error(error.message);
+     else {
+       toast.success(newStatus === "handed_off" ? "Bot pausado" : "Bot reativado");
+       loadConversation(currentConversation.contact_phone);
+     }
+   };
+ 
+   useEffect(() => {
+     if (chatOpen && currentConversation) {
+       const timer = setTimeout(() => {
+         scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+       }, 100);
+       return () => clearTimeout(timer);
+     }
+   }, [chatOpen, currentConversation?.transcript?.length]);
+ 
+   useEffect(() => {
+     if (!user?.id || !chatOpen || !currentConversation) return;
+     
+     const ch = supabase
+       .channel("funil_chat:" + currentConversation.contact_phone)
+       .on(
+         "postgres_changes",
+         { 
+           event: "UPDATE", 
+           schema: "public", 
+           table: "bot_conversations", 
+           filter: `id=eq.${currentConversation.id}` 
+         },
+         (payload) => {
+           setCurrentConversation(payload.new as any as Conversation);
+         }
+       )
+       .subscribe();
+       
+     return () => { supabase.removeChannel(ch); };
+   }, [user?.id, chatOpen, currentConversation?.id]);
+ 
  
     const filteredDeals = deals.filter(d => {
       const leadName = d.lead?.name?.toLowerCase() || "";
@@ -120,7 +234,7 @@ type Deal = {
   const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   return (
-    <div className="min-h-screen flex w-full bg-background overflow-hidden">
+     <div className="min-h-screen flex w-full bg-background overflow-hidden relative">
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar title="Funil de Vendas" subtitle="Arraste cards entre estágios para atualizar" />
@@ -190,7 +304,87 @@ type Deal = {
                      onMoveDeal={moveDeal}
                      dragId={dragId}
                      setDragId={setDragId}
+                     onSelectDeal={(deal) => {
+                       if (deal.lead?.phone) {
+                         setSelectedDealId(deal.id);
+                         loadConversation(deal.lead.phone);
+                         setChatOpen(true);
+                       } else {
+                         toast.error("Lead sem telefone para conversa");
+                       }
+                     }}
                    />
+ 
+       {/* Painel Lateral de Chat Otimizado para CRM Comercial */}
+       {chatOpen && (
+         <div className="absolute right-0 top-0 bottom-0 w-[400px] bg-card border-l border-border shadow-2xl flex flex-col z-50 animate-in slide-in-from-right duration-300">
+           <div className="h-16 px-4 border-b border-border flex items-center justify-between bg-muted/30">
+             <div className="flex items-center gap-3">
+               <div className="h-9 w-9 rounded-full bg-primary grid place-items-center text-primary-foreground font-bold">
+                 {currentConversation?.contact_name?.slice(0, 2).toUpperCase() || <User className="h-4 w-4" />}
+               </div>
+               <div>
+                 <h3 className="text-sm font-bold truncate max-w-[180px]">
+                   {currentConversation?.contact_name || currentConversation?.contact_phone || "Carregando..."}
+                 </h3>
+                 <p className="text-[10px] text-muted-foreground uppercase font-black tracking-tight">Processo Comercial</p>
+               </div>
+             </div>
+             <div className="flex items-center gap-2">
+               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={toggleHandoff}>
+                 {currentConversation?.status === "handed_off" ? <PlayCircle className="h-4 w-4 text-green-500" /> : <PauseCircle className="h-4 w-4 text-amber-500" />}
+               </Button>
+               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setChatOpen(false)}>
+                 <X className="h-4 w-4" />
+               </Button>
+             </div>
+           </div>
+ 
+           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/10">
+             {chatLoading ? (
+               <div className="h-full flex items-center justify-center">
+                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
+               </div>
+             ) : !currentConversation ? (
+               <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2">
+                 <MessageSquare className="h-10 w-10 text-muted-foreground/30" />
+                 <p className="text-sm font-bold text-muted-foreground">Nenhuma conversa iniciada</p>
+                 <p className="text-xs text-muted-foreground/70">O lead ainda não possui histórico de mensagens no WhatsApp.</p>
+               </div>
+             ) : (
+               currentConversation.transcript?.map((m, i) => (
+                 <div key={i} className={cn("flex flex-col", m.role === "user" ? "items-start" : "items-end")}>
+                   <div className={cn(
+                     "max-w-[85%] px-3 py-2 rounded-2xl text-xs",
+                     m.role === "user" ? "bg-muted text-foreground rounded-tl-none" : "bg-primary text-primary-foreground rounded-tr-none shadow-md shadow-primary/10"
+                   )}>
+                     {m.content}
+                   </div>
+                   <span className="text-[9px] text-muted-foreground mt-1 px-1">
+                     {m.at ? formatDistanceToNow(new Date(m.at), { addSuffix: true, locale: ptBR }) : ""}
+                   </span>
+                 </div>
+               ))
+             )}
+           </div>
+ 
+           <div className="p-4 border-t border-border bg-background">
+             <div className="flex gap-2">
+               <Input 
+                 placeholder="Digite sua resposta comercial..." 
+                 value={messageText}
+                 onChange={(e) => setMessageText(e.target.value)}
+                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                 className="flex-1 h-10 text-xs border-border/60 bg-muted/20"
+               />
+               <Button size="icon" className="h-10 w-10 shrink-0" onClick={sendMessage} disabled={sending || !messageText.trim()}>
+                 {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+               </Button>
+             </div>
+           </div>
+         </div>
+       )}
+ 
                  ))}
                  
                  {/* Coluna de "Adicionar Etapa" (Placeholder visual por enquanto) */}
