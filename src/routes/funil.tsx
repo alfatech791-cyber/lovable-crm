@@ -431,6 +431,34 @@ type Deal = {
         supabase.from("bot_conversations").select("*").eq("user_id", user.id).order("last_message_at", { ascending: false }),
         supabase.from("pipeline_leads").select("lead_id")
       ]);
+
+      // Reconcilia conversas órfãs (sem card no funil) — cobre casos de telefone divergente
+      const convsRaw = (convRes.data as any[]) ?? [];
+      const dealsRaw = (dlRes.data as any[]) ?? [];
+      const dealPhones = new Set(
+        dealsRaw.map((d: any) => normalizePhone(d.lead?.phone)).filter(Boolean)
+      );
+      const orphanConvs = convsRaw.filter(
+        (c: any) => !dealPhones.has(normalizePhone(c.contact_phone))
+      );
+      if (orphanConvs.length > 0) {
+        await Promise.all(
+          orphanConvs.map((c: any) =>
+            supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
+              _user_id: user.id,
+              _phone: c.contact_phone,
+              _name: c.contact_name,
+            } as any)
+          )
+        );
+        // Recarrega após reconciliação
+        const { data: newDeals } = await supabase
+          .from("pipeline_leads")
+          .select("*, lead:leads(name, phone, source)")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+        if (newDeals) (dlRes as any).data = newDeals;
+      }
       
       if (stRes.error) toast.error("Erro ao carregar estágios: " + stRes.error.message);
       if (dlRes.error) toast.error("Erro ao carregar negociações: " + dlRes.error.message);
