@@ -158,6 +158,7 @@ type Deal = {
    const [deals, setDeals] = useState<Deal[]>([]);
    const [leads, setLeads] = useState<{ id: string; name: string }[]>([]);
    const [conversations, setConversations] = useState<Conversation[]>([]);
+   const [statusFilter, setStatusFilter] = useState<"all" | "bot" | "manual" | "unread">("all");
    const [loading, setLoading] = useState(true);
    const [dragId, setDragId] = useState<string | null>(null);
    const [adding, setAdding] = useState<{ stage_id: string; initial: boolean } | null>(null);
@@ -716,12 +717,24 @@ type Deal = {
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Nenhuma conversa</p>
                       </div>
                     ) : (
-                      conversations
-                        .filter(c => 
-                          (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
-                          c.contact_phone.includes(searchTerm)
-                        )
-                        .map((conv) => (
+       conversations
+         .filter(c => {
+           const matchSearch = !searchTerm || 
+             (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
+             c.contact_phone.includes(searchTerm);
+           
+           if (!matchSearch) return false;
+           
+           if (statusFilter === "bot") return c.status !== "handed_off";
+           if (statusFilter === "manual") return c.status === "handed_off";
+           if (statusFilter === "unread") {
+             // Simulação simples de contagem de não lidas similar à página de conversas
+             const incoming = (c.transcript ?? []).filter((m) => m.role === "user").length;
+             return incoming > 0; // Para simplificar no funil, apenas mostra se tem mensagens do usuário
+           }
+           return true;
+         })
+         .map((conv) => (
                         <button
                           key={conv.id}
                           onClick={() => {
