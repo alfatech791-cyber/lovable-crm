@@ -243,16 +243,23 @@
                </div>
              </div>
            </div>
-           <DialogFooter>
-             <Button variant="outline" onClick={() => setIsCheckoutModalOpen(false)}>Voltar</Button>
-             <Button 
-               className="bg-primary hover:bg-primary/90 min-w-[150px]" 
-               onClick={handleFinishSale}
-               disabled={!receivedAmount || parseFloat(receivedAmount) < total}
-             >
-               Confirmar Recebimento
-             </Button>
-           </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCheckoutModalOpen(false)} disabled={isFinishing}>Voltar</Button>
+              <Button 
+                className="bg-primary hover:bg-primary/90 min-w-[150px]" 
+                onClick={handleFinishSale}
+                disabled={!receivedAmount || parseFloat(receivedAmount) < total || isFinishing}
+              >
+                {isFinishing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processando...
+                  </>
+                ) : (
+                  "Confirmar Recebimento"
+                )}
+              </Button>
+            </DialogFooter>
          </DialogContent>
        </Dialog>
  
@@ -267,22 +274,28 @@
                <Input placeholder="Buscar cliente por nome ou CPF..." className="pl-9" />
              </div>
              <ScrollArea className="h-[200px] rounded-md border p-4">
-               <div className="space-y-2">
-                 {['João Silva', 'Maria Oliveira', 'Pedro Santos'].map((name, i) => (
-                   <button
-                     key={i}
-                     onClick={() => {
-                       setSelectedCustomer({ id: String(i), name });
-                       setIsCustomerModalOpen(false);
-                       toast.info(`Cliente ${name} vinculado.`);
-                     }}
-                     className="w-full text-left p-3 hover:bg-muted rounded-lg border border-transparent hover:border-border transition flex items-center justify-between group"
-                   >
-                     <div className="font-medium">{name}</div>
-                     <Plus className="h-4 w-4 opacity-0 group-hover:opacity-100 transition" />
-                   </button>
-                 ))}
-               </div>
+                <div className="space-y-2">
+                  {customersList.length > 0 ? (
+                    customersList.map((customer) => (
+                      <button
+                        key={customer.id}
+                        onClick={() => {
+                          setSelectedCustomer({ id: customer.id, name: customer.full_name });
+                          setIsCustomerModalOpen(false);
+                          toast.info(`Cliente ${customer.full_name} vinculado.`);
+                        }}
+                        className="w-full text-left p-3 hover:bg-muted rounded-lg border border-transparent hover:border-border transition flex items-center justify-between group"
+                      >
+                        <div className="font-medium">{customer.full_name}</div>
+                        <Plus className="h-4 w-4 opacity-0 group-hover:opacity-100 transition" />
+                      </button>
+                    ))
+                  ) : (
+                    <div className="text-center py-4 text-muted-foreground text-sm">
+                      Nenhum cliente encontrado.
+                    </div>
+                  )}
+                </div>
              </ScrollArea>
              <Button variant="secondary" className="w-full gap-2">
                <UserPlus className="h-4 w-4" /> Cadastrar Novo Cliente
@@ -306,37 +319,42 @@
              />
            </div>
  
-           {search && (
-             <div className="mt-4 border border-border rounded-xl overflow-hidden max-h-[400px] overflow-y-auto">
-               {filteredProducts.length > 0 ? (
-                 filteredProducts.map(product => (
-                   <button
-                     key={product.id}
-                     onClick={() => addToCart(product)}
-                     className="w-full flex items-center gap-4 p-4 hover:bg-muted transition text-left border-b border-border last:border-none"
-                   >
-                     <div className="h-12 w-12 rounded-lg bg-primary/10 grid place-items-center shrink-0">
-                       <Package className="h-6 w-6 text-primary" />
-                     </div>
-                     <div className="flex-1 min-w-0">
-                       <div className="font-semibold truncate">{product.name}</div>
-                       <div className="text-sm text-muted-foreground">
-                         {product.category} • Estoque: {product.stock}
-                         {product.imei && ` • IMEI: ${product.imei}`}
-                       </div>
-                     </div>
-                     <div className="text-right">
-                       <div className="font-bold text-primary">
-                         {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                       </div>
-                     </div>
-                   </button>
-                 ))
-               ) : (
-                 <div className="p-8 text-center text-muted-foreground">Nenhum produto encontrado.</div>
-               )}
-             </div>
-           )}
+            {(search || loadingProducts) && (
+              <div className="mt-4 border border-border rounded-xl overflow-hidden max-h-[400px] overflow-y-auto bg-card">
+                {loadingProducts ? (
+                  <div className="p-8 flex items-center justify-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Carregando produtos...
+                  </div>
+                ) : filteredProducts.length > 0 ? (
+                  filteredProducts.map(product => (
+                    <button
+                      key={product.id}
+                      onClick={() => addToCart(product)}
+                      disabled={product.stock <= 0}
+                      className={`w-full flex items-center gap-4 p-4 hover:bg-muted transition text-left border-b border-border last:border-none ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <div className="h-12 w-12 rounded-lg bg-primary/10 grid place-items-center shrink-0">
+                        <Package className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold truncate">{product.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {product.category} • Estoque: {product.stock}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-primary">
+                          {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </div>
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-muted-foreground text-sm">Nenhum produto encontrado.</div>
+                )}
+              </div>
+            )}
          </div>
  
           <div className="flex-1 flex flex-col min-h-0">
