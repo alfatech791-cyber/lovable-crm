@@ -1,7 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AppSidebar } from "@/components/layout/Sidebar";
-import { Topbar } from "@/components/layout/Topbar";
-import { ShoppingBag, Plus, MoreVertical, Search, Filter } from "lucide-react";
+ import { createFileRoute } from "@tanstack/react-router";
+ import { AppSidebar } from "@/components/layout/Sidebar";
+ import { Topbar } from "@/components/layout/Topbar";
+ import { ShoppingBag, Plus, MoreVertical, Search, Filter, Loader2, Package, Trash2, Edit3 } from "lucide-react";
+ import { useState, useEffect, useCallback } from "react";
+ import { supabase } from "@/integrations/supabase/client";
+ import { useAuth } from "@/contexts/AuthContext";
+ import { toast } from "sonner";
+ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+ import { Button } from "@/components/ui/button";
+ import { Input } from "@/components/ui/input";
+ import { Label } from "@/components/ui/label";
+ import { 
+   DropdownMenu, 
+   DropdownMenuContent, 
+   DropdownMenuItem, 
+   DropdownMenuTrigger 
+ } from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/produtos")({
   head: () => ({
@@ -13,16 +27,267 @@ export const Route = createFileRoute("/produtos")({
   component: ProductsPage,
 });
 
-interface Product {
-  id: number;
-  name: string;
-  price: string;
-  stock: string;
-  category: string;
-}
-const products: Product[] = [];
-
-function ProductsPage() {
+ function ProductsPage() {
+   const { user } = useAuth();
+   const [products, setProducts] = useState<any[]>([]);
+   const [loading, setLoading] = useState(true);
+   const [searchTerm, setSearchTerm] = useState("");
+   const [isModalOpen, setIsModalOpen] = useState(false);
+   const [editingProduct, setEditingProduct] = useState<any | null>(null);
+   const [saving, setSaving] = useState(false);
+ 
+   const [formData, setFormData] = useState({
+     name: "",
+     price: "",
+     stock_quantity: "",
+     category: "Smartphones",
+     description: ""
+   });
+ 
+   const fetchProducts = useCallback(async () => {
+     if (!user?.id) return;
+     setLoading(true);
+     try {
+       const { data, error } = await supabase
+         .from("products")
+         .select("*")
+         .eq("user_id", user.id)
+         .order("created_at", { ascending: false });
+ 
+       if (error) throw error;
+       setProducts(data || []);
+     } catch (error) {
+       console.error("Erro ao carregar produtos:", error);
+       toast.error("Erro ao carregar catálogo.");
+     } finally {
+       setLoading(false);
+     }
+   }, [user?.id]);
+ 
+   useEffect(() => {
+     fetchProducts();
+   }, [fetchProducts]);
+ 
+   const handleOpenModal = (product?: any) => {
+     if (product) {
+       setEditingProduct(product);
+       setFormData({
+         name: product.name,
+         price: String(product.price || ""),
+         stock_quantity: String(product.stock_quantity || ""),
+         category: product.category || "Smartphones",
+         description: product.description || ""
+       });
+     } else {
+       setEditingProduct(null);
+       setFormData({
+         name: "",
+         price: "",
+         stock_quantity: "",
+         category: "Smartphones",
+         description: ""
+       });
+     }
+     setIsModalOpen(true);
+   };
+ 
+   const handleSave = async () => {
+     if (!user?.id || !formData.name) return;
+     setSaving(true);
+     try {
+       const payload = {
+         user_id: user.id,
+         name: formData.name,
+         price: parseFloat(formData.price) || 0,
+         stock_quantity: parseInt(formData.stock_quantity) || 0,
+         category: formData.category,
+         description: formData.description
+       };
+ 
+       if (editingProduct) {
+         const { error } = await supabase
+           .from("products")
+           .update(payload)
+           .eq("id", editingProduct.id);
+         if (error) throw error;
+         toast.success("Produto atualizado!");
+       } else {
+         const { error } = await supabase
+           .from("products")
+           .insert(payload);
+         if (error) throw error;
+         toast.success("Produto cadastrado!");
+       }
+ 
+       setIsModalOpen(false);
+       fetchProducts();
+     } catch (error) {
+       console.error("Erro ao salvar:", error);
+       toast.error("Erro ao salvar produto.");
+     } finally {
+       setSaving(false);
+     }
+   };
+ 
+   const handleDelete = async (id: string) => {
+     if (!confirm("Tem certeza que deseja excluir este produto?")) return;
+     try {
+       const { error } = await supabase.from("products").delete().eq("id", id);
+       if (error) throw error;
+       toast.success("Produto excluído.");
+       fetchProducts();
+     } catch (error) {
+       toast.error("Erro ao excluir.");
+     }
+   };
+ 
+   const filteredProducts = products.filter(p => 
+     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     p.category?.toLowerCase().includes(searchTerm.toLowerCase())
+   );
+ 
+   return (
+     <div className="min-h-screen flex w-full bg-background">
+       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+         <DialogContent className="sm:max-w-[425px]">
+           <DialogHeader>
+             <DialogTitle>{editingProduct ? "Editar Produto" : "Novo Produto"}</DialogTitle>
+           </DialogHeader>
+           <div className="grid gap-4 py-4">
+             <div className="space-y-2">
+               <Label htmlFor="name">Nome do Produto</Label>
+               <Input 
+                 id="name" 
+                 value={formData.name} 
+                 onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+                 placeholder="Ex: iPhone 15 Pro Max"
+               />
+             </div>
+             <div className="grid grid-cols-2 gap-4">
+               <div className="space-y-2">
+                 <Label htmlFor="price">Preço (R$)</Label>
+                 <Input 
+                   id="price" 
+                   type="number" 
+                   value={formData.price} 
+                   onChange={(e) => setFormData({ ...formData, price: e.target.value })} 
+                 />
+               </div>
+               <div className="space-y-2">
+                 <Label htmlFor="stock">Estoque</Label>
+                 <Input 
+                   id="stock" 
+                   type="number" 
+                   value={formData.stock_quantity} 
+                   onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })} 
+                 />
+               </div>
+             </div>
+             <div className="space-y-2">
+               <Label htmlFor="category">Categoria</Label>
+               <select 
+                 id="category"
+                 className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                 value={formData.category}
+                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+               >
+                 <option value="Smartphones">Smartphones</option>
+                 <option value="Acessórios">Acessórios</option>
+                 <option value="Peças">Peças</option>
+                 <option value="Serviços">Serviços</option>
+               </select>
+             </div>
+           </div>
+           <DialogFooter>
+             <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
+             <Button onClick={handleSave} disabled={saving}>
+               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Produto"}
+             </Button>
+           </DialogFooter>
+         </DialogContent>
+       </Dialog>
+ 
+       <AppSidebar />
+       <div className="flex-1 flex flex-col min-w-0">
+         <Topbar title="Catálogo de Produtos" subtitle="Gerencie o que você vende" />
+         <main className="flex-1 overflow-y-auto p-6">
+           <div className="flex items-center justify-between mb-6">
+             <div className="flex items-center gap-4 flex-1">
+               <div className="relative max-w-sm w-full">
+                 <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                 <input 
+                   placeholder="Buscar produtos..." 
+                   className="w-full h-10 pl-10 pr-4 rounded-xl bg-card border border-border outline-none text-sm" 
+                   value={searchTerm}
+                   onChange={(e) => setSearchTerm(e.target.value)}
+                 />
+               </div>
+             </div>
+             <button 
+               onClick={() => handleOpenModal()}
+               className="h-10 px-4 rounded-xl bg-gradient-primary text-white text-sm font-semibold shadow-elegant hover:opacity-95 transition flex items-center gap-2"
+             >
+               <Plus className="h-4 w-4" /> Novo Produto
+             </button>
+           </div>
+ 
+           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+             {loading ? (
+               <div className="col-span-full py-20 text-center">
+                 <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                 <p className="text-muted-foreground mt-2">Carregando catálogo...</p>
+               </div>
+             ) : filteredProducts.length === 0 ? (
+               <div className="col-span-full rounded-2xl bg-card border border-border p-12 text-center shadow-card">
+                 <div className="h-14 w-14 rounded-2xl bg-muted grid place-items-center mx-auto mb-4">
+                   <Package className="h-6 w-6 text-muted-foreground" />
+                 </div>
+                 <h3 className="text-lg font-semibold">Nenhum produto encontrado</h3>
+                 <p className="text-sm text-muted-foreground mt-1">Cadastre seus produtos ou serviços para começar a vender pelo CRM.</p>
+               </div>
+             ) : (
+               filteredProducts.map((product) => (
+                 <div key={product.id} className="rounded-2xl bg-card border border-border overflow-hidden shadow-card hover:shadow-elegant transition-all group">
+                   <div className="h-40 bg-muted grid place-items-center relative">
+                     <ShoppingBag className="h-12 w-12 text-muted-foreground/30 group-hover:scale-110 transition duration-300" />
+                     <div className="absolute top-3 right-3">
+                       <DropdownMenu>
+                         <DropdownMenuTrigger asChild>
+                           <button className="h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm grid place-items-center hover:bg-white text-foreground shadow-sm">
+                             <MoreVertical className="h-4 w-4" />
+                           </button>
+                         </DropdownMenuTrigger>
+                         <DropdownMenuContent align="end">
+                           <DropdownMenuItem onClick={() => handleOpenModal(product)} className="gap-2">
+                             <Edit3 className="h-4 w-4" /> Editar
+                           </DropdownMenuItem>
+                           <DropdownMenuItem onClick={() => handleDelete(product.id)} className="gap-2 text-destructive">
+                             <Trash2 className="h-4 w-4" /> Excluir
+                           </DropdownMenuItem>
+                         </DropdownMenuContent>
+                       </DropdownMenu>
+                     </div>
+                   </div>
+                   <div className="p-4">
+                     <div className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">{product.category}</div>
+                     <h3 className="font-bold text-sm mb-1 truncate">{product.name}</h3>
+                     <div className="text-lg font-bold font-display text-foreground">
+                       {(product.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                     </div>
+                     <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
+                       <span className="text-[11px] text-muted-foreground">Estoque: <span className={`font-semibold ${product.stock_quantity <= (product.min_stock || 0) ? 'text-destructive' : 'text-foreground'}`}>{product.stock_quantity}</span></span>
+                       <button onClick={() => handleOpenModal(product)} className="text-[11px] font-bold text-primary hover:underline">Ver detalhes</button>
+                     </div>
+                   </div>
+                 </div>
+               ))
+             )}
+           </div>
+         </main>
+       </div>
+     </div>
+   );
+ }
   return (
     <div className="min-h-screen flex w-full bg-background">
       <AppSidebar />
