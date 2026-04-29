@@ -1117,14 +1117,16 @@ function ConversasPage() {
                             </span>
                           </div>
                         )}
-                        <div className={`flex gap-3.5 items-end ${isUser ? "justify-start" : "justify-end"} group`}>
+                        <div className={`flex gap-2 items-end ${isUser ? "justify-start" : "justify-end"} group`}>
                           {isUser && (
-                            <div className="h-8 w-8 rounded-full bg-muted border border-border/20 grid place-items-center shrink-0 shadow-sm overflow-hidden mb-1">
-                              {selected.profile_pic_url ? (
-                                <img src={selected.profile_pic_url} className="h-full w-full object-cover" alt="" />
-                              ) : (
-                                <User className="h-4 w-4 text-muted-foreground" />
-                              )}
+                            <div className="flex flex-col items-center gap-1 shrink-0 mb-1">
+                              <div className="h-8 w-8 rounded-full bg-muted border border-border/20 grid place-items-center shadow-sm overflow-hidden">
+                                {selected.profile_pic_url ? (
+                                  <img src={selected.profile_pic_url} className="h-full w-full object-cover" alt="" />
+                                ) : (
+                                  <User className="h-4 w-4 text-muted-foreground" />
+                                )}
+                              </div>
                             </div>
                           )}
                           <div
