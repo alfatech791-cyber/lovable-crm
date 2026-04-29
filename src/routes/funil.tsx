@@ -380,8 +380,8 @@ type Deal = {
                  </p>
                </div>
              </div>
-             ) : (
-             <div className="flex-1 overflow-x-auto p-6 scrollbar-thin">
+            ) : (
+              <div className="flex-1 overflow-x-auto p-6 scrollbar-thin">
                <div className="flex gap-6 h-full min-w-max">
                  {stages.map((stage) => (
                    <StageColumn
