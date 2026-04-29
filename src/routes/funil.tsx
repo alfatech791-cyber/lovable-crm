@@ -22,6 +22,7 @@ import { useAuth } from "@/contexts/AuthContext";
  import { StageColumn } from "@/components/funil/StageColumn";
 import { AddDealDialog } from "@/components/funil/AddDealDialog";
 import { AddStageDialog } from "@/components/funil/AddStageDialog";
+import { PipelineTabs } from "@/components/pipeline/PipelineTabs";
 
  import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -529,8 +530,11 @@ type Deal = {
       <div className="min-h-screen flex w-full bg-background overflow-hidden relative">
        <AppSidebar />
        <div className="flex-1 flex flex-col min-w-0">
-         <Topbar title="Funil de Vendas" subtitle="Gerencie seus leads e converta mais vendas" />
+         <Topbar title="Pipeline de Vendas" subtitle="Gerencie leads e oportunidades em um só lugar" />
           <main className="flex-1 overflow-hidden flex flex-col bg-muted/5">
+            <div className="px-6 pt-4">
+              <PipelineTabs />
+            </div>
             {/* Stats Summary Panel */}
             <div className="px-6 py-4 bg-background border-b border-border/40 grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-primary/5 rounded-2xl p-3 border border-primary/10 flex items-center gap-3">

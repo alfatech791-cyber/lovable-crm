@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { PipelineTabs } from "@/components/pipeline/PipelineTabs";
 
 type Lead = {
   id: string;
@@ -133,9 +134,10 @@ export function LeadsTable() {
     <div className="min-h-screen flex w-full bg-background">
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Leads" subtitle="Base unificada de contatos do CRM" />
+        <Topbar title="Pipeline de Vendas" subtitle="Gerencie leads e oportunidades em um só lugar" />
         <main className="flex-1 overflow-y-auto p-6">
-          
+          <PipelineTabs />
+
           {/* Quick Add Section */}
           <div className={`mb-6 transition-all duration-300 overflow-hidden ${isQuickAddOpen ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}>
             <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 shadow-sm mb-6">
