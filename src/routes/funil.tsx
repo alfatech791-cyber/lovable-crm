@@ -997,7 +997,8 @@ type Deal = {
          onOpenChange={setAddingStage}
          onSuccess={load}
          stagesCount={stages.length}
-       />
+        />
+      </div>
     </div>
   );
 }
