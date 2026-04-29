@@ -35,10 +35,9 @@ function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-   const [isModalOpen, setIsModalOpen] = useState(false);
    const [isAddOpen, setIsAddOpen] = useState(false);
-  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<any | null>(null);
+   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -73,41 +72,27 @@ function ProductsPage() {
     fetchProducts();
   }, [fetchProducts]);
 
-  const handleOpenModal = (product?: any) => {
-    if (product) {
-      setEditingProduct(product);
-      setFormData({
-        name: product.name,
-        price: String(product.price || ""),
-        stock_quantity: String(product.stock_quantity || ""),
-        category: product.category || "Smartphones",
-        description: product.description || ""
-      });
-    } else {
-      setEditingProduct(null);
-      setFormData({
-        name: "",
-        price: "",
-        stock_quantity: "",
-        category: "Smartphones",
-        description: ""
-      });
-    }
-    setIsModalOpen(true);
-  };
+   const handleSave = async (data?: any) => {
+     if (!user?.id) return;
+     const dataToSave = data || {
+       name: formData.name,
+       price: parseFloat(formData.price) || 0,
+       stock_quantity: parseInt(formData.stock_quantity) || 0,
+       category: formData.category,
+       description: formData.description
+     };
+     
+     if (!dataToSave.name) return;
 
-  const handleSave = async () => {
-    if (!user?.id || !formData.name) return;
     setSaving(true);
     try {
-      const payload = {
-        user_id: user.id,
-        name: formData.name,
-        price: parseFloat(formData.price) || 0,
-        stock_quantity: parseInt(formData.stock_quantity) || 0,
-        category: formData.category,
-        description: formData.description
-      };
+       const payload = {
+         user_id: user.id,
+         ...dataToSave,
+         price: parseFloat(dataToSave.price) || 0,
+         stock_quantity: parseInt(dataToSave.stock || dataToSave.stock_quantity) || 0,
+       };
+       if (payload.stock !== undefined) delete payload.stock;
 
       if (editingProduct) {
         const { error } = await supabase
@@ -124,7 +109,8 @@ function ProductsPage() {
         toast.success("Produto cadastrado!");
       }
 
-      setIsModalOpen(false);
+       setEditingProduct(null);
+       setIsAddOpen(false);
       fetchProducts();
     } catch (error) {
       console.error("Erro ao salvar:", error);
@@ -151,97 +137,19 @@ function ProductsPage() {
      p.category?.toLowerCase().includes(searchTerm.toLowerCase())
    );
 
-   const handleAddProduct = async (data: any) => {
-     if (!user?.id) return;
-     setSaving(true);
-     try {
-       const payload = {
-         user_id: user.id,
-         ...data,
-         price: parseFloat(data.price) || 0,
-         stock_quantity: parseInt(data.stock) || 0,
-       };
-       delete payload.stock;
-
-       const { error } = await supabase.from("products").insert(payload);
-       if (error) throw error;
-       toast.success("Produto cadastrado!");
-       fetchProducts();
-     } catch (error) {
-       console.error("Erro ao salvar:", error);
-       toast.error("Erro ao salvar produto.");
-     } finally {
-       setSaving(false);
-     }
-   };
-
-   return (
-     <div className="min-h-screen flex w-full bg-background">
-       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{editingProduct ? "Editar Produto" : "Novo Produto"}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome do Produto</Label>
-              <Input 
-                id="name" 
-                value={formData.name} 
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
-                placeholder="Ex: iPhone 15 Pro Max"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="price">Preço (R$)</Label>
-                <Input 
-                  id="price" 
-                  type="number" 
-                  value={formData.price} 
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })} 
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="stock">Estoque</Label>
-                <Input 
-                  id="stock" 
-                  type="number" 
-                  value={formData.stock_quantity} 
-                  onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })} 
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="category">Categoria</Label>
-              <select 
-                id="category"
-                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              >
-                <option value="Smartphones">Smartphones</option>
-                <option value="Acessórios">Acessórios</option>
-                <option value="Peças">Peças</option>
-                <option value="Serviços">Serviços</option>
-              </select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Produto"}
-            </Button>
-           </DialogFooter>
-         </DialogContent>
-       </Dialog>
-
-       <ProductForm 
-         open={isAddOpen} 
-         onOpenChange={setIsAddOpen} 
-         onSave={handleAddProduct}
-       />
-
+    return (
+      <div className="min-h-screen flex w-full bg-background">
+        <ProductForm 
+          open={isAddOpen || !!editingProduct} 
+          onOpenChange={(open) => {
+            if (!open) {
+              setIsAddOpen(false);
+              setEditingProduct(null);
+            }
+          }} 
+          product={editingProduct}
+          onSave={handleSave}
+        />
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar title="Catálogo de Produtos" subtitle="Gerencie o que você vende" />
@@ -313,12 +221,20 @@ function ProductsPage() {
                 />
               </div>
             </div>
-            <button 
-              onClick={() => setIsQuickAddOpen(!isQuickAddOpen)}
-              className={`h-10 px-4 rounded-xl text-sm font-semibold shadow-elegant transition flex items-center gap-2 ${isQuickAddOpen ? "bg-muted text-foreground hover:bg-muted/80" : "bg-gradient-primary text-white hover:opacity-95"}`}
-            >
-              <Plus className="h-4 w-4" /> Novo Produto
-            </button>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setIsAddOpen(true)}
+                className="h-10 px-5 rounded-xl flex items-center gap-2 text-sm font-bold shadow-glow transition bg-gradient-primary text-white hover:opacity-95"
+              >
+                <Plus className="h-4 w-4" /> Novo Produto
+              </button>
+              <button 
+                onClick={() => setIsQuickAddOpen(!isQuickAddOpen)}
+                className={`h-10 px-4 rounded-xl border border-border text-sm font-medium transition flex items-center gap-2 ${isQuickAddOpen ? "bg-primary/10 text-primary border-primary/20" : "bg-card hover:bg-muted"}`}
+              >
+                <Plus className="h-4 w-4" /> Cadastro Rápido
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -348,7 +264,7 @@ function ProductsPage() {
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleOpenModal(product)} className="gap-2">
+                          <DropdownMenuItem onClick={() => setEditingProduct(product)} className="gap-2">
                             <Edit3 className="h-4 w-4" /> Editar
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleDelete(product.id)} className="gap-2 text-destructive">
@@ -366,7 +282,7 @@ function ProductsPage() {
                     </div>
                     <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
                       <span className="text-[11px] text-muted-foreground">Estoque: <span className={`font-semibold ${product.stock_quantity <= (product.min_stock || 0) ? 'text-destructive' : 'text-foreground'}`}>{product.stock_quantity}</span></span>
-                      <button onClick={() => handleOpenModal(product)} className="text-[11px] font-bold text-primary hover:underline">Ver detalhes</button>
+                      <button onClick={() => setEditingProduct(product)} className="text-[11px] font-bold text-primary hover:underline">Ver detalhes</button>
                     </div>
                   </div>
                 </div>
