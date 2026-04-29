@@ -743,14 +743,20 @@ function ConversasPage() {
          return;
        }
 
-       const res = await fetch(endpoint, {
-         method: "POST",
-         headers: { "Content-Type": "application/json" },
-         body: JSON.stringify(body),
-       });
+        // Enviar para a API Evolution
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
 
-       const data = await res.json();
-       if (!res.ok) throw new Error(data.error || "Erro ao enviar via Evolution");
+        const data = await res.json();
+        
+        // Se a resposta não for OK, tentamos extrair o erro de várias formas comuns na Evolution API
+        if (!res.ok) {
+          const errorDetail = data?.message || data?.error || (typeof data === 'string' ? data : "Erro desconhecido");
+          throw new Error(`Falha no envio Evolution: ${errorDetail}`);
+        }
 
        // Grava localmente no banco para manter o histórico
            const localConv = items.find(c => c.id === selected.id);
