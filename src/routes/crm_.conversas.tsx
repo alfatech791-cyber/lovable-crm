@@ -729,14 +729,13 @@ function ConversasPage() {
        if (payload.kind === "text") {
          endpoint = `/api/evolution/message/sendText/${instance}`;
          body.text = payload.text;
-       } else if (payload.kind === "audio") {
-         endpoint = `/api/evolution/message/sendWhatsAppAudio/${instance}`;
-         body.audio = payload.media;
-         body.encoding = true;
-       } else if (payload.kind === "sticker") {
-         endpoint = `/api/evolution/message/sendSticker/${instance}`;
-         body.sticker = payload.media;
-       } else if (payload.kind === "image") {
+        } else if (payload.kind === "audio") {
+          endpoint = `/api/evolution/message/sendWhatsAppAudio/${instance}`;
+          body.audio = payload.media;
+        } else if (payload.kind === "sticker") {
+          endpoint = `/api/evolution/message/sendSticker/${instance}`;
+          body.sticker = payload.media;
+        } else if (payload.kind === "image") {
          endpoint = `/api/evolution/message/sendMedia/${instance}`;
          body.mediatype = "image";
          body.media = payload.media;
@@ -839,8 +838,8 @@ function ConversasPage() {
       rec.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        const b64 = await blobToBase64(blob);
-        await sendPayload({ kind: "audio", media: b64, mimetype: "audio/webm" });
+        const b64 = await blobToBase64(blob); // Retorna base64 limpo sem prefixo
+        await sendPayload({ kind: "audio", media: b64, mimetype: "audio/mp4" }); // Evolution prefere audio/mp4 ou audio/ogg
       };
       rec.start();
       recorderRef.current = rec;
