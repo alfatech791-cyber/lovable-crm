@@ -221,6 +221,13 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
           </div>
         )}
 
+        {!isSmall && (
+          <button className="flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent transition-colors">
+            <HelpCircle className="h-4 w-4" />
+            <span className="text-[13px]">Central de Ajuda</span>
+          </button>
+        )}
+
         <div className={cn(
           "pt-2 border-t border-sidebar-border/40 flex flex-col gap-1",
           isSmall ? "items-center" : ""
