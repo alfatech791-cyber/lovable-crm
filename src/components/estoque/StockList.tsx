@@ -313,7 +313,7 @@ import { toast } from "sonner";
           >
             <FileDown className="h-4 w-4" /> Exportar
           </button>
-          <button onClick={() => setIsAddOpen(true)} className="h-10 px-5 rounded-xl bg-gradient-primary text-white flex items-center gap-2 text-sm font-bold shadow-glow hover:opacity-95 transition">
+          <button onClick={() => setIsQuickAddOpen(!isQuickAddOpen)} className={`h-10 px-5 rounded-xl flex items-center gap-2 text-sm font-bold shadow-glow transition ${isQuickAddOpen ? "bg-muted text-foreground hover:bg-muted/80" : "bg-gradient-primary text-white hover:opacity-95"}`}>
             <Plus className="h-4 w-4" /> Novo Produto
           </button>
         </div>
