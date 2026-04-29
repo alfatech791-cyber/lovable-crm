@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import { ShoppingBag, Plus, MoreVertical, Search, Filter, Loader2, Package, Trash2, Edit3 } from "lucide-react";
+ import { ShoppingBag, Plus, MoreVertical, Search, Filter, Loader2, Package, Trash2, Edit3, CheckCircle2 } from "lucide-react";
 import { X } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +17,8 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+
+ import { ProductForm } from "@/components/estoque/ProductForm";
 
 export const Route = createFileRoute("/produtos")({
   head: () => ({
@@ -234,8 +236,11 @@ function ProductsPage() {
          </DialogContent>
        </Dialog>
 
-       {/* Use the comprehensive form if available */}
-       {/* Injected component here if we had it, but for now we fix the existing buttons */}
+       <ProductForm 
+         open={isAddOpen} 
+         onOpenChange={setIsAddOpen} 
+         onSave={handleAddProduct}
+       />
 
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
