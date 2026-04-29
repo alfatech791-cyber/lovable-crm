@@ -261,8 +261,8 @@ type Deal = {
  
          return {
            ...deal,
-           last_message,
-           last_message_at
+           last_message: lastMessage,
+           last_message_at: lastMessageAt
          };
        }) ?? [];
       
