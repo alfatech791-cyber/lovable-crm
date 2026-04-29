@@ -354,14 +354,20 @@ type Deal = {
        return;
      }
      
-     try {
-       if (!silent) setLoading(true);
-       // Garante estágios padrão chamando o RPC (agora criado no banco)
-       try {
-         await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
-       } catch (rpcErr) {
-         console.warn("RPC ensure_default_funnel_stages falhou, continuando...", rpcErr);
-       }
+      try {
+        if (!silent) setLoading(true);
+        
+        // Inicializa configurações do bot e estágios
+        const { data: settings } = await supabase.from("bot_settings").select("id").eq("user_id", user.id).maybeSingle();
+        if (!settings) {
+          await supabase.from("bot_settings").insert({ user_id: user.id });
+        }
+        
+        try {
+          await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
+        } catch (rpcErr) {
+          console.warn("RPC ensure_default_funnel_stages falhou, continuando...", rpcErr);
+        }
 
       const [stRes, dlRes, ldRes, convRes, allDealsRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
