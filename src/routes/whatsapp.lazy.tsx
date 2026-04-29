@@ -326,16 +326,18 @@ function WhatsAppPage() {
 
         </main>
 
-        {selectedInstance && (
-          <QrCodeModal
-            instanceName={selectedInstance}
-            onClose={() => setSelectedInstance(null)}
-            onSuccess={() => {
-              setSelectedInstance(null);
-              fetchInstances();
-            }}
-          />
-        )}
+         {selectedInstance && (
+           <QrCodeModal
+             open={!!selectedInstance}
+             onOpenChange={(val) => {
+               if (!val) {
+                 setSelectedInstance(null);
+                 fetchInstances();
+               }
+             }}
+             initialInstanceName={selectedInstance}
+           />
+         )}
       </div>
     </div>
   );
