@@ -382,37 +382,36 @@ type Deal = {
              </div>
             ) : (
               <div className="flex-1 overflow-x-auto p-6 scrollbar-thin">
-               <div className="flex gap-6 h-full min-w-max">
-                 {stages.map((stage) => (
-                   <StageColumn
-                     key={stage.id}
-                     stage={stage}
-                     deals={filteredDeals.filter((d) => d.stage_id === stage.id)}
-                     onAddDeal={(stageId) => setAdding({ stage_id: stageId, lead_id: "", deal_value: "" })}
-                     onRemoveDeal={removeDeal}
-                     onMoveDeal={moveDeal}
-                     dragId={dragId}
-                     setDragId={setDragId}
-                     onSelectDeal={(deal) => {
-                       if (deal.lead?.phone) {
-                         setSelectedDealId(deal.id);
-                         loadConversation(deal.lead.phone);
-                         setChatOpen(true);
-                       } else {
-                         toast.error("Lead sem telefone para conversa");
-                       }
-                     }}
-                   />
-                 ))}
-                 
-                 {/* Coluna de "Adicionar Etapa" (Placeholder visual por enquanto) */}
-                 <div className="w-[300px] shrink-0 h-full rounded-2xl border-2 border-dashed border-border/40 flex flex-col items-center justify-center gap-4 opacity-40 hover:opacity-100 transition-all group cursor-pointer bg-muted/5">
-                   <div className="h-12 w-12 rounded-full bg-muted grid place-items-center group-hover:bg-primary/10 group-hover:scale-110 transition-all">
-                     <Plus className="h-6 w-6 text-muted-foreground group-hover:text-primary" />
-                   </div>
-                   <span className="text-xs font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Nova Etapa</span>
-                 </div>
-               </div>
+                <div className="flex gap-6 h-full min-w-max">
+                  {stages.map((stage) => (
+                    <StageColumn
+                      key={stage.id}
+                      stage={stage}
+                      deals={filteredDeals.filter((d) => d.stage_id === stage.id)}
+                      onAddDeal={(stageId) => setAdding({ stage_id: stageId, lead_id: "", deal_value: "" })}
+                      onRemoveDeal={removeDeal}
+                      onMoveDeal={moveDeal}
+                      dragId={dragId}
+                      setDragId={setDragId}
+                      onSelectDeal={(deal) => {
+                        if (deal.lead?.phone) {
+                          setSelectedDealId(deal.id);
+                          loadConversation(deal.lead.phone);
+                          setChatOpen(true);
+                        } else {
+                          toast.error("Lead sem telefone para conversa");
+                        }
+                      }}
+                    />
+                  ))}
+                  
+                  {/* Coluna de "Adicionar Etapa" (Placeholder visual por enquanto) */}
+                  <div className="w-[300px] shrink-0 h-full rounded-2xl border-2 border-dashed border-border/40 flex flex-col items-center justify-center gap-4 opacity-40 hover:opacity-100 transition-all group cursor-pointer bg-muted/5">
+                    <div className="h-12 w-12 rounded-full bg-muted grid place-items-center group-hover:bg-primary/10 group-hover:scale-110 transition-all">
+                      <Plus className="h-6 w-6 text-muted-foreground group-hover:text-primary" />
+                    </div>
+                    <span className="text-xs font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Nova Etapa</span>
+                  </div>
                 </div>
               </div>
             )}
