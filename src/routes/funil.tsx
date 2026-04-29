@@ -47,6 +47,7 @@ type Deal = {
   priority: string | null;
   last_message?: string;
   last_message_at?: string;
+  last_message_role?: "user" | "assistant" | "agent";
   lead?: {
     name: string;
     phone: string | null;
@@ -181,14 +182,8 @@ type Deal = {
            filter: `user_id=eq.${user.id}` 
          },
          () => {
-           // Recarrega a lista quando houver qualquer mudança (nova mensagem, novo contato, etc)
-           supabase.from("bot_conversations")
-             .select("*")
-             .eq("user_id", user.id)
-             .order("last_message_at", { ascending: false })
-             .then(({ data }) => {
-               if (data) setConversations(data as any as Conversation[]);
-             });
+            // Recarrega a lista e o funil quando houver qualquer mudança
+            load(true);
          }
        )
        .subscribe();
@@ -271,15 +266,15 @@ type Deal = {
       const existingLeadIds = new Set((allDealsRes.data as any[])?.map(d => d.lead_id) || []);
       
       const leadIds = (dlRes.data as any[])?.map(d => d.lead_id) || [];
-      let lastMessagesMap: Record<string, { content: string, created_at: string }> = {};
+      let lastMessagesMap: Record<string, { content: string, created_at: string, role?: any }> = {};
       
       if (leadIds.length > 0) {
         const filteredLeadIds = leadIds.filter(Boolean);
         if (filteredLeadIds.length > 0) {
-          const { data: msgData } = await supabase.from("messages").select("lead_id, content, created_at").in("lead_id", filteredLeadIds).order("created_at", { ascending: false });
+          const { data: msgData } = await supabase.from("messages").select("lead_id, content, created_at, role").in("lead_id", filteredLeadIds).order("created_at", { ascending: false });
           if (msgData) msgData.forEach(msg => { 
             if (msg.lead_id && !lastMessagesMap[msg.lead_id]) {
-              lastMessagesMap[msg.lead_id] = { content: msg.content, created_at: msg.created_at }; 
+              lastMessagesMap[msg.lead_id] = { content: msg.content, created_at: msg.created_at, role: msg.role }; 
             }
           });
         }
@@ -287,22 +282,26 @@ type Deal = {
       
        const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => {
          const conv = convs.find(c => c.contact_phone === deal.lead?.phone);
-         let lastMessage = deal.lead_id ? lastMessagesMap[deal.lead_id]?.content : undefined;
-         let lastMessageAt = deal.lead_id ? lastMessagesMap[deal.lead_id]?.created_at : undefined;
+          let lastMessage = deal.lead_id ? lastMessagesMap[deal.lead_id]?.content : undefined;
+          let lastMessageAt = deal.lead_id ? lastMessagesMap[deal.lead_id]?.created_at : undefined;
+          let lastMessageRole = deal.lead_id ? lastMessagesMap[deal.lead_id]?.role : undefined;
  
          // Prioritize data from bot_conversations for WhatsApp leads
          if (conv) {
            const transcript = conv.transcript as Msg[];
            if (transcript && transcript.length > 0) {
-             lastMessage = transcript[transcript.length - 1].content;
+              const last = transcript[transcript.length - 1];
+              lastMessage = last.content;
              lastMessageAt = conv.last_message_at;
+              lastMessageRole = last.role;
            }
          }
  
          return {
            ...deal,
            last_message: lastMessage,
-           last_message_at: lastMessageAt
+            last_message_at: lastMessageAt,
+            last_message_role: lastMessageRole
          };
        }) ?? [];
       
