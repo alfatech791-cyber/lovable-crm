@@ -266,36 +266,65 @@ function ConversasPage() {
   };
 
   const applyConversations = (list: Conversation[], notify = false) => {
-    const dedupMap = new Map<string, Conversation>();
-    for (const conversation of list) {
-      const key = conversation.contact_phone;
-      const previous = dedupMap.get(key);
-      if (!previous) {
-        dedupMap.set(key, conversation);
-        continue;
+    setItems((prev) => {
+      const dedupMap = new Map<string, Conversation>();
+      
+      // Include previous items first to ensure we don't lose data
+      for (const c of prev) {
+        dedupMap.set(c.contact_phone, c);
       }
-      const previousAt = +new Date(previous.last_message_at);
-      const currentAt = +new Date(conversation.last_message_at);
-      const previousLen = previous.transcript?.length ?? 0;
-      const currentLen = conversation.transcript?.length ?? 0;
-      if (currentAt > previousAt || (currentAt === previousAt && currentLen > previousLen)) {
-        dedupMap.set(key, conversation);
+      
+      for (const conversation of list) {
+        const key = conversation.contact_phone;
+        const previous = dedupMap.get(key);
+        if (!previous) {
+          dedupMap.set(key, conversation);
+          continue;
+        }
+        const previousAt = +new Date(previous.last_message_at);
+        const currentAt = +new Date(conversation.last_message_at);
+        const previousLen = previous.transcript?.length ?? 0;
+        const currentLen = conversation.transcript?.length ?? 0;
+        
+        // Update if more recent or has more messages
+        if (currentAt > previousAt || (currentAt === previousAt && currentLen >= previousLen)) {
+          dedupMap.set(key, {
+            ...previous,
+            ...conversation,
+            // Preserve transcript if the new one is shorter (unless it's a forced full fetch)
+            transcript: currentLen >= previousLen ? conversation.transcript : previous.transcript
+          });
+        }
       }
-    }
-    const sorted = [...dedupMap.values()].sort(
-      (a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at)
-    );
+      
+      const sorted = [...dedupMap.values()].sort(
+        (a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at)
+      );
 
-    if (notify) {
-      sorted.forEach(maybeNotifyIncoming);
-    } else {
-      sorted.forEach(rememberConversation);
-    }
+      if (notify) {
+        sorted.forEach(maybeNotifyIncoming);
+      } else {
+        sorted.forEach(rememberConversation);
+      }
 
-    setItems(sorted);
-    setSelectedId((current) => {
-      if (current && sorted.some((conversation) => conversation.id === current)) return current;
-      return sorted[0]?.id ?? null;
+      // Update selected ID based on contact_phone to avoid jumping
+      setSelectedId((currentId) => {
+        if (!currentId) return sorted[0]?.id ?? null;
+        
+        // Find current selected item in old items
+        const currentItem = prev.find(i => i.id === currentId);
+        if (!currentItem) {
+          // If not in prev, check if it's already in sorted
+          if (sorted.some(c => c.id === currentId)) return currentId;
+          return sorted[0]?.id ?? null;
+        }
+        
+        // Find matching item by phone in new sorted list
+        const match = sorted.find(c => c.contact_phone === currentItem.contact_phone);
+        return match?.id ?? currentId;
+      });
+
+      return sorted;
     });
   };
 
