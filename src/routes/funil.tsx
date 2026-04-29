@@ -59,6 +59,65 @@ type Deal = {
  
  function FunnelPage() {
     const { user, loading: authLoading } = useAuth();
+    const [syncing, setSyncing] = useState(false);
+
+    const syncFromWhatsApp = async () => {
+      if (!user?.id || syncing) return;
+      setSyncing(true);
+      try {
+        const instances = await evolution.getInstances();
+        const instance = instances.find(i => i.status === 'open' || i.status === 'connected')?.instanceName;
+        
+        if (!instance) {
+          toast.error("Nenhuma instância do WhatsApp conectada");
+          return;
+        }
+
+        const rawChats = await evolution.findChats(instance);
+        const chats = Array.isArray(rawChats) ? rawChats : (rawChats?.records || rawChats?.chats || []);
+        
+        if (!Array.isArray(chats) || chats.length === 0) {
+          toast.info("Nenhuma conversa encontrada na instância");
+          return;
+        }
+
+        toast.info(`Sincronizando ${chats.length} conversas...`);
+
+        for (const chat of chats.slice(0, 50)) {
+          const remoteJid = chat.remoteJid || chat.id || "";
+          if (!remoteJid || remoteJid.endsWith("@g.us")) continue;
+          
+          const phone = remoteJid.split("@")[0].replace(/\D/g, "");
+          const name = chat.name || chat.pushName || chat.verifiedName || null;
+          
+          const lastMsg = chat.lastMessage;
+          const transcript = lastMsg ? [{
+            role: lastMsg.key?.fromMe ? "assistant" : "user",
+            content: lastMsg.message?.conversation || lastMsg.message?.extendedTextMessage?.text || "Nova conversa",
+            at: new Date(lastMsg.messageTimestamp ? lastMsg.messageTimestamp * 1000 : Date.now()).toISOString()
+          }] : [];
+
+          await supabase.from("bot_conversations").upsert({
+            user_id: user.id,
+            contact_phone: phone,
+            contact_name: name,
+            transcript,
+            status: "active",
+            messages_count: transcript.length,
+            last_message_at: transcript[0]?.at || new Date().toISOString()
+          }, { onConflict: "user_id,contact_phone" });
+        }
+
+        toast.success("Sincronização concluída");
+        load();
+      } catch (err: any) {
+        console.error("Erro na sincronização:", err);
+        toast.error("Erro ao sincronizar WhatsApp: " + err.message);
+      } finally {
+        setSyncing(false);
+      }
+    };
+
     const [viewMode, setViewMode] = useState<"kanban" | "chat">("kanban");
    const [stages, setStages] = useState<Stage[]>([]);
    const [deals, setDeals] = useState<Deal[]>([]);
