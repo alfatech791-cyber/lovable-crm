@@ -729,13 +729,12 @@ function ConversasPage() {
        if (payload.kind === "text") {
          endpoint = `/api/evolution/message/sendText/${instance}`;
          body.text = payload.text;
-        } else if (payload.kind === "audio" || payload.kind === "sticker") {
-          // Both audio and sticker use base64 in the 'base64' field for this endpoint
-          endpoint = payload.kind === "audio" 
-            ? `/api/evolution/message/sendWhatsAppAudio/${instance}`
-            : `/api/evolution/message/sendSticker/${instance}`;
-          
-          body[payload.kind === "audio" ? "audio" : "sticker"] = payload.media;
+        } else if (payload.kind === "audio") {
+          endpoint = `/api/evolution/message/sendWhatsAppAudio/${instance}`;
+          body.audio = payload.media;
+        } else if (payload.kind === "sticker") {
+          endpoint = `/api/evolution/message/sendSticker/${instance}`;
+          body.sticker = payload.media;
         } else if (payload.kind === "image") {
          endpoint = `/api/evolution/message/sendSticker/${instance}`;
          body.sticker = payload.media;
