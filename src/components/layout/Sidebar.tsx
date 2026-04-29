@@ -200,35 +200,61 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
         })}
       </nav>
 
-      {/* Info card */}
-      <div className="px-3 pb-3 space-y-3">
-        {!flyout && (
-          <div className="rounded-xl bg-gradient-sidebar-cta p-3.5 text-white shadow-elegant">
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider">
-              <Sparkles className="h-3.5 w-3.5" /> Novo: IA Conecta
+      {/* Info card & User */}
+      <div className="px-3 pb-3 space-y-3 shrink-0">
+        {!isSmall && (
+          <div className="rounded-xl bg-gradient-sidebar-cta p-3.5 text-white shadow-elegant relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform">
+              <Sparkles className="h-12 w-12" />
             </div>
-            <p className="mt-1.5 text-xs text-white/85 leading-snug">
-              Resuma conversas, gere respostas e muito mais.
-            </p>
-            <button className="mt-3 w-full rounded-md bg-white/15 hover:bg-white/25 backdrop-blur-sm py-1.5 text-xs font-medium transition">
-              Experimentar agora
-            </button>
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider">
+                <Sparkles className="h-3.5 w-3.5" /> IA Conecta
+              </div>
+              <p className="mt-1.5 text-xs text-white/85 leading-snug">
+                Otimize seu atendimento com nossa IA.
+              </p>
+              <button className="mt-3 w-full rounded-md bg-white/15 hover:bg-white/25 backdrop-blur-sm py-1.5 text-xs font-medium transition shadow-sm">
+                Ativar agora
+              </button>
+            </div>
           </div>
         )}
 
-        <button
-          onClick={logout}
-          title={flyout ? "Sair" : undefined}
-          className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition group ${flyout ? "justify-center" : ""}`}
-        >
-          <Icons.LogOut className="h-[18px] w-[18px]" />
-          {!flyout && (
-            <div className="leading-tight text-left">
-              <div className="text-[13px] font-medium">Sair da Conta</div>
-              <div className="text-[11px] opacity-60">Encerrar sessão</div>
+        <div className={cn(
+          "pt-2 border-t border-sidebar-border/40 flex flex-col gap-1",
+          isSmall ? "items-center" : ""
+        )}>
+          {isSmall ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={logout}
+                  className="h-10 w-10 flex items-center justify-center rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition"
+                >
+                  <LogOut className="h-5 w-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right">Sair da Conta</TooltipContent>
+            </Tooltip>
+          ) : (
+            <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-sidebar-accent/50 transition-colors group cursor-pointer">
+              <div className="h-9 w-9 rounded-full bg-sidebar-primary/20 border border-sidebar-primary/30 grid place-items-center text-sidebar-primary font-bold text-sm shrink-0">
+                {user?.email?.charAt(0).toUpperCase() || "U"}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-[13px] font-semibold text-white truncate">{user?.email?.split('@')[0] || "Usuário"}</div>
+                <div className="text-[11px] text-sidebar-foreground/50 truncate">Plano Pro</div>
+              </div>
+              <button
+                onClick={logout}
+                className="p-1.5 rounded-lg text-sidebar-foreground/30 hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
             </div>
           )}
-        </button>
+        </div>
       </div>
     </aside>
 
