@@ -211,11 +211,12 @@ type Deal = {
       // Garante estágios padrão
       await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
       
-      const [stRes, dlRes, ldRes, convRes] = await Promise.all([
+      const [stRes, dlRes, ldRes, convRes, allDealsRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
         supabase.from("pipeline_leads").select("*, lead:leads(name, phone, source)").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("leads").select("id, name, phone").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("bot_conversations").select("*").eq("user_id", user.id).order("last_message_at", { ascending: false }),
+        supabase.from("pipeline_leads").select("lead_id")
       ]);
       
       if (stRes.error) toast.error("Erro ao carregar estágios: " + stRes.error.message);
@@ -224,7 +225,10 @@ type Deal = {
       if (convRes.error) toast.error("Erro ao carregar conversas: " + convRes.error.message);
 
       setStages((stRes.data as Stage[]) ?? []);
-      setConversations((convRes.data as any as Conversation[]) ?? []);
+      const convs = (convRes.data as any as Conversation[]) ?? [];
+      setConversations(convs);
+      
+      const existingLeadIds = new Set((allDealsRes.data as any[])?.map(d => d.lead_id) || []);
       
       const leadIds = (dlRes.data as any[])?.map(d => d.lead_id) || [];
       let lastMessagesMap: Record<string, { content: string, created_at: string }> = {};
@@ -248,7 +252,35 @@ type Deal = {
       })) ?? [];
       
       setDeals(dealsWithLastMessage);
-      setLeads((ldRes.data as any) ?? []);
+      const loadedLeads = (ldRes.data as any) ?? [];
+      setLeads(loadedLeads);
+
+      // Auto-create deals for conversations that don't have one yet
+      if (stRes.data && stRes.data.length > 0) {
+        const firstStageId = stRes.data[0].id;
+        for (const conv of convs) {
+          // Find lead for this conversation
+          const lead = loadedLeads.find((l: any) => l.phone === conv.contact_phone);
+          if (lead && !existingLeadIds.has(lead.id)) {
+            try {
+              await supabase.from("pipeline_leads").insert({
+                user_id: user.id,
+                lead_id: lead.id,
+                stage_id: firstStageId,
+                deal_value: 0
+              });
+              // Add to local state to avoid re-running or waiting for reload
+              existingLeadIds.add(lead.id);
+            } catch (e) {
+              console.error("Error auto-creating deal for lead:", lead.id, e);
+            }
+          }
+        }
+        // If we added new deals, reload once to get the full objects with lead data
+        if (convs.some(c => loadedLeads.find((l:any) => l.phone === c.contact_phone && !existingLeadIds.has(l.id)))) {
+          load(); 
+        }
+      }
     } catch (err) {
       console.error("Erro no load:", err);
       toast.error("Erro ao carregar dados do funil");
@@ -295,34 +327,6 @@ type Deal = {
            {/* Toolbar Superior */}
            <div className="px-6 py-4 border-b border-border/50 bg-background/50 flex flex-wrap items-center justify-between gap-4">
              <div className="flex items-center gap-4">
-               <div className="flex bg-muted p-1 rounded-lg border border-border/50 mr-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn(
-                      "h-8 gap-2 text-xs font-bold px-3 transition-all",
-                      viewMode === "kanban" 
-                        ? "bg-background shadow-sm text-primary" 
-                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                    )}
-                    onClick={() => setViewMode("kanban")}
-                  >
-                    <LayoutGrid className="h-3.5 w-3.5" /> MODO FUNIL
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn(
-                      "h-8 gap-2 text-xs font-bold px-3 transition-all",
-                      viewMode === "chat" 
-                        ? "bg-background shadow-sm text-primary" 
-                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                    )}
-                    onClick={() => setViewMode("chat")}
-                  >
-                    <MessageSquare className="h-3.5 w-3.5" /> MODO CONVERSAS
-                  </Button>
-               </div>
                <div className="relative w-64">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                  <Input 
@@ -376,178 +380,42 @@ type Deal = {
                  </p>
                </div>
              </div>
-            ) : viewMode === "kanban" ? (
-             <div className="flex-1 overflow-x-auto p-6 scrollbar-thin">
-               <div className="flex gap-6 h-full min-w-max">
-                 {stages.map((stage) => (
-                   <StageColumn
-                     key={stage.id}
-                     stage={stage}
-                     deals={filteredDeals.filter((d) => d.stage_id === stage.id)}
-                     onAddDeal={(stageId) => setAdding({ stage_id: stageId, lead_id: "", deal_value: "" })}
-                     onRemoveDeal={removeDeal}
-                     onMoveDeal={moveDeal}
-                     dragId={dragId}
-                     setDragId={setDragId}
-                     onSelectDeal={(deal) => {
-                       if (deal.lead?.phone) {
-                         setSelectedDealId(deal.id);
-                         loadConversation(deal.lead.phone);
-                         setChatOpen(true);
-                       } else {
-                         toast.error("Lead sem telefone para conversa");
-                       }
-                     }}
-                   />
-                 ))}
-                 
-                 {/* Coluna de "Adicionar Etapa" (Placeholder visual por enquanto) */}
-                 <div className="w-[300px] shrink-0 h-full rounded-2xl border-2 border-dashed border-border/40 flex flex-col items-center justify-center gap-4 opacity-40 hover:opacity-100 transition-all group cursor-pointer bg-muted/5">
-                   <div className="h-12 w-12 rounded-full bg-muted grid place-items-center group-hover:bg-primary/10 group-hover:scale-110 transition-all">
-                     <Plus className="h-6 w-6 text-muted-foreground group-hover:text-primary" />
-                   </div>
-                   <span className="text-xs font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Nova Etapa</span>
-                 </div>
-               </div>
-             </div>
             ) : (
-              <div className="flex-1 flex flex-col md:flex-row overflow-hidden bg-background">
-                {/* Lista de Conversas Lateral */}
-                <div className="w-full md:w-80 border-r border-border flex flex-col bg-muted/5">
-                  <div className="p-4 border-b border-border bg-background/50">
-                    <h3 className="text-sm font-black uppercase tracking-widest text-primary mb-1">Conversas Ativas</h3>
-                    <p className="text-[10px] text-muted-foreground">Clique para abrir o atendimento</p>
-                  </div>
-                  <div className="flex-1 overflow-y-auto">
-                    {conversations.length === 0 ? (
-                      <div className="p-8 text-center">
-                        <MessageSquare className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
-                        <p className="text-xs text-muted-foreground">Nenhuma conversa recente</p>
-                      </div>
-                    ) : (
-                      conversations.map((conv) => (
-                        <button
-                          key={conv.id}
-                          onClick={() => {
-                            setCurrentConversation(conv);
-                            setChatOpen(true);
-                          }}
-                          className={cn(
-                            "w-full p-3 flex items-center gap-3 border-b border-border/50 hover:bg-primary/5 transition-all text-left relative overflow-hidden group",
-                            currentConversation?.id === conv.id ? "bg-primary/5" : ""
-                          )}
-                        >
-                          {currentConversation?.id === conv.id && (
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
-                          )}
-                          <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center shrink-0 group-hover:scale-105 transition-transform">
-                            <User className="h-5 w-5 text-primary" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex justify-between items-start gap-2">
-                              <p className="text-sm font-bold truncate text-foreground/90">{conv.contact_name || conv.contact_phone}</p>
-                              {conv.last_message_at && (
-                                <span className="text-[9px] text-muted-foreground shrink-0 font-medium">
-                                  {formatDistanceToNow(new Date(conv.last_message_at), { locale: ptBR })}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-[11px] text-muted-foreground truncate italic mt-0.5">
-                              {conv.transcript?.[conv.transcript.length - 1]?.content || "Inicie uma conversa..."}
-                            </p>
-                          </div>
-                        </button>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                {/* Espaço Central / Chat quando aberto */}
-                <div className="flex-1 flex flex-col bg-muted/5 overflow-hidden">
-                  {chatOpen && currentConversation ? (
-                    <div className="flex-1 flex flex-col bg-background">
-                      {/* Header do Chat Interno */}
-                      <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/30">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center">
-                            <User className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold">{currentConversation.contact_name || currentConversation.contact_phone}</p>
-                            <p className="text-[10px] text-muted-foreground">{currentConversation.contact_phone}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            className="h-9 w-9 text-muted-foreground hover:text-primary transition-colors"
-                            onClick={toggleHandoff}
-                            title={currentConversation.status === "handed_off" ? "Reativar bot" : "Pausar bot"}
-                          >
-                            {currentConversation.status === "handed_off" ? <PlayCircle className="h-5 w-5" /> : <PauseCircle className="h-5 w-5" />}
-                          </Button>
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            className="h-9 w-9 text-muted-foreground hover:text-destructive transition-colors"
-                            onClick={() => setChatOpen(false)}
-                          >
-                            <X className="h-5 w-5" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Mensagens do Chat Interno */}
-                      <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
-                        {chatLoading ? (
-                          <div className="grid place-items-center h-full"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
-                        ) : currentConversation.transcript?.length === 0 ? (
-                          <div className="grid place-items-center h-full text-xs text-muted-foreground">Nenhuma mensagem nesta conversa.</div>
-                        ) : (
-                          currentConversation.transcript?.map((m, i) => {
-                            const mine = m.role === "agent" || m.sent;
-                            return (
-                              <div key={i} className={cn("flex", mine ? "justify-end" : "justify-start")}>
-                                <div className={cn("max-w-[75%] rounded-2xl px-4 py-2 text-sm shadow-sm", mine ? "bg-primary text-primary-foreground" : "bg-card border border-border")}>
-                                  <p className="whitespace-pre-wrap">{m.content}</p>
-                                  {m.at && <p className="text-[10px] opacity-60 mt-1">{formatDistanceToNow(new Date(m.at), { addSuffix: true, locale: ptBR })}</p>}
-                                </div>
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-
-                      {/* Input do Chat Interno */}
-                      <div className="p-4 border-t border-border bg-background flex items-center gap-2">
-                        <Input
-                          placeholder="Escreva sua mensagem..."
-                          value={messageText}
-                          onChange={(e) => setMessageText(e.target.value)}
-                          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                          className="flex-1"
-                        />
-                        <Button size="icon" onClick={sendMessage} disabled={sending || !messageText.trim()}>
-                          {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                        </Button>
-                      </div>
+              <div className="flex-1 overflow-x-auto p-6 scrollbar-thin">
+                <div className="flex gap-6 h-full min-w-max">
+                  {stages.map((stage) => (
+                    <StageColumn
+                      key={stage.id}
+                      stage={stage}
+                      deals={filteredDeals.filter((d) => d.stage_id === stage.id)}
+                      onAddDeal={(stageId) => setAdding({ stage_id: stageId, lead_id: "", deal_value: "" })}
+                      onRemoveDeal={removeDeal}
+                      onMoveDeal={moveDeal}
+                      dragId={dragId}
+                      setDragId={setDragId}
+                      onSelectDeal={(deal) => {
+                        if (deal.lead?.phone) {
+                          setSelectedDealId(deal.id);
+                          loadConversation(deal.lead.phone);
+                          setChatOpen(true);
+                        } else {
+                          toast.error("Lead sem telefone para conversa");
+                        }
+                      }}
+                    />
+                  ))}
+                  
+                  {/* Coluna de "Adicionar Etapa" (Placeholder visual por enquanto) */}
+                  <div className="w-[300px] shrink-0 h-full rounded-2xl border-2 border-dashed border-border/40 flex flex-col items-center justify-center gap-4 opacity-40 hover:opacity-100 transition-all group cursor-pointer bg-muted/5">
+                    <div className="h-12 w-12 rounded-full bg-muted grid place-items-center group-hover:bg-primary/10 group-hover:scale-110 transition-all">
+                      <Plus className="h-6 w-6 text-muted-foreground group-hover:text-primary" />
                     </div>
-                  ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
-                      <div className="h-20 w-20 rounded-full bg-primary/5 grid place-items-center mb-6">
-                        <Bot className="h-10 w-10 text-primary/40" />
-                      </div>
-                      <h2 className="text-xl font-black text-foreground mb-2">Central de Atendimento</h2>
-                      <p className="text-sm text-muted-foreground max-w-md">
-                        Selecione uma conversa na lista ao lado ou clique em um card no Funil para iniciar o atendimento comercial em tempo real.
-                      </p>
-                    </div>
-                  )}
+                    <span className="text-xs font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Nova Etapa</span>
+                  </div>
                 </div>
               </div>
-           )}
-         </main>
+            )}
+          </main>
       </div>
 
       {/* Painel Lateral de Chat (Apenas no modo Kanban) */}
