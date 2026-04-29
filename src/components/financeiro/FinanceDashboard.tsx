@@ -1,4 +1,4 @@
- import { DollarSign, ArrowUpRight, ArrowDownRight, Wallet, Building2, Receipt, ArrowRight, TrendingUp, TrendingDown, PieChart, Plus, Calendar, Loader2 } from "lucide-react";
+  import { DollarSign, ArrowUpRight, ArrowDownRight, Wallet, Building2, Receipt, ArrowRight, TrendingUp, TrendingDown, PieChart, Plus, Calendar, Loader2, Edit, Trash2 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { 
   AreaChart, 
