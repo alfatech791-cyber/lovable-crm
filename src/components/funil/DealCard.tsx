@@ -121,9 +121,16 @@ import { ptBR } from "date-fns/locale";
              </div>
            ) : (
              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/5 text-primary/60 text-[9px] font-black uppercase tracking-wider">
-               {deal.lead?.source || 'Geral'}
-             </div>
-           )}
+                {deal.lead?.source || 'Geral'}
+              </div>
+            )}
+            
+            {isNewFromUser && (
+              <div className="flex items-center gap-1 px-2 py-0.5 mt-1 rounded-full bg-primary text-primary-foreground text-[8px] font-black uppercase tracking-wider animate-pulse">
+                RESPONDER
+              </div>
+            )}
+            
            <div className="text-[9px] text-muted-foreground/60 mt-1 font-bold">
              {deal.created_at ? new Date(deal.created_at).toLocaleDateString('pt-BR') : ""}
            </div>
