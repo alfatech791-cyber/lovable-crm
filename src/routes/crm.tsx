@@ -98,7 +98,14 @@ function CrmHub() {
     })();
   }, [user?.id]);
 
-  const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+   const getTimeGreeting = () => {
+     const hour = new Date().getHours();
+     if (hour < 12) return "Bom dia";
+     if (hour < 18) return "Boa tarde";
+     return "Boa noite";
+   };
+
+   const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   return (
     <div className="min-h-screen flex w-full bg-background">
