@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      automation_runs: {
+        Row: {
+          action_type: string | null
+          automation_id: string | null
+          created_at: string
+          error: string | null
+          id: string
+          payload: Json
+          status: string
+          trigger_type: string
+          user_id: string
+        }
+        Insert: {
+          action_type?: string | null
+          automation_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json
+          status?: string
+          trigger_type: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string | null
+          automation_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json
+          status?: string
+          trigger_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       automations: {
         Row: {
           action_type: string
@@ -887,6 +941,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      dispatch_automation: {
+        Args: { _payload: Json; _trigger_type: string; _user_id: string }
+        Returns: undefined
+      }
       ensure_default_funnel_stages: {
         Args: { _user_id: string }
         Returns: undefined
@@ -904,6 +962,7 @@ export type Database = {
         Returns: undefined
       }
       normalize_phone: { Args: { p_phone: string }; Returns: string }
+      scan_no_reply_24h: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
