@@ -36,8 +36,8 @@ export function GoalProgress({ current, goal = 50000 }: GoalProgressProps) {
         </span>
       </div>
 
-      <div className="flex items-center gap-5 relative">
-        <div className="relative h-[140px] w-[140px] shrink-0">
+      <div className="flex items-center gap-4 relative min-w-0">
+        <div className="relative h-[120px] w-[120px] sm:h-[130px] sm:w-[130px] shrink-0">
           <svg className="w-full h-full -rotate-90" viewBox="0 0 140 140">
             <defs>
               <linearGradient id="goalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -69,24 +69,24 @@ export function GoalProgress({ current, goal = 50000 }: GoalProgressProps) {
           </div>
         </div>
 
-        <div className="flex-1 space-y-3">
-          <div>
+        <div className="flex-1 min-w-0 space-y-3">
+          <div className="min-w-0">
             <div className="text-[11px] text-muted-foreground">Realizado</div>
-            <div className="text-lg font-bold font-display">
+            <div className="text-base sm:text-lg font-bold font-display truncate">
               {current.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </div>
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="text-[11px] text-muted-foreground">Meta</div>
-            <div className="text-sm font-semibold text-foreground/70">
+            <div className="text-xs sm:text-sm font-semibold text-foreground/70 truncate">
               {goal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </div>
           </div>
-          <div className="pt-2 border-t border-border">
+          <div className="pt-2 border-t border-border min-w-0">
             <div className="text-[11px] text-muted-foreground flex items-center gap-1">
               <TrendingUp className="h-3 w-3" /> Faltam
             </div>
-            <div className="text-[13px] font-semibold text-primary">
+            <div className="text-[13px] font-semibold text-primary truncate">
               {remaining.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </div>
           </div>
