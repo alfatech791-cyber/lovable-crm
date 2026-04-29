@@ -1312,7 +1312,7 @@ function ConversasPage() {
                          else if (!val.includes("/")) setQuickRepliesOpen(false);
                        }}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
+                        if (e.key === "Enter" && !e.shiftKey && !sending) {
                           e.preventDefault();
                           sendText();
                         }
