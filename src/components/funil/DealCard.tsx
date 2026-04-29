@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
- import { Trash2, Phone, Calendar, DollarSign, GripVertical, Instagram, MessageCircle, MessageSquare, Clock, AlertCircle } from "lucide-react";
+ import { Trash2, Phone, Calendar, DollarSign, GripVertical, Instagram, MessageCircle, MessageSquare, Clock, AlertCircle, ExternalLink } from "lucide-react";
  import { cn } from "@/lib/utils";
  
  interface DealCardProps {
@@ -27,7 +27,7 @@ import { ptBR } from "date-fns/locale";
         className={cn(
           "bg-card border border-border rounded-xl p-3 shadow-sm hover:shadow-lg hover:border-primary/40 transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden active:scale-[0.98]",
           isStale && "border-l-4 border-l-amber-400",
-          isNewFromUser && "ring-2 ring-primary/20 bg-primary/5"
+          isNewFromUser && "ring-2 ring-green-500/20 bg-green-500/[0.02]"
         )}
      >
        {/* Indicador de prioridade opcional */}
@@ -67,15 +67,23 @@ import { ptBR } from "date-fns/locale";
        </div>
  
         {/* Preview da última mensagem - agora mais proeminente */}
-        <div className={cn(
-          "mb-3 px-3 py-2 rounded-xl border transition-all cursor-pointer group/msg relative",
-          isNewFromUser ? "bg-primary/10 border-primary/30" : "bg-muted/20 border-border/30 hover:bg-muted/40"
-        )}>
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <MessageSquare className={cn("h-3 w-3", isNewFromUser ? "text-primary" : "text-primary/60")} />
-            <span className={cn("text-[9px] font-black uppercase tracking-wider", isNewFromUser ? "text-primary" : "text-muted-foreground/70")}>
-              {isNewFromUser ? "Nova Mensagem" : "Interação"}
-            </span>
+         <div 
+           className={cn(
+             "mb-3 px-3 py-2.5 rounded-xl border transition-all cursor-pointer group/msg relative",
+             isNewFromUser ? "bg-green-500/10 border-green-500/30 ring-1 ring-green-500/20" : "bg-muted/20 border-border/30 hover:bg-muted/40"
+           )}
+           title="Clique para abrir a conversa"
+         >
+           <div className="flex items-center gap-1.5 mb-2">
+             <div className={cn(
+               "h-5 w-5 rounded-full flex items-center justify-center",
+               isNewFromUser ? "bg-green-500 text-white" : "bg-primary/10 text-primary"
+             )}>
+               <MessageSquare className="h-2.5 w-2.5" />
+             </div>
+             <span className={cn("text-[9px] font-black uppercase tracking-widest", isNewFromUser ? "text-green-600" : "text-muted-foreground/70")}>
+               {isNewFromUser ? "WhatsApp: Nova Mensagem" : "Última Mensagem"}
+             </span>
            {deal.last_message_at && (
              <span className="text-[9px] text-muted-foreground/60 ml-auto flex items-center gap-1">
                <Clock className="h-2.5 w-2.5" />
@@ -83,19 +91,26 @@ import { ptBR } from "date-fns/locale";
              </span>
            )}
          </div>
-          <p className={cn(
-            "text-[11px] leading-snug font-medium",
-            isNewFromUser ? "text-foreground font-bold line-clamp-4" : "text-foreground/70 italic line-clamp-2"
-          )}>
-            {deal.last_message ? `"${deal.last_message}"` : "Aguardando primeira mensagem..."}
-          </p>
-          
-          {isNewFromUser && (
-            <div className="absolute -top-1 -right-1">
-              <div className="h-2.5 w-2.5 rounded-full bg-primary animate-ping opacity-75" />
-              <div className="absolute inset-0 h-2.5 w-2.5 rounded-full bg-primary" />
-            </div>
-          )}
+           <div className="flex flex-col gap-1">
+             <p className={cn(
+               "text-[11px] leading-relaxed font-medium",
+               isNewFromUser ? "text-foreground font-bold line-clamp-3" : "text-foreground/70 italic line-clamp-2"
+             )}>
+               {deal.last_message ? deal.last_message : "Inicie uma conversa no WhatsApp..."}
+             </p>
+             
+             <div className="flex items-center gap-1 mt-1 opacity-0 group-hover/msg:opacity-100 transition-opacity">
+                <span className="text-[8px] font-black text-primary uppercase tracking-tighter">Abrir Chat Completo</span>
+                <ExternalLink className="h-2 w-2 text-primary" />
+             </div>
+           </div>
+           
+           {isNewFromUser && (
+             <div className="absolute -top-1 -right-1">
+               <div className="h-3 w-3 rounded-full bg-green-500 animate-ping opacity-75" />
+               <div className="absolute inset-0 h-3 w-3 rounded-full bg-green-500 border-2 border-background" />
+             </div>
+           )}
 
           {isStale && !isNewFromUser && (
             <div className="absolute -top-1 -right-1">
