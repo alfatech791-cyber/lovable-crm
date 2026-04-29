@@ -12,6 +12,12 @@ import {
    RefreshCw,
    Image as ImageIcon,
    X,
+   Crop,
+   Smile,
+   Type,
+   Pencil,
+   Download,
+   Plus,
 } from "lucide-react";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
