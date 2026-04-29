@@ -615,10 +615,11 @@ export function UnifiedChat() {
                      ) : (
                        <Send className="h-5 w-5" />
                      )}
-                   </button>
-                </div>
-              </div>
-            </div>
+                     </button>
+                   </div>
+                 </div>
+               </div>
+             </div>
           ) : (
             <div className="flex-1 grid place-items-center bg-muted/10">
               <div className="text-center space-y-3 max-w-sm px-6">
