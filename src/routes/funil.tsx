@@ -4,7 +4,9 @@ import { Topbar } from "@/components/layout/Topbar";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+  import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp } from "lucide-react";
+ import { StageColumn } from "@/components/funil/StageColumn";
+ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,14 +27,22 @@ export const Route = createFileRoute("/funil")({
 type Stage = { id: string; name: string; color: string | null; order_index: number };
 type Deal = { id: string; lead_id: string; stage_id: string; deal_value: number; priority: string | null; lead?: { name: string; phone: string | null } };
 
-function FunnelPage() {
-  const { user } = useAuth();
-  const [stages, setStages] = useState<Stage[]>([]);
-  const [deals, setDeals] = useState<Deal[]>([]);
-  const [leads, setLeads] = useState<{ id: string; name: string }[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [dragId, setDragId] = useState<string | null>(null);
-  const [adding, setAdding] = useState<{ stage_id: string; lead_id: string; deal_value: string } | null>(null);
+ function FunnelPage() {
+   const { user } = useAuth();
+   const [stages, setStages] = useState<Stage[]>([]);
+   const [deals, setDeals] = useState<Deal[]>([]);
+   const [leads, setLeads] = useState<{ id: string; name: string }[]>([]);
+   const [loading, setLoading] = useState(true);
+   const [dragId, setDragId] = useState<string | null>(null);
+   const [adding, setAdding] = useState<{ stage_id: string; lead_id: string; deal_value: string } | null>(null);
+   const [searchTerm, setSearchTerm] = useState("");
+ 
+   const filteredDeals = deals.filter(d => 
+     d.lead?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     d.lead?.phone?.includes(searchTerm)
+   );
+ 
+   const totalPipeline = deals.reduce((sum, d) => sum + Number(d.deal_value ?? 0), 0);
 
   const load = async () => {
     if (!user?.id) return;
@@ -83,61 +93,86 @@ function FunnelPage() {
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar title="Funil de Vendas" subtitle="Arraste cards entre estágios para atualizar" />
-        <main className="flex-1 overflow-hidden flex flex-col bg-muted/20">
-          {loading ? (
-            <div className="flex-1 grid place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-          ) : (
-            <div className="flex-1 overflow-x-auto p-6 flex gap-4">
-              {stages.map((stage) => {
-                const stageDeals = deals.filter((d) => d.stage_id === stage.id);
-                const total = stageDeals.reduce((s, d) => s + Number(d.deal_value ?? 0), 0);
-                return (
-                  <div
-                    key={stage.id}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={() => { if (dragId) moveDeal(dragId, stage.id); setDragId(null); }}
-                    className="w-[280px] shrink-0 flex flex-col"
-                  >
-                    <div className="mb-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="h-2 w-2 rounded-full" style={{ backgroundColor: stage.color ?? "#888" }} />
-                        <h3 className="text-[12px] font-bold uppercase tracking-wider flex-1 truncate">{stage.name}</h3>
-                        <span className="text-[10px] font-bold text-muted-foreground">{stageDeals.length}</span>
-                      </div>
-                      <div className="text-[11px] text-muted-foreground">{fmt(total)}</div>
-                    </div>
-                    <div className="flex-1 space-y-2 min-h-[200px]">
-                      <button
-                        onClick={() => setAdding({ stage_id: stage.id, lead_id: "", deal_value: "" })}
-                        className="w-full py-2 rounded-xl border border-dashed border-border text-[11px] text-muted-foreground hover:bg-muted/50 hover:text-primary transition flex items-center justify-center gap-1.5"
-                      >
-                        <Plus className="h-3.5 w-3.5" /> Adicionar
-                      </button>
-                      {stageDeals.map((d) => (
-                        <div
-                          key={d.id}
-                          draggable
-                          onDragStart={() => setDragId(d.id)}
-                          onDragEnd={() => setDragId(null)}
-                          className="bg-card border border-border rounded-xl p-3 shadow-card hover:shadow-elegant hover:border-primary/30 transition cursor-grab active:cursor-grabbing group"
-                        >
-                          <div className="flex items-start justify-between mb-1">
-                            <div className="text-[13px] font-bold truncate flex-1">{d.lead?.name ?? "Lead"}</div>
-                            <button onClick={() => removeDeal(d.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition">
-                              <Trash2 className="h-3 w-3" />
-                            </button>
-                          </div>
-                          <div className="text-[11px] text-muted-foreground">{d.lead?.phone ?? "—"}</div>
-                          <div className="mt-2 text-[11px] font-bold text-primary">{fmt(Number(d.deal_value ?? 0))}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </main>
+         <main className="flex-1 overflow-hidden flex flex-col bg-muted/10">
+           {/* Toolbar Superior */}
+           <div className="px-6 py-4 border-b border-border/50 bg-background/50 flex flex-wrap items-center justify-between gap-4">
+             <div className="flex items-center gap-4">
+               <div className="relative w-64">
+                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                 <Input 
+                   placeholder="Buscar lead ou telefone..." 
+                   className="pl-9 bg-background border-border/50 focus:border-primary/50 transition-all text-sm h-9"
+                   value={searchTerm}
+                   onChange={(e) => setSearchTerm(e.target.value)}
+                 />
+               </div>
+               <Button variant="outline" size="sm" className="h-9 gap-2 text-xs font-bold border-border/50">
+                 <Filter className="h-3.5 w-3.5" /> FILTROS
+               </Button>
+               <Button variant="outline" size="sm" className="h-9 gap-2 text-xs font-bold border-border/50">
+                 <ArrowUpDown className="h-3.5 w-3.5" /> ORDENAR
+               </Button>
+             </div>
+ 
+             <div className="flex items-center gap-6">
+               <div className="hidden md:flex flex-col items-end">
+                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Valor Total do Funil</span>
+                 <span className="text-sm font-black text-primary">{fmt(totalPipeline)}</span>
+               </div>
+               <div className="h-8 w-[1px] bg-border/50 hidden md:block" />
+               <div className="flex bg-muted p-1 rounded-lg border border-border/50">
+                 <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md bg-background shadow-sm text-primary">
+                   <LayoutGrid className="h-4 w-4" />
+                 </Button>
+                 <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground">
+                   <List className="h-4 w-4" />
+                 </Button>
+               </div>
+               <Button className="h-9 gap-2 text-xs font-black shadow-lg shadow-primary/20" onClick={() => setAdding({ stage_id: stages[0]?.id || "", lead_id: "", deal_value: "" })}>
+                 <Plus className="h-4 w-4" /> NOVO NEGÓCIO
+               </Button>
+             </div>
+           </div>
+ 
+           {loading ? (
+             <div className="flex-1 grid place-items-center">
+               <div className="flex flex-col items-center gap-4">
+                 <div className="relative">
+                   <div className="h-12 w-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+                   <div className="absolute inset-0 grid place-items-center">
+                     <TrendingUp className="h-5 w-5 text-primary/50" />
+                   </div>
+                 </div>
+                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground animate-pulse">Carregando Funil...</p>
+               </div>
+             </div>
+           ) : (
+             <div className="flex-1 overflow-x-auto p-6 scrollbar-thin">
+               <div className="flex gap-6 h-full min-w-max">
+                 {stages.map((stage) => (
+                   <StageColumn
+                     key={stage.id}
+                     stage={stage}
+                     deals={filteredDeals.filter((d) => d.stage_id === stage.id)}
+                     onAddDeal={(stageId) => setAdding({ stage_id: stageId, lead_id: "", deal_value: "" })}
+                     onRemoveDeal={removeDeal}
+                     onMoveDeal={moveDeal}
+                     dragId={dragId}
+                     setDragId={setDragId}
+                   />
+                 ))}
+                 
+                 {/* Coluna de "Adicionar Etapa" (Placeholder visual por enquanto) */}
+                 <div className="w-[300px] shrink-0 h-full rounded-2xl border-2 border-dashed border-border/40 flex flex-col items-center justify-center gap-4 opacity-40 hover:opacity-100 transition-all group cursor-pointer bg-muted/5">
+                   <div className="h-12 w-12 rounded-full bg-muted grid place-items-center group-hover:bg-primary/10 group-hover:scale-110 transition-all">
+                     <Plus className="h-6 w-6 text-muted-foreground group-hover:text-primary" />
+                   </div>
+                   <span className="text-xs font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Nova Etapa</span>
+                 </div>
+               </div>
+             </div>
+           )}
+         </main>
       </div>
 
       <Dialog open={!!adding} onOpenChange={(o) => !o && setAdding(null)}>
