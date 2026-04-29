@@ -846,7 +846,7 @@ type Deal = {
        {viewMode === "kanban" && chatOpen && (
          <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[450px] bg-background border-l border-border shadow-[0_0_50px_rgba(0,0,0,0.15)] flex flex-col z-[100] animate-in slide-in-from-right duration-300">
            {/* Header do Chat */}
-           <div className="px-6 py-4 border-b border-border flex flex-col gap-4 bg-card/50 backdrop-blur-md sticky top-0 z-10">
+           <div className="px-6 py-4 border-b border-border flex flex-col gap-3 bg-card/50 backdrop-blur-md sticky top-0 z-10">
              <div className="flex items-center justify-between">
              <div className="flex items-center gap-4 min-w-0">
                <div className="relative">
