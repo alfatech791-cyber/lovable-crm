@@ -1,3 +1,5 @@
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
  import { Trash2, Phone, Calendar, DollarSign, GripVertical, Instagram, MessageCircle } from "lucide-react";
  import { cn } from "@/lib/utils";
  
@@ -42,6 +44,9 @@
         <div className="mb-3 px-2 py-1.5 bg-muted/30 rounded-lg border border-border/40 hover:bg-muted/50 transition-colors cursor-pointer">
           <div className="flex items-center gap-1 mb-1">
             <span className="text-[9px] font-bold uppercase text-muted-foreground/70">Última interação:</span>
+            {deal.last_message_at && (
+              <span className="text-[9px] text-muted-foreground ml-auto">{formatDistanceToNow(new Date(deal.last_message_at), { addSuffix: true, locale: ptBR })}</span>
+            )}
           </div>
           <p className="text-[10px] text-foreground/80 line-clamp-2 leading-relaxed">
             {deal.last_message || "Aguardando primeira mensagem..."}
