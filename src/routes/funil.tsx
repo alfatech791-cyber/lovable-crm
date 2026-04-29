@@ -4,7 +4,7 @@ import { Topbar } from "@/components/layout/Topbar";
  import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
- import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp, MessageSquare, X, Send, Bot, User, UserCog, PauseCircle, PlayCircle, RefreshCw, ChevronRight, Sparkles, CreditCard, Users, Clock } from "lucide-react";
+  import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp, MessageSquare, X, Send, Bot, User, UserCog, PauseCircle, PlayCircle, RefreshCw, ChevronRight, Sparkles, CreditCard, Users, Clock, Wifi } from "lucide-react";
  import { formatDistanceToNow } from "date-fns";
  import { ptBR } from "date-fns/locale";
  import { evolution } from "@/lib/evolution";
@@ -55,8 +55,69 @@ type Deal = {
   }
 };
 
+ const normalizePhone = (p: string | null) => p ? p.replace(/\D/g, "") : "";
+ 
  function FunnelPage() {
     const { user, loading: authLoading } = useAuth();
+    const [syncing, setSyncing] = useState(false);
+
+    const syncFromWhatsApp = async () => {
+      if (!user?.id || syncing) return;
+      setSyncing(true);
+      try {
+        const instances = await evolution.getInstances();
+        const instance = instances.find(i => i.status === 'open' || (i as any).status === 'connected')?.instanceName;
+        
+        if (!instance) {
+          toast.error("Nenhuma instância do WhatsApp conectada");
+          return;
+        }
+
+        const rawChats = await evolution.findChats(instance);
+        const chats = Array.isArray(rawChats) ? rawChats : (rawChats?.records || rawChats?.chats || []);
+        
+        if (!Array.isArray(chats) || chats.length === 0) {
+          toast.info("Nenhuma conversa encontrada na instância");
+          return;
+        }
+
+        toast.info(`Sincronizando ${chats.length} conversas...`);
+
+        for (const chat of chats.slice(0, 50)) {
+          const remoteJid = chat.remoteJid || chat.id || "";
+          if (!remoteJid || remoteJid.endsWith("@g.us")) continue;
+          
+          const phone = remoteJid.split("@")[0].replace(/\D/g, "");
+          const name = chat.name || chat.pushName || chat.verifiedName || null;
+          
+          const lastMsg = chat.lastMessage;
+          const transcript = lastMsg ? [{
+            role: lastMsg.key?.fromMe ? "assistant" : "user",
+            content: lastMsg.message?.conversation || lastMsg.message?.extendedTextMessage?.text || "Nova conversa",
+            at: new Date(lastMsg.messageTimestamp ? lastMsg.messageTimestamp * 1000 : Date.now()).toISOString()
+          }] : [];
+
+          await supabase.from("bot_conversations").upsert({
+            user_id: user.id,
+            contact_phone: phone,
+            contact_name: name,
+            transcript,
+            status: "active",
+            messages_count: transcript.length,
+            last_message_at: transcript[0]?.at || new Date().toISOString()
+          }, { onConflict: "user_id,contact_phone" });
+        }
+
+        toast.success("Sincronização concluída");
+        load();
+      } catch (err: any) {
+        console.error("Erro na sincronização:", err);
+        toast.error("Erro ao sincronizar WhatsApp: " + err.message);
+      } finally {
+        setSyncing(false);
+      }
+    };
+
     const [viewMode, setViewMode] = useState<"kanban" | "chat">("kanban");
    const [stages, setStages] = useState<Stage[]>([]);
    const [deals, setDeals] = useState<Deal[]>([]);
@@ -308,8 +369,9 @@ type Deal = {
         }
       }
       
-       const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => {
-         const conv = convs.find(c => c.contact_phone === deal.lead?.phone);
+        const dealsWithLastMessage = (dlRes.data as any[])?.map((deal: any) => {
+          const dealPhone = normalizePhone(deal.lead?.phone);
+          const conv = convs.find(c => normalizePhone(c.contact_phone) === dealPhone);
           let lastMessage = deal.lead_id ? lastMessagesMap[deal.lead_id]?.content : undefined;
           let lastMessageAt = deal.lead_id ? lastMessagesMap[deal.lead_id]?.created_at : undefined;
           let lastMessageRole = deal.lead_id ? lastMessagesMap[deal.lead_id]?.role : undefined;
@@ -437,7 +499,18 @@ type Deal = {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <div className="flex bg-muted/30 p-1 rounded-xl border border-border/20">
+                <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-xl border border-border/20">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      disabled={syncing}
+                      className={cn("h-8 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all", syncing ? "bg-primary/20 text-primary animate-pulse" : "hover:bg-primary/10 hover:text-primary")}
+                      onClick={syncFromWhatsApp}
+                    >
+                      {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wifi className="h-3 w-3" />}
+                      {syncing ? "Sincronizando..." : "Sincronizar WhatsApp"}
+                    </Button>
+                    <div className="w-[1px] h-4 bg-border/40 mx-1" />
                    <Button 
                     variant={sortBy === "recent" ? "secondary" : "ghost"} 
                     size="sm" 
