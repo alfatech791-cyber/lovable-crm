@@ -111,12 +111,12 @@ function Dashboard() {
   }, [fetchStats]);
 
    const kpis = [
-     { label: "Vendas do Dia", value: stats.todaySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "Vendas", sub: "Resumo diário", icon: "ShoppingBag", tone: "success" },
-     { label: "OS Abertas", value: String(stats.activeOS), trend: stats.activeOS > 5 ? "Alto" : "Normal", sub: "Serviços ativos", icon: "Wrench", tone: "warning" },
-     { label: "Estoque Baixo", value: String(stats.lowStock), trend: stats.lowStock > 0 ? "Crítico" : "Ok", sub: "Reposição necessária", icon: "Box", tone: "destructive" },
-     { label: "Faturamento Mês", value: stats.monthRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "Meta", sub: "Meta: R$ 50k", icon: "DollarSign", tone: "primary" },
-     { label: "Novos Leads", value: String(stats.newLeads), trend: "+5", sub: "Hoje", icon: "Users", tone: "info" },
-     { label: "Ticket Médio", value: stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "Estável", sub: "Média 30 dias", icon: "TrendingUp", tone: "success" },
+     { label: "Vendas de hoje", value: stats.todaySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "", sub: "Total faturado no dia", icon: "ShoppingBag", tone: "success" },
+     { label: "Ordens de serviço em aberto", value: String(stats.activeOS), trend: "", sub: stats.activeOS > 5 ? "Demanda acima da média" : "Operação sob controle", icon: "Wrench", tone: "warning" },
+     { label: "Itens com estoque baixo", value: String(stats.lowStock), trend: "", sub: stats.lowStock > 0 ? "Reposição recomendada" : "Estoque equilibrado", icon: "Box", tone: "destructive" },
+     { label: "Faturamento do mês", value: stats.monthRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "", sub: "Meta mensal: R$ 50.000", icon: "DollarSign", tone: "primary" },
+     { label: "Leads recebidos hoje", value: String(stats.newLeads), trend: "", sub: "Novos contatos no funil", icon: "Users", tone: "info" },
+     { label: "Ticket médio", value: stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "", sub: "Valor médio por venda (30 dias)", icon: "TrendingUp", tone: "success" },
    ];
 
    return (
