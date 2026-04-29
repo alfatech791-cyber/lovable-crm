@@ -301,17 +301,77 @@ export function FinanceDashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-border shadow-sm flex flex-col rounded-2xl">
-          <CardHeader className="flex flex-row items-center justify-between pb-4">
-            <CardTitle className="text-base font-black flex items-center gap-2 text-slate-900">
-              <Building2 className="h-4 w-4 text-blue-600" /> Contas e Bancos
-            </CardTitle>
+ 
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+         <Card className="border-border shadow-sm flex flex-col rounded-2xl">
+           <CardHeader className="flex flex-row items-center justify-between pb-4">
+             <CardTitle className="text-base font-black flex items-center gap-2 text-slate-900">
+               <Building2 className="h-4 w-4 text-blue-600" /> Contas e Bancos
+             </CardTitle>
+             <button 
+               onClick={() => navigate({ to: "/financeiro/caixa" })}
+               className="text-[11px] font-black text-blue-600 hover:underline flex items-center gap-1 uppercase tracking-wider"
+             >
+               Ver Tudo <ArrowRight className="h-3 w-3" />
+             </button>
+           </CardHeader>
+           <CardContent className="space-y-4">
+             <div className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+               <div className="flex items-center gap-3">
+                 <div className="h-8 w-8 rounded-lg bg-white border border-slate-200 grid place-items-center shadow-sm">
+                   <Wallet className="h-4 w-4 text-blue-600" />
+                 </div>
+                 <div>
+                   <div className="text-xs font-black text-slate-900 uppercase tracking-tighter">Caixa Geral</div>
+                   <div className="text-[10px] font-bold text-muted-foreground uppercase">Saldo Disponível</div>
+                 </div>
+               </div>
+               <div className="text-right">
+                 <div className="text-sm font-black text-slate-900">R$ {stats.totalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+               </div>
+             </div>
+           </CardContent>
+         </Card>
+ 
+         <Card className="border-border shadow-sm flex flex-col rounded-2xl">
+           <CardHeader className="pb-4">
+             <CardTitle className="text-base font-black flex items-center gap-2 text-slate-900">
+               <Receipt className="h-4 w-4 text-blue-600" /> Lançamentos Recentes
+             </CardTitle>
+           </CardHeader>
+           <CardContent>
+             <div className="space-y-3">
+               {transactions.slice(0, 3).map((t, i) => (
+                 <div key={i} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg transition-colors">
+                   <div className="flex items-center gap-3">
+                     <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${t.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                       {t.type === 'income' ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+                     </div>
+                     <div>
+                       <div className="text-xs font-bold text-slate-900">{t.description}</div>
+                       <div className="text-[10px] text-muted-foreground">{t.category}</div>
+                     </div>
+                   </div>
+                   <div className={`text-xs font-black ${t.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                     {t.type === 'income' ? '+' : '-'} R$ {t.amount.toLocaleString('pt-BR')}
+                   </div>
+                 </div>
+               ))}
+               {transactions.length === 0 && (
+                 <div className="text-center text-xs text-muted-foreground py-8 italic border border-dashed border-slate-100 rounded-xl">
+                   Nenhum lançamento recente
+                 </div>
+               )}
+             </div>
+           </CardContent>
+         </Card>
+       </div>
+ 
        <TransactionForm 
          open={isFormOpen} 
          onOpenChange={setIsFormOpen} 
          onSave={handleSave} 
        />
-    </div>
-  );
-}
+     </div>
+   );
+ }
