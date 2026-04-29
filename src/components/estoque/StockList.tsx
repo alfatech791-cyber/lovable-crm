@@ -37,10 +37,7 @@ import { toast } from "sonner";
           .order("created_at", { ascending: false });
         if (error) toast.error("Erro ao carregar produtos: " + error.message);
         // Adapta campos do banco para o shape usado na UI
-        const rows = (data ?? []).map((p: any) => ({
-          ...p,
-          stock: p.stock_quantity ?? 0,
-        }));
+        const rows = (data ?? []).map((p: any) => ({ ...p, stock: p.stock_quantity ?? 0 }));
         setLocalProducts(rows);
         setLoading(false);
       })();
@@ -81,57 +78,70 @@ import { toast } from "sonner";
      toast.success("Relatório exportado!");
    };
  
-   const filteredProducts = useMemo(() => {
-     return localProducts.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           (product.imei?.includes(searchTerm));
+  const filteredProducts = useMemo(() => {
+    const lowerSearch = searchTerm.toLowerCase();
+    return localProducts.filter(product => {
+      const matchesSearch = 
+        product.name.toLowerCase().includes(lowerSearch) || 
+        (product.sku?.toLowerCase().includes(lowerSearch)) ||
+        (product.imei?.toLowerCase().includes(lowerSearch)) ||
+        (product.ean?.toLowerCase().includes(lowerSearch)) ||
+        (product.reference?.toLowerCase().includes(lowerSearch));
+      
       const matchesCategory = filterCategory === "all" || product.category === filterCategory;
       
-       if (viewTab === "low") return matchesSearch && matchesCategory && (product.stock || 0) <= 3 && (product.stock || 0) > 0;
-       if (viewTab === "out") return matchesSearch && matchesCategory && (product.stock || 0) === 0;
+      const isLowStock = (product.stock || 0) <= (product.min_stock || 3) && (product.stock || 0) > 0;
+      const isOutOfStock = (product.stock || 0) === 0;
+
+      if (viewTab === "low") return matchesSearch && matchesCategory && isLowStock;
+      if (viewTab === "out") return matchesSearch && matchesCategory && isOutOfStock;
       
       return matchesSearch && matchesCategory;
     });
-   }, [searchTerm, filterCategory, viewTab, localProducts]);
+  }, [searchTerm, filterCategory, viewTab, localProducts]);
 
-   const handleAddProduct = async (data: any) => {
-     if (!user?.id) return;
-     const payload: any = {
-       user_id: user.id,
-       name: data.name,
-       sku: data.sku ?? data.reference ?? null,
-       category: data.category ?? null,
-       price: Number(data.price ?? 0),
-       cost_price: Number(data.cost_price ?? 0),
-       stock_quantity: Number(data.stock ?? data.stock_quantity ?? 0),
-       min_stock: Number(data.min_stock ?? 0),
-       image_url: data.image ?? data.image_url ?? null,
-       description: data.description ?? null,
-     };
-     const { data: row, error } = await supabase.from("products").insert(payload).select().single();
-     if (error) return toast.error("Erro ao criar: " + error.message);
-     setLocalProducts((prev) => [{ ...row, stock: row.stock_quantity }, ...prev]);
-     toast.success("Produto criado!");
-   };
+  const handleAddProduct = async (data: any) => {
+    if (!user?.id) return;
+    const payload = {
+      user_id: user.id,
+      ...data,
+      price: Number(data.price || 0),
+      cost_price: Number(data.cost_price || 0),
+      stock_quantity: Number(data.stock || 0),
+      min_stock: Number(data.min_stock || 0),
+      wholesale_price: Number(data.wholesale_price || 0),
+      weight: Number(data.weight || 0),
+    };
+    delete payload.stock; // Remove virtual field
 
-   const handleUpdateProduct = async (data: any) => {
-     if (!editingProduct) return;
-     const payload: any = {
-       name: data.name,
-       sku: data.sku ?? data.reference ?? null,
-       category: data.category ?? null,
-       price: Number(data.price ?? 0),
-       cost_price: Number(data.cost_price ?? 0),
-       stock_quantity: Number(data.stock ?? data.stock_quantity ?? 0),
-       min_stock: Number(data.min_stock ?? 0),
-       image_url: data.image ?? data.image_url ?? null,
-       description: data.description ?? null,
-     };
-     const { error } = await supabase.from("products").update(payload).eq("id", editingProduct.id);
-     if (error) return toast.error("Erro ao salvar: " + error.message);
-     setLocalProducts((prev) => prev.map((p) => p.id === editingProduct.id ? { ...p, ...payload, stock: payload.stock_quantity } : p));
-     toast.success("Produto atualizado!");
-   };
+    const { data: row, error } = await supabase.from("products").insert(payload).select().single();
+    if (error) return toast.error("Erro ao criar: " + error.message);
+    setLocalProducts((prev) => [{ ...row, stock: row.stock_quantity }, ...prev]);
+    toast.success("Produto criado!");
+  };
+
+  const handleUpdateProduct = async (data: any) => {
+    if (!editingProduct) return;
+    const payload = {
+      ...data,
+      price: Number(data.price || 0),
+      cost_price: Number(data.cost_price || 0),
+      stock_quantity: Number(data.stock || 0),
+      min_stock: Number(data.min_stock || 0),
+      wholesale_price: Number(data.wholesale_price || 0),
+      weight: Number(data.weight || 0),
+    };
+    delete payload.stock; // Remove virtual field
+    delete payload.id;
+    delete payload.user_id;
+    delete payload.created_at;
+    delete payload.updated_at;
+
+    const { error } = await supabase.from("products").update(payload).eq("id", editingProduct.id);
+    if (error) return toast.error("Erro ao salvar: " + error.message);
+    setLocalProducts((prev) => prev.map((p) => p.id === editingProduct.id ? { ...p, ...payload, stock: payload.stock_quantity } : p));
+    toast.success("Produto atualizado!");
+  };
 
    const handleDeleteProduct = async (id: string) => {
      if (!window.confirm("Tem certeza que deseja excluir este produto?")) return;
@@ -364,22 +374,42 @@ import { toast } from "sonner";
                     <td className="px-6 py-4">
                       <span className="text-xs px-2 py-1 rounded bg-muted font-medium">{product.category}</span>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="inline-flex flex-col items-center">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-sm font-bold ${(product.stock || 0) <= 3 ? 'text-destructive' : 'text-foreground'}`}>
-                            {product.stock || 0}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground font-medium uppercase">{product.unit || 'un'}</span>
-                        </div>
-                        <div className="w-16 h-1 bg-muted rounded-full mt-1 overflow-hidden">
-                          <div 
-                            className={`h-full rounded-full ${ (product.stock || 0) <= 3 ? 'bg-destructive' : 'bg-primary' }`}
-                            style={{ width: `${Math.min(((product.stock || 0) / 10) * 100, 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    </td>
+                <td className="px-6 py-4 text-center">
+                  <div className="inline-flex flex-col items-center">
+                    <div className="flex items-center gap-2 group">
+                      <button 
+                        onClick={async () => {
+                          const newStock = Math.max(0, (product.stock || 0) - 1);
+                          const { error } = await supabase.from("products").update({ stock_quantity: newStock }).eq("id", product.id);
+                          if (!error) setLocalProducts(prev => prev.map(p => p.id === product.id ? { ...p, stock: newStock, stock_quantity: newStock } : p));
+                        }}
+                        className="h-6 w-6 rounded-full bg-muted flex items-center justify-center hover:bg-destructive hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        -
+                      </button>
+                      <span className={`text-sm font-bold ${(product.stock || 0) <= (product.min_stock || 3) ? 'text-destructive' : 'text-foreground'}`}>
+                        {product.stock || 0}
+                      </span>
+                      <button 
+                        onClick={async () => {
+                          const newStock = (product.stock || 0) + 1;
+                          const { error } = await supabase.from("products").update({ stock_quantity: newStock }).eq("id", product.id);
+                          if (!error) setLocalProducts(prev => prev.map(p => p.id === product.id ? { ...p, stock: newStock, stock_quantity: newStock } : p));
+                        }}
+                        className="h-6 w-6 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground font-medium uppercase">{product.unit || 'un'}</span>
+                    <div className="w-16 h-1 bg-muted rounded-full mt-1 overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full ${ (product.stock || 0) <= (product.min_stock || 3) ? 'bg-destructive' : 'bg-primary' }`}
+                        style={{ width: `${Math.min(((product.stock || 0) / (product.min_stock ? product.min_stock * 3 : 10)) * 100, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                </td>
                     <td className="px-6 py-4">
                       <span className="text-sm font-bold text-primary">
                         {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
