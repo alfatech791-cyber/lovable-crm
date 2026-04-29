@@ -132,8 +132,55 @@ serve(async (req) => {
       if (!aiKey) {
         replyText = settings.fallback_message;
       } else {
+        // Carrega catálogo (produtos + serviços ativos) para a IA poder oferecer
+        const [{ data: products }, { data: services }] = await Promise.all([
+          supabase
+            .from("products")
+            .select("name, description, category, price, stock_quantity, image_url, brand, model")
+            .eq("user_id", userId)
+            .limit(200),
+          supabase
+            .from("services")
+            .select("name, description, category, price, duration_minutes, image_url, keywords")
+            .eq("user_id", userId)
+            .eq("is_active", true)
+            .limit(200),
+        ]);
+
+        const fmtPrice = (v: number | null | undefined) =>
+          v == null ? "sob consulta" : Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+        const productLines = (products ?? []).map((p: any) => {
+          const parts = [
+            `• ${p.name}`,
+            p.category ? `[${p.category}]` : "",
+            `— ${fmtPrice(p.price)}`,
+            p.stock_quantity != null ? `(estoque: ${p.stock_quantity})` : "",
+            p.description ? `\n   ${String(p.description).slice(0, 160)}` : "",
+            p.image_url ? `\n   📷 ${p.image_url}` : "",
+          ].filter(Boolean);
+          return parts.join(" ");
+        }).join("\n");
+
+        const serviceLines = (services ?? []).map((s: any) => {
+          const parts = [
+            `• ${s.name}`,
+            s.category ? `[${s.category}]` : "",
+            `— ${fmtPrice(s.price)}`,
+            s.duration_minutes ? `(${s.duration_minutes} min)` : "",
+            s.description ? `\n   ${String(s.description).slice(0, 160)}` : "",
+            s.keywords?.length ? `\n   palavras-chave: ${s.keywords.join(", ")}` : "",
+            s.image_url ? `\n   📷 ${s.image_url}` : "",
+          ].filter(Boolean);
+          return parts.join(" ");
+        }).join("\n");
+
+        const catalogBlock = (productLines || serviceLines)
+          ? `\n\n=== CATÁLOGO DISPONÍVEL ===\nUse APENAS itens deste catálogo ao oferecer produtos/serviços. Quando o cliente pedir algo (ex: "iPhone"), liste TODOS os itens compatíveis com nome, preço e (se houver) link da foto. Se não houver item compatível, diga honestamente que não tem disponível.\n\n${productLines ? `PRODUTOS:\n${productLines}` : ""}${productLines && serviceLines ? "\n\n" : ""}${serviceLines ? `SERVIÇOS:\n${serviceLines}` : ""}\n=== FIM DO CATÁLOGO ===`
+          : "";
+
         const messages = [
-          { role: "system", content: settings.system_prompt },
+          { role: "system", content: (settings.system_prompt || "") + catalogBlock },
           ...transcript.slice(-12).map((m) => ({ role: m.role, content: m.content })),
         ];
         const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
