@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import { Users, Plus, MoreVertical, Search, Filter, Loader2, User, Trash2, Edit3, Phone, Mail, MapPin } from "lucide-react";
+ import { Users, Plus, MoreVertical, Search, Filter, Loader2, User, Trash2, Edit3, Phone, Mail, MapPin, DollarSign, Wrench } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -34,7 +34,10 @@ function CustomersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<any | null>(null);
-  const [saving, setSaving] = useState(false);
+   const [saving, setSaving] = useState(false);
+   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+   const [customerHistory, setCustomerHistory] = useState<{ sales: any[], services: any[] }>({ sales: [], services: [] });
+   const [loadingHistory, setLoadingHistory] = useState(false);
 
   const [formData, setFormData] = useState({
     full_name: "",
@@ -140,11 +143,35 @@ function CustomersPage() {
     }
   };
 
-  const filteredCustomers = customers.filter(c => 
-    c.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (c.email && c.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (c.phone && c.phone.includes(searchTerm))
-  );
+   const filteredCustomers = customers.filter(c => 
+     c.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     (c.email && c.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+     (c.phone && c.phone.includes(searchTerm))
+   );
+ 
+   const fetchCustomerHistory = async (customerId: string) => {
+     setLoadingHistory(true);
+     try {
+       const [salesRes, servicesRes] = await Promise.all([
+         supabase.from("sales").select("*").eq("customer_id", customerId).order("created_at", { ascending: false }),
+         supabase.from("service_orders").select("*").eq("customer_id", customerId).order("created_at", { ascending: false })
+       ]);
+       setCustomerHistory({
+         sales: salesRes.data || [],
+         services: servicesRes.data || []
+       });
+     } catch (error) {
+       toast.error("Erro ao carregar histórico");
+     } finally {
+       setLoadingHistory(false);
+     }
+   };
+ 
+   const handleViewHistory = (customer: any) => {
+     setEditingCustomer(customer);
+     fetchCustomerHistory(customer.id);
+     setIsHistoryOpen(true);
+   };
 
    return (
      <div className="min-h-screen flex w-full bg-background">
