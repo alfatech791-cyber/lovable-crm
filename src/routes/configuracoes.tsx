@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import { User, Shield, Bell, Zap, Database, Smartphone, Palette, HelpCircle, ChevronRight, Globe, Lock } from "lucide-react";
+ import { User, Shield, Bell, Zap, Database, Smartphone, Palette, HelpCircle, ChevronRight, Globe, Lock, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações — ConectaCRM" }, { name: "description", content: "Ajuste suas preferências e integrações" }] }),
