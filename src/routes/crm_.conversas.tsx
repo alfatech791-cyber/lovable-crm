@@ -759,24 +759,36 @@ function ConversasPage() {
          .eq("id", selected.id)
          .single();
 
-       const transcript = Array.isArray(conv?.transcript) ? conv.transcript : [];
-       const placeholder = payload.kind === "audio" ? "🎤 Áudio" : payload.kind === "sticker" ? "🟦 Figurinha" : payload.kind === "image" ? "🖼️ Imagem" : payload.text;
-       
-        const newMsg: Msg = {
-          role: "agent",
-          kind: payload.kind as any,
-          content: String(payload.text || placeholder),
-          at: new Date().toISOString(),
-          sent: true,
-        };
+           const localConv = items.find(c => c.id === selected.id);
+           const transcript = Array.isArray(localConv?.transcript) ? localConv.transcript : [];
+           const placeholder = payload.kind === "audio" ? "🎤 Áudio" : payload.kind === "sticker" ? "🟦 Figurinha" : payload.kind === "image" ? "🖼️ Imagem" : payload.text;
+           
+           const newMsg: Msg = {
+             role: "agent",
+             kind: payload.kind as any,
+             content: String(payload.text || placeholder),
+             at: new Date().toISOString(),
+             sent: true,
+           };
 
-        const { error: upsertError } = await supabase.from("bot_conversations").update({
-          transcript: [...transcript, newMsg] as any,
-          messages_count: transcript.length + 1,
-          last_message_at: new Date().toISOString(),
-        }).eq("id", selected.id);
+           const updatedTranscript = [...transcript, newMsg];
+           
+           // Update local state first for instant feedback
+           setItems(prev => prev.map(c => c.id === selected.id ? { 
+             ...c, 
+             transcript: updatedTranscript, 
+             messages_count: updatedTranscript.length,
+             last_message_at: newMsg.at!
+           } : c));
 
-       if (upsertError) console.error("Erro ao atualizar transcript:", upsertError);
+           // Then update DB
+           const { error: upsertError } = await supabase.from("bot_conversations").update({
+             transcript: updatedTranscript as any,
+             messages_count: updatedTranscript.length,
+             last_message_at: newMsg.at!,
+           }).eq("id", selected.id);
+
+           if (upsertError) console.error("Erro ao atualizar transcript:", upsertError);
        toast.success("Enviada!");
     } catch (e: any) {
       toast.error(e?.message ?? "Erro ao enviar");
