@@ -18,12 +18,12 @@ export const Route = createFileRoute("/crm")({
 });
 
 const modules = [
-  { title: "Leads", desc: "Cadastro e qualificação de contatos", url: "/leads", icon: UserPlus, color: "text-primary", bg: "bg-primary/10" },
+   { title: "Base de Leads", desc: "Gestão e qualificação de clientes potenciais", url: "/leads", icon: UserPlus, color: "text-primary", bg: "bg-primary/10" },
   { title: "Funil de Vendas", desc: "Pipeline Kanban por estágio", url: "/funil", icon: Trello, color: "text-info", bg: "bg-info/10" },
   { title: "Bot de Atendimento", desc: "IA que atende 24/7 no WhatsApp", url: "/crm/bot", icon: Bot, color: "text-success", bg: "bg-success/10" },
   { title: "Automações", desc: "Fluxos automáticos baseados em gatilhos", url: "/automacao", icon: Zap, color: "text-warning", bg: "bg-warning/10" },
-  { title: "WhatsApp", desc: "Conexão de instâncias e conversas", url: "/whatsapp", icon: MessageSquare, color: "text-success", bg: "bg-success/10" },
-  { title: "Instagram", desc: "Direct e comentários integrados", url: "/instagram", icon: Instagram, color: "text-primary", bg: "bg-primary/10" },
+   { title: "WhatsApp", desc: "Conversas em tempo real e automações", url: "/whatsapp", icon: MessageSquare, color: "text-success", bg: "bg-success/10" },
+   { title: "Instagram Business", desc: "Gestão de Directs e Engajamento", url: "/instagram", icon: Instagram, color: "text-primary", bg: "bg-primary/10" },
 ];
 
 function CrmHub() {
