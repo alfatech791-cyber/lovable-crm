@@ -34,6 +34,7 @@ interface ProductFormData {
   processor?: string;
   ram?: string;
   display?: string;
+  image_url?: string;
 }
 
 interface ProductFormProps {
@@ -68,6 +69,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
     color: product?.color || "",
     capacity: product?.capacity || "",
     description: product?.description || "",
+    image_url: product?.image_url || "",
     processor: product?.processor || "",
     ram: product?.ram || "",
     display: product?.display || "",
@@ -99,6 +101,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
         color: product.color || "",
         capacity: product.capacity || "",
         description: product.description || "",
+        image_url: product.image_url || "",
         processor: product.processor || "",
         ram: product.ram || "",
         display: product.display || "",
@@ -355,29 +358,39 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                      </div>
 
                      <div className="lg:col-span-4 space-y-6">
-                        <section className="bg-card rounded-2xl border border-border p-5 space-y-5 shadow-sm h-full">
-                           <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
-                             <ImageIcon className="h-3 w-3" /> Mídia do Produto
-                           </h3>
-                           <div className="space-y-4">
-                             <div className="aspect-square border-2 border-dashed border-primary/20 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-primary/[0.02] hover:border-primary/40 transition-all cursor-pointer group bg-muted/10">
-                               <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-glow">
-                                 <Upload className="h-5 w-5" />
-                               </div>
-                               <div className="text-center px-4">
-                                  <span className="text-[10px] font-black text-primary uppercase tracking-widest block">Upload Principal</span>
-                                  <span className="text-[9px] font-bold text-muted-foreground/60 uppercase">PNG, JPG até 5MB</span>
-                               </div>
-                             </div>
-                             <div className="grid grid-cols-3 gap-2">
-                                {Array.from({ length: 3 }).map((_, i) => (
-                                  <div key={i} className="aspect-square border border-dashed border-border rounded-xl flex items-center justify-center bg-muted/20 hover:bg-muted/30 transition-all cursor-pointer">
-                                     <Plus className="h-3 w-3 text-muted-foreground/40" />
-                                  </div>
-                                ))}
-                             </div>
-                           </div>
-                        </section>
+                  <section className="bg-card rounded-2xl border border-border p-5 space-y-5 shadow-sm h-full">
+                    <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
+                      <ImageIcon className="h-3 w-3" /> Mídia do Produto
+                    </h3>
+                    <div className="space-y-4">
+                      {formData.image_url ? (
+                        <div className="relative aspect-square rounded-3xl overflow-hidden border border-border group">
+                          <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
+                          <button 
+                            onClick={() => handleChange("image_url", "")}
+                            className="absolute top-2 right-2 p-1.5 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="aspect-square border-2 border-dashed border-primary/20 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-primary/[0.02] hover:border-primary/40 transition-all cursor-pointer group bg-muted/10">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-glow">
+                            <Upload className="h-5 w-5" />
+                          </div>
+                          <div className="text-center px-4">
+                             <span className="text-[10px] font-black text-primary uppercase tracking-widest block">URL da Imagem</span>
+                             <Input 
+                               value={formData.image_url}
+                               onChange={(e) => handleChange("image_url", e.target.value)}
+                               placeholder="https://..."
+                               className="mt-2 h-8 text-[10px] bg-transparent border-primary/20"
+                             />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </section>
                      </div>
                    </div>
                  </div>
