@@ -918,10 +918,7 @@ function ConversasPage() {
     setRecordSecs(0);
     const rec = recorderRef.current;
     if (!rec) return;
-    if (cancel) {
-      rec.ondataavailable = null;
-      rec.onstop = () => rec.stream.getTracks().forEach((t) => t.stop());
-    }
+    if (cancel) rec.ondataavailable = null;
     if (rec.state !== "inactive") rec.stop();
     recorderRef.current = null;
   };
