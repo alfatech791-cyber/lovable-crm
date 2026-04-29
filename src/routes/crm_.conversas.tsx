@@ -787,39 +787,42 @@ function ConversasPage() {
        let endpoint = "";
        let body: any = { number: jid };
 
+        const payloadData = {
+          number: jid,
+          delay: 1200,
+          presence: "composing",
+        };
+
         if (payload.kind === "text") {
           endpoint = `/api/evolution/message/sendText/${instance}`;
           body = {
-            number: jid,
+            ...payloadData,
             text: payload.text,
             linkPreview: false,
           };
         } else if (payload.kind === "audio") {
           endpoint = `/api/evolution/message/sendWhatsAppAudio/${instance}`;
           body = {
-            number: jid,
+            ...payloadData,
             audio: payload.media,
-            delay: 1200,
             encoding: true,
           };
         } else if (payload.kind === "sticker") {
           endpoint = `/api/evolution/message/sendSticker/${instance}`;
           body = {
-            number: jid,
+            ...payloadData,
             sticker: payload.media,
-            delay: 1200,
           };
         } else if (payload.kind === "image") {
           endpoint = `/api/evolution/message/sendMedia/${instance}`;
           body = {
-            number: jid,
+            ...payloadData,
             mediatype: "image",
             media: payload.media,
             mimetype: payload.mimetype || "image/png",
             caption: payload.text || "",
-            delay: 1200,
+            fileName: payload.fileName || "image.png",
           };
-          if (payload.fileName) body.fileName = payload.fileName;
         }
 
        if (!endpoint) {
