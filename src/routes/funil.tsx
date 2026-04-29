@@ -214,7 +214,7 @@ type Deal = {
       const [stRes, dlRes, ldRes, convRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
         supabase.from("pipeline_leads").select("*, lead:leads(name, phone, source)").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("leads").select("id, name").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("leads").select("id, name, phone").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("bot_conversations").select("*").eq("user_id", user.id).order("last_message_at", { ascending: false }),
       ]);
       
