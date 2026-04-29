@@ -55,7 +55,7 @@ type Deal = {
 };
 
  function FunnelPage() {
-   const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
    const [viewMode, setViewMode] = useState<"kanban" | "chat">("kanban");
    const [stages, setStages] = useState<Stage[]>([]);
    const [deals, setDeals] = useState<Deal[]>([]);
