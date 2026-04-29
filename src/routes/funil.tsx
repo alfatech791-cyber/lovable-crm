@@ -572,7 +572,22 @@ type Deal = {
       };
     }, [user?.id, currentConversation?.id]);
 
-    const filteredDeals = deals
+    // Dedupe defensivo: nunca renderiza dois cards com mesmo id ou mesmo lead_id
+    const dedupedDeals = (() => {
+      const seenId = new Set<string>();
+      const seenLead = new Set<string>();
+      const out: typeof deals = [];
+      for (const d of deals) {
+        if (!d?.id || seenId.has(d.id)) continue;
+        if (d.lead_id && seenLead.has(d.lead_id)) continue;
+        seenId.add(d.id);
+        if (d.lead_id) seenLead.add(d.lead_id);
+        out.push(d);
+      }
+      return out;
+    })();
+
+    const filteredDeals = dedupedDeals
       .filter(d => {
         const leadName = d.lead?.name?.toLowerCase() || "";
         const leadPhone = d.lead?.phone || "";
