@@ -842,8 +842,8 @@ function ConversasPage() {
       rec.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        const b64 = await blobToBase64(blob);
-        await sendPayload({ kind: "audio", media: b64, mimetype: "audio/webm" });
+        const b64 = await blobToBase64(blob); // Retorna base64 limpo sem prefixo
+        await sendPayload({ kind: "audio", media: b64, mimetype: "audio/mp4" }); // Evolution prefere audio/mp4 ou audio/ogg
       };
       rec.start();
       recorderRef.current = rec;
