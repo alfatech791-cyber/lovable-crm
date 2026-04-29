@@ -855,22 +855,30 @@ function ConversasPage() {
              sent: true,
            };
 
-           const updatedTranscript = [...transcript, newMsg];
-           
-           // Update local state first for instant feedback
-           setItems(prev => prev.map(c => c.id === selected.id ? { 
-             ...c, 
-             transcript: updatedTranscript, 
-             messages_count: updatedTranscript.length,
-             last_message_at: newMsg.at!
-           } : c));
+            // Buscamos o registro mais atualizado do banco antes de salvar
+            const { data: currentConv } = await supabase
+              .from("bot_conversations")
+              .select("transcript")
+              .eq("id", selected.id)
+              .single();
 
-           // Then update DB
-           const { error: upsertError } = await supabase.from("bot_conversations").update({
-             transcript: updatedTranscript as any,
-             messages_count: updatedTranscript.length,
-             last_message_at: newMsg.at!,
-           }).eq("id", selected.id);
+            const latestTranscript = (Array.isArray(currentConv?.transcript) ? currentConv.transcript : transcript) as Msg[];
+            const updatedTranscript = [...latestTranscript, newMsg];
+            
+            // Update local state first for instant feedback
+            setItems(prev => prev.map(c => c.id === selected.id ? { 
+              ...c, 
+              transcript: updatedTranscript, 
+              messages_count: updatedTranscript.length,
+              last_message_at: newMsg.at!
+            } : c));
+ 
+            // Then update DB
+            const { error: upsertError } = await supabase.from("bot_conversations").update({
+              transcript: updatedTranscript as any,
+              messages_count: updatedTranscript.length,
+              last_message_at: newMsg.at!,
+            }).eq("id", selected.id);
 
            if (upsertError) console.error("Erro ao atualizar transcript:", upsertError);
        toast.success("Enviada!");
@@ -1314,7 +1322,7 @@ function ConversasPage() {
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey && !sending) {
                           e.preventDefault();
-                          sendText();
+                          if (text.trim()) sendText();
                         }
                       }}
                       className="flex-1 min-h-[40px] max-h-32 bg-transparent border-none outline-none shadow-none resize-none transition-all py-2 px-0 text-[14px] leading-relaxed"
