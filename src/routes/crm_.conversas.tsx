@@ -205,8 +205,16 @@ function ConversasPage() {
   const [readState, setReadState] = useState<Record<string, number>>({});
   const [sideInfoOpen, setSideInfoOpen] = useState(true);
   const [localNotes, setLocalNotes] = useState("");
-  const [forwardMsg, setForwardMsg] = useState<Msg | null>(null);
-  const [isForwarding, setIsForwarding] = useState(false);
+   const [forwardMsg, setForwardMsg] = useState<Msg | null>(null);
+   const [isForwarding, setIsForwarding] = useState(false);
+   const [quickRepliesOpen, setQuickRepliesOpen] = useState(false);
+
+   const QUICK_REPLIES = [
+     { shortcut: "/oi", text: "Olá! Tudo bem? Como posso ajudar você hoje?" },
+     { shortcut: "/pix", text: "Segue nossa chave PIX para pagamento: (Chave aqui). Por favor, envie o comprovante após realizar a transferência." },
+     { shortcut: "/obrigado", text: "De nada! Qualquer dúvida, estamos à disposição." },
+     { shortcut: "/endereco", text: "Estamos localizados na (Rua, Número, Bairro, Cidade). Horário de funcionamento: 09h às 18h." },
+   ];
   const [userFilter, setUserFilter] = useState<"all" | "mine">("all");
    const [tagInput, setTagInput] = useState("");
    const [showScrollBottom, setShowScrollBottom] = useState(false);
