@@ -31,11 +31,13 @@ interface ProductFormData {
   color?: string;
   capacity?: string;
   description?: string;
-  processor?: string;
-  ram?: string;
-  display?: string;
-  image_url?: string;
-}
+   processor?: string;
+   ram?: string;
+   display?: string;
+   image_url?: string;
+   margin?: number;
+   markup?: number;
+ }
 
 interface ProductFormProps {
   open: boolean;
@@ -69,11 +71,13 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
     color: product?.color || "",
     capacity: product?.capacity || "",
     description: product?.description || "",
-    image_url: product?.image_url || "",
-    processor: product?.processor || "",
-    ram: product?.ram || "",
-    display: product?.display || "",
-  });
+     image_url: product?.image_url || "",
+     processor: product?.processor || "",
+     ram: product?.ram || "",
+     display: product?.display || "",
+     margin: 0,
+     markup: 0,
+   });
 
   useEffect(() => {
     if (product) {
@@ -109,12 +113,55 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
     }
   }, [product]);
 
-  const handleChange = (field: keyof ProductFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (field === "category") {
-      setIsSmartphone(value === "Smartphones");
-    }
-  };
+   const calculateFromPrice = (price: number, cost: number) => {
+     if (!cost || !price) return { margin: 0, markup: 0 };
+     const grossProfit = price - cost;
+     const margin = (grossProfit / price) * 100;
+     const markup = (grossProfit / cost) * 100;
+     return { margin: Math.max(0, margin), markup: Math.max(0, markup) };
+   };
+
+   const calculateFromMargin = (margin: number, cost: number) => {
+     if (!cost) return 0;
+     if (margin >= 100) return cost * 10; // Avoid division by zero
+     return cost / (1 - margin / 100);
+   };
+
+   const calculateFromMarkup = (markup: number, cost: number) => {
+     if (!cost) return 0;
+     return cost * (1 + markup / 100);
+   };
+
+   const handleChange = (field: keyof ProductFormData, value: any) => {
+     setFormData(prev => {
+       const newData = { ...prev, [field]: value };
+       
+       if (field === "price" || field === "cost_price") {
+         const { margin, markup } = calculateFromPrice(
+           field === "price" ? (typeof value === 'number' ? value : parseFloat(value) || 0) : prev.price,
+           field === "cost_price" ? (typeof value === 'number' ? value : parseFloat(value) || 0) : prev.cost_price
+         );
+         newData.margin = margin;
+         newData.markup = markup;
+       } else if (field === "margin") {
+         newData.price = calculateFromMargin(value, prev.cost_price || 0);
+         const { markup } = calculateFromPrice(newData.price, prev.cost_price || 0);
+         newData.markup = markup;
+       } else if (field === "markup") {
+         newData.price = calculateFromMarkup(value, prev.cost_price || 0);
+         const { margin } = calculateFromPrice(newData.price, prev.cost_price || 0);
+         newData.margin = margin;
+       }
+       
+       return newData;
+     });
+     
+     if (field === "category") {
+       setIsSmartphone(value === "Smartphones");
+     }
+   };
+
+   const grossProfit = (formData.price || 0) - (formData.cost_price || 0);
 
   const handleSave = () => {
     if (onSave) {
@@ -442,25 +489,45 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                            </div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="grid gap-1.5">
-                          <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Lucro Bruto (%)</Label>
-                          <Input type="number" placeholder="45.00" className="bg-card h-9 border-border text-xs font-bold" />
-                        </div>
-                        <div className="grid gap-1.5">
-                          <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Markup (%)</Label>
-                          <Input type="number" placeholder="81.82" className="bg-card h-9 border-border text-xs font-bold" />
-                        </div>
-                      </div>
-                      <div className="pt-2">
-                         <div className="flex items-center justify-between p-3 rounded-xl bg-primary/10 border border-primary/20">
-                            <div className="space-y-0.5">
-                               <span className="text-[9px] font-black uppercase text-primary block">Lucro Estimado</span>
-                               <span className="text-sm font-black text-primary">R$ 0,00</span>
-                            </div>
-                            <Percent className="h-4 w-4 text-primary/40" />
+                       <div className="grid grid-cols-2 gap-3">
+                         <div className="grid gap-1.5">
+                           <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Margem de Lucro (%)</Label>
+                           <div className="relative">
+                             <Input 
+                               type="number" 
+                               value={formData.margin?.toFixed(2)} 
+                               onChange={(e) => handleChange("margin", parseFloat(e.target.value) || 0)}
+                               className="bg-card h-9 border-border text-xs font-bold pr-7" 
+                             />
+                             <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">%</span>
+                           </div>
                          </div>
-                      </div>
+                         <div className="grid gap-1.5">
+                           <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Markup (%)</Label>
+                           <div className="relative">
+                             <Input 
+                               type="number" 
+                               value={formData.markup?.toFixed(2)} 
+                               onChange={(e) => handleChange("markup", parseFloat(e.target.value) || 0)}
+                               className="bg-card h-9 border-border text-xs font-bold pr-7" 
+                             />
+                             <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">%</span>
+                           </div>
+                         </div>
+                       </div>
+                       <div className="pt-2">
+                          <div className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${grossProfit > 0 ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-destructive/10 border-destructive/20'}`}>
+                             <div className="space-y-0.5">
+                                <span className={`text-[9px] font-black uppercase block ${grossProfit > 0 ? 'text-emerald-600' : 'text-destructive'}`}>Lucro Real por Unidade</span>
+                                <span className={`text-sm font-black ${grossProfit > 0 ? 'text-emerald-600' : 'text-destructive'}`}>
+                                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(grossProfit)}
+                                </span>
+                             </div>
+                             <div className={`p-2 rounded-lg ${grossProfit > 0 ? 'bg-emerald-500/20 text-emerald-600' : 'bg-destructive/20 text-destructive'}`}>
+                               <Percent className="h-4 w-4" />
+                             </div>
+                          </div>
+                       </div>
                     </div>
                  </section>
 
