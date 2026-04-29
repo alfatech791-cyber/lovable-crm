@@ -271,10 +271,15 @@ type Deal = {
       if (leadIds.length > 0) {
         const filteredLeadIds = leadIds.filter(Boolean);
         if (filteredLeadIds.length > 0) {
-          const { data: msgData } = await supabase.from("messages").select("lead_id, content, created_at, role").in("lead_id", filteredLeadIds).order("created_at", { ascending: false });
+          const { data: msgData } = await supabase.from("messages").select("lead_id, content, created_at, direction").in("lead_id", filteredLeadIds).order("created_at", { ascending: false });
           if (msgData) msgData.forEach(msg => { 
             if (msg.lead_id && !lastMessagesMap[msg.lead_id]) {
-              lastMessagesMap[msg.lead_id] = { content: msg.content, created_at: msg.created_at, role: msg.role }; 
+              // Normalize role: inbound -> user, outbound -> agent
+              lastMessagesMap[msg.lead_id] = { 
+                content: msg.content, 
+                created_at: msg.created_at, 
+                role: (msg as any).direction === 'inbound' ? 'user' : 'agent' 
+              }; 
             }
           });
         }
