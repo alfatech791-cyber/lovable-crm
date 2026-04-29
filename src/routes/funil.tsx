@@ -190,15 +190,22 @@ type Deal = {
      setStages((stRes.data as Stage[]) ?? []);
       const leadIds = (dlRes.data as any[])?.map(d => d.lead_id) || [];
       let lastMessagesMap: Record<string, { content: string, created_at: string }> = {};
-      if (leadIds.length > 0) {
-        const { data: msgData } = await supabase.from("messages").select("lead_id, content, created_at").in("lead_id", leadIds).order("created_at", { ascending: false });
-        if (msgData) msgData.forEach(msg => { if (!lastMessagesMap[msg.lead_id]) lastMessagesMap[msg.lead_id] = { content: msg.content, created_at: msg.created_at }; });
-      }
-      const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => ({
-        ...deal,
-        last_message: lastMessagesMap[deal.lead_id]?.content,
-        last_message_at: lastMessagesMap[deal.lead_id]?.created_at
-      })) ?? [];
+       if (leadIds.length > 0) {
+         const filteredLeadIds = leadIds.filter(Boolean);
+         if (filteredLeadIds.length > 0) {
+           const { data: msgData } = await supabase.from("messages").select("lead_id, content, created_at").in("lead_id", filteredLeadIds).order("created_at", { ascending: false });
+           if (msgData) msgData.forEach(msg => { 
+             if (msg.lead_id && !lastMessagesMap[msg.lead_id]) {
+               lastMessagesMap[msg.lead_id] = { content: msg.content, created_at: msg.created_at }; 
+             }
+           });
+         }
+       }
+       const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => ({
+         ...deal,
+         last_message: deal.lead_id ? lastMessagesMap[deal.lead_id]?.content : undefined,
+         last_message_at: deal.lead_id ? lastMessagesMap[deal.lead_id]?.created_at : undefined
+       })) ?? [];
       setDeals(dealsWithLastMessage);
      setLeads((ldRes.data as any) ?? []);
     setLoading(false);
