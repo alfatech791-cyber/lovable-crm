@@ -19,7 +19,8 @@ import {
   PauseCircle,
   PlayCircle,
   Image as ImageIcon,
-  Trash2,
+   Trash2,
+   ChevronDown,
   X,
   Users,
   Info,
@@ -204,10 +205,24 @@ function ConversasPage() {
   const [readState, setReadState] = useState<Record<string, number>>({});
   const [sideInfoOpen, setSideInfoOpen] = useState(true);
   const [localNotes, setLocalNotes] = useState("");
-  const [forwardMsg, setForwardMsg] = useState<Msg | null>(null);
-  const [isForwarding, setIsForwarding] = useState(false);
+   const [forwardMsg, setForwardMsg] = useState<Msg | null>(null);
+   const [isForwarding, setIsForwarding] = useState(false);
+   const [quickRepliesOpen, setQuickRepliesOpen] = useState(false);
+
+   const QUICK_REPLIES = [
+     { shortcut: "/oi", text: "Olá! Tudo bem? Como posso ajudar você hoje?" },
+     { shortcut: "/pix", text: "Segue nossa chave PIX para pagamento: (Chave aqui). Por favor, envie o comprovante após realizar a transferência." },
+     { shortcut: "/obrigado", text: "De nada! Qualquer dúvida, estamos à disposição." },
+     { shortcut: "/endereco", text: "Estamos localizados na (Rua, Número, Bairro, Cidade). Horário de funcionamento: 09h às 18h." },
+   ];
   const [userFilter, setUserFilter] = useState<"all" | "mine">("all");
-  const [tagInput, setTagInput] = useState("");
+   const [tagInput, setTagInput] = useState("");
+   const [showScrollBottom, setShowScrollBottom] = useState(false);
+
+   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+     setShowScrollBottom(scrollHeight - scrollTop - clientHeight > 300);
+   };
 
   const unreadCount = (c: Conversation) => {
     const seen = readState[c.id] ?? 0;
@@ -266,36 +281,68 @@ function ConversasPage() {
   };
 
   const applyConversations = (list: Conversation[], notify = false) => {
-    const dedupMap = new Map<string, Conversation>();
-    for (const conversation of list) {
-      const key = conversation.contact_phone;
-      const previous = dedupMap.get(key);
-      if (!previous) {
-        dedupMap.set(key, conversation);
-        continue;
+    setItems((prev) => {
+      const dedupMap = new Map<string, Conversation>();
+      let changed = list.length !== prev.length;
+      
+      // Include previous items first to ensure we don't lose data
+      for (const c of prev) {
+        dedupMap.set(c.contact_phone, c);
       }
-      const previousAt = +new Date(previous.last_message_at);
-      const currentAt = +new Date(conversation.last_message_at);
-      const previousLen = previous.transcript?.length ?? 0;
-      const currentLen = conversation.transcript?.length ?? 0;
-      if (currentAt > previousAt || (currentAt === previousAt && currentLen > previousLen)) {
-        dedupMap.set(key, conversation);
+      
+      for (const conversation of list) {
+        const key = conversation.contact_phone;
+        const previous = dedupMap.get(key);
+        if (!previous) {
+          dedupMap.set(key, conversation);
+          continue;
+        }
+        const previousAt = +new Date(previous.last_message_at);
+        const currentAt = +new Date(conversation.last_message_at);
+        const previousLen = previous.transcript?.length ?? 0;
+        const currentLen = conversation.transcript?.length ?? 0;
+        
+        // Update if more recent or has more messages
+        if (currentAt > previousAt || (currentAt === previousAt && currentLen >= previousLen)) {
+          const hasActuallyChanged = currentAt > previousAt || currentLen > previousLen;
+          if (hasActuallyChanged) changed = true;
+
+          dedupMap.set(key, {
+            ...previous,
+            ...conversation,
+            transcript: currentLen >= previousLen ? conversation.transcript : previous.transcript
+          });
+        }
       }
-    }
-    const sorted = [...dedupMap.values()].sort(
-      (a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at)
-    );
+      
+      const sorted = [...dedupMap.values()].sort(
+        (a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at)
+      );
 
-    if (notify) {
-      sorted.forEach(maybeNotifyIncoming);
-    } else {
-      sorted.forEach(rememberConversation);
-    }
+      if (notify) {
+        sorted.forEach(maybeNotifyIncoming);
+      } else {
+        sorted.forEach(rememberConversation);
+      }
 
-    setItems(sorted);
-    setSelectedId((current) => {
-      if (current && sorted.some((conversation) => conversation.id === current)) return current;
-      return sorted[0]?.id ?? null;
+      // Update selected ID based on contact_phone to avoid jumping
+      setSelectedId((currentId) => {
+        if (!currentId) return sorted[0]?.id ?? null;
+        
+        // Find current selected item in old items
+        const currentItem = prev.find(i => i.id === currentId);
+        if (!currentItem) {
+          // If not in prev, check if it's already in sorted
+          if (sorted.some(c => c.id === currentId)) return currentId;
+          return sorted[0]?.id ?? null;
+        }
+        
+        // Find matching item by phone in new sorted list
+        const match = sorted.find(c => c.contact_phone === currentItem.contact_phone);
+        return match?.id ?? currentId;
+      });
+
+      return changed ? sorted : prev;
     });
   };
 
@@ -522,12 +569,13 @@ function ConversasPage() {
           const isGroup = String(chat.remoteJid ?? "").endsWith("@g.us");
 
           const ex = byPhone.get(phone);
-          // Só busca o histórico completo se for a conversa selecionada ou se não tivermos transcript
-          const shouldFetchFull = chat.remoteJid === selected?.remote_jid || !ex?.transcript?.length;
-          const raw = shouldFetchFull ? await evolution.findMessages(instance, chat.remoteJid!) : [];
-          const transcript = normalizeTranscript(asArray<any>(raw));
-          const fallbackTranscript = normalizeTranscript(chat.lastMessage ? [chat.lastMessage] : []);
-          const mergedTranscript = transcript.length > 0 ? transcript : (ex?.transcript ?? fallbackTranscript); mergedTranscript.sort((a, b) => +new Date(a.at || 0) - +new Date(b.at || 0));
+           // Só busca o histórico completo se for a conversa selecionada (para performance)
+           const isSelected = chat.remoteJid === selected?.remote_jid || (selectedId?.split(':')[1] === phone);
+           const hasNoTranscript = !ex?.transcript?.length;
+           const raw = (isSelected || hasNoTranscript) ? await evolution.findMessages(instance, chat.remoteJid!).catch(() => []) : [];
+           const transcript = normalizeTranscript(asArray<any>(raw));
+           const mergedTranscript = transcript.length > 0 ? transcript : (ex?.transcript ?? normalizeTranscript(chat.lastMessage ? [chat.lastMessage] : [])); 
+           mergedTranscript.sort((a, b) => +new Date(a.at || 0) - +new Date(b.at || 0));
           const lastAt =
             mergedTranscript[mergedTranscript.length - 1]?.at ??
             normTs(chat.updatedAt ?? chat.lastMessageTime ?? chat.conversationTimestamp ?? chat.lastMessage?.messageTimestamp);
@@ -646,8 +694,8 @@ function ConversasPage() {
     // syncFromWhatsApp(false) já é chamado pelo Realtime e visibilitychange
     const initialTimer = window.setTimeout(() => syncFromWhatsApp(false), 300);
 
-    // Sincronização automática menos frequente para não sobrecarregar
-    const poller = window.setInterval(() => syncFromWhatsApp(false), 30000);
+     // Sincronização automática em background a cada 15s
+     const poller = window.setInterval(() => syncFromWhatsApp(false), 15000);
 
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
@@ -725,7 +773,10 @@ function ConversasPage() {
         toast.error("Sessão expirada. Faça login novamente.");
         return;
       }
-       const jid = selected.remote_jid || (selected.is_group && !selected.contact_phone.includes("@") ? `${selected.contact_phone}@g.us` : selected.contact_phone);
+        let jid = selected.remote_jid || selected.contact_phone;
+        if (!jid.includes("@")) {
+          jid = selected.is_group ? `${jid}@g.us` : `${jid}@s.whatsapp.net`;
+        }
        const instance = await resolveInstance();
        
        if (!instance) {
@@ -847,9 +898,9 @@ function ConversasPage() {
       rec.ondataavailable = (e) => e.data.size > 0 && chunksRef.current.push(e.data);
       rec.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        const b64 = await blobToBase64(blob); // Retorna base64 limpo sem prefixo
-        await sendPayload({ kind: "audio", media: b64, mimetype: "audio/mp4" }); // Evolution prefere audio/mp4 ou audio/ogg
+         const blob = new Blob(chunksRef.current, { type: "audio/ogg; codecs=opus" });
+         const b64 = await blobToBase64(blob);
+         await sendPayload({ kind: "audio", media: b64, mimetype: "audio/ogg" });
       };
       rec.start();
       recorderRef.current = rec;
@@ -1097,7 +1148,19 @@ function ConversasPage() {
                 </button>
               </div>
 
-              <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto space-y-4 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-fixed bg-opacity-5 scroll-smooth custom-scrollbar relative">
+               <div 
+                 ref={scrollRef} 
+                 onScroll={handleScroll}
+                 className="flex-1 p-6 overflow-y-auto space-y-4 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-fixed bg-opacity-5 scroll-smooth custom-scrollbar relative"
+               >
+                   {showScrollBottom && (
+                     <button
+                       onClick={() => scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" })}
+                       className="fixed bottom-24 right-8 z-50 h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center animate-in zoom-in-50 duration-300 hover:scale-110 active:scale-95"
+                     >
+                       <ChevronDown className="h-5 w-5" />
+                     </button>
+                   )}
                 <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background/80 pointer-events-none" />
                 {(selected.transcript ?? []).length === 0 ? (
                   <div className="text-xs text-center text-muted-foreground py-10">Sem mensagens registradas.</div>
@@ -1225,7 +1288,12 @@ function ConversasPage() {
                       rows={1} style={{ overflow: "hidden" }} onInput={(e) => { e.currentTarget.style.height = "auto"; e.currentTarget.style.height = e.currentTarget.scrollHeight + "px"; }}
                       placeholder={recording ? "Gravando áudio..." : "Digite uma mensagem..."}
                       value={text}
-                      onChange={(e) => setText(e.target.value)}
+                       onChange={(e) => {
+                         const val = e.target.value;
+                         setText(val);
+                         if (val.endsWith("/")) setQuickRepliesOpen(true);
+                         else if (!val.includes("/")) setQuickRepliesOpen(false);
+                       }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
@@ -1316,9 +1384,31 @@ function ConversasPage() {
                     </div>
                   )}
 
-                  {/* Stickers Popover Estilizado */}
-                  {stickerOpen && (
-                    <div className="absolute bottom-[calc(100%+12px)] left-0 z-50 bg-popover/95 backdrop-blur-xl border border-border/20 rounded-[24px] shadow-2xl p-4 w-[320px] animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+                   {/* Respostas Rápidas */}
+                   {quickRepliesOpen && (
+                     <div className="absolute bottom-[calc(100%+12px)] left-0 z-50 bg-popover/95 backdrop-blur-xl border border-border/20 rounded-2xl shadow-2xl p-2 w-[300px] animate-in slide-in-from-bottom-2 duration-200">
+                       <div className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest mb-2 px-2 py-1">Respostas Rápidas</div>
+                       <div className="space-y-1">
+                         {QUICK_REPLIES.map((r) => (
+                           <button
+                             key={r.shortcut}
+                             onClick={() => {
+                               setText(r.text);
+                               setQuickRepliesOpen(false);
+                             }}
+                             className="w-full text-left p-2 rounded-lg hover:bg-muted/50 transition-colors group"
+                           >
+                             <div className="text-[11px] font-bold text-primary">{r.shortcut}</div>
+                             <div className="text-[12px] text-muted-foreground truncate">{r.text}</div>
+                           </button>
+                         ))}
+                       </div>
+                     </div>
+                   )}
+
+                    {/* Stickers Popover Estilizado */}
+                    {stickerOpen && (
+                      <div className="absolute bottom-[calc(100%+12px)] left-0 z-50 bg-popover/95 backdrop-blur-xl border border-border/20 rounded-[24px] shadow-2xl p-4 w-[320px] animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
                       <div className="flex items-center justify-between mb-3 px-1">
                         <span className="text-[11px] font-black text-muted-foreground/60 uppercase tracking-widest">Emojis & Stickers</span>
                         <button onClick={() => setStickerOpen(false)} className="h-6 w-6 rounded-full hover:bg-muted transition-colors flex items-center justify-center">
