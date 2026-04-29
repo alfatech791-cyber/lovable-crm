@@ -1,3 +1,5 @@
+ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+ import { Trash2 } from "lucide-react";
  import { Plus, MoreVertical, TrendingUp, ChevronRight } from "lucide-react";
  import { DealCard } from "./DealCard";
  import { cn } from "@/lib/utils";
@@ -10,10 +12,11 @@
    onMoveDeal: (dealId: string, newStageId: string) => void;
    dragId: string | null;
    setDragId: (id: string | null) => void;
-   onSelectDeal?: (deal: any) => void;
+    onSelectDeal?: (deal: any) => void;
+    onDeleteStage?: (id: string) => void;
  }
  
- export function StageColumn({ stage, deals, onAddDeal, onRemoveDeal, onMoveDeal, dragId, setDragId, onSelectDeal }: StageColumnProps) {
+  export function StageColumn({ stage, deals, onAddDeal, onRemoveDeal, onMoveDeal, dragId, setDragId, onSelectDeal, onDeleteStage }: StageColumnProps) {
    const total = deals.reduce((s, d) => s + Number(d.deal_value ?? 0), 0);
    const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
  
@@ -37,9 +40,18 @@
              <span className="text-[10px] font-black bg-background/80 px-2 py-0.5 rounded-full border border-border/50 text-primary shadow-sm">
                {deals.length}
              </span>
-             <button className="text-muted-foreground hover:text-foreground transition p-1 hover:bg-background/50 rounded-md">
-               <MoreVertical className="h-3.5 w-3.5" />
-             </button>
+             <DropdownMenu>
+               <DropdownMenuTrigger asChild>
+                 <button className="text-muted-foreground hover:text-foreground transition p-1 hover:bg-background/50 rounded-md">
+                   <MoreVertical className="h-3.5 w-3.5" />
+                 </button>
+               </DropdownMenuTrigger>
+               <DropdownMenuContent align="end" className="w-40">
+                 <DropdownMenuItem onClick={() => onDeleteStage?.(stage.id)} className="text-destructive focus:text-destructive gap-2">
+                   <Trash2 className="h-4 w-4" /> Remover Etapa
+                 </DropdownMenuItem>
+               </DropdownMenuContent>
+             </DropdownMenu>
            </div>
          </div>
          
