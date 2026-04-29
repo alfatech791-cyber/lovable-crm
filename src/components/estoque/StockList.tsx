@@ -24,7 +24,7 @@ import { toast } from "sonner";
   const [filterCategory, setFilterCategory] = useState("all");
   const [viewTab, setViewTab] = useState("all");
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
-  const [quickProduct, setQuickProduct] = useState({ name: "", price: "", stock: "" });
+    const [quickProduct, setQuickProduct] = useState({ name: "", price: "", stock: "", category: "Acessórios" });
 
     useEffect(() => {
       if (!user?.id) return;
@@ -51,22 +51,24 @@ import { toast } from "sonner";
      return { totalValue, totalCost, lowStock, outOfStock, totalItems: localProducts.length };
    }, [localProducts]);
  
-   const handleExport = () => {
-     const headers = ["ID", "Nome", "Referência", "Categoria", "Estoque", "Preço", "Preço de Custo", "Total Venda", "Total Custo"];
-     const rows = filteredProducts.map(p => [
-       p.id,
-       p.name,
-       p.reference || p.sku || "",
-       p.category || "",
-       p.stock || 0,
-       p.price,
-       p.cost_price || 0,
-       (p.price * (p.stock || 0)).toFixed(2),
-       ((p.cost_price || 0) * (p.stock || 0)).toFixed(2)
-     ]);
- 
-     const csvContent = "data:text/csv;charset=utf-8," 
-       + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+  const handleExport = () => {
+    const headers = ["ID", "Nome", "SKU", "IMEI", "Categoria", "Marca", "Estoque", "Min Estoque", "Preço Venda", "Preço Custo", "Localização"];
+    const rows = filteredProducts.map(p => [
+      p.id,
+      p.name,
+      p.sku || "",
+      p.imei || "",
+      p.category || "",
+      p.brand || "",
+      p.stock || 0,
+      p.min_stock || 0,
+      p.price,
+      p.cost_price || 0,
+      p.location || ""
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + [headers.join(","), ...rows.map(e => e.map(cell => `"${cell}"`).join(","))].join("\n");
  
      const encodedUri = encodeURI(csvContent);
      const link = document.createElement("a");
@@ -155,19 +157,19 @@ import { toast } from "sonner";
       if (!user?.id) return;
       if (!quickProduct.name.trim()) { toast.error("Nome é obrigatório"); return; }
       setLoading(true);
-      const payload: any = {
+      const payload = {
         user_id: user.id,
         name: quickProduct.name.trim(),
         price: Number(quickProduct.price || 0),
         stock_quantity: Number(quickProduct.stock || 0),
-        category: "Acessórios",
+        category: quickProduct.category,
       };
       const { data: row, error } = await supabase.from("products").insert(payload).select().single();
       setLoading(false);
       if (error) return toast.error("Erro ao criar: " + error.message);
       setLocalProducts((prev) => [{ ...row, stock: row.stock_quantity }, ...prev]);
       toast.success("Produto cadastrado com sucesso!");
-      setQuickProduct({ name: "", price: "", stock: "" });
+      setQuickProduct({ name: "", price: "", stock: "", category: "Acessórios" });
       setIsQuickAddOpen(false);
     };
 
@@ -185,7 +187,7 @@ import { toast } from "sonner";
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
               <div className="space-y-1.5 md:col-span-1">
                 <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Nome do Produto</Label>
                 <input 
@@ -206,7 +208,7 @@ import { toast } from "sonner";
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Estoque Inicial</Label>
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Estoque</Label>
                 <input 
                   type="number"
                   placeholder="0" 
@@ -214,6 +216,20 @@ import { toast } from "sonner";
                   onChange={(e) => setQuickProduct({...quickProduct, stock: e.target.value})}
                   className="w-full h-11 px-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20"
                 />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Categoria</Label>
+                <Select value={quickProduct.category} onValueChange={(v) => setQuickProduct({...quickProduct, category: v})}>
+                  <SelectTrigger className="w-full h-11 rounded-xl bg-card border-border">
+                    <SelectValue placeholder="Categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Smartphones">Smartphones</SelectItem>
+                    <SelectItem value="Tablets">Tablets</SelectItem>
+                    <SelectItem value="Acessórios">Acessórios</SelectItem>
+                    <SelectItem value="Serviços">Serviços</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex gap-2">
                 <button 
