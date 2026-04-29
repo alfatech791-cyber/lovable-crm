@@ -136,11 +136,10 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
      setFormData(prev => {
        const newData = { ...prev, [field]: value };
        
-       if (field === "price" || field === "cost_price") {
-         const { margin, markup } = calculateFromPrice(
-           field === "price" ? (typeof value === 'number' ? value : parseFloat(value) || 0) : prev.price,
-           field === "cost_price" ? (typeof value === 'number' ? value : parseFloat(value) || 0) : prev.cost_price
-         );
+        if (field === "price" || field === "cost_price") {
+          const p = field === "price" ? (typeof value === 'number' ? value : parseFloat(value) || 0) : prev.price;
+          const c = field === "cost_price" ? (typeof value === 'number' ? value : parseFloat(value) || 0) : prev.cost_price;
+          const { margin, markup } = calculateFromPrice(p, c);
          newData.margin = margin;
          newData.markup = markup;
        } else if (field === "margin") {
