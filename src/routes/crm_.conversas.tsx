@@ -1319,8 +1319,11 @@ function ConversasPage() {
                        onChange={(e) => {
                          const val = e.target.value;
                          setText(val);
-                         if (val.endsWith("/")) setQuickRepliesOpen(true);
-                         else if (!val.includes("/")) setQuickRepliesOpen(false);
+                        if (val.endsWith("/")) {
+                          setQuickRepliesOpen(true);
+                        } else if (quickRepliesOpen && !val.includes("/")) {
+                          setQuickRepliesOpen(false);
+                        }
                        }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey && !sending) {
