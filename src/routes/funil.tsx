@@ -158,6 +158,7 @@ type Deal = {
    const [deals, setDeals] = useState<Deal[]>([]);
    const [leads, setLeads] = useState<{ id: string; name: string }[]>([]);
    const [conversations, setConversations] = useState<Conversation[]>([]);
+   const [statusFilter, setStatusFilter] = useState<"all" | "bot" | "manual" | "unread">("all");
    const [loading, setLoading] = useState(true);
    const [dragId, setDragId] = useState<string | null>(null);
    const [adding, setAdding] = useState<{ stage_id: string; initial: boolean } | null>(null);
@@ -699,15 +700,38 @@ type Deal = {
                         <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
                       </Button>
                     </div>
-                    <div className="relative">
-                      <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                      <Input 
-                        placeholder="Filtrar conversas..." 
-                        className="pl-9 h-9 text-xs bg-muted/50 border-none rounded-lg"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
-                    </div>
+                     <div className="space-y-2">
+                       <div className="relative">
+                         <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                         <Input 
+                           placeholder="Filtrar conversas..." 
+                           className="pl-9 h-9 text-xs bg-muted/50 border-none rounded-lg"
+                           value={searchTerm}
+                           onChange={(e) => setSearchTerm(e.target.value)}
+                         />
+                       </div>
+                       <div className="flex flex-wrap gap-1">
+                         {[
+                           { id: 'all', label: 'Todas' },
+                           { id: 'bot', label: 'Bot' },
+                           { id: 'manual', label: 'Humano' },
+                           { id: 'unread', label: 'Não Lidas' }
+                         ].map((f) => (
+                           <button
+                             key={f.id}
+                             onClick={() => setStatusFilter(f.id as any)}
+                             className={cn(
+                               "px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter transition-all",
+                               statusFilter === f.id 
+                                 ? "bg-primary text-primary-foreground" 
+                                 : "bg-muted text-muted-foreground hover:bg-muted-foreground/10"
+                             )}
+                           >
+                             {f.label}
+                           </button>
+                         ))}
+                       </div>
+                     </div>
                   </div>
                   <div className="flex-1 overflow-y-auto">
                     {conversations.length === 0 ? (
@@ -716,12 +740,24 @@ type Deal = {
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Nenhuma conversa</p>
                       </div>
                     ) : (
-                      conversations
-                        .filter(c => 
-                          (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
-                          c.contact_phone.includes(searchTerm)
-                        )
-                        .map((conv) => (
+       conversations
+         .filter(c => {
+           const matchSearch = !searchTerm || 
+             (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
+             c.contact_phone.includes(searchTerm);
+           
+           if (!matchSearch) return false;
+           
+           if (statusFilter === "bot") return c.status !== "handed_off";
+           if (statusFilter === "manual") return c.status === "handed_off";
+           if (statusFilter === "unread") {
+             // Simulação simples de contagem de não lidas similar à página de conversas
+             const incoming = (c.transcript ?? []).filter((m) => m.role === "user").length;
+             return incoming > 0; // Para simplificar no funil, apenas mostra se tem mensagens do usuário
+           }
+           return true;
+         })
+         .map((conv) => (
                         <button
                           key={conv.id}
                           onClick={() => {
