@@ -66,7 +66,7 @@ type Deal = {
       setSyncing(true);
       try {
         const instances = await evolution.getInstances();
-        const instance = instances.find(i => i.status === 'open' || i.status === 'connected')?.instanceName;
+        const instance = instances.find(i => i.status === 'open' || (i as any).status === 'connected')?.instanceName;
         
         if (!instance) {
           toast.error("Nenhuma instância do WhatsApp conectada");
@@ -499,7 +499,18 @@ type Deal = {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <div className="flex bg-muted/30 p-1 rounded-xl border border-border/20">
+                <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-xl border border-border/20">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      disabled={syncing}
+                      className={cn("h-8 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all", syncing ? "bg-primary/20 text-primary animate-pulse" : "hover:bg-primary/10 hover:text-primary")}
+                      onClick={syncFromWhatsApp}
+                    >
+                      {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wifi className="h-3 w-3" />}
+                      {syncing ? "Sincronizando..." : "Sincronizar WhatsApp"}
+                    </Button>
+                    <div className="w-[1px] h-4 bg-border/40 mx-1" />
                    <Button 
                     variant={sortBy === "recent" ? "secondary" : "ghost"} 
                     size="sm" 
