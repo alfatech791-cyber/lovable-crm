@@ -753,12 +753,6 @@ function ConversasPage() {
        if (!res.ok) throw new Error(data.error || "Erro ao enviar via Evolution");
 
        // Grava localmente no banco para manter o histórico
-       const { data: conv } = await supabase
-         .from("bot_conversations")
-         .select("transcript, contact_name, status")
-         .eq("id", selected.id)
-         .single();
-
            const localConv = items.find(c => c.id === selected.id);
            const transcript = Array.isArray(localConv?.transcript) ? localConv.transcript : [];
            const placeholder = payload.kind === "audio" ? "🎤 Áudio" : payload.kind === "sticker" ? "🟦 Figurinha" : payload.kind === "image" ? "🖼️ Imagem" : payload.text;
