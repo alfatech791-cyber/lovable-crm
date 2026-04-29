@@ -1,3 +1,39 @@
+           {/* Destaque de Experiência do Cliente */}
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+             <div className="bg-gradient-to-br from-primary/5 to-transparent border border-primary/20 rounded-2xl p-6 shadow-sm">
+               <div className="flex items-center gap-3 mb-4">
+                 <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary grid place-items-center">
+                   <Sparkles className="h-5 w-5" />
+                 </div>
+                 <div>
+                   <h3 className="font-bold text-sm">Dica de Experiência</h3>
+                   <p className="text-xs text-muted-foreground">Otimize sua conversão</p>
+                 </div>
+               </div>
+               <p className="text-sm leading-relaxed text-foreground/80">
+                 Clientes que recebem uma resposta nos primeiros <strong>5 minutos</strong> têm 10x mais chances de converter. Verifique suas conversas pendentes.
+               </p>
+             </div>
+
+             <div className="bg-gradient-to-br from-success/5 to-transparent border border-success/20 rounded-2xl p-6 shadow-sm">
+               <div className="flex items-center gap-3 mb-4">
+                 <div className="h-10 w-10 rounded-xl bg-success/10 text-success grid place-items-center">
+                   <CheckCircle2 className="h-5 w-5" />
+                 </div>
+                 <div>
+                   <h3 className="font-bold text-sm">Saúde da Carteira</h3>
+                   <p className="text-xs text-muted-foreground">Engajamento dos clientes</p>
+                 </div>
+               </div>
+               <div className="flex items-center gap-4">
+                 <div className="flex-1 h-2 bg-success/10 rounded-full overflow-hidden">
+                   <div className="h-full bg-success w-[85%]" />
+                 </div>
+                 <span className="text-sm font-bold text-success">Excelente (85%)</span>
+               </div>
+             </div>
+           </div>
+
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
