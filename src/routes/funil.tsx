@@ -165,6 +165,35 @@ type Deal = {
      return () => { supabase.removeChannel(ch); };
    }, [user?.id, chatOpen, currentConversation?.id]);
  
+   // Realtime para a lista de conversas
+   useEffect(() => {
+     if (!user?.id) return;
+     
+     const ch = supabase
+       .channel("funil_conversations_list")
+       .on(
+         "postgres_changes",
+         { 
+           event: "*", 
+           schema: "public", 
+           table: "bot_conversations", 
+           filter: `user_id=eq.${user.id}` 
+         },
+         () => {
+           // Recarrega a lista quando houver qualquer mudança (nova mensagem, novo contato, etc)
+           supabase.from("bot_conversations")
+             .select("*")
+             .eq("user_id", user.id)
+             .order("last_message_at", { ascending: false })
+             .then(({ data }) => {
+               if (data) setConversations(data as any as Conversation[]);
+             });
+         }
+       )
+       .subscribe();
+       
+     return () => { supabase.removeChannel(ch); };
+   }, [user?.id]);
  
     const filteredDeals = deals.filter(d => {
       const leadName = d.lead?.name?.toLowerCase() || "";
