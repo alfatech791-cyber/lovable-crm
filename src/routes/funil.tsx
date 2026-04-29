@@ -55,7 +55,7 @@ type Deal = {
 };
 
  function FunnelPage() {
-   const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
    const [viewMode, setViewMode] = useState<"kanban" | "chat">("kanban");
    const [stages, setStages] = useState<Stage[]>([]);
    const [deals, setDeals] = useState<Deal[]>([]);
@@ -192,9 +192,32 @@ type Deal = {
        )
        .subscribe();
        
-     return () => { supabase.removeChannel(ch); };
-   }, [user?.id]);
- 
+      return () => { supabase.removeChannel(ch); };
+    }, [user?.id]);
+
+    // Realtime para Negócios (Deals)
+    useEffect(() => {
+      if (!user?.id) return;
+      
+      const ch = supabase
+        .channel("funil_pipeline_leads")
+        .on(
+          "postgres_changes",
+          { 
+            event: "*", 
+            schema: "public", 
+            table: "pipeline_leads", 
+            filter: `user_id=eq.${user.id}` 
+          },
+          () => {
+            load(); // Recarrega quando houver qualquer mudança no pipeline
+          }
+        )
+        .subscribe();
+        
+      return () => { supabase.removeChannel(ch); };
+    }, [user?.id]);
+
     const filteredDeals = deals.filter(d => {
       const leadName = d.lead?.name?.toLowerCase() || "";
       const leadPhone = d.lead?.phone || "";
@@ -204,13 +227,21 @@ type Deal = {
  
    const totalPipeline = deals.reduce((sum, d) => sum + Number(d.deal_value ?? 0), 0);
 
-  const load = async () => {
-    if (!user?.id) return;
-    try {
-      setLoading(true);
-      // Garante estágios padrão
-      await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
-      
+   const load = async (silent = false) => {
+     if (!user?.id) {
+       if (!authLoading) setLoading(false);
+       return;
+     }
+     
+     try {
+       if (!silent) setLoading(true);
+       // Garante estágios padrão chamando o RPC (agora criado no banco)
+       try {
+         await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
+       } catch (rpcErr) {
+         console.warn("RPC ensure_default_funnel_stages falhou, continuando...", rpcErr);
+       }
+
       const [stRes, dlRes, ldRes, convRes, allDealsRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
         supabase.from("pipeline_leads").select("*, lead:leads(name, phone, source)").eq("user_id", user.id).order("created_at", { ascending: false }),
@@ -270,59 +301,8 @@ type Deal = {
       const loadedLeads = (ldRes.data as any) ?? [];
       setLeads(loadedLeads);
 
-      // Auto-create deals and leads for conversations that don't have one yet
-      if (stRes.data && stRes.data.length > 0) {
-        const firstStageId = stRes.data[0].id;
-        let needsReload = false;
-
-        for (const conv of convs) {
-          let leadId = loadedLeads.find((l: any) => l.phone === conv.contact_phone)?.id;
-          
-          // If no lead exists for this phone, create one
-          if (!leadId) {
-            try {
-              const { data: newLead, error: leadError } = await supabase
-                .from("leads")
-                .insert({
-                  user_id: user.id,
-                  name: conv.contact_name || conv.contact_phone,
-                  phone: conv.contact_phone,
-                  source: 'whatsapp'
-                })
-                .select()
-                .single();
-
-              if (leadError) throw leadError;
-              leadId = newLead.id;
-              needsReload = true;
-            } catch (e) {
-              console.error("Erro ao criar lead automático:", e);
-              continue;
-            }
-          }
-
-          // If lead exists but no deal exists, create one
-          if (leadId && !existingLeadIds.has(leadId)) {
-            try {
-              await supabase.from("pipeline_leads").insert({
-                user_id: user.id,
-                lead_id: leadId,
-                stage_id: firstStageId,
-                deal_value: 0
-              });
-              existingLeadIds.add(leadId);
-              needsReload = true;
-            } catch (e) {
-              console.error("Erro ao criar negócio automático:", e);
-            }
-          }
-        }
-        
-        if (needsReload) {
-          load();
-          return;
-        }
-      }
+       // A criação automática de leads e negócios agora é feita via gatilho no banco (handle_new_bot_conversation)
+       // para garantir sincronização instantânea sem depender de lógica no frontend.
     } catch (err) {
       console.error("Erro no load:", err);
       toast.error("Erro ao carregar dados do funil");
@@ -331,7 +311,7 @@ type Deal = {
     }
   };
 
-  useEffect(() => { load(); }, [user?.id]);
+   useEffect(() => { load(); }, [user?.id, authLoading]);
 
   const moveDeal = async (dealId: string, newStageId: string) => {
     setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, stage_id: newStageId } : d)));
