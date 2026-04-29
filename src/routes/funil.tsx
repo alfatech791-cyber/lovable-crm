@@ -436,7 +436,17 @@ type Deal = {
                   <span className="text-[10px] font-black text-primary uppercase tracking-widest">IA Ativa</span>
                 </div>
                 
-                <div className="h-8 w-[1px] bg-border/40" />
+                 <div className="h-8 w-[1px] bg-border/40" />
+                 
+                 <Button 
+                   variant="ghost" 
+                   size="icon" 
+                   className="h-10 w-10 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+                   onClick={() => load()}
+                   disabled={loading}
+                 >
+                   <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+                 </Button>
                 
                 <Button className="h-10 px-6 gap-2 text-xs font-black shadow-lg shadow-primary/20 rounded-xl hover:scale-105 transition-all" onClick={() => setAdding({ stage_id: stages[0]?.id || "", lead_id: "", deal_value: "" })}>
                   <Plus className="h-4 w-4" /> NOVO NEGÓCIO
@@ -483,9 +493,9 @@ type Deal = {
                     />
                   ))}
                   
-                  {/* Coluna de "Adicionar Etapa" (Placeholder visual por enquanto) */}
-                  <div className="w-[300px] shrink-0 h-full rounded-2xl border-2 border-dashed border-border/40 flex flex-col items-center justify-center gap-4 opacity-40 hover:opacity-100 transition-all group cursor-pointer bg-muted/5">
-                    <div className="h-12 w-12 rounded-full bg-muted grid place-items-center group-hover:bg-primary/10 group-hover:scale-110 transition-all">
+                   {/* Coluna de "Adicionar Etapa" Melhorada */}
+                   <div className="w-[310px] shrink-0 h-[calc(100vh-280px)] rounded-2xl border-2 border-dashed border-border/40 flex flex-col items-center justify-center gap-4 opacity-40 hover:opacity-100 hover:border-primary/30 hover:bg-primary/5 transition-all group cursor-pointer">
+                     <div className="h-14 w-14 rounded-2xl bg-muted grid place-items-center group-hover:bg-primary/10 group-hover:scale-110 group-hover:rotate-90 transition-all">
                       <Plus className="h-6 w-6 text-muted-foreground group-hover:text-primary" />
                     </div>
                     <span className="text-xs font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Nova Etapa</span>
