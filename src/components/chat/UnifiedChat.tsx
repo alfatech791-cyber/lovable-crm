@@ -55,18 +55,22 @@ const asArray = <T,>(value: unknown): T[] => {
   return [];
 };
 
-const getMessageText = (message: any) =>
-  message?.message?.conversation ??
-  message?.message?.extendedTextMessage?.text ??
-  message?.message?.imageMessage?.caption ??
-  message?.message?.videoMessage?.caption ??
-  message?.text ||
-  message?.body ||
-  (message?.message?.imageMessage ? "🖼️ Imagem" : 
-   message?.message?.videoMessage ? "🎥 Vídeo" : 
-   message?.message?.audioMessage ? "🎤 Áudio" : 
-   message?.message?.stickerMessage ? "🟦 Figurinha" : 
-   message?.message?.documentMessage ? "📄 Documento" : "");
+const getMessageText = (message: any) => {
+  const msg = message?.message || message;
+  return (
+    msg?.conversation ||
+    msg?.extendedTextMessage?.text ||
+    msg?.imageMessage?.caption ||
+    msg?.videoMessage?.caption ||
+    msg?.text ||
+    msg?.body ||
+    (msg?.imageMessage ? "🖼️ Imagem" : 
+     msg?.videoMessage ? "🎥 Vídeo" : 
+     msg?.audioMessage ? "🎤 Áudio" : 
+     msg?.stickerMessage ? "🟦 Figurinha" : 
+     msg?.documentMessage ? "📄 Documento" : "")
+  );
+};
 
 const normalizeTimestamp = (value: unknown) => {
   if (typeof value === "number") {
