@@ -33,6 +33,7 @@ function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [saving, setSaving] = useState(false);
 
