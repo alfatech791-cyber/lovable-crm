@@ -527,7 +527,18 @@ type Deal = {
               <div className="flex-1 flex overflow-hidden bg-background">
                 {/* Lista de Conversas */}
                 <div className="w-80 border-r border-border flex flex-col bg-card/20">
-                  <div className="p-4 border-b border-border">
+                  <div className="p-4 border-b border-border space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Conversas</span>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 rounded-md hover:bg-primary/10 hover:text-primary transition-colors"
+                        onClick={() => load()}
+                      >
+                        <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
+                      </Button>
+                    </div>
                     <div className="relative">
                       <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                       <Input 
