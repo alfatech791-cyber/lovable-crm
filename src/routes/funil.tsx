@@ -20,6 +20,9 @@ import { useAuth } from "@/contexts/AuthContext";
  };
  
  import { StageColumn } from "@/components/funil/StageColumn";
+import { AddDealDialog } from "@/components/funil/AddDealDialog";
+import { AddStageDialog } from "@/components/funil/AddStageDialog";
+
  import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -157,7 +160,8 @@ type Deal = {
    const [conversations, setConversations] = useState<Conversation[]>([]);
    const [loading, setLoading] = useState(true);
    const [dragId, setDragId] = useState<string | null>(null);
-   const [adding, setAdding] = useState<{ stage_id: string; lead_id: string; deal_value: string } | null>(null);
+   const [adding, setAdding] = useState<{ stage_id: string; initial: boolean } | null>(null);
+  const [addingStage, setAddingStage] = useState(false);
      const [searchTerm, setSearchTerm] = useState("");
      const [sortBy, setSortBy] = useState<"recent" | "value" | "whatsapp">("recent");
    const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
@@ -168,22 +172,7 @@ type Deal = {
    const [sending, setSending] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    const addStage = async () => {
-      if (!user?.id) return;
-      const name = prompt("Nome da nova etapa:");
-      if (!name) return;
-      const nextIndex = stages.length > 0 ? Math.max(...stages.map(s => s.order_index)) + 1 : 0;
-      const colors = ["#8B5CF6", "#EC4899", "#3B82F6", "#10B981", "#F59E0B"];
-      const color = colors[stages.length % colors.length];
-      const { error } = await supabase.from("funnel_stages").insert({
-        user_id: user.id,
-        name,
-        order_index: nextIndex,
-        color
-      });
-      if (error) toast.error("Erro ao criar etapa: " + error.message);
-      else load();
-    };
+    const addStage = () => setAddingStage(true);
 
     const deleteStage = async (id: string) => {
       if (!confirm("Tem certeza que deseja remover esta etapa? Todas as negociações nela serão perdidas.")) return;
@@ -627,7 +616,7 @@ type Deal = {
                    <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
                  </Button>
                 
-                <Button className="h-10 px-6 gap-2 text-xs font-black shadow-lg shadow-primary/20 rounded-xl hover:scale-105 transition-all" onClick={() => setAdding({ stage_id: stages[0]?.id || "", lead_id: "", deal_value: "" })}>
+                <Button className="h-10 px-6 gap-2 text-xs font-black shadow-lg shadow-primary/20 rounded-xl hover:scale-105 transition-all" onClick={() => setAdding({ stage_id: stages[0]?.id || "", initial: true })}>
                   <Plus className="h-4 w-4" /> NOVO NEGÓCIO
                 </Button>
               </div>
@@ -675,7 +664,7 @@ type Deal = {
                       key={stage.id}
                       stage={stage}
                       deals={filteredDeals.filter((d) => d.stage_id === stage.id)}
-                      onAddDeal={(stageId) => setAdding({ stage_id: stageId, lead_id: "", deal_value: "" })}
+                      onAddDeal={(stageId) => setAdding({ stage_id: stageId, initial: true })}
                       onRemoveDeal={removeDeal}
                       onMoveDeal={moveDeal}
                       dragId={dragId}
@@ -1006,32 +995,19 @@ type Deal = {
          </div>
        )}
 
-      <Dialog open={!!adding} onOpenChange={(o) => !o && setAdding(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Nova negociação</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Lead</Label>
-              <Select value={adding?.lead_id ?? ""} onValueChange={(v) => setAdding((p) => p ? { ...p, lead_id: v } : p)}>
-                <SelectTrigger><SelectValue placeholder="Selecione um lead" /></SelectTrigger>
-                <SelectContent>
-                  {leads.length === 0 ? (
-                    <div className="px-2 py-3 text-xs text-muted-foreground">Cadastre leads primeiro.</div>
-                  ) : leads.map((l) => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Valor (R$)</Label>
-              <Input type="number" min={0} value={adding?.deal_value ?? ""} onChange={(e) => setAdding((p) => p ? { ...p, deal_value: e.target.value } : p)} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAdding(null)}>Cancelar</Button>
-            <Button onClick={addDeal}>Criar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AddDealDialog 
+         open={!!adding} 
+         onOpenChange={(o) => !o && setAdding(null)}
+         initialStageId={adding?.stage_id || ""}
+         leads={leads}
+         onSuccess={load}
+       />
+       <AddStageDialog
+         open={addingStage}
+         onOpenChange={setAddingStage}
+         onSuccess={load}
+         stagesCount={stages.length}
+       />
     </div>
   );
 }
