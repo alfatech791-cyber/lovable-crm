@@ -787,41 +787,43 @@ function ConversasPage() {
        let endpoint = "";
        let body: any = { number: jid };
 
-        const payloadData = {
-          number: jid,
-          delay: 1200,
-          presence: "composing",
-        };
-
         if (payload.kind === "text") {
           endpoint = `/api/evolution/message/sendText/${instance}`;
           body = {
-            ...payloadData,
+            number: jid,
             text: payload.text,
+            delay: 1200,
             linkPreview: false,
+            presence: "composing"
           };
         } else if (payload.kind === "audio") {
           endpoint = `/api/evolution/message/sendWhatsAppAudio/${instance}`;
           body = {
-            ...payloadData,
+            number: jid,
             audio: payload.media,
+            delay: 1200,
             encoding: true,
+            presence: "composing"
           };
         } else if (payload.kind === "sticker") {
           endpoint = `/api/evolution/message/sendSticker/${instance}`;
           body = {
-            ...payloadData,
+            number: jid,
             sticker: payload.media,
+            delay: 1200,
+            presence: "composing"
           };
         } else if (payload.kind === "image") {
           endpoint = `/api/evolution/message/sendMedia/${instance}`;
           body = {
-            ...payloadData,
+            number: jid,
             mediatype: "image",
             media: payload.media,
             mimetype: payload.mimetype || "image/png",
             caption: payload.text || "",
+            delay: 1200,
             fileName: payload.fileName || "image.png",
+            presence: "composing"
           };
         }
 
@@ -1399,13 +1401,19 @@ function ConversasPage() {
                               toast.promise(
                                 (async () => {
                                   // Re-use existing logic but for target
+                                  let jid = target.remote_jid || target.contact_phone;
+                                  if (!jid.includes("@")) {
+                                    jid = target.is_group ? `${jid}@g.us` : `${jid}@s.whatsapp.net`;
+                                  }
                                   const res = await fetch(`/api/evolution/message/sendText/${resolvedInstance}`, {
                                     method: "POST",
                                     headers: { "Content-Type": "application/json" },
                                     body: JSON.stringify({
-                                      number: target.contact_phone,
-                                      options: { delay: 1200, presence: "composing", linkPreview: true },
-                                      text: forwardMsg.content
+                                      number: jid,
+                                      text: forwardMsg.content,
+                                      delay: 1200,
+                                      presence: "composing",
+                                      linkPreview: true
                                     }),
                                   });
                                   if (!res.ok) throw new Error("Erro ao encaminhar");
