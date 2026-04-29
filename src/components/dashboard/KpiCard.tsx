@@ -54,7 +54,7 @@ import {
    return (
      <button 
        onClick={handleClick}
-       className={`relative overflow-hidden rounded-2xl bg-card border border-border p-4 shadow-card hover:shadow-elegant hover:-translate-y-1 transition-all text-left w-full group hover:ring-2 ${styles.ring}`}
+       className={`relative overflow-hidden rounded-2xl bg-card border border-border p-3 sm:p-4 shadow-card hover:shadow-elegant hover:-translate-y-1 transition-all text-left w-full group hover:ring-2 min-w-0 ${styles.ring}`}
      >
          <div className={`absolute inset-0 bg-gradient-to-br ${styles.gradient} opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-0`} />
          <ArrowUpRight className="absolute top-3 right-3 h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all z-10" />
@@ -64,8 +64,8 @@ import {
          </div>
          <div className="min-w-0 flex-1">
            <div className="text-[11.5px] text-muted-foreground font-medium group-hover:text-foreground transition-colors pr-5">{label}</div>
-           <div className="mt-0.5 flex items-baseline gap-1.5">
-              <span className="text-[20px] lg:text-[22px] font-bold tracking-tight font-display truncate">{value}</span>
+           <div className="mt-0.5 flex items-baseline gap-1.5 flex-wrap">
+              <span className="text-[17px] sm:text-[20px] lg:text-[22px] font-bold tracking-tight font-display truncate max-w-full">{value}</span>
               {trend && <span className="text-[10px] font-semibold text-success whitespace-nowrap">↑ {trend.replace("+","")}</span>}
            </div>
            <div className="text-[11px] text-muted-foreground mt-0.5">{sub}</div>

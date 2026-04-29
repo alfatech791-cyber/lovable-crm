@@ -123,12 +123,12 @@ function Dashboard() {
      <div className="min-h-screen flex w-full bg-background/50">
        <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar 
+         <Topbar 
           title={`Olá, ${user?.user_metadata?.display_name || 'Usuário'}! 👋`}
           subtitle="Aqui está o resumo do seu negócio hoje." 
           toggleSidebar={() => setSidebarOpen(true)}
         />
-         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+         <main className="flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8">
            <HeroHeader
              userName={user?.user_metadata?.display_name || "Usuário"}
              todaySales={stats.todaySales}
@@ -138,9 +138,9 @@ function Dashboard() {
 
            <QuickActions />
 
-            <div className="flex flex-col xl:flex-row gap-6">
+             <div className="flex flex-col xl:flex-row gap-4 sm:gap-6">
              <div className="flex-1 flex flex-col gap-6 min-w-0">
-               <div className="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-4">
+               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3 sm:gap-4">
                   {loading ? (
                     Array.from({ length: 6 }).map((_, i) => (
                       <div key={i} className="h-28 rounded-2xl bg-card border border-border animate-pulse" />
