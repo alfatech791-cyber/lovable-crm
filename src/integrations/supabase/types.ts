@@ -891,6 +891,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      ensure_lead_and_pipeline_from_conversation: {
+        Args: { _name: string; _phone: string; _user_id: string }
+        Returns: undefined
+      }
       handle_new_bot_conversation_direct: {
         Args: { p_name: string; p_phone: string; p_user_id: string }
         Returns: undefined
