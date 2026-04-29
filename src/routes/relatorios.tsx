@@ -9,7 +9,6 @@ import { Topbar } from "@/components/layout/Topbar";
  } from "lucide-react";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart as RePieChart, Pie } from "recharts";
- import { funnelData as mockFunnelData, originData as mockOriginData, topPerformers as mockTopPerformers } from "@/lib/mock";
 import { useAuth } from "@/contexts/AuthContext";
  import { useState, useEffect, useCallback } from "react";
  import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +21,7 @@ export const Route = createFileRoute("/relatorios")({
  function ReportsPage() {
    const { user, profile } = useAuth();
    const [loading, setLoading] = useState(true);
-   const [stats, setStats] = useState({
+    const [stats, setStats] = useState<any>({
      revenue: 0,
      leads: 0,
      conversion: 0,
@@ -33,7 +32,107 @@ export const Route = createFileRoute("/relatorios")({
      avgTicketTrend: "+0%",
    });
  
-   const fetchReportsData = useCallback(async () => {
+    const [funnelData, setFunnelData] = useState<any[]>([]);
+    const [originData, setOriginData] = useState<any[]>([]);
+    const [topAgents, setTopAgents] = useState<any[]>([]);
+
+    const fetchReportsData = useCallback(async () => {
+      if (!user?.id) return;
+      setLoading(true);
+      try {
+        const now = new Date();
+        const firstDayMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        
+        // Sales and Revenue
+        const { data: sales } = await supabase
+          .from("sales_orders")
+          .select("total_amount, status, created_at, user_id")
+          .eq("user_id", user.id);
+
+        const concludedSales = (sales || []).filter(s => s.status === 'concluded');
+        const monthRevenue = concludedSales
+          .filter(s => new Date(s.created_at!) >= firstDayMonth)
+          .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+
+        const avgTicket = concludedSales.length > 0 
+          ? monthRevenue / concludedSales.filter(s => new Date(s.created_at!) >= firstDayMonth).length || 0
+          : 0;
+
+        // Leads
+        const { data: leads } = await supabase
+          .from("leads")
+          .select("source, status, created_at")
+          .eq("user_id", user.id);
+
+        const totalLeads = leads?.length || 0;
+        const wonLeads = leads?.filter(l => l.status === 'won' || l.status === 'concluded').length || 0;
+        const conversionRate = totalLeads > 0 ? (wonLeads / totalLeads) * 100 : 0;
+
+        setStats({
+          revenue: monthRevenue,
+          leads: totalLeads,
+          conversion: conversionRate,
+          avgTicket: avgTicket,
+          revenueTrend: "+0%",
+          leadsTrend: "+0%",
+          conversionTrend: "+0%",
+          avgTicketTrend: "+0%",
+        });
+
+        // Funnel Data
+        const { data: stages } = await supabase
+          .from("funnel_stages")
+          .select("name, color, id")
+          .eq("user_id", user.id)
+          .order("order_index");
+        
+        const { data: pipeline } = await supabase
+          .from("pipeline_leads")
+          .select("stage_id")
+          .eq("user_id", user.id);
+
+        const fData = (stages || []).map(s => ({
+          name: s.name,
+          value: (pipeline || []).filter(p => p.stage_id === s.id).length,
+          color: s.color || "#64748b"
+        }));
+        setFunnelData(fData);
+
+        // Origin Data
+        const counts: Record<string, number> = {};
+        (leads || []).forEach(l => {
+          const src = l.source || "Direto";
+          counts[src] = (counts[src] || 0) + 1;
+        });
+        const oData = Object.entries(counts).map(([name, value]) => ({
+          name,
+          value,
+          color: name === 'WhatsApp' ? '#25D366' : name === 'Instagram' ? '#E1306C' : '#64748b'
+        }));
+        setOriginData(oData);
+
+        // Top Agents (using mock if only one user, or fetch other users if team module active)
+        // For now, let's just show the current user as top agent if they have sales
+        if (concludedSales.length > 0) {
+          setTopAgents([{
+            name: profile?.display_name || "Você",
+            avatar: (profile?.display_name || "V")[0],
+            sales: concludedSales.length,
+            revenue: monthRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+            trend: "+0%"
+          }]);
+        }
+
+      } catch (err) {
+        console.error("Error fetching reports:", err);
+      } finally {
+        setLoading(false);
+      }
+    }, [user?.id, profile?.display_name]);
+
+    useEffect(() => {
+      fetchReportsData();
+    }, [fetchReportsData]);
      if (!user?.id) return;
      setLoading(true);
      try {
