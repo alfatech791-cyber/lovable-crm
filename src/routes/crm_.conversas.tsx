@@ -275,6 +275,7 @@ function ConversasPage() {
   const applyConversations = (list: Conversation[], notify = false) => {
     setItems((prev) => {
       const dedupMap = new Map<string, Conversation>();
+      let changed = list.length !== prev.length;
       
       // Include previous items first to ensure we don't lose data
       for (const c of prev) {
