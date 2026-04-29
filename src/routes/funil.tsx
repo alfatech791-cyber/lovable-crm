@@ -55,6 +55,8 @@ type Deal = {
   }
 };
 
+ const normalizePhone = (p: string | null) => p ? p.replace(/\D/g, "") : "";
+ 
  function FunnelPage() {
     const { user, loading: authLoading } = useAuth();
     const [viewMode, setViewMode] = useState<"kanban" | "chat">("kanban");
@@ -308,8 +310,9 @@ type Deal = {
         }
       }
       
-       const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => {
-         const conv = convs.find(c => c.contact_phone === deal.lead?.phone);
+        const dealsWithLastMessage = (dlRes.data as any[])?.map((deal: any) => {
+          const dealPhone = normalizePhone(deal.lead?.phone);
+          const conv = convs.find(c => normalizePhone(c.contact_phone) === dealPhone);
           let lastMessage = deal.lead_id ? lastMessagesMap[deal.lead_id]?.content : undefined;
           let lastMessageAt = deal.lead_id ? lastMessagesMap[deal.lead_id]?.created_at : undefined;
           let lastMessageRole = deal.lead_id ? lastMessagesMap[deal.lead_id]?.role : undefined;
