@@ -1208,27 +1208,27 @@ function ConversasPage() {
                               </span>
                             ) : m.kind === "image" ? (
                               <div className="space-y-2">
-                                <img 
-                                  src={m.media || (typeof m.content === 'string' && m.content.startsWith('http') ? m.content : '')} 
-                                  className="rounded-xl max-w-full h-auto cursor-pointer transition hover:brightness-110 shadow-sm" 
-                                  alt="" 
-                                  onClick={() => m.media && window.open(m.media, '_blank')} 
+                                <img
+                                  src={m.media || (typeof m.content === "string" && m.content.startsWith("http") ? m.content : "")}
+                                  className="rounded-xl max-w-full h-auto cursor-pointer transition hover:brightness-110 shadow-sm"
+                                  alt=""
+                                  onClick={() => m.media && window.open(m.media, "_blank")}
                                 />
-                                {m.content && typeof m.content === 'string' && !m.content.startsWith("🖼️") && (
+                                {m.content && typeof m.content === "string" && !m.content.startsWith("🖼️") && (
                                   <p className="opacity-90">{m.content}</p>
                                 )}
                               </div>
-) : (
-<>
-                              {selected.is_group && isUser && m.sender && (
-                                <p className="text-[10px] font-black text-primary mb-1.5 opacity-90 uppercase tracking-widest flex items-center gap-1.5">
-                                  <span className="h-1 w-1 rounded-full bg-primary" />
-                                  {m.sender}
-                                </p>
-                              )}
-<span className="whitespace-pre-wrap break-words">{m.content}</span>
-</>
-                             )}
+                            ) : (
+                              <>
+                                {selected.is_group && isUser && m.sender && (
+                                  <p className="text-[10px] font-black text-primary mb-1.5 opacity-90 uppercase tracking-widest flex items-center gap-1.5">
+                                    <span className="h-1 w-1 rounded-full bg-primary" />
+                                    {m.sender}
+                                  </p>
+                                )}
+                                <span className="whitespace-pre-wrap break-words">{m.content}</span>
+                              </>
+                            )}
 
                              <div className={`flex items-center gap-2 mt-1.5 ${isUser ? "justify-start ml-1" : "justify-end mr-1"}`}>
                                {m.at && m.kind !== "sticker" && (
