@@ -539,12 +539,12 @@ type Deal = {
     }
   };
 
-    useEffect(() => { 
-      load(); 
-      // Se não houver negociações, tenta um sync automático
-      if (user?.id && !loading && deals.length === 0) {
-        syncFromWhatsApp();
-      }
+    useEffect(() => {
+      if (authLoading) return;
+      load();
+      // Timeout de segurança: garante que o loading termine mesmo se algo travar
+      const safety = setTimeout(() => setLoading(false), 8000);
+      return () => clearTimeout(safety);
     }, [user?.id, authLoading]);
 
   const moveDeal = async (dealId: string, newStageId: string) => {
