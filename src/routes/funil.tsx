@@ -245,11 +245,26 @@ type Deal = {
         }
       }
       
-      const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => ({
-        ...deal,
-        last_message: deal.lead_id ? lastMessagesMap[deal.lead_id]?.content : undefined,
-        last_message_at: deal.lead_id ? lastMessagesMap[deal.lead_id]?.created_at : undefined
-      })) ?? [];
+       const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => {
+         const conv = convs.find(c => c.contact_phone === deal.lead?.phone);
+         let lastMessage = deal.lead_id ? lastMessagesMap[deal.lead_id]?.content : undefined;
+         let lastMessageAt = deal.lead_id ? lastMessagesMap[deal.lead_id]?.created_at : undefined;
+ 
+         // Prioritize data from bot_conversations for WhatsApp leads
+         if (conv) {
+           const transcript = conv.transcript as Msg[];
+           if (transcript && transcript.length > 0) {
+             lastMessage = transcript[transcript.length - 1].content;
+             lastMessageAt = conv.last_message_at;
+           }
+         }
+ 
+         return {
+           ...deal,
+           last_message,
+           last_message_at
+         };
+       }) ?? [];
       
       setDeals(dealsWithLastMessage);
       const loadedLeads = (ldRes.data as any) ?? [];
