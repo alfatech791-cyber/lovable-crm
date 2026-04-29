@@ -12,11 +12,11 @@ import {
 
  type Tone = "info" | "success" | "warning" | "primary" | "destructive";
  const toneStyles: Record<Tone, { icon: string; gradient: string; ring: string }> = {
-   info:        { icon: "bg-info/10 text-info",                                 gradient: "from-info/8 to-info/0",                ring: "ring-info/20" },
-   success:     { icon: "bg-success/10 text-success",                           gradient: "from-success/8 to-success/0",          ring: "ring-success/20" },
-   warning:     { icon: "bg-warning/15 text-[oklch(0.55_0.15_75)]",             gradient: "from-warning/10 to-warning/0",         ring: "ring-warning/20" },
-   primary:     { icon: "bg-primary/10 text-primary",                           gradient: "from-primary/10 to-primary/0",         ring: "ring-primary/20" },
-   destructive: { icon: "bg-destructive/10 text-destructive",                   gradient: "from-destructive/8 to-destructive/0",  ring: "ring-destructive/20" },
+   info:        { icon: "bg-info/10 text-info",                       gradient: "from-info/10 to-transparent",        ring: "ring-info/20" },
+   success:     { icon: "bg-success/10 text-success",                 gradient: "from-success/10 to-transparent",     ring: "ring-success/20" },
+   warning:     { icon: "bg-warning/15 text-[oklch(0.55_0.15_75)]",   gradient: "from-warning/10 to-transparent",     ring: "ring-warning/20" },
+   primary:     { icon: "bg-primary/10 text-primary",                 gradient: "from-primary/10 to-transparent",     ring: "ring-primary/20" },
+   destructive: { icon: "bg-destructive/10 text-destructive",         gradient: "from-destructive/10 to-transparent", ring: "ring-destructive/20" },
  };
 
   export function KpiCard({
@@ -56,9 +56,9 @@ import {
        onClick={handleClick}
        className={`relative overflow-hidden rounded-2xl bg-card border border-border p-4 shadow-card hover:shadow-elegant hover:-translate-y-1 transition-all text-left w-full group hover:ring-2 ${styles.ring}`}
      >
-        <div className={`absolute inset-0 bg-gradient-to-br ${styles.gradient} opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none`} />
-        <ArrowUpRight className="absolute top-3 right-3 h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-       <div className="flex items-start gap-3 relative">
+         <div className={`absolute inset-0 bg-gradient-to-br ${styles.gradient} opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-0`} />
+         <ArrowUpRight className="absolute top-3 right-3 h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all z-10" />
+        <div className="flex items-start gap-3 relative z-10">
          <div className={`h-10 w-10 rounded-xl grid place-items-center shrink-0 transition-transform group-hover:scale-110 group-hover:rotate-3 ${styles.icon}`}>
            <Icon className="h-[18px] w-[18px]" />
          </div>
