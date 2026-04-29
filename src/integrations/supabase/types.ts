@@ -516,49 +516,100 @@ export type Database = {
       }
       products: {
         Row: {
+          brand: string | null
+          capacity: string | null
           category: string | null
+          color: string | null
           cost_price: number | null
           created_at: string | null
           description: string | null
+          display: string | null
+          ean: string | null
           id: string
           image_url: string | null
+          imei: string | null
+          location: string | null
           min_stock: number | null
+          model: string | null
           name: string
+          ncm: string | null
           price: number | null
+          processor: string | null
+          ram: string | null
+          reference: string | null
           sku: string | null
           stock_quantity: number | null
+          store: string | null
+          supplier: string | null
+          unit: string | null
           updated_at: string | null
           user_id: string
+          weight: number | null
+          wholesale_price: number | null
         }
         Insert: {
+          brand?: string | null
+          capacity?: string | null
           category?: string | null
+          color?: string | null
           cost_price?: number | null
           created_at?: string | null
           description?: string | null
+          display?: string | null
+          ean?: string | null
           id?: string
           image_url?: string | null
+          imei?: string | null
+          location?: string | null
           min_stock?: number | null
+          model?: string | null
           name: string
+          ncm?: string | null
           price?: number | null
+          processor?: string | null
+          ram?: string | null
+          reference?: string | null
           sku?: string | null
           stock_quantity?: number | null
+          store?: string | null
+          supplier?: string | null
+          unit?: string | null
           updated_at?: string | null
           user_id: string
+          weight?: number | null
+          wholesale_price?: number | null
         }
         Update: {
+          brand?: string | null
+          capacity?: string | null
           category?: string | null
+          color?: string | null
           cost_price?: number | null
           created_at?: string | null
           description?: string | null
+          display?: string | null
+          ean?: string | null
           id?: string
           image_url?: string | null
+          imei?: string | null
+          location?: string | null
           min_stock?: number | null
+          model?: string | null
           name?: string
+          ncm?: string | null
           price?: number | null
+          processor?: string | null
+          ram?: string | null
+          reference?: string | null
           sku?: string | null
           stock_quantity?: number | null
+          store?: string | null
+          supplier?: string | null
+          unit?: string | null
           updated_at?: string | null
           user_id?: string
+          weight?: number | null
+          wholesale_price?: number | null
         }
         Relationships: []
       }

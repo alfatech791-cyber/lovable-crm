@@ -24,7 +24,7 @@ import { toast } from "sonner";
   const [filterCategory, setFilterCategory] = useState("all");
   const [viewTab, setViewTab] = useState("all");
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
-  const [quickProduct, setQuickProduct] = useState({ name: "", price: "", stock: "" });
+    const [quickProduct, setQuickProduct] = useState({ name: "", price: "", stock: "", category: "Acessórios" });
 
     useEffect(() => {
       if (!user?.id) return;
@@ -37,10 +37,7 @@ import { toast } from "sonner";
           .order("created_at", { ascending: false });
         if (error) toast.error("Erro ao carregar produtos: " + error.message);
         // Adapta campos do banco para o shape usado na UI
-        const rows = (data ?? []).map((p: any) => ({
-          ...p,
-          stock: p.stock_quantity ?? 0,
-        }));
+        const rows = (data ?? []).map((p: any) => ({ ...p, stock: p.stock_quantity ?? 0 }));
         setLocalProducts(rows);
         setLoading(false);
       })();
@@ -54,22 +51,24 @@ import { toast } from "sonner";
      return { totalValue, totalCost, lowStock, outOfStock, totalItems: localProducts.length };
    }, [localProducts]);
  
-   const handleExport = () => {
-     const headers = ["ID", "Nome", "Referência", "Categoria", "Estoque", "Preço", "Preço de Custo", "Total Venda", "Total Custo"];
-     const rows = filteredProducts.map(p => [
-       p.id,
-       p.name,
-       p.reference || p.sku || "",
-       p.category || "",
-       p.stock || 0,
-       p.price,
-       p.cost_price || 0,
-       (p.price * (p.stock || 0)).toFixed(2),
-       ((p.cost_price || 0) * (p.stock || 0)).toFixed(2)
-     ]);
- 
-     const csvContent = "data:text/csv;charset=utf-8," 
-       + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+  const handleExport = () => {
+    const headers = ["ID", "Nome", "SKU", "IMEI", "Categoria", "Marca", "Estoque", "Min Estoque", "Preço Venda", "Preço Custo", "Localização"];
+    const rows = filteredProducts.map(p => [
+      p.id,
+      p.name,
+      p.sku || "",
+      p.imei || "",
+      p.category || "",
+      p.brand || "",
+      p.stock || 0,
+      p.min_stock || 0,
+      p.price,
+      p.cost_price || 0,
+      p.location || ""
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + [headers.join(","), ...rows.map(e => e.map(cell => `"${cell}"`).join(","))].join("\n");
  
      const encodedUri = encodeURI(csvContent);
      const link = document.createElement("a");
@@ -81,57 +80,70 @@ import { toast } from "sonner";
      toast.success("Relatório exportado!");
    };
  
-   const filteredProducts = useMemo(() => {
-     return localProducts.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           (product.imei?.includes(searchTerm));
+  const filteredProducts = useMemo(() => {
+    const lowerSearch = searchTerm.toLowerCase();
+    return localProducts.filter(product => {
+      const matchesSearch = 
+        product.name.toLowerCase().includes(lowerSearch) || 
+        (product.sku?.toLowerCase().includes(lowerSearch)) ||
+        (product.imei?.toLowerCase().includes(lowerSearch)) ||
+        (product.ean?.toLowerCase().includes(lowerSearch)) ||
+        (product.reference?.toLowerCase().includes(lowerSearch));
+      
       const matchesCategory = filterCategory === "all" || product.category === filterCategory;
       
-       if (viewTab === "low") return matchesSearch && matchesCategory && (product.stock || 0) <= 3 && (product.stock || 0) > 0;
-       if (viewTab === "out") return matchesSearch && matchesCategory && (product.stock || 0) === 0;
+      const isLowStock = (product.stock || 0) <= (product.min_stock || 3) && (product.stock || 0) > 0;
+      const isOutOfStock = (product.stock || 0) === 0;
+
+      if (viewTab === "low") return matchesSearch && matchesCategory && isLowStock;
+      if (viewTab === "out") return matchesSearch && matchesCategory && isOutOfStock;
       
       return matchesSearch && matchesCategory;
     });
-   }, [searchTerm, filterCategory, viewTab, localProducts]);
+  }, [searchTerm, filterCategory, viewTab, localProducts]);
 
-   const handleAddProduct = async (data: any) => {
-     if (!user?.id) return;
-     const payload: any = {
-       user_id: user.id,
-       name: data.name,
-       sku: data.sku ?? data.reference ?? null,
-       category: data.category ?? null,
-       price: Number(data.price ?? 0),
-       cost_price: Number(data.cost_price ?? 0),
-       stock_quantity: Number(data.stock ?? data.stock_quantity ?? 0),
-       min_stock: Number(data.min_stock ?? 0),
-       image_url: data.image ?? data.image_url ?? null,
-       description: data.description ?? null,
-     };
-     const { data: row, error } = await supabase.from("products").insert(payload).select().single();
-     if (error) return toast.error("Erro ao criar: " + error.message);
-     setLocalProducts((prev) => [{ ...row, stock: row.stock_quantity }, ...prev]);
-     toast.success("Produto criado!");
-   };
+  const handleAddProduct = async (data: any) => {
+    if (!user?.id) return;
+    const payload = {
+      user_id: user.id,
+      ...data,
+      price: Number(data.price || 0),
+      cost_price: Number(data.cost_price || 0),
+      stock_quantity: Number(data.stock || 0),
+      min_stock: Number(data.min_stock || 0),
+      wholesale_price: Number(data.wholesale_price || 0),
+      weight: Number(data.weight || 0),
+    };
+    delete payload.stock; // Remove virtual field
 
-   const handleUpdateProduct = async (data: any) => {
-     if (!editingProduct) return;
-     const payload: any = {
-       name: data.name,
-       sku: data.sku ?? data.reference ?? null,
-       category: data.category ?? null,
-       price: Number(data.price ?? 0),
-       cost_price: Number(data.cost_price ?? 0),
-       stock_quantity: Number(data.stock ?? data.stock_quantity ?? 0),
-       min_stock: Number(data.min_stock ?? 0),
-       image_url: data.image ?? data.image_url ?? null,
-       description: data.description ?? null,
-     };
-     const { error } = await supabase.from("products").update(payload).eq("id", editingProduct.id);
-     if (error) return toast.error("Erro ao salvar: " + error.message);
-     setLocalProducts((prev) => prev.map((p) => p.id === editingProduct.id ? { ...p, ...payload, stock: payload.stock_quantity } : p));
-     toast.success("Produto atualizado!");
-   };
+    const { data: row, error } = await supabase.from("products").insert(payload).select().single();
+    if (error) return toast.error("Erro ao criar: " + error.message);
+    setLocalProducts((prev) => [{ ...row, stock: row.stock_quantity }, ...prev]);
+    toast.success("Produto criado!");
+  };
+
+  const handleUpdateProduct = async (data: any) => {
+    if (!editingProduct) return;
+    const payload = {
+      ...data,
+      price: Number(data.price || 0),
+      cost_price: Number(data.cost_price || 0),
+      stock_quantity: Number(data.stock || 0),
+      min_stock: Number(data.min_stock || 0),
+      wholesale_price: Number(data.wholesale_price || 0),
+      weight: Number(data.weight || 0),
+    };
+    delete payload.stock; // Remove virtual field
+    delete payload.id;
+    delete payload.user_id;
+    delete payload.created_at;
+    delete payload.updated_at;
+
+    const { error } = await supabase.from("products").update(payload).eq("id", editingProduct.id);
+    if (error) return toast.error("Erro ao salvar: " + error.message);
+    setLocalProducts((prev) => prev.map((p) => p.id === editingProduct.id ? { ...p, ...payload, stock: payload.stock_quantity } : p));
+    toast.success("Produto atualizado!");
+  };
 
    const handleDeleteProduct = async (id: string) => {
      if (!window.confirm("Tem certeza que deseja excluir este produto?")) return;
@@ -145,19 +157,19 @@ import { toast } from "sonner";
       if (!user?.id) return;
       if (!quickProduct.name.trim()) { toast.error("Nome é obrigatório"); return; }
       setLoading(true);
-      const payload: any = {
+      const payload = {
         user_id: user.id,
         name: quickProduct.name.trim(),
         price: Number(quickProduct.price || 0),
         stock_quantity: Number(quickProduct.stock || 0),
-        category: "Acessórios",
+        category: quickProduct.category,
       };
       const { data: row, error } = await supabase.from("products").insert(payload).select().single();
       setLoading(false);
       if (error) return toast.error("Erro ao criar: " + error.message);
       setLocalProducts((prev) => [{ ...row, stock: row.stock_quantity }, ...prev]);
       toast.success("Produto cadastrado com sucesso!");
-      setQuickProduct({ name: "", price: "", stock: "" });
+      setQuickProduct({ name: "", price: "", stock: "", category: "Acessórios" });
       setIsQuickAddOpen(false);
     };
 
@@ -175,7 +187,7 @@ import { toast } from "sonner";
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
               <div className="space-y-1.5 md:col-span-1">
                 <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Nome do Produto</Label>
                 <input 
@@ -196,7 +208,7 @@ import { toast } from "sonner";
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Estoque Inicial</Label>
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Estoque</Label>
                 <input 
                   type="number"
                   placeholder="0" 
@@ -204,6 +216,20 @@ import { toast } from "sonner";
                   onChange={(e) => setQuickProduct({...quickProduct, stock: e.target.value})}
                   className="w-full h-11 px-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20"
                 />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Categoria</Label>
+                <Select value={quickProduct.category} onValueChange={(v) => setQuickProduct({...quickProduct, category: v})}>
+                  <SelectTrigger className="w-full h-11 rounded-xl bg-card border-border">
+                    <SelectValue placeholder="Categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Smartphones">Smartphones</SelectItem>
+                    <SelectItem value="Tablets">Tablets</SelectItem>
+                    <SelectItem value="Acessórios">Acessórios</SelectItem>
+                    <SelectItem value="Serviços">Serviços</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex gap-2">
                 <button 
@@ -338,8 +364,8 @@ import { toast } from "sonner";
                   <tr key={product.id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        {product.image ? (
-                          <img src={product.image} alt={product.name} className="h-10 w-10 rounded-lg object-cover shrink-0 border border-border" />
+                        {product.image_url ? (
+                          <img src={product.image_url} alt={product.name} className="h-10 w-10 rounded-lg object-cover shrink-0 border border-border" />
                         ) : (
                           <div className="h-10 w-10 rounded-lg bg-muted grid place-items-center shrink-0 border border-border">
                             <Package className="h-5 w-5 text-muted-foreground" />
@@ -364,22 +390,42 @@ import { toast } from "sonner";
                     <td className="px-6 py-4">
                       <span className="text-xs px-2 py-1 rounded bg-muted font-medium">{product.category}</span>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="inline-flex flex-col items-center">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-sm font-bold ${(product.stock || 0) <= 3 ? 'text-destructive' : 'text-foreground'}`}>
-                            {product.stock || 0}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground font-medium uppercase">{product.unit || 'un'}</span>
-                        </div>
-                        <div className="w-16 h-1 bg-muted rounded-full mt-1 overflow-hidden">
-                          <div 
-                            className={`h-full rounded-full ${ (product.stock || 0) <= 3 ? 'bg-destructive' : 'bg-primary' }`}
-                            style={{ width: `${Math.min(((product.stock || 0) / 10) * 100, 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    </td>
+                <td className="px-6 py-4 text-center">
+                  <div className="inline-flex flex-col items-center">
+                    <div className="flex items-center gap-2 group">
+                      <button 
+                        onClick={async () => {
+                          const newStock = Math.max(0, (product.stock || 0) - 1);
+                          const { error } = await supabase.from("products").update({ stock_quantity: newStock }).eq("id", product.id);
+                          if (!error) setLocalProducts(prev => prev.map(p => p.id === product.id ? { ...p, stock: newStock, stock_quantity: newStock } : p));
+                        }}
+                        className="h-6 w-6 rounded-full bg-muted flex items-center justify-center hover:bg-destructive hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        -
+                      </button>
+                      <span className={`text-sm font-bold ${(product.stock || 0) <= (product.min_stock || 3) ? 'text-destructive' : 'text-foreground'}`}>
+                        {product.stock || 0}
+                      </span>
+                      <button 
+                        onClick={async () => {
+                          const newStock = (product.stock || 0) + 1;
+                          const { error } = await supabase.from("products").update({ stock_quantity: newStock }).eq("id", product.id);
+                          if (!error) setLocalProducts(prev => prev.map(p => p.id === product.id ? { ...p, stock: newStock, stock_quantity: newStock } : p));
+                        }}
+                        className="h-6 w-6 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground font-medium uppercase">{product.unit || 'un'}</span>
+                    <div className="w-16 h-1 bg-muted rounded-full mt-1 overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full ${ (product.stock || 0) <= (product.min_stock || 3) ? 'bg-destructive' : 'bg-primary' }`}
+                        style={{ width: `${Math.min(((product.stock || 0) / (product.min_stock ? product.min_stock * 3 : 10)) * 100, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                </td>
                     <td className="px-6 py-4">
                       <span className="text-sm font-bold text-primary">
                         {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
