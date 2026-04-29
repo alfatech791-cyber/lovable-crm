@@ -207,7 +207,13 @@ function ConversasPage() {
   const [forwardMsg, setForwardMsg] = useState<Msg | null>(null);
   const [isForwarding, setIsForwarding] = useState(false);
   const [userFilter, setUserFilter] = useState<"all" | "mine">("all");
-  const [tagInput, setTagInput] = useState("");
+   const [tagInput, setTagInput] = useState("");
+   const [showScrollBottom, setShowScrollBottom] = useState(false);
+
+   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+     setShowScrollBottom(scrollHeight - scrollTop - clientHeight > 300);
+   };
 
   const unreadCount = (c: Conversation) => {
     const seen = readState[c.id] ?? 0;
