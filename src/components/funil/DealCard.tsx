@@ -84,8 +84,8 @@ import { ptBR } from "date-fns/locale";
            )}
          </div>
           <p className={cn(
-            "text-[11px] line-clamp-2 leading-snug font-medium",
-            isNewFromUser ? "text-foreground font-bold" : "text-foreground/70 italic"
+            "text-[11px] leading-snug font-medium",
+            isNewFromUser ? "text-foreground font-bold line-clamp-4" : "text-foreground/70 italic line-clamp-2"
           )}>
             {deal.last_message ? `"${deal.last_message}"` : "Aguardando primeira mensagem..."}
           </p>
