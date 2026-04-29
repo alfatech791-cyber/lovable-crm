@@ -755,7 +755,10 @@ function ConversasPage() {
         toast.error("Sessão expirada. Faça login novamente.");
         return;
       }
-       const jid = selected.remote_jid || (selected.is_group && !selected.contact_phone.includes("@") ? `${selected.contact_phone}@g.us` : selected.contact_phone);
+        let jid = selected.remote_jid || selected.contact_phone;
+        if (!jid.includes("@")) {
+          jid = selected.is_group ? `${jid}@g.us` : `${jid}@s.whatsapp.net`;
+        }
        const instance = await resolveInstance();
        
        if (!instance) {
