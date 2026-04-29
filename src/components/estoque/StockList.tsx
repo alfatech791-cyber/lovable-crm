@@ -364,8 +364,8 @@ import { toast } from "sonner";
                   <tr key={product.id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        {product.image ? (
-                          <img src={product.image} alt={product.name} className="h-10 w-10 rounded-lg object-cover shrink-0 border border-border" />
+                        {product.image_url ? (
+                          <img src={product.image_url} alt={product.name} className="h-10 w-10 rounded-lg object-cover shrink-0 border border-border" />
                         ) : (
                           <div className="h-10 w-10 rounded-lg bg-muted grid place-items-center shrink-0 border border-border">
                             <Package className="h-5 w-5 text-muted-foreground" />
