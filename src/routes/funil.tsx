@@ -56,9 +56,11 @@ type Deal = {
 
  function FunnelPage() {
    const { user } = useAuth();
+   const [viewMode, setViewMode] = useState<"kanban" | "chat">("kanban");
    const [stages, setStages] = useState<Stage[]>([]);
    const [deals, setDeals] = useState<Deal[]>([]);
    const [leads, setLeads] = useState<{ id: string; name: string }[]>([]);
+   const [conversations, setConversations] = useState<Conversation[]>([]);
    const [loading, setLoading] = useState(true);
    const [dragId, setDragId] = useState<string | null>(null);
    const [adding, setAdding] = useState<{ stage_id: string; lead_id: string; deal_value: string } | null>(null);
@@ -177,17 +179,20 @@ type Deal = {
     if (!user?.id) return;
     setLoading(true);
     await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
-      const [stRes, dlRes, ldRes] = await Promise.all([
+       const [stRes, dlRes, ldRes, convRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
         supabase.from("pipeline_leads").select("*, lead:leads(name, phone, source)").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("leads").select("id, name").eq("user_id", user.id).order("created_at", { ascending: false }),
+         supabase.from("bot_conversations").select("*").eq("user_id", user.id).order("last_message_at", { ascending: false }),
       ]);
      
      if (stRes.error) toast.error("Erro ao carregar estágios: " + stRes.error.message);
      if (dlRes.error) toast.error("Erro ao carregar negociações: " + dlRes.error.message);
      if (ldRes.error) toast.error("Erro ao carregar leads: " + ldRes.error.message);
+      if (convRes.error) toast.error("Erro ao carregar conversas: " + convRes.error.message);
 
      setStages((stRes.data as Stage[]) ?? []);
+      setConversations((convRes.data as any as Conversation[]) ?? []);
       const leadIds = (dlRes.data as any[])?.map(d => d.lead_id) || [];
       let lastMessagesMap: Record<string, { content: string, created_at: string }> = {};
        if (leadIds.length > 0) {
@@ -249,6 +254,24 @@ type Deal = {
            {/* Toolbar Superior */}
            <div className="px-6 py-4 border-b border-border/50 bg-background/50 flex flex-wrap items-center justify-between gap-4">
              <div className="flex items-center gap-4">
+               <div className="flex bg-muted p-1 rounded-lg border border-border/50 mr-2">
+                 <Button 
+                   variant="ghost" 
+                   size="sm" 
+                   className={cn("h-8 gap-2 text-xs font-bold", viewMode === "kanban" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}
+                   onClick={() => setViewMode("kanban")}
+                 >
+                   <LayoutGrid className="h-3.5 w-3.5" /> FUNIL
+                 </Button>
+                 <Button 
+                   variant="ghost" 
+                   size="sm" 
+                   className={cn("h-8 gap-2 text-xs font-bold", viewMode === "chat" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}
+                   onClick={() => setViewMode("chat")}
+                 >
+                   <MessageSquare className="h-3.5 w-3.5" /> CONVERSAS
+                 </Button>
+               </div>
                <div className="relative w-64">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                  <Input 
