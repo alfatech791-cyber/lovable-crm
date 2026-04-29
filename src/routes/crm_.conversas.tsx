@@ -981,7 +981,7 @@ function ConversasPage() {
                       }`}
                     >
                       <div className="relative shrink-0">
-                        <Avatar className={`h-12 w-12 transition-transform duration-500 ${isSelected ? "scale-105" : "group-hover:scale-105"}`}>
+                        <Avatar className={`h-12 w-12 ring-2 ring-offset-2 ring-transparent transition-all duration-500 ${isSelected ? "scale-105 ring-primary/40 ring-offset-background" : "group-hover:scale-105"}`}>
                           {c.profile_pic_url ? (
                             <AvatarImage src={c.profile_pic_url} alt={displayName} />
                           ) : null}
