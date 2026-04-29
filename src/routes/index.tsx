@@ -140,7 +140,7 @@ function Dashboard() {
 
              <div className="flex flex-col xl:flex-row gap-4 sm:gap-6">
              <div className="flex-1 flex flex-col gap-6 min-w-0">
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {loading ? (
                     Array.from({ length: 6 }).map((_, i) => (
                       <div key={i} className="h-28 rounded-2xl bg-card border border-border animate-pulse" />
