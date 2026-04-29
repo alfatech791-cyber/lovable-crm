@@ -1081,7 +1081,8 @@ function ConversasPage() {
                 </button>
               </div>
 
-              <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto space-y-4 bg-gradient-to-b from-transparent to-muted/10 scroll-smooth">
+              <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto space-y-4 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-fixed bg-opacity-5 scroll-smooth custom-scrollbar relative">
+                <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background/80 pointer-events-none" />
                 {(selected.transcript ?? []).length === 0 ? (
                   <div className="text-xs text-center text-muted-foreground py-10">Sem mensagens registradas.</div>
                 ) : (
