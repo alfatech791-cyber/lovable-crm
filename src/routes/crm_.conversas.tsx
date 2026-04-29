@@ -1283,27 +1283,14 @@ function ConversasPage() {
                               toast.promise(
                                 (async () => {
                                   // Re-use existing logic but for target
-                                  const payload = {
-                                    kind: forwardMsg.kind || "text",
-                                    text: forwardMsg.content,
-                                    media: forwardMsg.media,
-                                    mimetype: forwardMsg.mimetype,
-                                  };
-                                  
-                                  // We need to trigger the Evolution API for this specific contact
-                                  // This is a bit complex as current sendText is tied to 'selected'
-                                  // For now, let's inform it's forwarding
-                                  const endpoint = `${evolution.BASE_URL}/message/sendText/${resolvedInstance}`;
-                                  const body = {
-                                    number: target.contact_phone,
-                                    options: { delay: 1200, presence: "composing", linkPreview: true },
-                                    text: forwardMsg.content
-                                  };
-
-                                  const res = await fetch(endpoint, {
+                                  const res = await fetch(`/api/evolution/message/sendText/${resolvedInstance}`, {
                                     method: "POST",
-                                    headers: { "Content-Type": "application/json", "apikey": evolution.API_KEY },
-                                    body: JSON.stringify(body),
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                      number: target.contact_phone,
+                                      options: { delay: 1200, presence: "composing", linkPreview: true },
+                                      text: forwardMsg.content
+                                    }),
                                   });
                                   if (!res.ok) throw new Error("Erro ao encaminhar");
                                   syncFromWhatsApp(false);
