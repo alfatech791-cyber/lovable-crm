@@ -386,11 +386,8 @@ type Deal = {
           await supabase.from("bot_settings").insert({ user_id: user.id });
         }
         
-        try {
-          await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
-        } catch (rpcErr) {
-          console.warn("RPC ensure_default_funnel_stages falhou, continuando...", rpcErr);
-        }
+      // Garante que o usuário tenha as etapas padrão profissionais
+      await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
 
       const [stRes, dlRes, ldRes, convRes, allDealsRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
