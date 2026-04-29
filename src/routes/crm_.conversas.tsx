@@ -1401,13 +1401,19 @@ function ConversasPage() {
                               toast.promise(
                                 (async () => {
                                   // Re-use existing logic but for target
+                                  let jid = target.remote_jid || target.contact_phone;
+                                  if (!jid.includes("@")) {
+                                    jid = target.is_group ? `${jid}@g.us` : `${jid}@s.whatsapp.net`;
+                                  }
                                   const res = await fetch(`/api/evolution/message/sendText/${resolvedInstance}`, {
                                     method: "POST",
                                     headers: { "Content-Type": "application/json" },
                                     body: JSON.stringify({
-                                      number: target.contact_phone,
-                                      options: { delay: 1200, presence: "composing", linkPreview: true },
-                                      text: forwardMsg.content
+                                      number: jid,
+                                      text: forwardMsg.content,
+                                      delay: 1200,
+                                      presence: "composing",
+                                      linkPreview: true
                                     }),
                                   });
                                   if (!res.ok) throw new Error("Erro ao encaminhar");
