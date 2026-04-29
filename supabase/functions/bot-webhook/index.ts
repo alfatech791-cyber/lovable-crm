@@ -32,8 +32,13 @@ serve(async (req) => {
     if (fromMe || !remoteJid) {
       return json({ ok: true, skipped: "fromMe or no remoteJid" });
     }
-    
-    const isGroup = remoteJid.endsWith("@g.us");
+
+    // Ignora COMPLETAMENTE mensagens de grupos: não responde, não cria lead, não cria card.
+    const isGroup = remoteJid.endsWith("@g.us") || remoteJid.endsWith("@broadcast");
+    const participant: string = data?.key?.participant ?? "";
+    if (isGroup || participant) {
+      return json({ ok: true, skipped: "group" });
+    }
 
     const messageText: string =
       data?.message?.conversation ??
@@ -72,10 +77,9 @@ serve(async (req) => {
     transcript.push({ role: "user", content: messageText, at: new Date().toISOString(), sender: data?.pushName || null });
 
     // Se o bot estiver inativo, apenas grava a mensagem para o atendimento manual
-    if (!settings.is_active || isGroup) {
-      // Nota: Bot não responde em grupos por padrão para evitar loop/spam
+    if (!settings.is_active) {
       await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active");
-      return json({ ok: true, inactiveOrGroup: true, stored: true });
+      return json({ ok: true, inactive: true, stored: true });
     }
 
     // Verifica horário comercial (se habilitado)
