@@ -855,11 +855,11 @@ type Deal = {
                       <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
                       <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                         Online via WhatsApp
-                      </p>
-                    </div>
+                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+              </div>
+              <div className="flex items-center gap-2">
                {currentConversation && (
                  <Button 
                   size="sm" 
