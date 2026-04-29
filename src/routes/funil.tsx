@@ -206,43 +206,55 @@ type Deal = {
 
   const load = async () => {
     if (!user?.id) return;
-    setLoading(true);
-    await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
-       const [stRes, dlRes, ldRes, convRes] = await Promise.all([
+    try {
+      setLoading(true);
+      // Garante estágios padrão
+      await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
+      
+      const [stRes, dlRes, ldRes, convRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
         supabase.from("pipeline_leads").select("*, lead:leads(name, phone, source)").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("leads").select("id, name").eq("user_id", user.id).order("created_at", { ascending: false }),
-         supabase.from("bot_conversations").select("*").eq("user_id", user.id).order("last_message_at", { ascending: false }),
+        supabase.from("bot_conversations").select("*").eq("user_id", user.id).order("last_message_at", { ascending: false }),
       ]);
-     
-     if (stRes.error) toast.error("Erro ao carregar estágios: " + stRes.error.message);
-     if (dlRes.error) toast.error("Erro ao carregar negociações: " + dlRes.error.message);
-     if (ldRes.error) toast.error("Erro ao carregar leads: " + ldRes.error.message);
+      
+      if (stRes.error) toast.error("Erro ao carregar estágios: " + stRes.error.message);
+      if (dlRes.error) toast.error("Erro ao carregar negociações: " + dlRes.error.message);
+      if (ldRes.error) toast.error("Erro ao carregar leads: " + ldRes.error.message);
       if (convRes.error) toast.error("Erro ao carregar conversas: " + convRes.error.message);
 
-     setStages((stRes.data as Stage[]) ?? []);
+      setStages((stRes.data as Stage[]) ?? []);
       setConversations((convRes.data as any as Conversation[]) ?? []);
+      
       const leadIds = (dlRes.data as any[])?.map(d => d.lead_id) || [];
       let lastMessagesMap: Record<string, { content: string, created_at: string }> = {};
-       if (leadIds.length > 0) {
-         const filteredLeadIds = leadIds.filter(Boolean);
-         if (filteredLeadIds.length > 0) {
-           const { data: msgData } = await supabase.from("messages").select("lead_id, content, created_at").in("lead_id", filteredLeadIds).order("created_at", { ascending: false });
-           if (msgData) msgData.forEach(msg => { 
-             if (msg.lead_id && !lastMessagesMap[msg.lead_id]) {
-               lastMessagesMap[msg.lead_id] = { content: msg.content, created_at: msg.created_at }; 
-             }
-           });
-         }
-       }
-       const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => ({
-         ...deal,
-         last_message: deal.lead_id ? lastMessagesMap[deal.lead_id]?.content : undefined,
-         last_message_at: deal.lead_id ? lastMessagesMap[deal.lead_id]?.created_at : undefined
-       })) ?? [];
+      
+      if (leadIds.length > 0) {
+        const filteredLeadIds = leadIds.filter(Boolean);
+        if (filteredLeadIds.length > 0) {
+          const { data: msgData } = await supabase.from("messages").select("lead_id, content, created_at").in("lead_id", filteredLeadIds).order("created_at", { ascending: false });
+          if (msgData) msgData.forEach(msg => { 
+            if (msg.lead_id && !lastMessagesMap[msg.lead_id]) {
+              lastMessagesMap[msg.lead_id] = { content: msg.content, created_at: msg.created_at }; 
+            }
+          });
+        }
+      }
+      
+      const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => ({
+        ...deal,
+        last_message: deal.lead_id ? lastMessagesMap[deal.lead_id]?.content : undefined,
+        last_message_at: deal.lead_id ? lastMessagesMap[deal.lead_id]?.created_at : undefined
+      })) ?? [];
+      
       setDeals(dealsWithLastMessage);
-     setLeads((ldRes.data as any) ?? []);
-    setLoading(false);
+      setLeads((ldRes.data as any) ?? []);
+    } catch (err) {
+      console.error("Erro no load:", err);
+      toast.error("Erro ao carregar dados do funil");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, [user?.id]);
@@ -437,23 +449,85 @@ type Deal = {
                   </div>
                 </div>
 
-                {/* Espaço Vazio / Ilustração quando nada selecionado */}
-                <div className="hidden md:flex flex-1 flex-col items-center justify-center p-12 text-center bg-muted/5">
-                  <div className="h-20 w-20 rounded-full bg-primary/5 grid place-items-center mb-6">
-                    <Bot className="h-10 w-10 text-primary/40" />
-                  </div>
-                  <h2 className="text-xl font-black text-foreground mb-2">Central de Atendimento</h2>
-                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                    Selecione uma conversa na lista ao lado ou clique em um card no Funil para iniciar o atendimento comercial em tempo real.
-                  </p>
+                {/* Espaço Central / Chat quando aberto */}
+                <div className="flex-1 flex flex-col bg-muted/5 overflow-hidden">
+                  {chatOpen && currentConversation ? (
+                    <div className="flex-1 flex flex-col bg-background">
+                      {/* Header do Chat Interno */}
+                      <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/30">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center">
+                            <User className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold">{currentConversation.contact_name || currentConversation.contact_phone}</p>
+                            <p className="text-[10px] text-muted-foreground">{currentConversation.contact_phone}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button size="icon" variant="ghost" onClick={toggleHandoff}>
+                            {currentConversation.status === "handed_off" ? <PlayCircle className="h-4 w-4" /> : <PauseCircle className="h-4 w-4" />}
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => setChatOpen(false)}>
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Mensagens do Chat Interno */}
+                      <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
+                        {chatLoading ? (
+                          <div className="grid place-items-center h-full"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+                        ) : currentConversation.transcript?.length === 0 ? (
+                          <div className="grid place-items-center h-full text-xs text-muted-foreground">Nenhuma mensagem nesta conversa.</div>
+                        ) : (
+                          currentConversation.transcript?.map((m, i) => {
+                            const mine = m.role === "agent" || m.sent;
+                            return (
+                              <div key={i} className={cn("flex", mine ? "justify-end" : "justify-start")}>
+                                <div className={cn("max-w-[75%] rounded-2xl px-4 py-2 text-sm shadow-sm", mine ? "bg-primary text-primary-foreground" : "bg-card border border-border")}>
+                                  <p className="whitespace-pre-wrap">{m.content}</p>
+                                  {m.at && <p className="text-[10px] opacity-60 mt-1">{formatDistanceToNow(new Date(m.at), { addSuffix: true, locale: ptBR })}</p>}
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+
+                      {/* Input do Chat Interno */}
+                      <div className="p-4 border-t border-border bg-background flex items-center gap-2">
+                        <Input
+                          placeholder="Escreva sua mensagem..."
+                          value={messageText}
+                          onChange={(e) => setMessageText(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+                          className="flex-1"
+                        />
+                        <Button size="icon" onClick={sendMessage} disabled={sending || !messageText.trim()}>
+                          {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
+                      <div className="h-20 w-20 rounded-full bg-primary/5 grid place-items-center mb-6">
+                        <Bot className="h-10 w-10 text-primary/40" />
+                      </div>
+                      <h2 className="text-xl font-black text-foreground mb-2">Central de Atendimento</h2>
+                      <p className="text-sm text-muted-foreground max-w-md">
+                        Selecione uma conversa na lista ao lado ou clique em um card no Funil para iniciar o atendimento comercial em tempo real.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
            )}
          </main>
       </div>
 
-      {/* Painel Lateral de Chat */}
-      {chatOpen && (
+      {/* Painel Lateral de Chat (Apenas no modo Kanban) */}
+      {viewMode === "kanban" && chatOpen && (
         <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[420px] bg-card border-l border-border shadow-2xl flex flex-col z-50">
           <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-muted/30">
             <div className="flex items-center gap-3 min-w-0">
