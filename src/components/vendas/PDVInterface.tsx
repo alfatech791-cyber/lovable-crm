@@ -21,7 +21,7 @@
    const [cart, setCart] = useState<CartItem[]>([]);
    const [search, setSearch] = useState("");
    const [allProducts, setAllProducts] = useState<Product[]>([]);
-   const [loadingProducts, setLoadingProducts] = useState(false);
+   const [loadingProducts, setLoadingProducts] = useState(true);
    const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
    const [selectedCustomer, setSelectedCustomer] = useState<{ id: string; name: string } | null>(null);
    const [customersList, setCustomersList] = useState<{ id: string; full_name: string }[]>([]);
@@ -82,14 +82,35 @@
      fetchCustomers();
    }, [fetchProducts, fetchCustomers]);
  
+   const [activeCategory, setActiveCategory] = useState("all");
+   const [customerSearch, setCustomerSearch] = useState("");
+ 
    const filteredProducts = useMemo(() => {
-     if (!search) return [];
+     let filtered = allProducts;
+     
+     if (activeCategory !== "all") {
+       const catMap: Record<string, string[]> = {
+         "phones": ["Smartphones", "Celulares", "Aparelhos"],
+         "acc": ["Acessórios", "Películas", "Cabos", "Fones", "Carregadores"],
+         "services": ["Serviços", "Mão de Obra"]
+       };
+       const allowedCats = catMap[activeCategory] || [];
+       filtered = filtered.filter(p => allowedCats.some(c => p.category.includes(c)));
+     }
+ 
+     if (!search) return filtered;
      const s = search.toLowerCase();
-     return allProducts.filter(p => 
+     return filtered.filter(p => 
        p.name.toLowerCase().includes(s) || 
        p.category.toLowerCase().includes(s)
      );
-   }, [search, allProducts]);
+   }, [search, allProducts, activeCategory]);
+ 
+   const filteredCustomers = useMemo(() => {
+     if (!customerSearch) return customersList;
+     const s = customerSearch.toLowerCase();
+     return customersList.filter(c => c.full_name.toLowerCase().includes(s));
+   }, [customerSearch, customersList]);
  
    const addToCart = (product: Product) => {
      setCart(current => {
@@ -271,32 +292,37 @@
            <div className="space-y-4 py-4">
              <div className="relative">
                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-               <Input placeholder="Buscar cliente por nome ou CPF..." className="pl-9" />
+               <Input 
+                 placeholder="Buscar cliente por nome..." 
+                 className="pl-9" 
+                 value={customerSearch}
+                 onChange={(e) => setCustomerSearch(e.target.value)}
+               />
              </div>
-             <ScrollArea className="h-[200px] rounded-md border p-4">
+             <ScrollArea className="h-[250px] rounded-md border p-4">
                 <div className="space-y-2">
-                  {customersList.length > 0 ? (
-                    customersList.map((customer) => (
-                      <button
-                        key={customer.id}
-                        onClick={() => {
-                          setSelectedCustomer({ id: customer.id, name: customer.full_name });
-                          setIsCustomerModalOpen(false);
-                          toast.info(`Cliente ${customer.full_name} vinculado.`);
-                        }}
-                        className="w-full text-left p-3 hover:bg-muted rounded-lg border border-transparent hover:border-border transition flex items-center justify-between group"
-                      >
-                        <div className="font-medium">{customer.full_name}</div>
-                        <Plus className="h-4 w-4 opacity-0 group-hover:opacity-100 transition" />
-                      </button>
-                    ))
-                  ) : (
-                    <div className="text-center py-4 text-muted-foreground text-sm">
-                      Nenhum cliente encontrado.
-                    </div>
-                  )}
-                </div>
-             </ScrollArea>
+                  {filteredCustomers.length > 0 ? (
+                    filteredCustomers.map((customer) => (
+                       <button
+                         key={customer.id}
+                         onClick={() => {
+                           setSelectedCustomer({ id: customer.id, name: customer.full_name });
+                           setIsCustomerModalOpen(false);
+                           toast.info(`Cliente ${customer.full_name} vinculado.`);
+                         }}
+                         className="w-full text-left p-3 hover:bg-muted rounded-lg border border-transparent hover:border-border transition flex items-center justify-between group"
+                       >
+                         <div className="font-medium">{customer.full_name}</div>
+                         <Plus className="h-4 w-4 opacity-0 group-hover:opacity-100 transition" />
+                       </button>
+                     ))
+                   ) : (
+                     <div className="text-center py-4 text-muted-foreground text-sm">
+                       Nenhum cliente encontrado.
+                     </div>
+                   )}
+                 </div>
+              </ScrollArea>
              <Button variant="secondary" className="w-full gap-2">
                <UserPlus className="h-4 w-4" /> Cadastrar Novo Cliente
              </Button>
@@ -357,28 +383,42 @@
             )}
          </div>
  
-          <div className="flex-1 flex flex-col min-h-0">
-            <Tabs defaultValue="all" className="w-full h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-4 bg-muted/30">
-                <TabsTrigger value="all">Tudo</TabsTrigger>
-                <TabsTrigger value="phones">Aparelhos</TabsTrigger>
-                <TabsTrigger value="acc">Acessórios</TabsTrigger>
-                <TabsTrigger value="services">Serviços</TabsTrigger>
-              </TabsList>
-              <ScrollArea className="flex-1 mt-4">
-                <TabsContent value="all" className="m-0">
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
-                    {['Smartphones', 'Acessórios', 'Peças', 'Serviços', 'Películas', 'Cabos', 'Fones', 'Carregadores'].map(cat => (
-                      <button key={cat} className="h-28 rounded-2xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition flex flex-col items-center justify-center gap-2 font-medium group">
-                        <div className="h-10 w-10 rounded-full bg-muted group-hover:bg-primary/10 grid place-items-center transition"><Package className="h-5 w-5 text-muted-foreground group-hover:text-primary" /></div>
-                        <span className="text-sm">{cat}</span>
-                      </button>
-                    ))}
-                  </div>
-                </TabsContent>
-              </ScrollArea>
-            </Tabs>
-         </div>
+           <div className="flex-1 flex flex-col min-h-0">
+             <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full h-full flex flex-col">
+               <TabsList className="grid w-full grid-cols-4 bg-muted/30">
+                 <TabsTrigger value="all">Tudo</TabsTrigger>
+                 <TabsTrigger value="phones">Aparelhos</TabsTrigger>
+                 <TabsTrigger value="acc">Acessórios</TabsTrigger>
+                 <TabsTrigger value="services">Serviços</TabsTrigger>
+               </TabsList>
+               <ScrollArea className="flex-1 mt-4">
+                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
+                   {allProducts
+                     .filter(p => activeCategory === "all" || 
+                       (activeCategory === "phones" && ["Smartphones", "Celulares", "Aparelhos"].some(c => p.category.includes(c))) ||
+                       (activeCategory === "acc" && ["Acessórios", "Películas", "Cabos", "Fones", "Carregadores"].some(c => p.category.includes(c))) ||
+                       (activeCategory === "services" && ["Serviços", "Mão de Obra"].some(c => p.category.includes(c)))
+                     )
+                     .slice(0, 12)
+                     .map(product => (
+                       <button 
+                         key={product.id} 
+                         onClick={() => addToCart(product)}
+                         className="h-28 rounded-2xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition flex flex-col items-center justify-center gap-2 font-medium group"
+                       >
+                         <div className="h-10 w-10 rounded-full bg-muted group-hover:bg-primary/10 grid place-items-center transition">
+                           <Package className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                         </div>
+                         <span className="text-xs text-center px-2 line-clamp-2">{product.name}</span>
+                         <span className="text-[10px] font-bold text-primary">
+                           {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                         </span>
+                       </button>
+                     ))}
+                 </div>
+               </ScrollArea>
+             </Tabs>
+          </div>
        </div>
  
        {/* Right Side: Cart & Checkout */}
