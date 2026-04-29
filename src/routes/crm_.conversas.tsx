@@ -1384,8 +1384,29 @@ function ConversasPage() {
                     </div>
                   )}
 
-                  {/* Stickers Popover Estilizado */}
-                  {stickerOpen && (
+                   {/* Respostas Rápidas */}
+                   {quickRepliesOpen && (
+                     <div className="absolute bottom-[calc(100%+12px)] left-0 z-50 bg-popover/95 backdrop-blur-xl border border-border/20 rounded-2xl shadow-2xl p-2 w-[300px] animate-in slide-in-from-bottom-2 duration-200">
+                       <div className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest mb-2 px-2 py-1">Respostas Rápidas</div>
+                       <div className="space-y-1">
+                         {QUICK_REPLIES.map((r) => (
+                           <button
+                             key={r.shortcut}
+                             onClick={() => {
+                               setText(r.text);
+                               setQuickRepliesOpen(false);
+                             }}
+                             className="w-full text-left p-2 rounded-lg hover:bg-muted/50 transition-colors group"
+                           >
+                             <div className="text-[11px] font-bold text-primary">{r.shortcut}</div>
+                             <div className="text-[12px] text-muted-foreground truncate">{r.text}</div>
+                           </button>
+                         ))}
+                       </div>
+                     </div>
+                   )}
+
+                   {/* Stickers Popover Estilizado */}
                     <div className="absolute bottom-[calc(100%+12px)] left-0 z-50 bg-popover/95 backdrop-blur-xl border border-border/20 rounded-[24px] shadow-2xl p-4 w-[320px] animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
                       <div className="flex items-center justify-between mb-3 px-1">
                         <span className="text-[11px] font-black text-muted-foreground/60 uppercase tracking-widest">Emojis & Stickers</span>
