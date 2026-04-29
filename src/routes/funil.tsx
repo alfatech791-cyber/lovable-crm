@@ -4,7 +4,7 @@ import { Topbar } from "@/components/layout/Topbar";
  import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
- import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp, MessageSquare, X, Send, Bot, User, UserCog, PauseCircle, PlayCircle, RefreshCw, ChevronRight, Sparkles, CreditCard, Users, Clock } from "lucide-react";
+  import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp, MessageSquare, X, Send, Bot, User, UserCog, PauseCircle, PlayCircle, RefreshCw, ChevronRight, Sparkles, CreditCard, Users, Clock, Wifi } from "lucide-react";
  import { formatDistanceToNow } from "date-fns";
  import { ptBR } from "date-fns/locale";
  import { evolution } from "@/lib/evolution";
