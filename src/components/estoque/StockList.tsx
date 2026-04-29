@@ -162,6 +162,67 @@ import { toast } from "sonner";
 
    return (
      <div className="space-y-6">
+        
+        {/* Quick Add Section */}
+        <div className={`transition-all duration-300 overflow-hidden ${isQuickAddOpen ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}>
+          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 shadow-sm mb-2">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold flex items-center gap-2 text-primary">
+                <Plus className="h-4 w-4" /> Cadastro Rápido de Produto
+              </h3>
+              <button onClick={() => setIsQuickAddOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              <div className="space-y-1.5 md:col-span-1">
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Nome do Produto</Label>
+                <input 
+                  placeholder="Ex: Carregador USB-C" 
+                  value={quickProduct.name}
+                  onChange={(e) => setQuickProduct({...quickProduct, name: e.target.value})}
+                  className="w-full h-11 px-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Preço (R$)</Label>
+                <input 
+                  type="number"
+                  placeholder="0,00" 
+                  value={quickProduct.price}
+                  onChange={(e) => setQuickProduct({...quickProduct, price: e.target.value})}
+                  className="w-full h-11 px-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Estoque Inicial</Label>
+                <input 
+                  type="number"
+                  placeholder="0" 
+                  value={quickProduct.stock}
+                  onChange={(e) => setQuickProduct({...quickProduct, stock: e.target.value})}
+                  className="w-full h-11 px-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleQuickAdd} 
+                  disabled={loading}
+                  className="flex-1 h-11 bg-primary text-primary-foreground rounded-xl font-bold text-sm shadow-glow hover:opacity-90 transition disabled:opacity-50"
+                >
+                  Cadastrar
+                </button>
+                <button 
+                  onClick={() => setIsAddOpen(true)}
+                  className="h-11 px-4 rounded-xl border border-border bg-card text-sm font-medium hover:bg-muted transition"
+                >
+                  Completo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-sidebar-border bg-sidebar/30">
