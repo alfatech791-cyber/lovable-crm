@@ -532,12 +532,12 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                       </div>
                       <div className="grid gap-2">
                         <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Status Inicial</Label>
-                        <Select defaultValue="ativo">
+                        <Select value={formData.location || 'ativo'} onValueChange={(v) => handleChange("location", v)}>
                           <SelectTrigger className="bg-card h-11 border-border font-semibold transition-all"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="ativo">Ativo</SelectItem>
                             <SelectItem value="rascunho">Rascunho</SelectItem>
-                            <SelectItem value="desativado">Desativado</SelectItem>
+                            <SelectItem value="indisponivel">Indisponível</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -555,7 +555,12 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                   <div className="grid gap-4">
                     <div className="grid gap-2">
                       <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-widest">SKU / Part Number</Label>
-                      <Input placeholder="GER-100234" className="bg-muted/10 h-11 border-border text-xs font-bold font-mono tracking-widest" />
+                      <Input 
+                        value={formData.sku} 
+                        onChange={(e) => handleChange("sku", e.target.value)}
+                        placeholder="GER-100234" 
+                        className="bg-muted/10 h-11 border-border text-xs font-bold font-mono tracking-widest" 
+                      />
                     </div>
                     {isSmartphone && (
                       <div className="grid gap-2">
