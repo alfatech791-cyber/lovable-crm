@@ -14,19 +14,21 @@ import { ptBR } from "date-fns/locale";
  export function DealCard({ deal, onRemove, onDragStart, onDragEnd, onClick }: DealCardProps) {
    const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
    
-   // Check if the deal is "stale" (no message in 24h)
-   const isStale = deal.last_message_at && (new Date().getTime() - new Date(deal.last_message_at).getTime() > 24 * 60 * 60 * 1000);
- 
+    // Check if the deal is "stale" (no message in 24h)
+    const isStale = deal.last_message_at && (new Date().getTime() - new Date(deal.last_message_at).getTime() > 24 * 60 * 60 * 1000);
+    const isNewFromUser = deal.last_message_role === 'user';
+    
    return (
      <div
        draggable
        onDragStart={() => onDragStart(deal.id)}
        onDragEnd={onDragEnd}
        onClick={onClick}
-       className={cn(
-         "bg-card border border-border rounded-xl p-3 shadow-sm hover:shadow-lg hover:border-primary/40 transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden active:scale-[0.98]",
-         isStale && "border-l-4 border-l-amber-400"
-       )}
+        className={cn(
+          "bg-card border border-border rounded-xl p-3 shadow-sm hover:shadow-lg hover:border-primary/40 transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden active:scale-[0.98]",
+          isStale && "border-l-4 border-l-amber-400",
+          isNewFromUser && "ring-2 ring-primary/20 bg-primary/5"
+        )}
      >
        {/* Indicador de prioridade opcional */}
        {deal.priority === 'high' && <div className="absolute top-0 right-0 w-20 h-20 bg-destructive/5 rounded-bl-full -mr-10 -mt-10" />}
@@ -64,11 +66,16 @@ import { ptBR } from "date-fns/locale";
          </div>
        </div>
  
-       {/* Preview da última mensagem - agora mais proeminente */}
-       <div className="mb-3 px-3 py-2 bg-muted/20 rounded-xl border border-border/30 hover:bg-muted/40 transition-all cursor-pointer group/msg relative">
-         <div className="flex items-center gap-1.5 mb-1.5">
-           <MessageSquare className="h-3 w-3 text-primary/60" />
-           <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/70">Interação</span>
+        {/* Preview da última mensagem - agora mais proeminente */}
+        <div className={cn(
+          "mb-3 px-3 py-2 rounded-xl border transition-all cursor-pointer group/msg relative",
+          isNewFromUser ? "bg-primary/10 border-primary/30" : "bg-muted/20 border-border/30 hover:bg-muted/40"
+        )}>
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <MessageSquare className={cn("h-3 w-3", isNewFromUser ? "text-primary" : "text-primary/60")} />
+            <span className={cn("text-[9px] font-black uppercase tracking-wider", isNewFromUser ? "text-primary" : "text-muted-foreground/70")}>
+              {isNewFromUser ? "Nova Mensagem" : "Interação"}
+            </span>
            {deal.last_message_at && (
              <span className="text-[9px] text-muted-foreground/60 ml-auto flex items-center gap-1">
                <Clock className="h-2.5 w-2.5" />
@@ -76,15 +83,25 @@ import { ptBR } from "date-fns/locale";
              </span>
            )}
          </div>
-         <p className="text-[11px] text-foreground/70 line-clamp-2 leading-snug italic font-medium">
-           "{deal.last_message || "Aguardando primeira mensagem..."}"
-         </p>
-         
-         {isStale && (
-           <div className="absolute -top-1 -right-1">
-             <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.5)]" title="Sem resposta há mais de 24h" />
-           </div>
-         )}
+          <p className={cn(
+            "text-[11px] line-clamp-2 leading-snug font-medium",
+            isNewFromUser ? "text-foreground font-bold" : "text-foreground/70 italic"
+          )}>
+            {deal.last_message ? `"${deal.last_message}"` : "Aguardando primeira mensagem..."}
+          </p>
+          
+          {isNewFromUser && (
+            <div className="absolute -top-1 -right-1">
+              <div className="h-2.5 w-2.5 rounded-full bg-primary animate-ping opacity-75" />
+              <div className="absolute inset-0 h-2.5 w-2.5 rounded-full bg-primary" />
+            </div>
+          )}
+
+          {isStale && !isNewFromUser && (
+            <div className="absolute -top-1 -right-1">
+              <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.5)]" title="Sem resposta há mais de 24h" />
+            </div>
+          )}
        </div>
  
        <div className="flex items-center justify-between pt-2.5 border-t border-border/50">
