@@ -1,10 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import { useEffect, useState } from "react";
+ import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-  import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp } from "lucide-react";
+ import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp, MessageSquare, X, Send, Bot, User, UserCog, PauseCircle, PlayCircle, RefreshCw } from "lucide-react";
+ import { formatDistanceToNow } from "date-fns";
+ import { ptBR } from "date-fns/locale";
+ import { evolution } from "@/lib/evolution";
+ type Msg = { role: "user" | "assistant" | "agent"; content: string; at?: string; sent?: boolean };
+ type Conversation = {
+   id: string;
+   contact_name: string | null;
+   contact_phone: string;
+   status: string;
+   messages_count: number;
+   last_message_at: string;
+   transcript: Msg[];
+ };
+ 
  import { StageColumn } from "@/components/funil/StageColumn";
  import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -49,6 +63,106 @@ type Deal = {
    const [dragId, setDragId] = useState<string | null>(null);
    const [adding, setAdding] = useState<{ stage_id: string; lead_id: string; deal_value: string } | null>(null);
    const [searchTerm, setSearchTerm] = useState("");
+   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
+   const [chatOpen, setChatOpen] = useState(false);
+   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
+   const [chatLoading, setChatLoading] = useState(false);
+   const [messageText, setMessageText] = useState("");
+   const [sending, setSending] = useState(false);
+   const scrollRef = useRef<HTMLDivElement>(null);
+   const loadConversation = async (phone: string) => {
+     if (!user?.id || !phone) return;
+     setChatLoading(true);
+     try {
+       const { data, error } = await supabase
+         .from("bot_conversations")
+         .select("*")
+         .eq("user_id", user.id)
+         .eq("contact_phone", phone)
+         .maybeSingle();
+ 
+       if (error) throw error;
+       if (data) {
+         setCurrentConversation(data as any as Conversation);
+       } else {
+         setCurrentConversation(null);
+       }
+     } catch (err) {
+       console.error("Erro ao carregar conversa:", err);
+       toast.error("Erro ao carregar conversa");
+     } finally {
+       setChatLoading(false);
+     }
+   };
+ 
+   const sendMessage = async () => {
+     if (!currentConversation || !messageText.trim() || sending) return;
+     setSending(true);
+     try {
+       const { data, error } = await supabase.functions.invoke("send-whatsapp", {
+         body: {
+           phone: currentConversation.contact_phone,
+           text: messageText.trim(),
+           contactName: currentConversation.contact_name,
+         },
+       });
+       if (error) throw error;
+       setMessageText("");
+       // O Realtime deve atualizar a conversa, mas vamos recarregar para garantir
+       loadConversation(currentConversation.contact_phone);
+     } catch (e: any) {
+       toast.error(e?.message ?? "Erro ao enviar");
+     } finally {
+       setSending(false);
+     }
+   };
+ 
+   const toggleHandoff = async () => {
+     if (!currentConversation) return;
+     const newStatus = currentConversation.status === "handed_off" ? "active" : "handed_off";
+     const { error } = await supabase
+       .from("bot_conversations")
+       .update({ status: newStatus })
+       .eq("id", currentConversation.id);
+     
+     if (error) toast.error(error.message);
+     else {
+       toast.success(newStatus === "handed_off" ? "Bot pausado" : "Bot reativado");
+       loadConversation(currentConversation.contact_phone);
+     }
+   };
+ 
+   useEffect(() => {
+     if (chatOpen && currentConversation) {
+       const timer = setTimeout(() => {
+         scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+       }, 100);
+       return () => clearTimeout(timer);
+     }
+   }, [chatOpen, currentConversation?.transcript?.length]);
+ 
+   useEffect(() => {
+     if (!user?.id || !chatOpen || !currentConversation) return;
+     
+     const ch = supabase
+       .channel("funil_chat:" + currentConversation.contact_phone)
+       .on(
+         "postgres_changes",
+         { 
+           event: "UPDATE", 
+           schema: "public", 
+           table: "bot_conversations", 
+           filter: `id=eq.${currentConversation.id}` 
+         },
+         (payload) => {
+           setCurrentConversation(payload.new as any as Conversation);
+         }
+       )
+       .subscribe();
+       
+     return () => { supabase.removeChannel(ch); };
+   }, [user?.id, chatOpen, currentConversation?.id]);
+ 
  
     const filteredDeals = deals.filter(d => {
       const leadName = d.lead?.name?.toLowerCase() || "";
@@ -76,15 +190,22 @@ type Deal = {
      setStages((stRes.data as Stage[]) ?? []);
       const leadIds = (dlRes.data as any[])?.map(d => d.lead_id) || [];
       let lastMessagesMap: Record<string, { content: string, created_at: string }> = {};
-      if (leadIds.length > 0) {
-        const { data: msgData } = await supabase.from("messages").select("lead_id, content, created_at").in("lead_id", leadIds).order("created_at", { ascending: false });
-        if (msgData) msgData.forEach(msg => { if (!lastMessagesMap[msg.lead_id]) lastMessagesMap[msg.lead_id] = { content: msg.content, created_at: msg.created_at }; });
-      }
-      const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => ({
-        ...deal,
-        last_message: lastMessagesMap[deal.lead_id]?.content,
-        last_message_at: lastMessagesMap[deal.lead_id]?.created_at
-      })) ?? [];
+       if (leadIds.length > 0) {
+         const filteredLeadIds = leadIds.filter(Boolean);
+         if (filteredLeadIds.length > 0) {
+           const { data: msgData } = await supabase.from("messages").select("lead_id, content, created_at").in("lead_id", filteredLeadIds).order("created_at", { ascending: false });
+           if (msgData) msgData.forEach(msg => { 
+             if (msg.lead_id && !lastMessagesMap[msg.lead_id]) {
+               lastMessagesMap[msg.lead_id] = { content: msg.content, created_at: msg.created_at }; 
+             }
+           });
+         }
+       }
+       const dealsWithLastMessage = (dlRes.data as any[])?.map(deal => ({
+         ...deal,
+         last_message: deal.lead_id ? lastMessagesMap[deal.lead_id]?.content : undefined,
+         last_message_at: deal.lead_id ? lastMessagesMap[deal.lead_id]?.created_at : undefined
+       })) ?? [];
       setDeals(dealsWithLastMessage);
      setLeads((ldRes.data as any) ?? []);
     setLoading(false);
@@ -120,7 +241,7 @@ type Deal = {
   const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   return (
-    <div className="min-h-screen flex w-full bg-background overflow-hidden">
+     <div className="min-h-screen flex w-full bg-background overflow-hidden relative">
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar title="Funil de Vendas" subtitle="Arraste cards entre estágios para atualizar" />
@@ -190,6 +311,15 @@ type Deal = {
                      onMoveDeal={moveDeal}
                      dragId={dragId}
                      setDragId={setDragId}
+                     onSelectDeal={(deal) => {
+                       if (deal.lead?.phone) {
+                         setSelectedDealId(deal.id);
+                         loadConversation(deal.lead.phone);
+                         setChatOpen(true);
+                       } else {
+                         toast.error("Lead sem telefone para conversa");
+                       }
+                     }}
                    />
                  ))}
                  

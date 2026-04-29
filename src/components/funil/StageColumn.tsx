@@ -10,9 +10,10 @@
    onMoveDeal: (dealId: string, newStageId: string) => void;
    dragId: string | null;
    setDragId: (id: string | null) => void;
+   onSelectDeal?: (deal: any) => void;
  }
  
- export function StageColumn({ stage, deals, onAddDeal, onRemoveDeal, onMoveDeal, dragId, setDragId }: StageColumnProps) {
+ export function StageColumn({ stage, deals, onAddDeal, onRemoveDeal, onMoveDeal, dragId, setDragId, onSelectDeal }: StageColumnProps) {
    const total = deals.reduce((s, d) => s + Number(d.deal_value ?? 0), 0);
    const fmt = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
  
@@ -73,6 +74,7 @@
              onRemove={onRemoveDeal}
              onDragStart={setDragId}
              onDragEnd={() => setDragId(null)}
+             onClick={() => onSelectDeal?.(d)}
            />
          ))}
          
