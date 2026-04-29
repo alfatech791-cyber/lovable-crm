@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
- import { Users, Plus, MoreVertical, Search, Filter, Loader2, User, Trash2, Edit3, Phone, Mail, MapPin, DollarSign, Wrench } from "lucide-react";
+ import { Users, Plus, MoreVertical, Search, Filter, Loader2, User, Trash2, Edit3, Phone, Mail, MapPin, DollarSign, Wrench, X } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
