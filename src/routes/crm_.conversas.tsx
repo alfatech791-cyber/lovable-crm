@@ -862,7 +862,7 @@ function ConversasPage() {
               .eq("id", selected.id)
               .single();
 
-            const latestTranscript = Array.isArray(currentConv?.transcript) ? currentConv.transcript : transcript;
+            const latestTranscript = (Array.isArray(currentConv?.transcript) ? currentConv.transcript : transcript) as Msg[];
             const updatedTranscript = [...latestTranscript, newMsg];
             
             // Update local state first for instant feedback
