@@ -146,9 +146,58 @@ function CustomersPage() {
     (c.phone && c.phone.includes(searchTerm))
   );
 
-  return (
-    <div className="min-h-screen flex w-full bg-background">
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+   return (
+     <div className="min-h-screen flex w-full bg-background">
+       <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+         <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+           <DialogHeader>
+             <DialogTitle>Histórico: {editingCustomer?.full_name}</DialogTitle>
+           </DialogHeader>
+           <div className="space-y-6 py-4">
+             {loadingHistory ? (
+               <div className="flex justify-center py-10"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+             ) : (
+               <>
+                 <div className="space-y-3">
+                   <h3 className="text-sm font-bold flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-600" /> Vendas Recentes</h3>
+                   {customerHistory.sales.length > 0 ? (
+                     <div className="space-y-2">
+                       {customerHistory.sales.map(s => (
+                         <div key={s.id} className="text-xs p-3 rounded-xl border border-border bg-slate-50/50 flex justify-between items-center">
+                           <div>
+                             <div className="font-bold">Venda #{s.id.slice(0, 8)}</div>
+                             <div className="text-muted-foreground">{new Date(s.created_at).toLocaleDateString('pt-BR')}</div>
+                           </div>
+                           <div className="font-black text-slate-900">R$ {s.total_amount.toLocaleString('pt-BR')}</div>
+                         </div>
+                       ))}
+                     </div>
+                   ) : <p className="text-xs text-muted-foreground italic px-3">Nenhuma venda registrada.</p>}
+                 </div>
+ 
+                 <div className="space-y-3">
+                   <h3 className="text-sm font-bold flex items-center gap-2"><Wrench className="h-4 w-4 text-blue-600" /> Ordens de Serviço</h3>
+                   {customerHistory.services.length > 0 ? (
+                     <div className="space-y-2">
+                       {customerHistory.services.map(s => (
+                         <div key={s.id} className="text-xs p-3 rounded-xl border border-border bg-slate-50/50 flex justify-between items-center">
+                           <div>
+                             <div className="font-bold">{s.equipment}</div>
+                             <div className="text-muted-foreground">{new Date(s.created_at).toLocaleDateString('pt-BR')} - {s.status}</div>
+                           </div>
+                           <div className="font-black text-slate-900">R$ {(s.estimated_cost || 0).toLocaleString('pt-BR')}</div>
+                         </div>
+                       ))}
+                     </div>
+                   ) : <p className="text-xs text-muted-foreground italic px-3">Nenhum serviço registrado.</p>}
+                 </div>
+               </>
+             )}
+           </div>
+         </DialogContent>
+       </Dialog>
+ 
+       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>{editingCustomer ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
