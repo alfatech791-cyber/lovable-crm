@@ -1157,9 +1157,12 @@ function ConversasPage() {
                               </div>
 ) : (
 <>
-{selected.is_group && isUser && m.sender && (
-<p className="text-[10px] font-bold text-primary mb-1 opacity-80 uppercase tracking-tighter">{m.sender}</p>
-)}
+                              {selected.is_group && isUser && m.sender && (
+                                <p className="text-[10px] font-black text-primary mb-1.5 opacity-90 uppercase tracking-widest flex items-center gap-1.5">
+                                  <span className="h-1 w-1 rounded-full bg-primary" />
+                                  {m.sender}
+                                </p>
+                              )}
 <span className="whitespace-pre-wrap break-words">{m.content}</span>
 </>
                              )}
