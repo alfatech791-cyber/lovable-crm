@@ -24,7 +24,7 @@ import { toast } from "sonner";
   const [filterCategory, setFilterCategory] = useState("all");
   const [viewTab, setViewTab] = useState("all");
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
-    const [quickProduct, setQuickProduct] = useState({ name: "", price: "", stock: "", category: "Acessórios" });
+    const [quickProduct, setQuickProduct] = useState({ name: "", price: "", stock: "", category: "Acessórios", cost_price: "" });
 
     useEffect(() => {
       if (!user?.id) return;
@@ -160,6 +160,7 @@ import { toast } from "sonner";
       const payload = {
         user_id: user.id,
         name: quickProduct.name.trim(),
+        cost_price: Number(quickProduct.cost_price || 0),
         price: Number(quickProduct.price || 0),
         stock_quantity: Number(quickProduct.stock || 0),
         category: quickProduct.category,
@@ -169,7 +170,7 @@ import { toast } from "sonner";
       if (error) return toast.error("Erro ao criar: " + error.message);
       setLocalProducts((prev) => [{ ...row, stock: row.stock_quantity }, ...prev]);
       toast.success("Produto cadastrado com sucesso!");
-      setQuickProduct({ name: "", price: "", stock: "", category: "Acessórios" });
+      setQuickProduct({ name: "", price: "", stock: "", category: "Acessórios", cost_price: "" });
       setIsQuickAddOpen(false);
     };
 
@@ -187,8 +188,8 @@ import { toast } from "sonner";
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-              <div className="space-y-1.5 md:col-span-1">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+              <div className="space-y-1.5 md:col-span-3">
                 <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Nome do Produto</Label>
                 <input 
                   placeholder="Ex: Carregador USB-C" 
@@ -197,8 +198,18 @@ import { toast } from "sonner";
                   className="w-full h-11 px-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Preço (R$)</Label>
+              <div className="space-y-1.5 md:col-span-2">
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Custo (R$)</Label>
+                <input 
+                  type="number"
+                  placeholder="0,00" 
+                  value={quickProduct.cost_price}
+                  onChange={(e) => setQuickProduct({...quickProduct, cost_price: e.target.value})}
+                  className="w-full h-11 px-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="space-y-1.5 md:col-span-2">
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Venda (R$)</Label>
                 <input 
                   type="number"
                   placeholder="0,00" 
@@ -207,7 +218,7 @@ import { toast } from "sonner";
                   className="w-full h-11 px-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 md:col-span-1">
                 <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Estoque</Label>
                 <input 
                   type="number"
@@ -217,7 +228,7 @@ import { toast } from "sonner";
                   className="w-full h-11 px-4 rounded-xl bg-card border border-border text-sm outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 md:col-span-2">
                 <Label className="text-[10px] uppercase font-bold text-muted-foreground ml-1">Categoria</Label>
                 <Select value={quickProduct.category} onValueChange={(v) => setQuickProduct({...quickProduct, category: v})}>
                   <SelectTrigger className="w-full h-11 rounded-xl bg-card border-border">
@@ -231,7 +242,7 @@ import { toast } from "sonner";
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 md:col-span-2">
                 <button 
                   onClick={handleQuickAdd} 
                   disabled={loading}
@@ -339,8 +350,11 @@ import { toast } from "sonner";
           >
             <FileDown className="h-4 w-4" /> Exportar
           </button>
-          <button onClick={() => setIsQuickAddOpen(!isQuickAddOpen)} className={`h-10 px-5 rounded-xl flex items-center gap-2 text-sm font-bold shadow-glow transition ${isQuickAddOpen ? "bg-muted text-foreground hover:bg-muted/80" : "bg-gradient-primary text-white hover:opacity-95"}`}>
+          <button onClick={() => setIsAddOpen(true)} className="h-10 px-5 rounded-xl flex items-center gap-2 text-sm font-bold shadow-glow transition bg-gradient-primary text-white hover:opacity-95">
             <Plus className="h-4 w-4" /> Novo Produto
+          </button>
+          <button onClick={() => setIsQuickAddOpen(!isQuickAddOpen)} className={`h-10 px-4 rounded-xl border border-border text-sm font-medium transition flex items-center gap-2 ${isQuickAddOpen ? "bg-primary/10 text-primary border-primary/20" : "bg-card hover:bg-muted"}`}>
+            <Plus className="h-4 w-4" /> Cadastro Rápido
           </button>
         </div>
        </div>
