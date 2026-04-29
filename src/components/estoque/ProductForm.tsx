@@ -82,6 +82,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
   useEffect(() => {
     if (product) {
       setIsSmartphone(product.category === "Smartphones");
+      const { margin, markup } = calculateFromPrice(product.price || 0, product.cost_price);
       setFormData({
         name: product.name || "",
         sku: product.sku || "",
@@ -109,6 +110,8 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
         processor: product.processor || "",
         ram: product.ram || "",
         display: product.display || "",
+        margin,
+        markup,
       });
     }
   }, [product]);
