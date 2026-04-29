@@ -49,28 +49,36 @@ function Dashboard() {
       const firstDayMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
       // Fetch sales
-      const { data: sales } = await supabase
+      const { data: sales, error: salesError } = await supabase
         .from("sales_orders")
         .select("total_amount, created_at, status")
         .eq("user_id", user.id);
+      
+      if (salesError) throw salesError;
 
       // Fetch products for stock
-      const { data: products } = await supabase
+      const { data: products, error: productsError } = await supabase
         .from("products")
         .select("stock_quantity, min_stock")
         .eq("user_id", user.id);
 
+      if (productsError) throw productsError;
+
       // Fetch leads
-      const { data: leads } = await supabase
+      const { data: leads, error: leadsError } = await supabase
         .from("leads")
         .select("created_at")
         .eq("user_id", user.id);
 
+      if (leadsError) throw leadsError;
+
       // Fetch OS
-      const { data: os } = await supabase
+      const { data: os, error: osError } = await supabase
         .from("service_orders")
         .select("status")
         .eq("user_id", user.id);
+
+      if (osError) throw osError;
 
       const todaySales = (sales || [])
         .filter(s => new Date(s.created_at!) >= today && s.status === 'concluded')
@@ -115,10 +123,10 @@ function Dashboard() {
   }, [fetchStats]);
 
    const kpis = [
-     { label: "Vendas do Dia", value: stats.todaySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "+12%", sub: "vs ontem", icon: "ShoppingBag", tone: "success" },
+     { label: "Vendas do Dia", value: stats.todaySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "Vendas", sub: "Resumo diário", icon: "ShoppingBag", tone: "success" },
      { label: "OS Abertas", value: String(stats.activeOS), trend: stats.activeOS > 5 ? "Alto" : "Normal", sub: "Serviços ativos", icon: "Wrench", tone: "warning" },
      { label: "Estoque Baixo", value: String(stats.lowStock), trend: stats.lowStock > 0 ? "Crítico" : "Ok", sub: "Reposição necessária", icon: "Box", tone: "destructive" },
-     { label: "Faturamento Mês", value: stats.monthRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "65%", sub: "Meta: R$ 50k", icon: "DollarSign", tone: "primary" },
+     { label: "Faturamento Mês", value: stats.monthRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "Meta", sub: "Meta: R$ 50k", icon: "DollarSign", tone: "primary" },
      { label: "Novos Leads", value: String(stats.newLeads), trend: "+5", sub: "Hoje", icon: "Users", tone: "info" },
      { label: "Ticket Médio", value: stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "Estável", sub: "Média 30 dias", icon: "TrendingUp", tone: "success" },
    ];

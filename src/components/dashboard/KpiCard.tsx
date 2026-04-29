@@ -45,8 +45,8 @@
          <div className="min-w-0 flex-1">
            <div className="text-[12px] text-muted-foreground font-medium group-hover:text-primary transition-colors">{label}</div>
            <div className="mt-0.5 flex items-baseline gap-1.5">
-             <span className="text-[22px] font-bold tracking-tight font-display">{value}</span>
-             <span className="text-[11px] font-semibold text-success">↑ {trend.replace("+","")}</span>
+              <span className="text-[20px] lg:text-[22px] font-bold tracking-tight font-display truncate">{value}</span>
+              {trend && <span className="text-[10px] font-semibold text-success whitespace-nowrap">↑ {trend.replace("+","")}</span>}
            </div>
            <div className="text-[11px] text-muted-foreground mt-0.5">{sub}</div>
          </div>
