@@ -77,6 +77,38 @@ serve(async (req) => {
       await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active");
       return json({ ok: true, inactiveOrGroup: true, stored: true });
     }
+
+    // Verifica horário comercial (se habilitado)
+    const bh = settings.business_hours ?? {};
+    if (bh.enabled) {
+      // Hora atual no fuso de São Paulo
+      const nowSP = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+      const day = nowSP.getDay(); // 0=dom .. 6=sab
+      const hhmm = nowSP.toTimeString().slice(0, 5); // "HH:MM"
+      const days: number[] = bh.days ?? [1, 2, 3, 4, 5];
+      const start: string = bh.start ?? "08:00";
+      const end: string = bh.end ?? "18:00";
+      const inDay = days.includes(day);
+      const inHour = hhmm >= start && hhmm <= end;
+      if (!inDay || !inHour) {
+        // Fora do horário: envia away_message uma vez
+        const awayText = settings.away_message || "No momento estamos fora do horário de atendimento.";
+        transcript.push({ role: "assistant", content: awayText, at: new Date().toISOString() });
+        await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active");
+        const instance = settings.whatsapp_instance;
+        const evoUrl = Deno.env.get("EVOLUTION_API_URL");
+        const evoKey = Deno.env.get("EVOLUTION_API_KEY");
+        if (instance && evoUrl && evoKey) {
+          await fetch(`${evoUrl}/message/sendText/${instance}`, {
+            method: "POST",
+            headers: { apikey: evoKey, "Content-Type": "application/json" },
+            body: JSON.stringify({ number: phone, text: awayText }),
+          });
+        }
+        return json({ ok: true, away: true });
+      }
+    }
+
     // Handoff por palavra-chave ou limite
     const lower = messageText.toLowerCase();
     const keywordHit = (settings.handoff_keywords ?? []).some((k: string) => lower.includes(k.toLowerCase()));
