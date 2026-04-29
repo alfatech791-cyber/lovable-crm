@@ -437,25 +437,31 @@ import { toast } from "sonner";
                       </span>
                     </td>
                    <td className="px-6 py-4">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className="p-2 rounded-lg hover:bg-muted transition">
-                            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
-                          <DropdownMenuItem onClick={() => setEditingProduct(product)} className="gap-2">
-                            <Edit className="h-4 w-4" /> Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2">
-                            <History className="h-4 w-4" /> Movimentação
-                          </DropdownMenuItem>
-                           <DropdownMenuItem onClick={() => handleDeleteProduct(product.id)} className="gap-2 text-destructive focus:text-destructive">
-                             <Trash2 className="h-4 w-4" /> Excluir
-                           </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                   </td>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => setEditingProduct(product)}
+                          className="p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition text-muted-foreground"
+                          title="Editar"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="p-2 rounded-lg hover:bg-muted transition">
+                              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuItem className="gap-2">
+                              <History className="h-4 w-4" /> Movimentação
+                            </DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => handleDeleteProduct(product.id)} className="gap-2 text-destructive focus:text-destructive">
+                               <Trash2 className="h-4 w-4" /> Excluir
+                             </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </td>
                  </tr>
                ))}
              </tbody>
