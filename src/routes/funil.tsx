@@ -86,7 +86,6 @@ type Deal = {
         last_message_at: lastMessagesMap[deal.lead_id]?.created_at
       })) ?? [];
       setDeals(dealsWithLastMessage);
-      setDeals(dealsWithLastMessage);
      setLeads((ldRes.data as any) ?? []);
     setLoading(false);
   };
