@@ -140,6 +140,26 @@ import { toast } from "sonner";
      toast.success("Produto excluído.");
    };
 
+    const handleQuickAdd = async () => {
+      if (!user?.id) return;
+      if (!quickProduct.name.trim()) { toast.error("Nome é obrigatório"); return; }
+      setLoading(true);
+      const payload: any = {
+        user_id: user.id,
+        name: quickProduct.name.trim(),
+        price: Number(quickProduct.price || 0),
+        stock_quantity: Number(quickProduct.stock || 0),
+        category: "Acessórios",
+      };
+      const { data: row, error } = await supabase.from("products").insert(payload).select().single();
+      setLoading(false);
+      if (error) return toast.error("Erro ao criar: " + error.message);
+      setLocalProducts((prev) => [{ ...row, stock: row.stock_quantity }, ...prev]);
+      toast.success("Produto cadastrado com sucesso!");
+      setQuickProduct({ name: "", price: "", stock: "" });
+      setIsQuickAddOpen(false);
+    };
+
    return (
      <div className="space-y-6">
       {/* Summary Cards */}
