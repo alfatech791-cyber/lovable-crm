@@ -833,33 +833,33 @@ type Deal = {
        {/* Painel Lateral de Chat Refinado */}
        {viewMode === "kanban" && chatOpen && (
          <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[450px] bg-background border-l border-border shadow-[0_0_50px_rgba(0,0,0,0.15)] flex flex-col z-[100] animate-in slide-in-from-right duration-300">
-           {/* Header do Chat */}
-           <div className="px-6 py-4 border-b border-border flex flex-col gap-3 bg-card/50 backdrop-blur-md sticky top-0 z-10">
-             <div className="flex items-center justify-between">
-             <div className="flex items-center gap-4 min-w-0">
-               <div className="relative">
-                 <div className="h-11 w-11 rounded-2xl bg-primary/10 grid place-items-center shrink-0 border border-primary/20">
-                   <User className="h-5 w-5 text-primary" />
-                 </div>
-                 {currentConversation?.status !== "handed_off" && (
-                   <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 border-2 border-background flex items-center justify-center">
-                     <Bot className="h-2 w-2 text-white" />
-                   </div>
-                 )}
-               </div>
-               <div className="min-w-0">
-                 <p className="text-sm font-black truncate text-foreground tracking-tight">
-                   {currentConversation?.contact_name || currentConversation?.contact_phone || "Lead Sem Nome"}
-                 </p>
-                 <div className="flex items-center gap-1.5">
-                   <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                   <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                     Online via WhatsApp
-                   </p>
-                 </div>
-               </div>
-             </div>
-             <div className="flex items-center gap-2">
+            {/* Header do Chat */}
+            <div className="px-6 py-4 border-b border-border flex flex-col gap-3 bg-card/50 backdrop-blur-md sticky top-0 z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="relative">
+                    <div className="h-11 w-11 rounded-2xl bg-primary/10 grid place-items-center shrink-0 border border-primary/20">
+                      <User className="h-5 w-5 text-primary" />
+                    </div>
+                    {currentConversation?.status !== "handed_off" && (
+                      <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 border-2 border-background flex items-center justify-center">
+                        <Bot className="h-2 w-2 text-white" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-black truncate text-foreground tracking-tight">
+                      {currentConversation?.contact_name || currentConversation?.contact_phone || "Lead Sem Nome"}
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                        Online via WhatsApp
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
                {currentConversation && (
                  <Button 
                   size="sm" 
