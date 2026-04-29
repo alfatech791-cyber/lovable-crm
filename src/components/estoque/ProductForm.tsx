@@ -493,7 +493,13 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                       </div>
                        <div className="grid grid-cols-2 gap-3">
                          <div className="grid gap-1.5">
-                           <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Margem de Lucro (%)</Label>
+                           <div className="flex items-center justify-between">
+                             <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Margem (%)</Label>
+                             <div className="flex gap-1">
+                               <button onClick={() => handleChange("margin", 30)} className="text-[8px] px-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-primary font-bold">30%</button>
+                               <button onClick={() => handleChange("margin", 50)} className="text-[8px] px-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-primary font-bold">50%</button>
+                             </div>
+                           </div>
                            <div className="relative">
                              <Input 
                                type="number" 
