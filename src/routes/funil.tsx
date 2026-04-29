@@ -422,7 +422,11 @@ type Deal = {
         }
         
       // Garante que o usuário tenha as etapas padrão profissionais
-      await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
+      try {
+        await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
+      } catch (e) {
+        console.warn("ensure_default_funnel_stages falhou:", e);
+      }
 
       const [stRes, dlRes, ldRes, convRes, allDealsRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
@@ -442,22 +446,26 @@ type Deal = {
         (c: any) => !dealPhones.has(normalizePhone(c.contact_phone))
       );
       if (orphanConvs.length > 0) {
-        await Promise.all(
-          orphanConvs.map((c: any) =>
-            supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
-              _user_id: user.id,
-              _phone: c.contact_phone,
-              _name: c.contact_name,
-            } as any)
-          )
-        );
-        // Recarrega após reconciliação
-        const { data: newDeals } = await supabase
-          .from("pipeline_leads")
-          .select("*, lead:leads(name, phone, source)")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
-        if (newDeals) (dlRes as any).data = newDeals;
+        try {
+          await Promise.all(
+            orphanConvs.slice(0, 50).map((c: any) =>
+              supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
+                _user_id: user.id,
+                _phone: c.contact_phone,
+                _name: c.contact_name,
+              } as any)
+            )
+          );
+          // Recarrega após reconciliação
+          const { data: newDeals } = await supabase
+            .from("pipeline_leads")
+            .select("*, lead:leads(name, phone, source)")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false });
+          if (newDeals) (dlRes as any).data = newDeals;
+        } catch (e) {
+          console.warn("Reconciliação de órfãos falhou:", e);
+        }
       }
       
       if (stRes.error) toast.error("Erro ao carregar estágios: " + stRes.error.message);
@@ -531,12 +539,12 @@ type Deal = {
     }
   };
 
-    useEffect(() => { 
-      load(); 
-      // Se não houver negociações, tenta um sync automático
-      if (user?.id && !loading && deals.length === 0) {
-        syncFromWhatsApp();
-      }
+    useEffect(() => {
+      if (authLoading) return;
+      load();
+      // Timeout de segurança: garante que o loading termine mesmo se algo travar
+      const safety = setTimeout(() => setLoading(false), 8000);
+      return () => clearTimeout(safety);
     }, [user?.id, authLoading]);
 
   const moveDeal = async (dealId: string, newStageId: string) => {
