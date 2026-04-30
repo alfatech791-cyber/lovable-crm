@@ -45,7 +45,7 @@ import { toast } from "sonner";
     }, [user?.id]);
 
    const stats = useMemo(() => {
-     const totalValue = localProducts.reduce((acc, p) => acc + (p.price * (p.stock || 0)), 0);
+       const totalValue = localProducts.reduce((acc, p) => acc + (Number(p.price || 0) * (p.stock || 0)), 0);
      const totalCost = localProducts.reduce((acc, p) => acc + ((p.cost_price || 0) * (p.stock || 0)), 0);
      const lowStock = localProducts.filter(p => (p.stock || 0) <= 3 && (p.stock || 0) > 0).length;
      const outOfStock = localProducts.filter(p => (p.stock || 0) === 0).length;
@@ -277,7 +277,7 @@ import { toast } from "sonner";
                </div>
                <div>
                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{stat.label}</p>
-                 <h3 className="text-2xl font-display font-bold leading-none mt-1">{stat.value}</h3>
+               <h3 className="text-2xl font-display font-bold leading-none mt-1">{stat.value || 0}</h3>
                </div>
              </CardContent>
            </Card>
@@ -419,9 +419,9 @@ import { toast } from "sonner";
                   </div>
                 </td>
                      <td className="px-6 py-5">
-                      <span className="text-sm font-bold text-primary">
-                        {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                      </span>
+                       <span className="text-sm font-bold text-primary">
+                         {Number(product.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                       </span>
                     </td>
                      <td className="px-6 py-5">
                       <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${(product.stock || 0) > 0 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
