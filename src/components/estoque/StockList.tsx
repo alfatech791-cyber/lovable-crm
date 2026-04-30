@@ -438,29 +438,37 @@ import { toast } from "sonner";
                  <td className="px-6 py-5 text-center">
                   <div className="inline-flex flex-col items-center">
                     <div className="flex items-center gap-2 group">
-                      <button 
-                        onClick={async () => {
-                          const newStock = Math.max(0, (product.stock || 0) - 1);
-                          const { error } = await supabase.from("products").update({ stock_quantity: newStock }).eq("id", product.id);
-                          if (!error) setLocalProducts(prev => prev.map(p => p.id === product.id ? { ...p, stock: newStock, stock_quantity: newStock } : p));
-                        }}
-                        className="h-6 w-6 rounded-full bg-muted flex items-center justify-center hover:bg-destructive hover:text-white transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                        -
-                      </button>
+                       <button 
+                         onClick={async (e) => {
+                           e.stopPropagation();
+                           const newStock = Math.max(0, (product.stock || 0) - 1);
+                           const { error } = await supabase.from("products").update({ stock_quantity: newStock }).eq("id", product.id);
+                           if (!error) {
+                             setLocalProducts(prev => prev.map(p => p.id === product.id ? { ...p, stock: newStock, stock_quantity: newStock } : p));
+                             fetchStats();
+                           }
+                         }}
+                         className="h-6 w-6 rounded-full bg-muted flex items-center justify-center hover:bg-destructive hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                       >
+                         -
+                       </button>
                       <span className={`text-sm font-bold ${(product.stock || 0) <= (product.min_stock || 3) ? 'text-destructive' : 'text-foreground'}`}>
                         {product.stock || 0}
                       </span>
-                      <button 
-                        onClick={async () => {
-                          const newStock = (product.stock || 0) + 1;
-                          const { error } = await supabase.from("products").update({ stock_quantity: newStock }).eq("id", product.id);
-                          if (!error) setLocalProducts(prev => prev.map(p => p.id === product.id ? { ...p, stock: newStock, stock_quantity: newStock } : p));
-                        }}
-                        className="h-6 w-6 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-white transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                        +
-                      </button>
+                       <button 
+                         onClick={async (e) => {
+                           e.stopPropagation();
+                           const newStock = (product.stock || 0) + 1;
+                           const { error } = await supabase.from("products").update({ stock_quantity: newStock }).eq("id", product.id);
+                           if (!error) {
+                             setLocalProducts(prev => prev.map(p => p.id === product.id ? { ...p, stock: newStock, stock_quantity: newStock } : p));
+                             fetchStats();
+                           }
+                         }}
+                         className="h-6 w-6 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                       >
+                         +
+                       </button>
                     </div>
                     <span className="text-[10px] text-muted-foreground font-medium uppercase">{product.unit || 'un'}</span>
                     <div className="w-16 h-1 bg-muted rounded-full mt-1 overflow-hidden">
