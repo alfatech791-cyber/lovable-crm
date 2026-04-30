@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Tag, DollarSign, History, CheckCircle2, Plus, Cpu, Upload, Image as ImageIcon, Hash, Settings2, Info as InfoIcon, Zap, Box, ClipboardList, Warehouse, MapPin, Percent, Globe, Trash2, ChevronDown, Sparkles } from "lucide-react";
+import { Tag, DollarSign, History, CheckCircle2, Plus, Cpu, Upload, Image as ImageIcon, Hash, Settings2, Info as InfoIcon, Zap, Box, ClipboardList, Warehouse, MapPin, Percent, Globe, Trash2, ChevronDown, Sparkles, LayoutGrid, Coins, Package, Monitor } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 interface ProductFormData {
@@ -235,15 +235,36 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
 
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-muted/5">
             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
-               <div className="grid grid-cols-1 gap-6">
-                 <div className="space-y-6">
+               <div className="flex flex-col gap-8">
+                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-1 bg-muted/20 rounded-2xl border border-sidebar-border/30">
+                    <Button variant="ghost" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider bg-background shadow-sm text-primary">
+                      <LayoutGrid className="h-3.5 w-3.5 mr-2" /> Geral
+                    </Button>
+                    <Button variant="ghost" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider hover:bg-background/50">
+                      <Coins className="h-3.5 w-3.5 mr-2" /> Financeiro
+                    </Button>
+                    <Button variant="ghost" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider hover:bg-background/50">
+                      <Package className="h-3.5 w-3.5 mr-2" /> Logística
+                    </Button>
+                    <Button variant="ghost" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider hover:bg-background/50">
+                      <Monitor className="h-3.5 w-3.5 mr-2" /> Especificações
+                    </Button>
+                 </div>
+
+                 <div className="space-y-8">
                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                     <section className="lg:col-span-8 bg-muted/5 rounded-3xl border border-sidebar-border/40 p-6 space-y-6 shadow-sm hover:shadow-md transition-shadow">
-                         <h3 className="text-[12px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-2">
-                           <Sparkles className="h-4 w-4 text-primary animate-pulse" /> Identificação & Marca
-                         </h3>
+                     <section className="lg:col-span-8 bg-background rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm hover:shadow-md transition-all duration-300">
+                         <div className="flex items-center justify-between">
+                           <h3 className="text-[13px] font-black uppercase tracking-widest text-primary flex items-center gap-2.5">
+                             <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                               <Tag className="h-4 w-4 text-primary" />
+                             </div>
+                             Dados do Produto
+                           </h3>
+                           <Badge variant="outline" className="bg-emerald-500/5 text-emerald-600 border-emerald-500/20 text-[9px] font-black py-1">Sincronizado</Badge>
+                         </div>
                          
-                         <div className="grid gap-5">
+                         <div className="grid gap-6">
                          <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
                            <div className="md:col-span-8 grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 flex items-center gap-2">
