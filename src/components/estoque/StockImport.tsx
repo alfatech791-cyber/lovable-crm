@@ -61,10 +61,18 @@
            }
          });
  
-         if (error) throw error;
+          if (error) {
+            setLoading(false);
+            throw error;
+          }
+          
           if (data?.products) {
             setPreviewData(data.products);
             setStep('preview');
+            setLoading(false);
+          } else {
+            setLoading(false);
+            toast.error("Nenhum dado pôde ser extraído do PDF.");
           }
        } else {
          // XLS, XLSX, CSV
@@ -138,8 +146,9 @@
               };
             }).filter(p => p.name !== "Produto sem nome" || p.price > 0 || p.stock_quantity > 0);
  
-            setPreviewData(products);
-            setStep('preview');
+             setPreviewData(products);
+             setStep('preview');
+             setLoading(false);
          };
          reader.readAsBinaryString(file);
        }
