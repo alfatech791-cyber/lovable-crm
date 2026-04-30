@@ -11,6 +11,10 @@
    DialogTrigger,
  } from "@/components/ui/dialog";
  import { toast } from "sonner";
+ import { History, RotateCcw, Check, AlertCircle } from "lucide-react";
+ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+ import { Badge } from "@/components/ui/badge";
+ import { ScrollArea } from "@/components/ui/scroll-area";
  import * as XLSX from "xlsx";
  import { supabase } from "@/integrations/supabase/client";
  import { useAuth } from "@/contexts/AuthContext";
@@ -23,7 +27,20 @@
    const { user } = useAuth();
    const [isOpen, setIsOpen] = useState(false);
    const [loading, setLoading] = useState(false);
+   const [step, setStep] = useState<'upload' | 'preview' | 'history'>('upload');
+   const [previewData, setPreviewData] = useState<any[]>([]);
+   const [currentFile, setCurrentFile] = useState<File | null>(null);
+   const [importHistory, setImportHistory] = useState<any[]>([]);
    const fileInputRef = useRef<HTMLInputElement>(null);
+ 
+   const fetchHistory = async () => {
+     if (!user?.id) return;
+     const { data, error } = await supabase
+       .from('import_history')
+       .select('*')
+       .order('created_at', { ascending: false });
+     if (!error) setImportHistory(data || []);
+   };
  
    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
      const file = e.target.files?.[0];
@@ -44,9 +61,10 @@
          });
  
          if (error) throw error;
-         if (data?.products) {
-           await saveProducts(data.products);
-         }
+          if (data?.products) {
+            setPreviewData(data.products);
+            setStep('preview');
+          }
        } else {
          // XLS, XLSX, CSV
          reader.onload = async (event) => {
@@ -119,7 +137,8 @@
               };
             }).filter(p => p.name !== "Produto sem nome" || p.price > 0 || p.stock_quantity > 0);
  
-           await saveProducts(products);
+            setPreviewData(products);
+            setStep('preview');
          };
          reader.readAsBinaryString(file);
        }
@@ -139,20 +158,66 @@
      });
    };
  
-   const saveProducts = async (products: any[]) => {
-     const { data, error } = await supabase
-       .from("products")
-       .insert(products)
-       .select();
+   const saveProducts = async () => {
+     if (!user?.id || previewData.length === 0) return;
+     setLoading(true);
+     try {
+       const { data: history, error: hErr } = await supabase
+         .from('import_history')
+         .insert({
+           user_id: user.id,
+           file_name: currentFile?.name || 'Importação via IA',
+           file_type: currentFile?.name.split('.').pop() || 'pdf',
+           items_count: previewData.length,
+           status: 'success'
+         })
+         .select()
+         .single();
  
-     if (error) {
-       toast.error("Erro ao salvar produtos: " + error.message);
-     } else {
+       if (hErr) throw hErr;
+ 
+       const productsToInsert = previewData.map(p => ({
+         ...p,
+         user_id: user.id,
+         import_id: history.id
+       }));
+ 
+       const { data, error } = await supabase
+         .from("products")
+         .insert(productsToInsert)
+         .select();
+ 
+       if (error) throw error;
+ 
        toast.success(`${data.length} produtos importados com sucesso!`);
        onImported(data);
        setIsOpen(false);
+       setStep('upload');
+       setPreviewData([]);
+     } catch (error: any) {
+       toast.error("Erro ao salvar produtos: " + error.message);
+     } finally {
+       setLoading(false);
      }
-     setLoading(false);
+   };
+ 
+   const handleReverse = async (importId: string) => {
+     if (!confirm("Tem certeza que deseja reverter esta importação? Todos os produtos vinculados a ela serão removidos.")) return;
+     setLoading(true);
+     try {
+       const { error: pErr } = await supabase.from('products').delete().eq('import_id', importId);
+       if (pErr) throw pErr;
+       const { error: hErr } = await supabase.from('import_history').update({ status: 'reversed' }).eq('id', importId);
+       if (hErr) throw hErr;
+       toast.success("Importação revertida com sucesso.");
+       fetchHistory();
+       // Opcional: recarregar lista principal de produtos
+       window.location.reload();
+     } catch (e: any) {
+       toast.error("Erro ao reverter: " + e.message);
+     } finally {
+       setLoading(false);
+     }
    };
  
    return (
