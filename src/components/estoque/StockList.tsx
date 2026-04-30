@@ -69,13 +69,37 @@ import { toast } from "sonner";
        fetchProducts(nextPage);
      };
 
-   const stats = useMemo(() => {
-       const totalValue = localProducts.reduce((acc, p) => acc + (Number(p.price || 0) * (p.stock || 0)), 0);
-     const totalCost = localProducts.reduce((acc, p) => acc + ((p.cost_price || 0) * (p.stock || 0)), 0);
-     const lowStock = localProducts.filter(p => (p.stock || 0) <= 3 && (p.stock || 0) > 0).length;
-     const outOfStock = localProducts.filter(p => (p.stock || 0) === 0).length;
-     return { totalValue, totalCost, lowStock, outOfStock, totalItems: localProducts.length };
-   }, [localProducts]);
+    const [totalStats, setTotalStats] = useState({ totalValue: 0, totalCost: 0, lowStock: 0, outOfStock: 0, totalItems: 0 });
+
+    const fetchStats = async () => {
+      if (!user?.id) return;
+      const { data, error } = await supabase
+        .from('products')
+        .select('price, cost_price, stock_quantity, min_stock')
+        .eq('user_id', user.id);
+
+      if (error) return;
+      
+      const stats = data.reduce((acc, p) => {
+        const stock = p.stock_quantity || 0;
+        const price = p.price || 0;
+        const cost = p.cost_price || 0;
+        const min = p.min_stock || 3;
+        
+        acc.totalValue += price * stock;
+        acc.totalCost += cost * stock;
+        if (stock <= min && stock > 0) acc.lowStock++;
+        if (stock === 0) acc.outOfStock++;
+        acc.totalItems++;
+        return acc;
+      }, { totalValue: 0, totalCost: 0, lowStock: 0, outOfStock: 0, totalItems: 0 });
+
+      setTotalStats(stats);
+    };
+
+    useEffect(() => {
+      fetchStats();
+    }, [localProducts.length]); // Atualiza stats quando o tamanho da lista local muda (import/add/delete)
  
   const handleExport = () => {
     const headers = ["ID", "Nome", "SKU", "IMEI", "Categoria", "Marca", "Estoque", "Min Estoque", "Preço Venda", "Preço Custo", "Localização"];
