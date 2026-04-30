@@ -221,53 +221,158 @@
    };
  
    return (
-     <Dialog open={isOpen} onOpenChange={setIsOpen}>
+     <Dialog open={isOpen} onOpenChange={(o) => {
+       setIsOpen(o);
+       if (o) fetchHistory();
+       else { setStep('upload'); setPreviewData([]); }
+     }}>
        <DialogTrigger asChild>
          <button className="h-10 px-4 rounded-xl border border-border bg-card text-sm font-medium hover:bg-muted transition flex items-center gap-2">
            <FileUp className="h-4 w-4" /> Importar
          </button>
        </DialogTrigger>
-       <DialogContent className="sm:max-w-[425px]">
+       <DialogContent className={step === 'preview' ? "sm:max-w-[900px]" : "sm:max-w-[500px]"}>
          <DialogHeader>
-           <DialogTitle>Importar Estoque</DialogTitle>
+           <div className="flex items-center justify-between pr-8">
+             <DialogTitle className="flex items-center gap-2">
+               {step === 'upload' && "Importar Estoque"}
+               {step === 'preview' && "Conferir Dados Lidos"}
+               {step === 'history' && "Histórico de Importações"}
+             </DialogTitle>
+             {step === 'upload' && (
+               <Button variant="ghost" size="sm" onClick={() => { setStep('history'); fetchHistory(); }}>
+                 <History className="h-4 w-4 mr-2" /> Histórico
+               </Button>
+             )}
+           </div>
            <DialogDescription>
-             Selecione um arquivo PDF, XLS ou XLSX para importar seus produtos de outro sistema.
+             {step === 'upload' && "Selecione um arquivo PDF, XLS ou XLSX de outro sistema."}
+             {step === 'preview' && `Identificamos ${previewData.length} produtos. Verifique se os preços e nomes estão corretos.`}
+             {step === 'history' && "Gerencie importações anteriores e reverta se necessário."}
            </DialogDescription>
          </DialogHeader>
-         
-         <div className="grid gap-4 py-4">
-           <div className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-8 space-y-4 hover:border-primary/50 transition cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-             <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-               {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : <FileUp className="h-6 w-6" />}
-             </div>
-             <div className="text-center">
-               <p className="text-sm font-medium">Clique para selecionar</p>
-               <p className="text-xs text-muted-foreground mt-1">PDF, XLS, XLSX ou CSV</p>
-             </div>
-             <input 
-               ref={fileInputRef}
-               type="file" 
-               className="hidden" 
-               accept=".pdf,.xls,.xlsx,.csv" 
-               onChange={handleFileChange}
-               disabled={loading}
-             />
-           </div>
  
-           <div className="bg-muted/50 rounded-lg p-3 flex gap-3 items-start">
-             <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-             <div className="text-xs space-y-1">
-               <p className="font-bold">Dicas para melhor importação:</p>
-               <p>• Use cabeçalhos claros como "Nome", "Preço", "Estoque".</p>
-               <p>• Arquivos PDF são processados via IA para identificar os campos.</p>
+         <div className="py-4">
+           {step === 'upload' && (
+             <div className="space-y-4">
+               <div className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-10 space-y-4 hover:border-primary/50 transition cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                 <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                   {loading ? <Loader2 className="h-7 w-7 animate-spin" /> : <FileUp className="h-7 w-7" />}
+                 </div>
+                 <div className="text-center">
+                   <p className="text-sm font-bold">Clique para selecionar arquivo</p>
+                   <p className="text-xs text-muted-foreground mt-1">Excel (XLS, XLSX), CSV ou PDF</p>
+                 </div>
+                 <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,.xls,.xlsx,.csv" onChange={(e) => {
+                   const f = e.target.files?.[0];
+                   if (f) { setCurrentFile(f); handleFileChange(e); }
+                 }} disabled={loading} />
+               </div>
+               <div className="bg-muted/50 rounded-xl p-4 flex gap-3 items-start">
+                 <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                 <div className="text-xs space-y-1 text-muted-foreground">
+                   <p className="font-bold text-foreground">Como funciona a importação:</p>
+                   <p>• O sistema reconhece colunas de Nome, Preço Venda, Custo e Estoque.</p>
+                   <p>• Para PDFs, usamos IA Vision para ler tabelas de qualquer formato.</p>
+                 </div>
+               </div>
              </div>
-           </div>
+           )}
+ 
+           {step === 'preview' && (
+             <div className="space-y-4">
+               <ScrollArea className="h-[400px] border border-border rounded-xl">
+                 <Table>
+                   <TableHeader className="bg-muted/50 sticky top-0 z-10">
+                     <TableRow>
+                       <TableHead>Nome</TableHead>
+                       <TableHead>Categoria</TableHead>
+                       <TableHead className="text-center">Estoque</TableHead>
+                       <TableHead className="text-right">Venda</TableHead>
+                       <TableHead className="text-right">Custo</TableHead>
+                     </TableRow>
+                   </TableHeader>
+                   <TableBody>
+                     {previewData.map((p, i) => (
+                       <TableRow key={i}>
+                         <TableCell className="font-medium text-xs max-w-[200px] truncate">{p.name}</TableCell>
+                         <TableCell className="text-xs">{p.category || '-'}</TableCell>
+                         <TableCell className="text-center text-xs font-bold">{p.stock_quantity}</TableCell>
+                         <TableCell className="text-right text-xs font-bold text-primary">
+                           {Number(p.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                         </TableCell>
+                         <TableCell className="text-right text-xs text-muted-foreground">
+                           {Number(p.cost_price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                         </TableCell>
+                       </TableRow>
+                     ))}
+                   </TableBody>
+                 </Table>
+               </ScrollArea>
+               <div className="flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                 <AlertCircle className="h-4 w-4 text-blue-500" />
+                 <p className="text-[10px] text-blue-700 font-medium">Os dados acima ainda não foram salvos. Clique em "Confirmar" para finalizar.</p>
+               </div>
+             </div>
+           )}
+ 
+           {step === 'history' && (
+             <div className="space-y-4">
+               <ScrollArea className="h-[400px]">
+                 <div className="space-y-3">
+                   {importHistory.length === 0 ? (
+                     <div className="py-20 text-center text-muted-foreground">Nenhuma importação realizada.</div>
+                   ) : importHistory.map((h) => (
+                     <div key={h.id} className="p-4 border border-border rounded-xl flex items-center justify-between group hover:bg-muted/30 transition">
+                       <div>
+                         <div className="flex items-center gap-2">
+                           <p className="text-sm font-bold truncate max-w-[200px]">{h.file_name}</p>
+                           <Badge variant={h.status === 'success' ? 'default' : 'secondary'} className="text-[10px] h-4">
+                             {h.status === 'success' ? 'Importado' : 'Revertido'}
+                           </Badge>
+                         </div>
+                         <p className="text-[10px] text-muted-foreground mt-1">
+                           {new Date(h.created_at).toLocaleString('pt-BR')} • {h.items_count} itens • .{h.file_type}
+                         </p>
+                       </div>
+                       {h.status === 'success' && (
+                         <Button 
+                           variant="ghost" 
+                           size="sm" 
+                           className="text-destructive hover:bg-destructive/10"
+                           onClick={() => handleReverse(h.id)}
+                           disabled={loading}
+                         >
+                           <RotateCcw className="h-3.5 w-3.5 mr-2" /> Reverter
+                         </Button>
+                       )}
+                     </div>
+                   ))}
+                 </div>
+               </ScrollArea>
+               <Button variant="outline" className="w-full h-10 rounded-xl" onClick={() => setStep('upload')}>
+                 Fazer Nova Importação
+               </Button>
+             </div>
+           )}
          </div>
  
-         <DialogFooter>
-           <Button variant="ghost" onClick={() => setIsOpen(false)} disabled={loading}>
-             Cancelar
-           </Button>
+         <DialogFooter className="gap-2">
+           {step === 'upload' && (
+             <Button variant="ghost" className="h-10 rounded-xl" onClick={() => setIsOpen(false)} disabled={loading}>Cancelar</Button>
+           )}
+           {step === 'preview' && (
+             <>
+               <Button variant="ghost" className="h-10 rounded-xl" onClick={() => setStep('upload')} disabled={loading}>Voltar</Button>
+               <Button className="h-10 rounded-xl px-8" onClick={saveProducts} disabled={loading}>
+                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
+                 Confirmar e Salvar {previewData.length} itens
+               </Button>
+             </>
+           )}
+           {step === 'history' && (
+             <Button variant="ghost" className="h-10 rounded-xl" onClick={() => setIsOpen(false)}>Fechar</Button>
+           )}
          </DialogFooter>
        </DialogContent>
      </Dialog>
