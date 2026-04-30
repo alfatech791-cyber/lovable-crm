@@ -668,6 +668,7 @@ export type Database = {
       }
       products: {
         Row: {
+          battery_health: string | null
           brand: string | null
           capacity: string | null
           category: string | null
@@ -686,6 +687,7 @@ export type Database = {
           model: string | null
           name: string
           ncm: string | null
+          observations: string | null
           price: number | null
           processor: string | null
           ram: string | null
@@ -701,6 +703,7 @@ export type Database = {
           wholesale_price: number | null
         }
         Insert: {
+          battery_health?: string | null
           brand?: string | null
           capacity?: string | null
           category?: string | null
@@ -719,6 +722,7 @@ export type Database = {
           model?: string | null
           name: string
           ncm?: string | null
+          observations?: string | null
           price?: number | null
           processor?: string | null
           ram?: string | null
@@ -734,6 +738,7 @@ export type Database = {
           wholesale_price?: number | null
         }
         Update: {
+          battery_health?: string | null
           brand?: string | null
           capacity?: string | null
           category?: string | null
@@ -752,6 +757,7 @@ export type Database = {
           model?: string | null
           name?: string
           ncm?: string | null
+          observations?: string | null
           price?: number | null
           processor?: string | null
           ram?: string | null
