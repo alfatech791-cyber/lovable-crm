@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +50,37 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ open, onOpenChange, product, onSave }: ProductFormProps) {
+  const [existingBrands, setExistingBrands] = useState<string[]>([]);
+  const [existingSuppliers, setExistingSuppliers] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchExistingData = async () => {
+      const { data: brandsData } = await (window as any).supabase
+        .from('products')
+        .select('brand')
+        .not('brand', 'is', null)
+        .neq('brand', '');
+      
+      const { data: suppliersData } = await (window as any).supabase
+        .from('products')
+        .select('supplier')
+        .not('supplier', 'is', null)
+        .neq('supplier', '');
+
+      if (brandsData) {
+        const uniqueBrands = Array.from(new Set(brandsData.map((b: any) => b.brand)));
+        setExistingBrands(uniqueBrands as string[]);
+      }
+      if (suppliersData) {
+        const uniqueSuppliers = Array.from(new Set(suppliersData.map((s: any) => s.supplier)));
+        setExistingSuppliers(uniqueSuppliers as string[]);
+      }
+    };
+
+    if (open) {
+      fetchExistingData();
+    }
+  }, [open]);
   const [isSmartphone, setIsSmartphone] = useState(product?.category === "Smartphones");
   const [formData, setFormData] = useState<ProductFormData>({
     name: product?.name || "",
@@ -293,23 +324,51 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                                </SelectContent>
                              </Select>
                            </div>
-                           <div className="grid gap-2">
+                           <div className="grid gap-2 relative">
                                <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fabricante / Marca</Label>
-                               <Input 
-                                 value={formData.brand}
-                                 onChange={(e) => handleChange("brand", e.target.value)}
-                                 placeholder="Ex: Apple, Samsung..." 
-                                 className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
-                               />
+                               <div className="relative group">
+                                 <Input 
+                                   value={formData.brand}
+                                   onChange={(e) => handleChange("brand", e.target.value)}
+                                   placeholder="Ex: Apple, Samsung..." 
+                                   className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all pr-10" 
+                                 />
+                                 {existingBrands.length > 0 && (
+                                   <Select onValueChange={(v) => handleChange("brand", v)}>
+                                     <SelectTrigger className="absolute right-0 top-0 h-11 w-10 border-none bg-transparent shadow-none focus:ring-0">
+                                       <span className="sr-only">Selecionar existente</span>
+                                     </SelectTrigger>
+                                     <SelectContent>
+                                       {existingBrands.map(brand => (
+                                         <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                                       ))}
+                                     </SelectContent>
+                                   </Select>
+                                 )}
+                               </div>
                              </div>
-                            <div className="grid gap-2">
+                            <div className="grid gap-2 relative">
                               <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fornecedor</Label>
-                              <Input 
-                                value={formData.supplier}
-                                onChange={(e) => handleChange("supplier", e.target.value)}
-                                placeholder="Ex: Apple Brasil, Fornecedor X..." 
-                                className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
-                              />
+                              <div className="relative group">
+                                <Input 
+                                  value={formData.supplier}
+                                  onChange={(e) => handleChange("supplier", e.target.value)}
+                                  placeholder="Ex: Apple Brasil, Fornecedor X..." 
+                                  className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all pr-10" 
+                                />
+                                {existingSuppliers.length > 0 && (
+                                  <Select onValueChange={(v) => handleChange("supplier", v)}>
+                                    <SelectTrigger className="absolute right-0 top-0 h-11 w-10 border-none bg-transparent shadow-none focus:ring-0">
+                                      <span className="sr-only">Selecionar existente</span>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {existingSuppliers.map(supplier => (
+                                        <SelectItem key={supplier} value={supplier}>{supplier}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                )}
+                              </div>
                             </div>
                            <div className="grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Modelo / Referência</Label>
