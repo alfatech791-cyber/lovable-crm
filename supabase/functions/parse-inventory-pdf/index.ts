@@ -99,9 +99,28 @@
        }),
      });
  
-     const aiData = await response.json();
-     const content = aiData.choices[0].message.content;
-     const products = JSON.parse(content.replace(/```json|```/g, ""));
+      const aiData = await response.json();
+      
+      if (!aiData.choices?.[0]?.message?.content) {
+        console.error("AI Error:", aiData);
+        throw new Error(aiData.error?.message || "Erro na resposta da IA ao processar o PDF.");
+      }
+
+      const content = aiData.choices[0].message.content;
+      console.log("AI Content:", content);
+      
+      let products = [];
+      try {
+        const jsonMatch = content.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          products = JSON.parse(jsonMatch[0]);
+        } else {
+          products = JSON.parse(content.replace(/```json|```/g, "").trim());
+        }
+      } catch (e) {
+        console.error("JSON Parse error:", content);
+        throw new Error("Não foi possível processar a lista de produtos retornada.");
+      }
  
      return new Response(JSON.stringify({ products }), {
        headers: { ...corsHeaders, "Content-Type": "application/json" },
