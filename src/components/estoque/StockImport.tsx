@@ -81,8 +81,25 @@
                  finalName = String(modelVal);
                }
 
-               const price = Number(findVal(['venda', 'preço', 'valor', 'price', 'unitário', 'vlr', 'saída']) || 0);
-               const cost = Number(findVal(['custo', 'compra', 'cost', 'entrada', 'preço custo']) || 0);
+               const parseCurrency = (val: any) => {
+                 if (val === null || val === undefined) return 0;
+                 if (typeof val === 'number') return val;
+                 const str = String(val).replace('R$', '').trim();
+                 if (str.includes(',') && str.includes('.')) {
+                   // Formato como 1.234,56
+                   return Number(str.replace(/\./g, '').replace(',', '.'));
+                 } else if (str.includes(',')) {
+                   // Formato como 1234,56
+                   return Number(str.replace(',', '.'));
+                 }
+                 return Number(str);
+               };
+
+               const priceVal = findVal(['venda', 'preço', 'valor', 'price', 'unitário', 'vlr', 'saída', 'valor venda']);
+               const costVal = findVal(['custo', 'compra', 'cost', 'entrada', 'preço custo', 'valor custo']);
+               
+               const price = parseCurrency(priceVal);
+               const cost = parseCurrency(costVal);
                const stock = Number(findVal(['estoque', 'qtd', 'quantidade', 'stock', 'saldo', 'atual', 'disponível']) || 0);
                
               return {
