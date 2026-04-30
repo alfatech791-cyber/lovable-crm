@@ -322,24 +322,28 @@ import { toast } from "sonner";
 
       {/* Summary Cards */}
        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-         {[
-            { label: "Total de Itens", value: totalStats.totalItems, icon: Layers, color: "primary" },
-            { label: "Valor em Estoque", value: totalStats.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), icon: TrendingUp, color: "green-500" },
-            { label: "Estoque Baixo", value: totalStats.lowStock, icon: Clock, color: "orange-500" },
-            { label: "Esgotados", value: totalStats.outOfStock, icon: AlertTriangle, color: "destructive" },
-         ].map((stat, i) => (
-           <Card key={i} className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300">
-             <CardContent className="p-5 flex items-center gap-4">
-               <div className={`h-12 w-12 rounded-2xl bg-${stat.color === 'primary' ? 'primary' : stat.color}/10 flex items-center justify-center text-${stat.color === 'primary' ? 'primary' : stat.color}`}>
-                 <stat.icon className="h-6 w-6" />
-               </div>
-               <div>
-                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{stat.label}</p>
-               <h3 className="text-2xl font-display font-bold leading-none mt-1">{stat.value || 0}</h3>
-               </div>
-             </CardContent>
-           </Card>
-         ))}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {[
+             { label: "Total de Itens", value: totalStats.totalItems, icon: Layers, color: "primary" },
+             { label: "Valor de Venda", value: totalStats.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), icon: TrendingUp, color: "emerald-500" },
+             { label: "Custo de Estoque", value: totalStats.totalCost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), icon: Tags, color: "blue-500" },
+             { label: "Estoque Baixo", value: totalStats.lowStock, icon: Clock, color: "orange-500" },
+             { label: "Esgotados", value: totalStats.outOfStock, icon: AlertTriangle, color: "destructive" },
+          ].map((stat, i) => (
+            <Card key={i} className="border-border/40 bg-card/40 backdrop-blur-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300 group overflow-hidden">
+              <CardContent className="p-4 flex flex-col gap-3 relative">
+                <div className={`h-10 w-10 rounded-xl bg-${stat.color === 'primary' ? 'primary' : stat.color}/10 flex items-center justify-center text-${stat.color === 'primary' ? 'primary' : stat.color} group-hover:scale-110 transition-transform`}>
+                  <stat.icon className="h-5 w-5" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">{stat.label}</p>
+                  <h3 className="text-lg md:text-xl font-black tracking-tight truncate">{stat.value || 0}</h3>
+                </div>
+                <div className={`absolute -right-2 -bottom-2 h-12 w-12 bg-${stat.color === 'primary' ? 'primary' : stat.color}/5 rounded-full blur-2xl group-hover:blur-xl transition-all`} />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
        </div>
 
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-card p-4 rounded-2xl border border-border">
@@ -400,13 +404,13 @@ import { toast } from "sonner";
            <table className="w-full text-left border-collapse">
              <thead>
                 <tr className="border-b border-border bg-muted/30">
-                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Produto / Referência</th>
-                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">NCM / EAN</th>
-                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Categoria</th>
-                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">Estoque</th>
-                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Preço Venda</th>
-                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Status</th>
-                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Ações</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Produto / Marca</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] text-center">Identificação</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Categoria</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] text-center">Estoque</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Preço Venda</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Lucro Est.</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] text-right">Ações</th>
                 </tr>
              </thead>
              <tbody className="divide-y divide-border">
@@ -489,14 +493,24 @@ import { toast } from "sonner";
                   </div>
                 </td>
                      <td className="px-6 py-5">
-                       <span className="text-sm font-bold text-primary">
-                         {Number(product.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                       </span>
+                       <div className="flex flex-col">
+                         <span className="text-sm font-black text-primary leading-none">
+                           {Number(product.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                         </span>
+                         {product.wholesale_price > 0 && (
+                           <span className="text-[9px] text-muted-foreground font-bold mt-1">Atacado: {Number(product.wholesale_price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                         )}
+                       </div>
                     </td>
                      <td className="px-6 py-5">
-                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${(product.stock || 0) > 0 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
-                        {(product.stock || 0) > 0 ? 'EM ESTOQUE' : 'ESGOTADO'}
-                      </span>
+                       <div className="flex flex-col gap-1">
+                         <span className={`text-[10px] font-black ${(product.price - (product.cost_price || 0)) > 0 ? 'text-emerald-600' : 'text-destructive'}`}>
+                           {Number(product.price - (product.cost_price || 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                         </span>
+                         <span className={`px-2 py-0.5 rounded-full text-[8px] font-black border w-fit ${ (product.stock || 0) > 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-destructive/10 text-destructive border-destructive/20' }`}>
+                           { (product.stock || 0) > 0 ? 'EM ESTOQUE' : 'ESGOTADO' }
+                         </span>
+                       </div>
                     </td>
                     <td className="px-6 py-5 text-right" onClick={(e) => e.stopPropagation()}>
                        <div className="flex items-center justify-end gap-2">
