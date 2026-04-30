@@ -101,25 +101,27 @@ import { toast } from "sonner";
       fetchStats();
     }, [localProducts.length]); // Atualiza stats quando o tamanho da lista local muda (import/add/delete)
  
-   const handleExport = () => {
-     const headers = ["ID", "Nome", "SKU", "IMEI", "Categoria", "Marca", "Cor", "Capacidade", "Saúde Bateria", "Estoque", "Min Estoque", "Preço Venda", "Preço Custo", "Localização", "Observações"];
-     const rows = filteredProducts.map(p => [
-       p.id,
-       p.name,
-       p.sku || "",
-       p.imei || "",
-       p.category || "",
-       p.brand || "",
-       p.color || "",
-       p.capacity || "",
-       p.battery_health || "",
-       p.stock || 0,
-       p.min_stock || 0,
-       p.price,
-       p.cost_price || 0,
-       p.location || "",
-       p.observations || ""
-     ]);
+    const handleExport = () => {
+      const headers = ["ID", "Nome", "SKU", "IMEI 1", "IMEI 2", "Categoria", "Marca", "Fornecedor", "Cor", "Capacidade", "Saúde Bateria", "Estoque", "Min Estoque", "Preço Venda", "Preço Custo", "Localização", "Observações"];
+      const rows = filteredProducts.map(p => [
+        p.id,
+        p.name,
+        p.sku || "",
+        p.imei || "",
+        p.imei2 || "",
+        p.category || "",
+        p.brand || "",
+        p.supplier || "",
+        p.color || "",
+        p.capacity || "",
+        p.battery_health || "",
+        p.stock || 0,
+        p.min_stock || 0,
+        p.price,
+        p.cost_price || 0,
+        p.location || "",
+        p.observations || ""
+      ]);
 
     const csvContent = "data:text/csv;charset=utf-8," 
       + [headers.join(","), ...rows.map(e => e.map(cell => `"${cell}"`).join(","))].join("\n");
@@ -141,8 +143,11 @@ import { toast } from "sonner";
         product.name.toLowerCase().includes(lowerSearch) || 
         (product.sku?.toLowerCase().includes(lowerSearch)) ||
         (product.imei?.toLowerCase().includes(lowerSearch)) ||
+        (product.imei2?.toLowerCase().includes(lowerSearch)) ||
         (product.ean?.toLowerCase().includes(lowerSearch)) ||
-        (product.reference?.toLowerCase().includes(lowerSearch));
+        (product.reference?.toLowerCase().includes(lowerSearch)) ||
+        (product.brand?.toLowerCase().includes(lowerSearch)) ||
+        (product.supplier?.toLowerCase().includes(lowerSearch));
       
       const matchesCategory = filterCategory === "all" || product.category === filterCategory;
       
