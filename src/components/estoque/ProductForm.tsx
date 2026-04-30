@@ -468,32 +468,32 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                            />
                          </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="grid gap-1.5">
-                          <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda (Atacado)</Label>
-                          <div className="relative group">
-                             <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-bold text-[8px] rounded-l-lg border border-r-0 border-border">R$</div>
-                             <Input 
-                               type="number" 
-                               value={formData.wholesale_price}
-                               onChange={(e) => handleChange("wholesale_price", parseFloat(e.target.value) || 0)}
-                               className="bg-card h-9 border-border text-xs font-bold pl-10" 
-                             />
-                           </div>
-                        </div>
-                        <div className="grid gap-1.5">
-                          <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Custo (Compra)</Label>
-                          <div className="relative group">
-                             <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-bold text-[8px] rounded-l-lg border border-r-0 border-border">R$</div>
-                             <Input 
-                               type="number" 
-                               value={formData.cost_price}
-                               onChange={(e) => handleChange("cost_price", parseFloat(e.target.value) || 0)}
-                               className="bg-card h-9 border-border text-xs font-bold pl-10" 
-                             />
-                           </div>
-                        </div>
-                      </div>
+                       <div className="grid gap-4">
+                         <div className="grid gap-2">
+                           <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda (Atacado)</Label>
+                           <div className="relative group">
+                              <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-muted text-muted-foreground font-black text-[10px] rounded-l-xl border border-r-0 border-border">R$</div>
+                              <Input 
+                                type="number" 
+                                value={formData.wholesale_price}
+                                onChange={(e) => handleChange("wholesale_price", parseFloat(e.target.value) || 0)}
+                                className="bg-card h-12 border-border focus:ring-4 focus:ring-primary/5 text-lg font-black transition-all pl-12" 
+                              />
+                            </div>
+                         </div>
+                         <div className="grid gap-2">
+                           <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Custo (Compra)</Label>
+                           <div className="relative group">
+                              <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-muted text-muted-foreground font-black text-[10px] rounded-l-xl border border-r-0 border-border">R$</div>
+                              <Input 
+                                type="number" 
+                                value={formData.cost_price}
+                                onChange={(e) => handleChange("cost_price", parseFloat(e.target.value) || 0)}
+                                className="bg-card h-12 border-border focus:ring-4 focus:ring-primary/5 text-lg font-black transition-all pl-12" 
+                              />
+                            </div>
+                         </div>
+                       </div>
                        <div className="grid grid-cols-2 gap-3">
                          <div className="grid gap-1.5">
                            <div className="flex items-center justify-between">
