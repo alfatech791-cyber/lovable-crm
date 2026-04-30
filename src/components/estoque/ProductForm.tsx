@@ -440,13 +440,13 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
 
                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                      <div className="lg:col-span-8 space-y-6">
-                        <section className="bg-card rounded-2xl border border-border p-5 space-y-4 shadow-sm">
+                        <section className="bg-card rounded-3xl border border-border/60 p-6 space-y-4 shadow-sm hover:shadow-md transition-shadow">
                            <div className="flex items-center justify-between">
                               <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
                                  <InfoIcon className="h-3 w-3" /> Descrição Comercial
                               </h3>
                                <Button variant="outline" size="sm" className="h-7 text-[9px] font-black uppercase gap-1.5 px-3 rounded-lg border-primary/30 text-primary hover:bg-primary/5 shadow-sm"><Zap className="h-3 w-3 fill-current" /> IA</Button>
-                            </div>
+                             </div>
                            <textarea 
                              value={formData.description}
                              onChange={(e) => handleChange("description", e.target.value)}
@@ -455,7 +455,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                            />
                         </section>
 
-                        <section className="bg-card rounded-2xl border border-border p-5 space-y-4 shadow-sm">
+                        <section className="bg-card rounded-3xl border border-border/60 p-6 space-y-4 shadow-sm hover:shadow-md transition-shadow">
                            <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
                              <ClipboardList className="h-3 w-3" /> Ficha Técnica / Spec
                            </h3>
@@ -492,7 +492,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                      </div>
 
                      <div className="lg:col-span-4 space-y-6">
-                  <section className="bg-card rounded-2xl border border-border p-5 space-y-5 shadow-sm h-full">
+                  <section className="bg-card rounded-3xl border border-border/60 p-6 space-y-5 shadow-sm hover:shadow-md transition-shadow h-full">
                     <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
                       <ImageIcon className="h-3 w-3" /> Mídia do Produto
                     </h3>
