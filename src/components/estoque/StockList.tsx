@@ -183,6 +183,7 @@ import { toast } from "sonner";
     const { data: row, error } = await supabase.from("products").insert(payload).select().single();
     if (error) return toast.error("Erro ao criar: " + error.message);
     setLocalProducts((prev) => [{ ...row, stock: row.stock_quantity }, ...prev]);
+    fetchStats(); // Atualiza estatísticas após inserção
     toast.success("Produto criado!");
   };
 
@@ -206,6 +207,7 @@ import { toast } from "sonner";
     const { error } = await supabase.from("products").update(payload).eq("id", editingProduct.id);
     if (error) return toast.error("Erro ao salvar: " + error.message);
     setLocalProducts((prev) => prev.map((p) => p.id === editingProduct.id ? { ...p, ...payload, stock: payload.stock_quantity } : p));
+    fetchStats(); // Atualiza estatísticas após atualização
     toast.success("Produto atualizado!");
   };
 
@@ -214,6 +216,7 @@ import { toast } from "sonner";
      const { error } = await supabase.from("products").delete().eq("id", id);
      if (error) return toast.error("Erro ao excluir: " + error.message);
      setLocalProducts((prev) => prev.filter((p) => p.id !== id));
+     fetchStats(); // Atualiza estatísticas após exclusão
      toast.success("Produto excluído.");
    };
 
