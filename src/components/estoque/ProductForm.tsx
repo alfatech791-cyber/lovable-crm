@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Tag, DollarSign, History, CheckCircle2, Plus, Cpu, Upload, Image as ImageIcon, Hash, Settings2, Info as InfoIcon, Zap, Box, ClipboardList, Warehouse, MapPin, Percent, Globe, Trash2 } from "lucide-react";
+import { Tag, DollarSign, History, CheckCircle2, Plus, Cpu, Upload, Image as ImageIcon, Hash, Settings2, Info as InfoIcon, Zap, Box, ClipboardList, Warehouse, MapPin, Percent, Globe, Trash2, ChevronDown } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 interface ProductFormData {
@@ -348,27 +348,43 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                                  )}
                                </div>
                              </div>
-                            <div className="grid gap-2 relative">
+                            <div className="grid gap-2">
                               <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fornecedor</Label>
-                              <div className="relative group">
+                              <div className="flex w-full group">
                                 <Input 
                                   value={formData.supplier}
                                   onChange={(e) => handleChange("supplier", e.target.value)}
                                   placeholder="Ex: Apple Brasil, Fornecedor X..." 
-                                  className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all pr-10" 
+                                  className="bg-card h-11 border-border border-r-0 rounded-r-none shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
                                 />
-                                {existingSuppliers.length > 0 && (
-                                  <Select onValueChange={(v) => handleChange("supplier", v)}>
-                                    <SelectTrigger className="absolute right-0 top-0 h-11 w-10 border-none bg-transparent shadow-none focus:ring-0">
-                                      <span className="sr-only">Selecionar existente</span>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {existingSuppliers.map(supplier => (
+                                <Select onValueChange={(v) => {
+                                  if (v === "new_supplier") {
+                                    // Em uma implementação real aqui abriria um modal de cadastro
+                                    // Por enquanto apenas limpa para o usuário digitar
+                                    handleChange("supplier", "");
+                                  } else {
+                                    handleChange("supplier", v);
+                                  }
+                                }}>
+                                  <SelectTrigger className="h-11 w-10 border-border border-l-0 rounded-l-none bg-card hover:bg-muted/20 transition-colors focus:ring-0">
+                                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                  </SelectTrigger>
+                                  <SelectContent className="border-border shadow-elegant">
+                                    <SelectItem value="new_supplier" className="font-bold text-primary border-b border-border mb-1 hover:bg-primary/5">
+                                      <div className="flex items-center gap-2">
+                                        <Plus className="h-3 w-3" />
+                                        <span>Cadastrar Novo</span>
+                                      </div>
+                                    </SelectItem>
+                                    {existingSuppliers.length > 0 ? (
+                                      existingSuppliers.map(supplier => (
                                         <SelectItem key={supplier} value={supplier}>{supplier}</SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                )}
+                                      ))
+                                    ) : (
+                                      <div className="p-2 text-[10px] text-center text-muted-foreground uppercase font-black">Nenhum fornecedor</div>
+                                    )}
+                                  </SelectContent>
+                                </Select>
                               </div>
                             </div>
                            <div className="grid gap-2">
