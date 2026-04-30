@@ -27,6 +27,7 @@
    const { user } = useAuth();
    const [isOpen, setIsOpen] = useState(false);
    const [loading, setLoading] = useState(false);
+   const [progress, setProgress] = useState(0);
    const [step, setStep] = useState<'upload' | 'preview' | 'history'>('upload');
    const [previewData, setPreviewData] = useState<any[]>([]);
    const [currentFile, setCurrentFile] = useState<File | null>(null);
@@ -158,48 +159,61 @@
      });
    };
  
-   const saveProducts = async () => {
-     if (!user?.id || previewData.length === 0) return;
-     setLoading(true);
-     try {
-       const { data: history, error: hErr } = await supabase
-         .from('import_history')
-         .insert({
-           user_id: user.id,
-           file_name: currentFile?.name || 'Importação via IA',
-           file_type: currentFile?.name.split('.').pop() || 'pdf',
-           items_count: previewData.length,
-           status: 'success'
-         })
-         .select()
-         .single();
- 
-       if (hErr) throw hErr;
- 
-       const productsToInsert = previewData.map(p => ({
-         ...p,
-         user_id: user.id,
-         import_id: history.id
-       }));
- 
-       const { data, error } = await supabase
-         .from("products")
-         .insert(productsToInsert)
-         .select();
- 
-       if (error) throw error;
- 
-       toast.success(`${data.length} produtos importados com sucesso!`);
-       onImported(data);
-       setIsOpen(false);
-       setStep('upload');
-       setPreviewData([]);
-     } catch (error: any) {
-       toast.error("Erro ao salvar produtos: " + error.message);
-     } finally {
-       setLoading(false);
-     }
-   };
+    const saveProducts = async () => {
+      if (!user?.id || previewData.length === 0) return;
+      setLoading(true);
+      setProgress(0);
+      try {
+        const { data: history, error: hErr } = await supabase
+          .from('import_history')
+          .insert({
+            user_id: user.id,
+            file_name: currentFile?.name || 'Importação via IA',
+            file_type: currentFile?.name?.split('.').pop() || 'pdf',
+            items_count: previewData.length,
+            status: 'success'
+          })
+          .select()
+          .single();
+  
+        if (hErr) throw hErr;
+  
+        const CHUNK_SIZE = 50;
+        const totalItems = previewData.length;
+        let importedCount = 0;
+        const allImported = [];
+
+        for (let i = 0; i < totalItems; i += CHUNK_SIZE) {
+          const chunk = previewData.slice(i, i + CHUNK_SIZE).map(p => ({
+            ...p,
+            user_id: user.id,
+            import_id: history.id
+          }));
+
+          const { data, error } = await supabase
+            .from("products")
+            .insert(chunk)
+            .select();
+
+          if (error) throw error;
+          if (data) allImported.push(...data);
+          
+          importedCount += chunk.length;
+          setProgress(Math.round((importedCount / totalItems) * 100));
+        }
+  
+        toast.success(`${allImported.length} produtos importados com sucesso!`);
+        onImported(allImported);
+        setIsOpen(false);
+        setStep('upload');
+        setPreviewData([]);
+      } catch (error: any) {
+        toast.error("Erro ao salvar produtos: " + error.message);
+      } finally {
+        setLoading(false);
+        setProgress(0);
+      }
+    };
  
    const handleReverse = async (importId: string) => {
      if (!confirm("Tem certeza que deseja reverter esta importação? Todos os produtos vinculados a ela serão removidos.")) return;
@@ -256,13 +270,30 @@
            {step === 'upload' && (
              <div className="space-y-4">
                <div className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-10 space-y-4 hover:border-primary/50 transition cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                 <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                   {loading ? <Loader2 className="h-7 w-7 animate-spin" /> : <FileUp className="h-7 w-7" />}
-                 </div>
-                 <div className="text-center">
-                   <p className="text-sm font-bold">Clique para selecionar arquivo</p>
-                   <p className="text-xs text-muted-foreground mt-1">Excel (XLS, XLSX), CSV ou PDF</p>
-                 </div>
+                  {loading ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-primary relative">
+                        <Loader2 className="h-7 w-7 animate-spin" />
+                        {progress > 0 && (
+                          <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold">
+                            {progress}%
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm font-bold">Processando...</p>
+                      <p className="text-[10px] text-muted-foreground">Aguarde, estamos organizando os dados.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                        <FileUp className="h-7 w-7" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm font-bold">Clique para selecionar arquivo</p>
+                        <p className="text-xs text-muted-foreground mt-1">Excel (XLS, XLSX), CSV ou PDF</p>
+                      </div>
+                    </>
+                  )}
                  <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,.xls,.xlsx,.csv" onChange={(e) => {
                    const f = e.target.files?.[0];
                    if (f) { setCurrentFile(f); handleFileChange(e); }
