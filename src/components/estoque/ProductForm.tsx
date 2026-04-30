@@ -336,11 +336,23 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                                     placeholder="Ex: Apple, Samsung..." 
                                     className="bg-card h-11 border-border border-r-0 rounded-r-none shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
                                   />
-                                  <Select onValueChange={(v) => handleChange("brand", v)}>
+                                  <Select onValueChange={(v) => {
+                                    if (v === "new_brand") {
+                                      handleChange("brand", "");
+                                    } else {
+                                      handleChange("brand", v);
+                                    }
+                                  }}>
                                     <SelectTrigger className="h-11 w-10 border-border border-l-0 rounded-l-none bg-card hover:bg-muted/20 transition-colors focus:ring-0">
                                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                                     </SelectTrigger>
                                     <SelectContent className="border-border shadow-elegant">
+                                      <SelectItem value="new_brand" className="font-bold text-primary border-b border-border mb-1 hover:bg-primary/5">
+                                        <div className="flex items-center gap-2">
+                                          <Plus className="h-3 w-3" />
+                                          <span>Cadastrar Nova</span>
+                                        </div>
+                                      </SelectItem>
                                       {existingBrands.length > 0 ? (
                                         existingBrands.map(brand => (
                                           <SelectItem key={brand} value={brand}>{brand}</SelectItem>
