@@ -37,6 +37,8 @@ interface ProductFormData {
    image_url?: string;
    margin?: number;
    markup?: number;
+   battery_health?: string;
+   observations?: string;
  }
 
 interface ProductFormProps {
@@ -72,12 +74,14 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
     capacity: product?.capacity || "",
     description: product?.description || "",
      image_url: product?.image_url || "",
-     processor: product?.processor || "",
-     ram: product?.ram || "",
-     display: product?.display || "",
-     margin: 0,
-     markup: 0,
-   });
+      processor: product?.processor || "",
+      ram: product?.ram || "",
+      display: product?.display || "",
+      battery_health: product?.battery_health || "",
+      observations: product?.observations || "",
+      margin: 0,
+      markup: 0,
+    });
 
   useEffect(() => {
     if (product) {
@@ -107,12 +111,14 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
         capacity: product.capacity || "",
         description: product.description || "",
         image_url: product.image_url || "",
-        processor: product.processor || "",
-        ram: product.ram || "",
-        display: product.display || "",
-        margin,
-        markup,
-      });
+         processor: product.processor || "",
+         ram: product.ram || "",
+         display: product.display || "",
+         battery_health: product.battery_health || "",
+         observations: product.observations || "",
+         margin,
+         markup,
+       });
     }
   }, [product]);
 
@@ -196,11 +202,11 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                  <div className="space-y-6">
                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                      <section className="lg:col-span-8 bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
-                       <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                         <Tag className="h-3 w-3" /> Identificação Básica
-                       </h3>
-                       
-                       <div className="grid gap-5">
+                         <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                           <Tag className="h-3 w-3" /> Identificação Básica & Marca
+                         </h3>
+                         
+                         <div className="grid gap-5">
                          <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
                            <div className="md:col-span-8 grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 flex items-center gap-2">
@@ -285,17 +291,14 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                              </Select>
                            </div>
                            <div className="grid gap-2">
-                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fabricante / Marca</Label>
-                             <Select value={formData.brand} onValueChange={(v) => handleChange("brand", v)}>
-                               <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
-                               <SelectContent className="border-border shadow-elegant">
-                                 <SelectItem value="apple">Apple</SelectItem>
-                                 <SelectItem value="samsung">Samsung</SelectItem>
-                                 <SelectItem value="xiaomi">Xiaomi</SelectItem>
-                                 <SelectItem value="motorola">Motorola</SelectItem>
-                               </SelectContent>
-                             </Select>
-                           </div>
+                               <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fabricante / Marca</Label>
+                               <Input 
+                                 value={formData.brand}
+                                 onChange={(e) => handleChange("brand", e.target.value)}
+                                 placeholder="Ex: Apple, Samsung..." 
+                                 className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                               />
+                             </div>
                            <div className="grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fornecedor</Label>
                              <Select value={formData.supplier} onValueChange={(v) => handleChange("supplier", v)}>
@@ -688,6 +691,30 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                           onChange={(e) => handleChange("capacity", e.target.value)} 
                           placeholder="Ex: 256GB" 
                           className="bg-muted/10 h-10 border-border text-xs font-bold" 
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="grid gap-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Saúde da Bateria (%)</Label>
+                        <Input 
+                          value={formData.battery_health} 
+                          onChange={(e) => handleChange("battery_health", e.target.value)} 
+                          placeholder="Ex: 100%" 
+                          className="bg-muted/10 h-10 border-border text-xs font-bold" 
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="grid gap-2">
+                        <Label className="text-[11px] font-black uppercase text-muted-foreground/60 tracking-wider">Observações</Label>
+                        <textarea 
+                          value={formData.observations}
+                          onChange={(e) => handleChange("observations", e.target.value)}
+                          className="w-full bg-muted/10 border border-border rounded-xl p-3 text-xs font-bold outline-none focus:ring-4 focus:ring-primary/5 min-h-[80px] custom-scrollbar transition-all leading-relaxed" 
+                          placeholder="Observações internas..." 
                         />
                       </div>
                     </div>
