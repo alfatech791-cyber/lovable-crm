@@ -532,7 +532,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
 
                {/* Gestão de Estoque, Preço e Localização */}
                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-border/50">
-                 <section className="bg-primary/5 rounded-2xl border border-primary/10 p-5 space-y-5">
+                 <section className="bg-primary/5 rounded-3xl border border-primary/10 p-6 space-y-6 shadow-sm">
                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                      <DollarSign className="h-3.5 w-3.5" /> Precificação e Venda
                    </h5>
@@ -624,7 +624,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                     </div>
                  </section>
 
-                 <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
+                 <section className="bg-muted/5 rounded-3xl border border-sidebar-border/40 p-6 space-y-6 shadow-sm">
                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                      <Warehouse className="h-3.5 w-3.5" /> Estoque & Unidade
                    </h5>
@@ -678,7 +678,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                    </div>
                  </section>
 
-                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
+                  <section className="bg-muted/5 rounded-3xl border border-sidebar-border/40 p-6 space-y-6 shadow-sm">
                     <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                       <MapPin className="h-3.5 w-3.5" /> Armazenamento & Localização
                     </h5>
