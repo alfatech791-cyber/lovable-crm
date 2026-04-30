@@ -101,21 +101,25 @@ import { toast } from "sonner";
       fetchStats();
     }, [localProducts.length]); // Atualiza stats quando o tamanho da lista local muda (import/add/delete)
  
-  const handleExport = () => {
-    const headers = ["ID", "Nome", "SKU", "IMEI", "Categoria", "Marca", "Estoque", "Min Estoque", "Preço Venda", "Preço Custo", "Localização"];
-    const rows = filteredProducts.map(p => [
-      p.id,
-      p.name,
-      p.sku || "",
-      p.imei || "",
-      p.category || "",
-      p.brand || "",
-      p.stock || 0,
-      p.min_stock || 0,
-      p.price,
-      p.cost_price || 0,
-      p.location || ""
-    ]);
+   const handleExport = () => {
+     const headers = ["ID", "Nome", "SKU", "IMEI", "Categoria", "Marca", "Cor", "Capacidade", "Saúde Bateria", "Estoque", "Min Estoque", "Preço Venda", "Preço Custo", "Localização", "Observações"];
+     const rows = filteredProducts.map(p => [
+       p.id,
+       p.name,
+       p.sku || "",
+       p.imei || "",
+       p.category || "",
+       p.brand || "",
+       p.color || "",
+       p.capacity || "",
+       p.battery_health || "",
+       p.stock || 0,
+       p.min_stock || 0,
+       p.price,
+       p.cost_price || 0,
+       p.location || "",
+       p.observations || ""
+     ]);
 
     const csvContent = "data:text/csv;charset=utf-8," 
       + [headers.join(","), ...rows.map(e => e.map(cell => `"${cell}"`).join(","))].join("\n");
