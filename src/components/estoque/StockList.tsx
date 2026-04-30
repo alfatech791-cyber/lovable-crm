@@ -19,38 +19,87 @@ import { toast } from "sonner";
     const { user } = useAuth();
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<any>(null);
-    const [localProducts, setLocalProducts] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
+     const [localProducts, setLocalProducts] = useState<any[]>([]);
+     const [loading, setLoading] = useState(false);
+     const [hasMore, setHasMore] = useState(true);
+     const [page, setPage] = useState(0);
+     const PAGE_SIZE = 50;
    const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [viewTab, setViewTab] = useState("all");
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
     const [quickProduct, setQuickProduct] = useState({ name: "", price: "", stock: "", category: "Acessórios", cost_price: "" });
 
-    useEffect(() => {
-      if (!user?.id) return;
-      setLoading(true);
-      (async () => {
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
-        if (error) toast.error("Erro ao carregar produtos: " + error.message);
-        // Adapta campos do banco para o shape usado na UI
-        const rows = (data ?? []).map((p: any) => ({ ...p, stock: p.stock_quantity ?? 0 }));
-        setLocalProducts(rows);
-        setLoading(false);
-      })();
-    }, [user?.id]);
+     const fetchProducts = async (pageNum: number, isInitial = false) => {
+       if (!user?.id) return;
+       if (isInitial) {
+         setLoading(true);
+         setPage(0);
+       }
+       
+       const { data, error } = await supabase
+         .from("products")
+         .select("*")
+         .eq("user_id", user.id)
+         .order("created_at", { ascending: false })
+         .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1);
+ 
+       if (error) {
+         toast.error("Erro ao carregar produtos: " + error.message);
+       } else {
+         const rows = (data ?? []).map((p: any) => ({ ...p, stock: p.stock_quantity ?? 0 }));
+         if (isInitial) {
+           setLocalProducts(rows);
+         } else {
+           setLocalProducts(prev => [...prev, ...rows]);
+         }
+         setHasMore(rows.length === PAGE_SIZE);
+       }
+       
+       if (isInitial) setLoading(false);
+     };
+ 
+     useEffect(() => {
+       fetchProducts(0, true);
+     }, [user?.id]);
+ 
+     const handleLoadMore = () => {
+       const nextPage = page + 1;
+       setPage(nextPage);
+       fetchProducts(nextPage);
+     };
 
-   const stats = useMemo(() => {
-       const totalValue = localProducts.reduce((acc, p) => acc + (Number(p.price || 0) * (p.stock || 0)), 0);
-     const totalCost = localProducts.reduce((acc, p) => acc + ((p.cost_price || 0) * (p.stock || 0)), 0);
-     const lowStock = localProducts.filter(p => (p.stock || 0) <= 3 && (p.stock || 0) > 0).length;
-     const outOfStock = localProducts.filter(p => (p.stock || 0) === 0).length;
-     return { totalValue, totalCost, lowStock, outOfStock, totalItems: localProducts.length };
-   }, [localProducts]);
+    const [totalStats, setTotalStats] = useState({ totalValue: 0, totalCost: 0, lowStock: 0, outOfStock: 0, totalItems: 0 });
+
+    const fetchStats = async () => {
+      if (!user?.id) return;
+      const { data, error } = await supabase
+        .from('products')
+        .select('price, cost_price, stock_quantity, min_stock')
+        .eq('user_id', user.id);
+
+      if (error) return;
+      
+      const stats = data.reduce((acc, p) => {
+        const stock = p.stock_quantity || 0;
+        const price = p.price || 0;
+        const cost = p.cost_price || 0;
+        const min = p.min_stock || 3;
+        
+        acc.totalValue += price * stock;
+        acc.totalCost += cost * stock;
+        if (stock <= min && stock > 0) acc.lowStock++;
+        if (stock === 0) acc.outOfStock++;
+        acc.totalItems++;
+        return acc;
+      }, { totalValue: 0, totalCost: 0, lowStock: 0, outOfStock: 0, totalItems: 0 });
+
+      setTotalStats(stats);
+    };
+
+    useEffect(() => {
+      fetchStats();
+    }, [localProducts.length]); // Atualiza stats quando o tamanho da lista local muda (import/add/delete)
  
   const handleExport = () => {
     const headers = ["ID", "Nome", "SKU", "IMEI", "Categoria", "Marca", "Estoque", "Min Estoque", "Preço Venda", "Preço Custo", "Localização"];
@@ -265,10 +314,10 @@ import { toast } from "sonner";
       {/* Summary Cards */}
        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
          {[
-           { label: "Total de Itens", value: stats.totalItems, icon: Layers, color: "primary" },
-           { label: "Valor em Estoque", value: stats.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), icon: TrendingUp, color: "green-500" },
-           { label: "Estoque Baixo", value: stats.lowStock, icon: Clock, color: "orange-500" },
-           { label: "Esgotados", value: stats.outOfStock, icon: AlertTriangle, color: "destructive" },
+            { label: "Total de Itens", value: totalStats.totalItems, icon: Layers, color: "primary" },
+            { label: "Valor em Estoque", value: totalStats.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), icon: TrendingUp, color: "green-500" },
+            { label: "Estoque Baixo", value: totalStats.lowStock, icon: Clock, color: "orange-500" },
+            { label: "Esgotados", value: totalStats.outOfStock, icon: AlertTriangle, color: "destructive" },
          ].map((stat, i) => (
            <Card key={i} className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300">
              <CardContent className="p-5 flex items-center gap-4">
@@ -461,15 +510,27 @@ import { toast } from "sonner";
              <Loader2 className="h-6 w-6 animate-spin text-primary" />
            </div>
          )}
-         {!loading && filteredProducts.length === 0 && (
-           <div className="p-16 text-center">
-             <div className="h-14 w-14 rounded-full bg-muted grid place-items-center mx-auto mb-3">
-               <Package className="h-7 w-7 text-muted-foreground/40" />
-             </div>
-             <h3 className="text-base font-bold">Nenhum produto cadastrado</h3>
-             <p className="text-sm text-muted-foreground mt-1">Clique em "Novo Produto" para começar.</p>
-           </div>
-         )}
+          {!loading && filteredProducts.length === 0 && (
+            <div className="p-16 text-center">
+              <div className="h-14 w-14 rounded-full bg-muted grid place-items-center mx-auto mb-3">
+                <Package className="h-7 w-7 text-muted-foreground/40" />
+              </div>
+              <h3 className="text-base font-bold">Nenhum produto encontrado</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {searchTerm || filterCategory !== 'all' ? 'Tente ajustar seus filtros.' : 'Clique em "Novo Produto" para começar.'}
+              </p>
+            </div>
+          )}
+          {hasMore && !loading && (
+            <div className="p-4 border-t border-border bg-muted/10 flex justify-center">
+              <button 
+                onClick={handleLoadMore}
+                className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+              >
+                Ver mais produtos <ArrowUpDown className="h-3 w-3" />
+              </button>
+            </div>
+          )}
        </div>
 
         <ProductForm open={isAddOpen} onOpenChange={setIsAddOpen} onSave={handleAddProduct} />
