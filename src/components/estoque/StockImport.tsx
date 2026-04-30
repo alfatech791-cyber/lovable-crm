@@ -72,14 +72,22 @@
                 return key ? row[key] : null;
               };
 
-              const name = String(findVal(['nome', 'produto', 'description', 'descrição', 'item']) || "Produto sem nome");
-              const price = Number(findVal(['venda', 'preço', 'valor', 'price', 'unitário', 'vlr']) || 0);
-              const cost = Number(findVal(['custo', 'compra', 'cost', 'entrada']) || 0);
-              const stock = Number(findVal(['estoque', 'qtd', 'quantidade', 'stock', 'saldo', 'atual']) || 0);
-              
+               const nameVal = findVal(['nome', 'produto', 'description', 'descrição', 'item', 'modelo', 'model']);
+               const modelVal = findVal(['modelo', 'model']);
+               
+               // Use model if name is missing or too generic
+               let finalName = String(nameVal || modelVal || "Produto sem nome");
+               if (finalName === "Produto sem nome" && modelVal) {
+                 finalName = String(modelVal);
+               }
+
+               const price = Number(findVal(['venda', 'preço', 'valor', 'price', 'unitário', 'vlr', 'saída']) || 0);
+               const cost = Number(findVal(['custo', 'compra', 'cost', 'entrada', 'preço custo']) || 0);
+               const stock = Number(findVal(['estoque', 'qtd', 'quantidade', 'stock', 'saldo', 'atual', 'disponível']) || 0);
+               
               return {
                 user_id: user.id,
-                name,
+                 name: finalName,
                 price,
                 cost_price: cost,
                 stock_quantity: stock,
