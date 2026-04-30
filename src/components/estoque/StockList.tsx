@@ -19,30 +19,55 @@ import { toast } from "sonner";
     const { user } = useAuth();
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<any>(null);
-    const [localProducts, setLocalProducts] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
+     const [localProducts, setLocalProducts] = useState<any[]>([]);
+     const [loading, setLoading] = useState(false);
+     const [hasMore, setHasMore] = useState(true);
+     const [page, setPage] = useState(0);
+     const PAGE_SIZE = 50;
    const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [viewTab, setViewTab] = useState("all");
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
     const [quickProduct, setQuickProduct] = useState({ name: "", price: "", stock: "", category: "Acessórios", cost_price: "" });
 
-    useEffect(() => {
-      if (!user?.id) return;
-      setLoading(true);
-      (async () => {
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
-        if (error) toast.error("Erro ao carregar produtos: " + error.message);
-        // Adapta campos do banco para o shape usado na UI
-        const rows = (data ?? []).map((p: any) => ({ ...p, stock: p.stock_quantity ?? 0 }));
-        setLocalProducts(rows);
-        setLoading(false);
-      })();
-    }, [user?.id]);
+     const fetchProducts = async (pageNum: number, isInitial = false) => {
+       if (!user?.id) return;
+       if (isInitial) {
+         setLoading(true);
+         setPage(0);
+       }
+       
+       const { data, error } = await supabase
+         .from("products")
+         .select("*")
+         .eq("user_id", user.id)
+         .order("created_at", { ascending: false })
+         .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1);
+ 
+       if (error) {
+         toast.error("Erro ao carregar produtos: " + error.message);
+       } else {
+         const rows = (data ?? []).map((p: any) => ({ ...p, stock: p.stock_quantity ?? 0 }));
+         if (isInitial) {
+           setLocalProducts(rows);
+         } else {
+           setLocalProducts(prev => [...prev, ...rows]);
+         }
+         setHasMore(rows.length === PAGE_SIZE);
+       }
+       
+       if (isInitial) setLoading(false);
+     };
+ 
+     useEffect(() => {
+       fetchProducts(0, true);
+     }, [user?.id]);
+ 
+     const handleLoadMore = () => {
+       const nextPage = page + 1;
+       setPage(nextPage);
+       fetchProducts(nextPage);
+     };
 
    const stats = useMemo(() => {
        const totalValue = localProducts.reduce((acc, p) => acc + (Number(p.price || 0) * (p.stock || 0)), 0);
