@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Tag, DollarSign, History, CheckCircle2, Plus, Cpu, Upload, Image as ImageIcon, Hash, Settings2, Info as InfoIcon, Zap, Box, ClipboardList, Warehouse, MapPin, Percent, Globe, Trash2, ChevronDown } from "lucide-react";
+import { Tag, DollarSign, History, CheckCircle2, Plus, Cpu, Upload, Image as ImageIcon, Hash, Settings2, Info as InfoIcon, Zap, Box, ClipboardList, Warehouse, MapPin, Percent, Globe, Trash2, ChevronDown, Sparkles } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 interface ProductFormData {
@@ -223,10 +223,12 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
             </div>
             <div className="space-y-0.5">
               <DialogTitle className="text-2xl font-black tracking-tight">{product ? "Editar Registro" : "Novo Cadastro"}</DialogTitle>
-              <DialogDescription className="text-xs font-medium text-muted-foreground flex items-center gap-2">
-                 {product ? "Atualização de estoque e metadados" : "Todos os dados concentrados em uma única página"}
-                 <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[9px] uppercase font-bold py-0 h-4">Fluxo Unificado</Badge>
-              </DialogDescription>
+              <div className="flex items-center gap-2">
+                <DialogDescription className="text-xs font-medium text-muted-foreground">
+                   {product ? "Atualização de estoque e metadados" : "Todos os dados concentrados em uma única página"}
+                </DialogDescription>
+                <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[9px] uppercase font-bold py-0 h-4 animate-pulse">Fluxo Unificado</Badge>
+              </div>
             </div>
           </div>
         </DialogHeader>
@@ -236,9 +238,9 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                <div className="grid grid-cols-1 gap-6">
                  <div className="space-y-6">
                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                     <section className="lg:col-span-8 bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
-                         <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                           <Tag className="h-3 w-3" /> Identificação Básica & Marca
+                     <section className="lg:col-span-8 bg-muted/5 rounded-3xl border border-sidebar-border/40 p-6 space-y-6 shadow-sm hover:shadow-md transition-shadow">
+                         <h3 className="text-[12px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-2">
+                           <Sparkles className="h-4 w-4 text-primary animate-pulse" /> Identificação & Marca
                          </h3>
                          
                          <div className="grid gap-5">
@@ -325,29 +327,31 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                                </SelectContent>
                              </Select>
                            </div>
-                           <div className="grid gap-2 relative">
-                               <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fabricante / Marca</Label>
-                               <div className="relative group">
-                                 <Input 
-                                   value={formData.brand}
-                                   onChange={(e) => handleChange("brand", e.target.value)}
-                                   placeholder="Ex: Apple, Samsung..." 
-                                   className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all pr-10" 
-                                 />
-                                 {existingBrands.length > 0 && (
-                                   <Select onValueChange={(v) => handleChange("brand", v)}>
-                                     <SelectTrigger className="absolute right-0 top-0 h-11 w-10 border-none bg-transparent shadow-none focus:ring-0">
-                                       <span className="sr-only">Selecionar existente</span>
-                                     </SelectTrigger>
-                                     <SelectContent>
-                                       {existingBrands.map(brand => (
-                                         <SelectItem key={brand} value={brand}>{brand}</SelectItem>
-                                       ))}
-                                     </SelectContent>
-                                   </Select>
-                                 )}
-                               </div>
-                             </div>
+                            <div className="grid gap-2">
+                                <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fabricante / Marca</Label>
+                                <div className="flex w-full group">
+                                  <Input 
+                                    value={formData.brand}
+                                    onChange={(e) => handleChange("brand", e.target.value)}
+                                    placeholder="Ex: Apple, Samsung..." 
+                                    className="bg-card h-11 border-border border-r-0 rounded-r-none shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                                  />
+                                  <Select onValueChange={(v) => handleChange("brand", v)}>
+                                    <SelectTrigger className="h-11 w-10 border-border border-l-0 rounded-l-none bg-card hover:bg-muted/20 transition-colors focus:ring-0">
+                                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                    </SelectTrigger>
+                                    <SelectContent className="border-border shadow-elegant">
+                                      {existingBrands.length > 0 ? (
+                                        existingBrands.map(brand => (
+                                          <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                                        ))
+                                      ) : (
+                                        <div className="p-2 text-[10px] text-center text-muted-foreground uppercase font-black">Nenhuma marca</div>
+                                      )}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
                             <div className="grid gap-2">
                               <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fornecedor</Label>
                               <div className="flex w-full group">
@@ -436,13 +440,13 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
 
                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                      <div className="lg:col-span-8 space-y-6">
-                        <section className="bg-card rounded-2xl border border-border p-5 space-y-4 shadow-sm">
+                        <section className="bg-card rounded-3xl border border-border/60 p-6 space-y-4 shadow-sm hover:shadow-md transition-shadow">
                            <div className="flex items-center justify-between">
                               <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
                                  <InfoIcon className="h-3 w-3" /> Descrição Comercial
                               </h3>
                                <Button variant="outline" size="sm" className="h-7 text-[9px] font-black uppercase gap-1.5 px-3 rounded-lg border-primary/30 text-primary hover:bg-primary/5 shadow-sm"><Zap className="h-3 w-3 fill-current" /> IA</Button>
-                            </div>
+                             </div>
                            <textarea 
                              value={formData.description}
                              onChange={(e) => handleChange("description", e.target.value)}
@@ -451,7 +455,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                            />
                         </section>
 
-                        <section className="bg-card rounded-2xl border border-border p-5 space-y-4 shadow-sm">
+                        <section className="bg-card rounded-3xl border border-border/60 p-6 space-y-4 shadow-sm hover:shadow-md transition-shadow">
                            <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
                              <ClipboardList className="h-3 w-3" /> Ficha Técnica / Spec
                            </h3>
@@ -488,7 +492,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                      </div>
 
                      <div className="lg:col-span-4 space-y-6">
-                  <section className="bg-card rounded-2xl border border-border p-5 space-y-5 shadow-sm h-full">
+                  <section className="bg-card rounded-3xl border border-border/60 p-6 space-y-5 shadow-sm hover:shadow-md transition-shadow h-full">
                     <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
                       <ImageIcon className="h-3 w-3" /> Mídia do Produto
                     </h3>
@@ -528,7 +532,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
 
                {/* Gestão de Estoque, Preço e Localização */}
                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-border/50">
-                 <section className="bg-primary/5 rounded-2xl border border-primary/10 p-5 space-y-5">
+                 <section className="bg-primary/5 rounded-3xl border border-primary/10 p-6 space-y-6 shadow-sm">
                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                      <DollarSign className="h-3.5 w-3.5" /> Precificação e Venda
                    </h5>
@@ -620,7 +624,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                     </div>
                  </section>
 
-                 <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
+                 <section className="bg-muted/5 rounded-3xl border border-sidebar-border/40 p-6 space-y-6 shadow-sm">
                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                      <Warehouse className="h-3.5 w-3.5" /> Estoque & Unidade
                    </h5>
@@ -674,7 +678,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                    </div>
                  </section>
 
-                  <section className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-5">
+                  <section className="bg-muted/5 rounded-3xl border border-sidebar-border/40 p-6 space-y-6 shadow-sm">
                     <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                       <MapPin className="h-3.5 w-3.5" /> Armazenamento & Localização
                     </h5>
