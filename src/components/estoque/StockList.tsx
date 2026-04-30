@@ -314,10 +314,10 @@ import { toast } from "sonner";
       {/* Summary Cards */}
        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
          {[
-           { label: "Total de Itens", value: stats.totalItems, icon: Layers, color: "primary" },
-           { label: "Valor em Estoque", value: stats.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), icon: TrendingUp, color: "green-500" },
-           { label: "Estoque Baixo", value: stats.lowStock, icon: Clock, color: "orange-500" },
-           { label: "Esgotados", value: stats.outOfStock, icon: AlertTriangle, color: "destructive" },
+            { label: "Total de Itens", value: totalStats.totalItems, icon: Layers, color: "primary" },
+            { label: "Valor em Estoque", value: totalStats.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), icon: TrendingUp, color: "green-500" },
+            { label: "Estoque Baixo", value: totalStats.lowStock, icon: Clock, color: "orange-500" },
+            { label: "Esgotados", value: totalStats.outOfStock, icon: AlertTriangle, color: "destructive" },
          ].map((stat, i) => (
            <Card key={i} className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300">
              <CardContent className="p-5 flex items-center gap-4">
