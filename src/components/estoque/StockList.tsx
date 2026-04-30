@@ -493,14 +493,24 @@ import { toast } from "sonner";
                   </div>
                 </td>
                      <td className="px-6 py-5">
-                       <span className="text-sm font-bold text-primary">
-                         {Number(product.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                       </span>
+                       <div className="flex flex-col">
+                         <span className="text-sm font-black text-primary leading-none">
+                           {Number(product.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                         </span>
+                         {product.wholesale_price > 0 && (
+                           <span className="text-[9px] text-muted-foreground font-bold mt-1">Atacado: {Number(product.wholesale_price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                         )}
+                       </div>
                     </td>
                      <td className="px-6 py-5">
-                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${(product.stock || 0) > 0 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
-                        {(product.stock || 0) > 0 ? 'EM ESTOQUE' : 'ESGOTADO'}
-                      </span>
+                       <div className="flex flex-col gap-1">
+                         <span className={`text-[10px] font-black ${(product.price - (product.cost_price || 0)) > 0 ? 'text-emerald-600' : 'text-destructive'}`}>
+                           {Number(product.price - (product.cost_price || 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                         </span>
+                         <span className={`px-2 py-0.5 rounded-full text-[8px] font-black border w-fit ${ (product.stock || 0) > 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-destructive/10 text-destructive border-destructive/20' }`}>
+                           { (product.stock || 0) > 0 ? 'EM ESTOQUE' : 'ESGOTADO' }
+                         </span>
+                       </div>
                     </td>
                     <td className="px-6 py-5 text-right" onClick={(e) => e.stopPropagation()}>
                        <div className="flex items-center justify-end gap-2">
