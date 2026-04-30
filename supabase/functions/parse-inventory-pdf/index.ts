@@ -44,16 +44,19 @@
      // OR using a library like pdf-parse.
      
      const prompt = `You are a data extraction assistant. I will provide you with the text content of a PDF inventory list from another system. 
-     Please extract all products and return them as a JSON array of objects with the following fields:
-     - name (string)
-     - price (number)
-     - cost_price (number, optional)
-     - stock_quantity (number)
-     - category (string)
-     - brand (string, optional)
-     - model (string, optional)
-     - sku (string, optional)
-     - imei (string, optional)
+      Please extract ALL products found in the document. For each product, extract all available details and return them as a JSON array of objects with the following fields:
+      - name (string) -> The full name or description of the product
+      - price (number) -> The selling price
+      - cost_price (number, optional) -> The cost price or purchase price
+      - stock_quantity (number) -> The current stock quantity
+      - category (string) -> The product category
+      - brand (string, optional) -> The manufacturer or brand
+      - model (string, optional) -> Specific model
+      - sku (string, optional) -> SKU or internal code
+      - imei (string, optional) -> IMEI numbers if present
+      - reference (string, optional) -> Internal reference or ID
+      - ncm (string, optional) -> NCM fiscal code
+      - ean (string, optional) -> Barcode or EAN
  
      If the text is messy, use your best judgment to identify the fields.
      Return ONLY the JSON array.`;
