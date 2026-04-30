@@ -27,7 +27,8 @@ interface ProductFormData {
   weight?: number;
   location?: string;
   store?: string;
-  imei?: string;
+   imei?: string;
+   imei2?: string;
   color?: string;
   capacity?: string;
   description?: string;
@@ -69,7 +70,8 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
     weight: product?.weight || 0,
     location: product?.location || "",
     store: product?.store || "matriz",
-    imei: product?.imei || "",
+      imei: product?.imei || "",
+      imei2: product?.imei2 || "",
     color: product?.color || "",
     capacity: product?.capacity || "",
     description: product?.description || "",
@@ -106,7 +108,8 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
         weight: product.weight || 0,
         location: product.location || "",
         store: product.store || "matriz",
-        imei: product.imei || "",
+         imei: product.imei || "",
+         imei2: product.imei2 || "",
         color: product.color || "",
         capacity: product.capacity || "",
         description: product.description || "",
@@ -299,16 +302,15 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                                  className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
                                />
                              </div>
-                           <div className="grid gap-2">
-                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fornecedor</Label>
-                             <Select value={formData.supplier} onValueChange={(v) => handleChange("supplier", v)}>
-                               <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
-                               <SelectContent className="border-border shadow-elegant">
-                                 <SelectItem value="padrao">Principal</SelectItem>
-                                 <SelectItem value="dist">Distribuidora</SelectItem>
-                               </SelectContent>
-                             </Select>
-                           </div>
+                            <div className="grid gap-2">
+                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fornecedor</Label>
+                              <Input 
+                                value={formData.supplier}
+                                onChange={(e) => handleChange("supplier", e.target.value)}
+                                placeholder="Ex: Apple Brasil, Fornecedor X..." 
+                                className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                              />
+                            </div>
                            <div className="grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Modelo / Referência</Label>
                              <Input 
@@ -653,18 +655,30 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                         className="bg-muted/10 h-11 border-border text-xs font-bold font-mono tracking-widest" 
                       />
                     </div>
-                    {isSmartphone && (
-                      <div className="grid gap-2">
-                         <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-widest">IMEI Principal (SIM 1)</Label>
-                                 <Input 
-                                   id="imei" 
-                                   value={formData.imei} 
-                                   onChange={(e) => handleChange("imei", e.target.value)}
-                                   placeholder="Ex: 356789..." 
-                                   className="bg-muted/10 h-12 border-border font-mono text-sm tracking-[0.2em] font-black focus:ring-4 focus:ring-primary/5 transition-all" 
-                                 />
-                      </div>
-                    )}
+                     {isSmartphone && (
+                       <>
+                         <div className="grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-widest">IMEI 1 (SIM 1)</Label>
+                            <Input 
+                              id="imei" 
+                              value={formData.imei} 
+                              onChange={(e) => handleChange("imei", e.target.value)}
+                              placeholder="Ex: 356789..." 
+                              className="bg-muted/10 h-12 border-border font-mono text-sm tracking-[0.2em] font-black focus:ring-4 focus:ring-primary/5 transition-all" 
+                            />
+                         </div>
+                         <div className="grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-widest">IMEI 2 (SIM 2)</Label>
+                            <Input 
+                              id="imei2" 
+                              value={formData.imei2} 
+                              onChange={(e) => handleChange("imei2", e.target.value)}
+                              placeholder="Ex: 356789..." 
+                              className="bg-muted/10 h-12 border-border font-mono text-sm tracking-[0.2em] font-black focus:ring-4 focus:ring-primary/5 transition-all" 
+                            />
+                         </div>
+                       </>
+                     )}
                   </div>
                 </div>
 
