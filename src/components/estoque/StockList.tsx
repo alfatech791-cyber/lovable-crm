@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { 
   Package, Search, Plus, Filter, MoreHorizontal, ArrowUpDown, 
   AlertTriangle, Edit, Trash2, History, Layers, TrendingUp, 
-   Clock, FileDown, FileUp, Smartphone, Tablet, Watch, Loader2, X
+    Clock, FileDown, FileUp, Smartphone, Tablet, Watch, Loader2, X, Tags, BarChart3
 } from "lucide-react";
   import { ProductForm } from "./ProductForm";
   import { StockImport } from "./StockImport";
@@ -263,52 +263,26 @@ import { toast } from "sonner";
         </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-sidebar-border bg-sidebar/30">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-              <Layers className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase">Total de Itens</p>
-              <h3 className="text-xl font-bold">{stats.totalItems}</h3>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-sidebar-border bg-sidebar/30">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500">
-              <TrendingUp className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase">Valor em Estoque</p>
-              <h3 className="text-xl font-bold">{stats.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h3>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-sidebar-border bg-sidebar/30">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
-              <Clock className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase">Estoque Baixo</p>
-              <h3 className="text-xl font-bold">{stats.lowStock}</h3>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-sidebar-border bg-sidebar/30">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-destructive/10 flex items-center justify-center text-destructive">
-              <AlertTriangle className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase">Esgotados</p>
-              <h3 className="text-xl font-bold">{stats.outOfStock}</h3>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+         {[
+           { label: "Total de Itens", value: stats.totalItems, icon: Layers, color: "primary" },
+           { label: "Valor em Estoque", value: stats.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), icon: TrendingUp, color: "green-500" },
+           { label: "Estoque Baixo", value: stats.lowStock, icon: Clock, color: "orange-500" },
+           { label: "Esgotados", value: stats.outOfStock, icon: AlertTriangle, color: "destructive" },
+         ].map((stat, i) => (
+           <Card key={i} className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300">
+             <CardContent className="p-5 flex items-center gap-4">
+               <div className={`h-12 w-12 rounded-2xl bg-${stat.color === 'primary' ? 'primary' : stat.color}/10 flex items-center justify-center text-${stat.color === 'primary' ? 'primary' : stat.color}`}>
+                 <stat.icon className="h-6 w-6" />
+               </div>
+               <div>
+                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{stat.label}</p>
+                 <h3 className="text-2xl font-display font-bold leading-none mt-1">{stat.value}</h3>
+               </div>
+             </CardContent>
+           </Card>
+         ))}
+       </div>
 
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-card p-4 rounded-2xl border border-border">
         <Tabs value={viewTab} onValueChange={setViewTab} className="w-full xl:w-auto">
@@ -320,7 +294,7 @@ import { toast } from "sonner";
         </Tabs>
 
          <div className="flex items-center gap-3">
-           <div className="relative flex-1 md:w-80">
+               <div className="relative flex-1 md:w-96">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
              <input 
                placeholder="Buscar por nome, categoria ou IMEI..." 
@@ -368,19 +342,19 @@ import { toast } from "sonner";
            <table className="w-full text-left border-collapse">
              <thead>
                 <tr className="border-b border-border bg-muted/30">
-                  <th className="px-6 py-4 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Produto / Referência</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-center">NCM / EAN</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Categoria</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-center">Estoque Atual</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Preço Venda</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Ações</th>
+                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Produto / Referência</th>
+                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">NCM / EAN</th>
+                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Categoria</th>
+                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">Estoque</th>
+                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Preço Venda</th>
+                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Status</th>
+                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Ações</th>
                 </tr>
              </thead>
              <tbody className="divide-y divide-border">
                 {filteredProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-6 py-4">
+                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
                         {product.image_url ? (
                           <img src={product.image_url} alt={product.name} className="h-10 w-10 rounded-lg object-cover shrink-0 border border-border" />
@@ -399,16 +373,16 @@ import { toast } from "sonner";
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                     <td className="px-6 py-5">
                       <div className="flex flex-col items-center gap-1">
                         <span className="text-[10px] font-mono text-muted-foreground bg-muted/50 px-2 py-0.5 rounded leading-none">{product.ncm || '---'}</span>
                         <span className="text-[10px] font-mono text-muted-foreground leading-none">{product.ean || '---'}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                     <td className="px-6 py-5">
                       <span className="text-xs px-2 py-1 rounded bg-muted font-medium">{product.category}</span>
                     </td>
-                <td className="px-6 py-4 text-center">
+                 <td className="px-6 py-5 text-center">
                   <div className="inline-flex flex-col items-center">
                     <div className="flex items-center gap-2 group">
                       <button 
@@ -444,18 +418,18 @@ import { toast } from "sonner";
                     </div>
                   </div>
                 </td>
-                    <td className="px-6 py-4">
+                     <td className="px-6 py-5">
                       <span className="text-sm font-bold text-primary">
                         {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                     <td className="px-6 py-5">
                       <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${(product.stock || 0) > 0 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
                         {(product.stock || 0) > 0 ? 'EM ESTOQUE' : 'ESGOTADO'}
                       </span>
                     </td>
-                   <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
+                    <td className="px-6 py-5 text-right">
+                       <div className="flex items-center justify-end gap-2">
                         <button 
                           onClick={() => setEditingProduct(product)}
                           className="p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition text-muted-foreground"
