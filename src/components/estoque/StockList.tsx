@@ -404,13 +404,13 @@ import { toast } from "sonner";
            <table className="w-full text-left border-collapse">
              <thead>
                 <tr className="border-b border-border bg-muted/30">
-                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Produto / Referência</th>
-                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">NCM / EAN</th>
-                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Categoria</th>
-                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">Estoque</th>
-                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Preço Venda</th>
-                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Status</th>
-                   <th className="px-6 py-5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-right">Ações</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Produto / Marca</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] text-center">Identificação</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Categoria</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] text-center">Estoque</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Preço Venda</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Lucro Est.</th>
+                    <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] text-right">Ações</th>
                 </tr>
              </thead>
              <tbody className="divide-y divide-border">
