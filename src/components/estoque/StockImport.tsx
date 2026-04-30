@@ -64,15 +64,18 @@
  
            const products = data.map((row: any) => ({
              user_id: user.id,
-             name: row.Nome || row.name || row.Produto || row.description || "Produto sem nome",
-             price: Number(row.Preço || row.price || row.Valor || 0),
-             cost_price: Number(row.Custo || row.cost_price || 0),
-             stock_quantity: Number(row.Estoque || row.stock || row.quantity || 0),
-             category: row.Categoria || row.category || "Importado",
-             brand: row.Marca || row.brand || "",
-             model: row.Modelo || row.model || "",
-             sku: row.SKU || row.sku || "",
-             imei: row.IMEI || row.imei || "",
+             name: String(row.Nome || row.name || row.Produto || row.description || "Produto sem nome"),
+             price: Number(row["Preço Venda"] || row.Preço || row.price || row.Valor || row.price_sale || 0),
+             cost_price: Number(row["Preço Custo"] || row.Custo || row.cost_price || row.cost || 0),
+             stock_quantity: Number(row["Estoque Atual"] || row.Estoque || row.stock || row.quantity || row.stock_quantity || 0),
+             category: String(row.Categoria || row.category || row.Category || "Importado"),
+             brand: String(row.Marca || row.brand || row.Brand || ""),
+             model: String(row.Modelo || row.model || row.Model || ""),
+             sku: String(row.SKU || row.sku || ""),
+             imei: String(row.IMEI || row.imei || ""),
+             reference: String(row.Referência || row.reference || row.Ref || ""),
+             ncm: String(row.NCM || row.ncm || ""),
+             ean: String(row.EAN || row.ean || row["Código de Barras"] || ""),
            }));
  
            await saveProducts(products);
