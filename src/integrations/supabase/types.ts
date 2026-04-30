@@ -681,6 +681,7 @@ export type Database = {
           id: string
           image_url: string | null
           imei: string | null
+          imei2: string | null
           import_id: string | null
           location: string | null
           min_stock: number | null
@@ -716,6 +717,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           imei?: string | null
+          imei2?: string | null
           import_id?: string | null
           location?: string | null
           min_stock?: number | null
@@ -751,6 +753,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           imei?: string | null
+          imei2?: string | null
           import_id?: string | null
           location?: string | null
           min_stock?: number | null
