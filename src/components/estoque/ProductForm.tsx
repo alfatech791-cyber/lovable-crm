@@ -388,12 +388,12 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                             <div className="grid gap-2">
                               <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fornecedor</Label>
                               <div className="flex w-full group">
-                                <Input 
-                                  value={formData.supplier}
-                                  onChange={(e) => handleChange("supplier", e.target.value)}
-                                  placeholder="Ex: Apple Brasil, Fornecedor X..." 
-                                  className="bg-card h-11 border-border border-r-0 rounded-r-none shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
-                                />
+                                  <Input 
+                                    value={formData.supplier}
+                                    onChange={(e) => handleChange("supplier", e.target.value)}
+                                    placeholder="Selecione ou digite..." 
+                                    className="bg-muted/10 h-11 border-border border-r-0 rounded-r-none shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                                  />
                                 <Select onValueChange={(v) => {
                                   if (v === "new_supplier") {
                                     // Em uma implementação real aqui abriria um modal de cadastro
