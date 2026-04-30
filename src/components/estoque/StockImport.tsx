@@ -62,21 +62,37 @@
              return;
            }
  
-           const products = data.map((row: any) => ({
-             user_id: user.id,
-             name: String(row.Nome || row.name || row.Produto || row.description || "Produto sem nome"),
-             price: Number(row["Preço Venda"] || row.Preço || row.price || row.Valor || row.price_sale || 0),
-             cost_price: Number(row["Preço Custo"] || row.Custo || row.cost_price || row.cost || 0),
-             stock_quantity: Number(row["Estoque Atual"] || row.Estoque || row.stock || row.quantity || row.stock_quantity || 0),
-             category: String(row.Categoria || row.category || row.Category || "Importado"),
-             brand: String(row.Marca || row.brand || row.Brand || ""),
-             model: String(row.Modelo || row.model || row.Model || ""),
-             sku: String(row.SKU || row.sku || ""),
-             imei: String(row.IMEI || row.imei || ""),
-             reference: String(row.Referência || row.reference || row.Ref || ""),
-             ncm: String(row.NCM || row.ncm || ""),
-             ean: String(row.EAN || row.ean || row["Código de Barras"] || ""),
-           }));
+            const products = data.map((row: any) => {
+              // Helper to find a value by searching for multiple possible key names (case-insensitive)
+              const findVal = (possibleKeys: string[]) => {
+                const keys = Object.keys(row);
+                const key = keys.find(k => 
+                  possibleKeys.some(pk => k.toLowerCase().includes(pk.toLowerCase()))
+                );
+                return key ? row[key] : null;
+              };
+
+              const name = String(findVal(['nome', 'produto', 'description', 'descrição', 'item']) || "Produto sem nome");
+              const price = Number(findVal(['venda', 'preço', 'valor', 'price', 'unitário', 'vlr']) || 0);
+              const cost = Number(findVal(['custo', 'compra', 'cost', 'entrada']) || 0);
+              const stock = Number(findVal(['estoque', 'qtd', 'quantidade', 'stock', 'saldo', 'atual']) || 0);
+              
+              return {
+                user_id: user.id,
+                name,
+                price,
+                cost_price: cost,
+                stock_quantity: stock,
+                category: String(findVal(['categoria', 'category', 'grupo']) || "Importado"),
+                brand: String(findVal(['marca', 'brand', 'fabricante']) || ""),
+                model: String(findVal(['modelo', 'model']) || ""),
+                sku: String(findVal(['sku', 'código', 'cod']) || ""),
+                imei: String(findVal(['imei', 'serial', 'sn']) || ""),
+                reference: String(findVal(['referência', 'ref', 'id']) || ""),
+                ncm: String(findVal(['ncm']) || ""),
+                ean: String(findVal(['ean', 'barras', 'barcode']) || ""),
+              };
+            }).filter(p => p.name !== "Produto sem nome" || p.price > 0 || p.stock_quantity > 0);
  
            await saveProducts(products);
          };

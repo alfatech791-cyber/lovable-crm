@@ -44,19 +44,25 @@
      // OR using a library like pdf-parse.
      
      const prompt = `You are a data extraction assistant. I will provide you with the text content of a PDF inventory list from another system. 
-      Please extract ALL products found in the document. For each product, extract all available details and return them as a JSON array of objects with the following fields:
-      - name (string) -> The full name or description of the product
-      - price (number) -> The selling price
-      - cost_price (number, optional) -> The cost price or purchase price
-      - stock_quantity (number) -> The current stock quantity
-      - category (string) -> The product category
-      - brand (string, optional) -> The manufacturer or brand
-      - model (string, optional) -> Specific model
-      - sku (string, optional) -> SKU or internal code
-      - imei (string, optional) -> IMEI numbers if present
-      - reference (string, optional) -> Internal reference or ID
-      - ncm (string, optional) -> NCM fiscal code
-      - ean (string, optional) -> Barcode or EAN
+      Extract ALL products found in the document. For each product, extract all details and return a JSON array of objects.
+      CRITICAL: You must extract the following fields for EVERY item:
+      - name (string) -> Full name/description. NEVER return null or "Unknown". Use the most descriptive text available.
+      - price (number) -> The SELLING PRICE. Look for "Preço", "Venda", "Valor", or columns on the right. If not found, use 0.
+      - cost_price (number) -> The COST PRICE or PURCHASE PRICE. Look for "Custo", "Compra", "Entrada". If not found, use 0.
+      - stock_quantity (number) -> Current inventory count. Look for "Qtd", "Estoque", "Saldos". If not found, use 0.
+      - category (string) -> Product category.
+      - brand (string, optional) -> Manufacturer/Brand.
+      - model (string, optional) -> Specific model/version.
+      - sku (string, optional) -> SKU/Internal Code.
+      - imei (string, optional) -> IMEI numbers (very common in cell phone inventory).
+      - reference (string, optional) -> Internal reference/ID.
+      - ncm (string, optional) -> Fiscal code.
+      - ean (string, optional) -> Barcode.
+
+      Rules:
+      1. Be aggressive in finding prices. If there are multiple prices, the higher one is usually the selling price.
+      2. If an item name is split across multiple lines or columns, combine them.
+      3. Return ONLY the JSON array. No conversational text.
  
      If the text is messy, use your best judgment to identify the fields.
      Return ONLY the JSON array.`;
