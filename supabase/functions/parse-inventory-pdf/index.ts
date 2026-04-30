@@ -47,8 +47,8 @@
       Extract ALL products found in the document. For each product, extract all details and return a JSON array of objects.
       CRITICAL: You must extract the following fields for EVERY item:
       - name (string) -> Full name/description. NEVER return null or "Unknown". Use the most descriptive text available.
-      - price (number) -> The SELLING PRICE. Look for "Preço", "Venda", "Valor", or columns on the right. If not found, use 0.
-      - cost_price (number) -> The COST PRICE or PURCHASE PRICE. Look for "Custo", "Compra", "Entrada". If not found, use 0.
+      - price (number) -> The SELLING PRICE. Look for "Valor venda", "Preço Venda", "Venda", "Preço", "Valor", or columns on the right. If not found, use 0.
+      - cost_price (number) -> The COST PRICE or PURCHASE PRICE. Look for "Valor custo", "Preço Custo", "Custo", "Compra", "Entrada". If not found, use 0.
       - stock_quantity (number) -> Current inventory count. Look for "Qtd", "Estoque", "Saldos". If not found, use 0.
       - category (string) -> Product category.
       - brand (string, optional) -> Manufacturer/Brand.
