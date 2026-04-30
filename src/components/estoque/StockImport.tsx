@@ -61,10 +61,18 @@
            }
          });
  
-         if (error) throw error;
+          if (error) {
+            setLoading(false);
+            throw error;
+          }
+          
           if (data?.products) {
             setPreviewData(data.products);
             setStep('preview');
+            setLoading(false);
+          } else {
+            setLoading(false);
+            toast.error("Nenhum dado pôde ser extraído do PDF.");
           }
        } else {
          // XLS, XLSX, CSV
@@ -138,8 +146,9 @@
               };
             }).filter(p => p.name !== "Produto sem nome" || p.price > 0 || p.stock_quantity > 0);
  
-            setPreviewData(products);
-            setStep('preview');
+             setPreviewData(products);
+             setStep('preview');
+             setLoading(false);
          };
          reader.readAsBinaryString(file);
        }
@@ -185,9 +194,20 @@
 
         for (let i = 0; i < totalItems; i += CHUNK_SIZE) {
           const chunk = previewData.slice(i, i + CHUNK_SIZE).map(p => ({
-            ...p,
             user_id: user.id,
-            import_id: history.id
+            import_id: history.id,
+            name: String(p.name || "Produto sem nome"),
+            price: Number(p.price || 0),
+            cost_price: Number(p.cost_price || 0),
+            stock_quantity: Number(p.stock_quantity || 0),
+            category: String(p.category || "Importado"),
+            brand: String(p.brand || ""),
+            model: String(p.model || ""),
+            sku: String(p.sku || ""),
+            imei: String(p.imei || ""),
+            reference: String(p.reference || ""),
+            ncm: String(p.ncm || ""),
+            ean: String(p.ean || ""),
           }));
 
           const { data, error } = await supabase
@@ -395,10 +415,23 @@
            {step === 'preview' && (
              <>
                <Button variant="ghost" className="h-10 rounded-xl" onClick={() => setStep('upload')} disabled={loading}>Voltar</Button>
-               <Button className="h-10 rounded-xl px-8" onClick={saveProducts} disabled={loading}>
-                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
-                 Confirmar e Salvar {previewData.length} itens
-               </Button>
+                <Button 
+                  className="h-10 rounded-xl px-8 bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 shadow-glow" 
+                  onClick={saveProducts} 
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Salvando {previewData.length} itens...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4" />
+                      <span>Confirmar e Salvar {previewData.length} itens</span>
+                    </div>
+                  )}
+                </Button>
              </>
            )}
            {step === 'history' && (
