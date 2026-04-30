@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,13 +56,13 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
 
   useEffect(() => {
     const fetchExistingData = async () => {
-      const { data: brandsData } = await (window as any).supabase
+      const { data: brandsData } = await supabase
         .from('products')
         .select('brand')
         .not('brand', 'is', null)
         .neq('brand', '');
       
-      const { data: suppliersData } = await (window as any).supabase
+      const { data: suppliersData } = await supabase
         .from('products')
         .select('supplier')
         .not('supplier', 'is', null)
