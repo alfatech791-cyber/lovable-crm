@@ -415,10 +415,23 @@
            {step === 'preview' && (
              <>
                <Button variant="ghost" className="h-10 rounded-xl" onClick={() => setStep('upload')} disabled={loading}>Voltar</Button>
-               <Button className="h-10 rounded-xl px-8" onClick={saveProducts} disabled={loading}>
-                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
-                 Confirmar e Salvar {previewData.length} itens
-               </Button>
+                <Button 
+                  className="h-10 rounded-xl px-8 bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 shadow-glow" 
+                  onClick={saveProducts} 
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Salvando {previewData.length} itens...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4" />
+                      <span>Confirmar e Salvar {previewData.length} itens</span>
+                    </div>
+                  )}
+                </Button>
              </>
            )}
            {step === 'history' && (
