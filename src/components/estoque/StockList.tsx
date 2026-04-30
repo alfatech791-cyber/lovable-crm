@@ -59,9 +59,15 @@ import { toast } from "sonner";
        if (isInitial) setLoading(false);
      };
  
-     useEffect(() => {
-       fetchProducts(0, true);
-     }, [user?.id]);
+      useEffect(() => {
+        if (user?.id) {
+          // Executa as duas buscas em paralelo para ganhar tempo
+          Promise.all([
+            fetchProducts(0, true),
+            fetchStats()
+          ]);
+        }
+      }, [user?.id]);
  
      const handleLoadMore = () => {
        const nextPage = page + 1;
@@ -97,9 +103,8 @@ import { toast } from "sonner";
       setTotalStats(stats);
     };
 
-    useEffect(() => {
-      fetchStats();
-    }, [localProducts.length]); // Atualiza stats quando o tamanho da lista local muda (import/add/delete)
+    // Removido useEffect que chamava fetchStats a cada mudança em localProducts.length
+    // Agora chamaremos fetchStats manualmente apenas quando necessário ou usaremos atualização local.
  
     const handleExport = () => {
       const headers = ["ID", "Nome", "SKU", "IMEI 1", "IMEI 2", "Categoria", "Marca", "Fornecedor", "Cor", "Capacidade", "Saúde Bateria", "Estoque", "Min Estoque", "Preço Venda", "Preço Custo", "Localização", "Observações"];
