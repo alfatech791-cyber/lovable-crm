@@ -59,9 +59,15 @@ import { toast } from "sonner";
        if (isInitial) setLoading(false);
      };
  
-     useEffect(() => {
-       fetchProducts(0, true);
-     }, [user?.id]);
+      useEffect(() => {
+        if (user?.id) {
+          // Executa as duas buscas em paralelo para ganhar tempo
+          Promise.all([
+            fetchProducts(0, true),
+            fetchStats()
+          ]);
+        }
+      }, [user?.id]);
  
      const handleLoadMore = () => {
        const nextPage = page + 1;
@@ -97,9 +103,8 @@ import { toast } from "sonner";
       setTotalStats(stats);
     };
 
-    useEffect(() => {
-      fetchStats();
-    }, [localProducts.length]); // Atualiza stats quando o tamanho da lista local muda (import/add/delete)
+    // Removido useEffect que chamava fetchStats a cada mudança em localProducts.length
+    // Agora chamaremos fetchStats manualmente apenas quando necessário ou usaremos atualização local.
  
     const handleExport = () => {
       const headers = ["ID", "Nome", "SKU", "IMEI 1", "IMEI 2", "Categoria", "Marca", "Fornecedor", "Cor", "Capacidade", "Saúde Bateria", "Estoque", "Min Estoque", "Preço Venda", "Preço Custo", "Localização", "Observações"];
@@ -178,6 +183,7 @@ import { toast } from "sonner";
     const { data: row, error } = await supabase.from("products").insert(payload).select().single();
     if (error) return toast.error("Erro ao criar: " + error.message);
     setLocalProducts((prev) => [{ ...row, stock: row.stock_quantity }, ...prev]);
+    fetchStats(); // Atualiza estatísticas após inserção
     toast.success("Produto criado!");
   };
 
@@ -201,6 +207,7 @@ import { toast } from "sonner";
     const { error } = await supabase.from("products").update(payload).eq("id", editingProduct.id);
     if (error) return toast.error("Erro ao salvar: " + error.message);
     setLocalProducts((prev) => prev.map((p) => p.id === editingProduct.id ? { ...p, ...payload, stock: payload.stock_quantity } : p));
+    fetchStats(); // Atualiza estatísticas após atualização
     toast.success("Produto atualizado!");
   };
 
@@ -209,6 +216,7 @@ import { toast } from "sonner";
      const { error } = await supabase.from("products").delete().eq("id", id);
      if (error) return toast.error("Erro ao excluir: " + error.message);
      setLocalProducts((prev) => prev.filter((p) => p.id !== id));
+     fetchStats(); // Atualiza estatísticas após exclusão
      toast.success("Produto excluído.");
    };
 
