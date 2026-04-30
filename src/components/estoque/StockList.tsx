@@ -352,8 +352,12 @@ import { toast } from "sonner";
                 </tr>
              </thead>
              <tbody className="divide-y divide-border">
-                {filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-muted/30 transition-colors">
+                 {filteredProducts.map((product) => (
+                   <tr 
+                     key={product.id} 
+                     className="hover:bg-muted/30 transition-colors cursor-pointer group"
+                     onClick={() => setEditingProduct(product)}
+                   >
                      <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
                         {product.image_url ? (
@@ -428,15 +432,8 @@ import { toast } from "sonner";
                         {(product.stock || 0) > 0 ? 'EM ESTOQUE' : 'ESGOTADO'}
                       </span>
                     </td>
-                    <td className="px-6 py-5 text-right">
+                    <td className="px-6 py-5 text-right" onClick={(e) => e.stopPropagation()}>
                        <div className="flex items-center justify-end gap-2">
-                        <button 
-                          onClick={() => setEditingProduct(product)}
-                          className="p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition text-muted-foreground"
-                          title="Editar"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <button className="p-2 rounded-lg hover:bg-muted transition">
