@@ -2,9 +2,10 @@ import { useState, useMemo, useEffect } from "react";
 import { 
   Package, Search, Plus, Filter, MoreHorizontal, ArrowUpDown, 
   AlertTriangle, Edit, Trash2, History, Layers, TrendingUp, 
-  Clock, FileDown, Smartphone, Tablet, Watch, Loader2, X
+   Clock, FileDown, FileUp, Smartphone, Tablet, Watch, Loader2, X
 } from "lucide-react";
- import { ProductForm } from "./ProductForm";
+  import { ProductForm } from "./ProductForm";
+  import { StockImport } from "./StockImport";
  import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -343,13 +344,16 @@ import { toast } from "sonner";
           </Select>
          </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <button 
-            onClick={handleExport}
-            className="h-10 px-4 rounded-xl border border-border bg-card text-sm font-medium hover:bg-muted transition flex items-center gap-2"
-          >
-            <FileDown className="h-4 w-4" /> Exportar
-          </button>
+         <div className="flex items-center gap-2 shrink-0">
+           <StockImport onImported={(newProducts) => {
+             setLocalProducts(prev => [...newProducts.map(p => ({ ...p, stock: p.stock_quantity || 0 })), ...prev]);
+           }} />
+           <button 
+             onClick={handleExport}
+             className="h-10 px-4 rounded-xl border border-border bg-card text-sm font-medium hover:bg-muted transition flex items-center gap-2"
+           >
+             <FileDown className="h-4 w-4" /> Exportar
+           </button>
           <button onClick={() => setIsAddOpen(true)} className="h-10 px-5 rounded-xl flex items-center gap-2 text-sm font-bold shadow-glow transition bg-gradient-primary text-white hover:opacity-95">
             <Plus className="h-4 w-4" /> Novo Produto
           </button>
