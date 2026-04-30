@@ -194,9 +194,20 @@
 
         for (let i = 0; i < totalItems; i += CHUNK_SIZE) {
           const chunk = previewData.slice(i, i + CHUNK_SIZE).map(p => ({
-            ...p,
             user_id: user.id,
-            import_id: history.id
+            import_id: history.id,
+            name: String(p.name || "Produto sem nome"),
+            price: Number(p.price || 0),
+            cost_price: Number(p.cost_price || 0),
+            stock_quantity: Number(p.stock_quantity || 0),
+            category: String(p.category || "Importado"),
+            brand: String(p.brand || ""),
+            model: String(p.model || ""),
+            sku: String(p.sku || ""),
+            imei: String(p.imei || ""),
+            reference: String(p.reference || ""),
+            ncm: String(p.ncm || ""),
+            ean: String(p.ean || ""),
           }));
 
           const { data, error } = await supabase
