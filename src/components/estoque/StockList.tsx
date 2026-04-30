@@ -510,15 +510,27 @@ import { toast } from "sonner";
              <Loader2 className="h-6 w-6 animate-spin text-primary" />
            </div>
          )}
-         {!loading && filteredProducts.length === 0 && (
-           <div className="p-16 text-center">
-             <div className="h-14 w-14 rounded-full bg-muted grid place-items-center mx-auto mb-3">
-               <Package className="h-7 w-7 text-muted-foreground/40" />
-             </div>
-             <h3 className="text-base font-bold">Nenhum produto cadastrado</h3>
-             <p className="text-sm text-muted-foreground mt-1">Clique em "Novo Produto" para começar.</p>
-           </div>
-         )}
+          {!loading && filteredProducts.length === 0 && (
+            <div className="p-16 text-center">
+              <div className="h-14 w-14 rounded-full bg-muted grid place-items-center mx-auto mb-3">
+                <Package className="h-7 w-7 text-muted-foreground/40" />
+              </div>
+              <h3 className="text-base font-bold">Nenhum produto encontrado</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {searchTerm || filterCategory !== 'all' ? 'Tente ajustar seus filtros.' : 'Clique em "Novo Produto" para começar.'}
+              </p>
+            </div>
+          )}
+          {hasMore && !loading && (
+            <div className="p-4 border-t border-border bg-muted/10 flex justify-center">
+              <button 
+                onClick={handleLoadMore}
+                className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+              >
+                Ver mais produtos <ArrowUpDown className="h-3 w-3" />
+              </button>
+            </div>
+          )}
        </div>
 
         <ProductForm open={isAddOpen} onOpenChange={setIsAddOpen} onSave={handleAddProduct} />
