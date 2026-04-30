@@ -495,6 +495,36 @@ export type Database = {
         }
         Relationships: []
       }
+      import_history: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          file_type: string
+          id: string
+          items_count: number | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          file_type: string
+          id?: string
+          items_count?: number | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          file_type?: string
+          id?: string
+          items_count?: number | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           created_at: string
@@ -650,6 +680,7 @@ export type Database = {
           id: string
           image_url: string | null
           imei: string | null
+          import_id: string | null
           location: string | null
           min_stock: number | null
           model: string | null
@@ -682,6 +713,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           imei?: string | null
+          import_id?: string | null
           location?: string | null
           min_stock?: number | null
           model?: string | null
@@ -714,6 +746,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           imei?: string | null
+          import_id?: string | null
           location?: string | null
           min_stock?: number | null
           model?: string | null
@@ -733,7 +766,15 @@ export type Database = {
           weight?: number | null
           wholesale_price?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_import_id_fkey"
+            columns: ["import_id"]
+            isOneToOne: false
+            referencedRelation: "import_history"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
