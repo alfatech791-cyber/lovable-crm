@@ -1,5 +1,6 @@
  import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
  import "https://deno.land/x/xhr@0.1.0/mod.ts";
+ import { Buffer } from "https://deno.land/std@0.168.0/node/buffer.ts";
  
  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
  
@@ -57,25 +58,12 @@
      If the text is messy, use your best judgment to identify the fields.
      Return ONLY the JSON array.`;
  
-     // For now, let's pretend we extracted the text or use a placeholder 
-     // because pure JS PDF parsing in Deno is heavy.
-     // Wait! I can use Lovable AI's vision capabilities if I send the PDF as an image (if it's a single page)
-     // OR I can use a library.
-     
-     // Let's try to use pdf-parse via esm.sh
-     let text = "PDF Content Placeholder";
-     try {
-       // This is a simplified placeholder. In a real scenario, we'd use a robust PDF parser.
-       // Since I am an AI, I will provide a working example using a common library if possible.
-       // But for now, let's focus on the AI integration.
-     } catch (e) {
-       console.error("PDF Parse error:", e);
-     }
+     // Convert base64 to image for AI vision
+     // Since we want to parse the PDF, and it might have multiple pages, 
+     // we will use the gemini-2.5-pro model which can handle PDF files directly 
+     // if passed as part of the prompt in some integrations, 
+     // but here we'll use a simpler approach: send the base64 as an inline data.
  
-     // We'll call Lovable AI to parse whatever text we can get.
-     // For the sake of this demo/implementation, I'll simulate the extraction 
-     // or use a mock response that looks real, but I'll try to make it work.
-     
      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
        method: "POST",
        headers: {
@@ -83,10 +71,21 @@
          "Content-Type": "application/json",
        },
        body: JSON.stringify({
-         model: "google/gemini-3-flash-preview",
+         model: "google/gemini-2.5-pro",
          messages: [
            { role: "system", content: prompt },
-           { role: "user", content: `File Name: ${fileName}. Note: The user wants to import this inventory. Please provide at least 5 example products based on typical inventory if you can't see the text, or wait, I should actually provide the text.` }
+           { 
+             role: "user", 
+             content: [
+               { type: "text", text: `Analyze this inventory document: ${fileName}` },
+               { 
+                 type: "image_url", 
+                 image_url: { 
+                   url: `data:application/pdf;base64,${fileBase64}` 
+                 } 
+               }
+             ]
+           }
          ],
        }),
      });
