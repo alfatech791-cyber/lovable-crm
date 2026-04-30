@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { 
   Package, Search, Plus, Filter, MoreHorizontal, ArrowUpDown, 
   AlertTriangle, Edit, Trash2, History, Layers, TrendingUp, 
-   Clock, FileDown, FileUp, Smartphone, Tablet, Watch, Loader2, X
+    Clock, FileDown, FileUp, Smartphone, Tablet, Watch, Loader2, X, Tags, BarChart3
 } from "lucide-react";
   import { ProductForm } from "./ProductForm";
   import { StockImport } from "./StockImport";
@@ -263,52 +263,26 @@ import { toast } from "sonner";
         </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-sidebar-border bg-sidebar/30">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-              <Layers className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase">Total de Itens</p>
-              <h3 className="text-xl font-bold">{stats.totalItems}</h3>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-sidebar-border bg-sidebar/30">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500">
-              <TrendingUp className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase">Valor em Estoque</p>
-              <h3 className="text-xl font-bold">{stats.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h3>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-sidebar-border bg-sidebar/30">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
-              <Clock className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase">Estoque Baixo</p>
-              <h3 className="text-xl font-bold">{stats.lowStock}</h3>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-sidebar-border bg-sidebar/30">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-destructive/10 flex items-center justify-center text-destructive">
-              <AlertTriangle className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium uppercase">Esgotados</p>
-              <h3 className="text-xl font-bold">{stats.outOfStock}</h3>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+         {[
+           { label: "Total de Itens", value: stats.totalItems, icon: Layers, color: "primary" },
+           { label: "Valor em Estoque", value: stats.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), icon: TrendingUp, color: "green-500" },
+           { label: "Estoque Baixo", value: stats.lowStock, icon: Clock, color: "orange-500" },
+           { label: "Esgotados", value: stats.outOfStock, icon: AlertTriangle, color: "destructive" },
+         ].map((stat, i) => (
+           <Card key={i} className="border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-md transition-all duration-300">
+             <CardContent className="p-5 flex items-center gap-4">
+               <div className={`h-12 w-12 rounded-2xl bg-${stat.color === 'primary' ? 'primary' : stat.color}/10 flex items-center justify-center text-${stat.color === 'primary' ? 'primary' : stat.color}`}>
+                 <stat.icon className="h-6 w-6" />
+               </div>
+               <div>
+                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{stat.label}</p>
+                 <h3 className="text-2xl font-display font-bold leading-none mt-1">{stat.value}</h3>
+               </div>
+             </CardContent>
+           </Card>
+         ))}
+       </div>
 
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-card p-4 rounded-2xl border border-border">
         <Tabs value={viewTab} onValueChange={setViewTab} className="w-full xl:w-auto">
