@@ -427,7 +427,12 @@ type Deal = {
 
        if (error) throw error;
        if (data) {
-         setCurrentConversation(data as any as Conversation);
+          const conv = data as any as Conversation;
+          const lead = leads.find(l => normalizePhone(l.phone) === normalizePhone(conv.contact_phone));
+          if (lead && lead.name && !lead.name.startsWith("Lead WhatsApp ")) {
+            conv.contact_name = lead.name;
+          }
+          setCurrentConversation(conv);
        } else {
          // Cria uma conversa vazia local pra permitir enviar a primeira mensagem
          setCurrentConversation({
@@ -1453,7 +1458,7 @@ type Deal = {
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-black truncate text-foreground tracking-tight">
-                      {currentConversation?.contact_name || currentConversation?.contact_phone || "Lead Sem Nome"}
+                      {(currentConversation?.contact_name && currentConversation?.contact_name !== currentConversation?.contact_phone) ? currentConversation.contact_name : (currentConversation?.contact_phone || "Lead Sem Nome")}
                     </p>
                     <div className="flex items-center gap-1.5">
                       <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
