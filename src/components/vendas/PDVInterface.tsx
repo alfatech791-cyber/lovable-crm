@@ -231,6 +231,12 @@
 
     const change = useMemo(() => Math.max(0, totalReceived - total), [totalReceived, total]);
  
+  const handleCheckoutKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && totalReceived >= total && !isFinishing && selectedCustomer) {
+      handleFinishSale();
+    }
+  };
+
     const handleFinishSale = async () => {
       if (!user?.id) return;
       
@@ -498,6 +504,7 @@
                         className="pl-8 h-10 font-bold text-sm"
                         value={moneyAmount}
                         onChange={(e) => setMoneyAmount(e.target.value)}
+                        onKeyDown={handleCheckoutKeyDown}
                         autoFocus={paymentMethod === 'money'}
                       />
                     </div>
@@ -514,6 +521,7 @@
                         className="pl-8 h-10 font-bold text-sm"
                         value={cardAmount}
                         onChange={(e) => setCardAmount(e.target.value)}
+                        onKeyDown={handleCheckoutKeyDown}
                         autoFocus={paymentMethod === 'card'}
                       />
                     </div>
@@ -530,6 +538,7 @@
                         className="pl-8 h-10 font-bold text-sm"
                         value={pixAmount}
                         onChange={(e) => setPixAmount(e.target.value)}
+                        onKeyDown={handleCheckoutKeyDown}
                         autoFocus={paymentMethod === 'pix'}
                       />
                     </div>
