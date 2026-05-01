@@ -260,7 +260,15 @@ type Deal = {
             ...(existing?.id ? { id: existing.id } : {}),
             user_id: user.id,
             contact_phone: phone,
-            contact_name: (chat.pushName || chat.name || chat.verifiedName) && (chat.pushName || chat.name || chat.verifiedName) !== phone ? (chat.pushName || chat.name || chat.verifiedName) : existing?.contact_name || null,
+            contact_name: (() => {
+              const rawName = chat.pushName || chat.name || chat.verifiedName;
+              // Filtro defensivo no frontend também para nomes "bugados"
+              const isBuggy = !rawName || 
+                             rawName === phone || 
+                             /^[a-zA-Z0-9]{15,}$/.test(rawName) || 
+                             /^\d+$/.test(rawName);
+              return isBuggy ? (existing?.contact_name || null) : rawName;
+            })(),
             transcript: previewTranscript,
             status: existing?.status ?? "active",
             messages_count: previewTranscript.length,
