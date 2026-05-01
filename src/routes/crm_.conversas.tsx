@@ -706,7 +706,7 @@ function ConversasPage() {
   };
 
   useEffect(() => {
-    load();
+    fetchAvailableInstances().then(() => load());
     const ch = user?.id
       ? supabase
           .channel("conv:bot_conversations:" + user.id)
