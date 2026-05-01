@@ -308,8 +308,8 @@
              customerDetails = {
                id: fullCustomer.id,
                name: fullCustomer.full_name,
-               phone: fullCustomer.phone,
-               document: fullCustomer.document,
+                phone: fullCustomer.phone || undefined,
+                document: fullCustomer.document || undefined,
                address: `${fullCustomer.address_street || ''}, ${fullCustomer.address_number || ''} ${fullCustomer.address_neighborhood || ''} ${fullCustomer.address_city || ''}-${fullCustomer.address_state || ''}`.trim().replace(/^,/, '').trim()
              };
            }
