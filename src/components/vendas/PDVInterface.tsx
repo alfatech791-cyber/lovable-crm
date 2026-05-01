@@ -40,6 +40,7 @@
    const [isFinishing, setIsFinishing] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [lastSaleId, setLastSaleId] = useState<string | null>(null);
+  const [lastSaleData, setLastSaleData] = useState<{ items: CartItem[], total: number, discount: number, customer: { name: string } | null, paymentMethod: string } | null>(null);
  
    const fetchProducts = useCallback(async () => {
      if (!user?.id) return;
