@@ -802,11 +802,18 @@
                         <Package className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
                       </div>
 
-                      <div className="flex-1 min-w-0 flex flex-col justify-center">
+                         <div className="flex-1 min-w-0 flex flex-col justify-start">
                         <div className="flex items-start justify-between gap-2">
-                          <span className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
-                            {item.name}
-                          </span>
+                           <div className="flex flex-col min-w-0">
+                             <span className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                               {item.name}
+                             </span>
+                             {item.description && (
+                               <p className="text-[10px] text-muted-foreground line-clamp-2 leading-tight mt-0.5 italic">
+                                 {item.description}
+                               </p>
+                             )}
+                           </div>
                           <button 
                             onClick={() => removeFromCart(item.id)}
                             className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all"
