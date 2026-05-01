@@ -295,7 +295,7 @@
 
        try {
          // Buscar dados completos do cliente para o snapshot
-         let customerDetails = selectedCustomer ? { name: selectedCustomer.name, id: selectedCustomer.id } : null;
+          let customerDetails: { id?: string; name: string; phone?: string; document?: string; address?: string } | null = selectedCustomer ? { name: selectedCustomer.name, id: selectedCustomer.id } : null;
          
          if (selectedCustomer?.id) {
            const { data: fullCustomer } = await supabase
