@@ -57,7 +57,10 @@ export function Topbar({ title, subtitle, toggleSidebar }: { title: string; subt
           <MessageCircle className="h-[18px] w-[18px] text-foreground/70" />
           <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-primary text-[10px] font-semibold text-primary-foreground grid place-items-center">3</span>
         </button>
-        <div className="ml-1 sm:ml-2 flex items-center gap-2.5 pl-1 sm:pl-2 pr-1 py-1 rounded-xl hover:bg-muted cursor-pointer">
+       <div 
+         className="ml-1 sm:ml-2 flex items-center gap-2.5 pl-1 sm:pl-2 pr-1 py-1 rounded-xl hover:bg-muted cursor-pointer"
+         onClick={() => navigate({ to: "/configuracoes" })}
+       >
           <div className="relative">
             <div className="h-9 w-9 rounded-full bg-gradient-primary grid place-items-center text-white text-sm font-semibold">RS</div>
             <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-success border-2 border-card" />
