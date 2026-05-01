@@ -283,28 +283,32 @@ type Deal = {
       }
     };
 
-    const handleInstanceChange = async (newInstance: string) => {
-      if (!user?.id) return;
-      setActiveInstance(newInstance);
-      
-      setLoading(true);
-      setDeals([]);
-
-      try {
-        await supabase.from("bot_settings").upsert(
-          { user_id: user.id, whatsapp_instance: newInstance },
-          { onConflict: "user_id" }
-        );
-        
-        toast.success(`Instância alterada para ${newInstance}`);
-        await load(false);
-        await syncFromWhatsApp(false);
-      } catch (e) {
-        toast.error("Erro ao trocar de instância");
-      } finally {
-        setLoading(false);
-      }
-    };
+     const handleInstanceChange = async (newInstance: string) => {
+       if (!user?.id) return;
+       setActiveInstance(newInstance);
+       
+       setLoading(true);
+       // Clear current deals to avoid showing data from the old instance
+       setDeals([]);
+ 
+       try {
+         await supabase.from("bot_settings").upsert(
+           { user_id: user.id, whatsapp_instance: newInstance },
+           { onConflict: "user_id" }
+         );
+         
+         toast.success(`Instância alterada para ${newInstance}`);
+         
+         // Small delay to allow the update to propagate if needed, then load and sync
+         setTimeout(async () => {
+           await load(false);
+           await syncFromWhatsApp(false);
+         }, 100);
+       } catch (e) {
+         toast.error("Erro ao trocar de instância");
+         setLoading(false);
+       }
+     };
 
     const [viewMode, setViewMode] = useState<"kanban" | "chat">("kanban");
    const [stages, setStages] = useState<Stage[]>([]);

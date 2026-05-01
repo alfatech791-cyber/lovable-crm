@@ -290,44 +290,50 @@ function ConversasPage() {
     }
   };
 
-  const applyConversations = (list: Conversation[], notify = false) => {
-    setItems((prev) => {
-      const dedupMap = new Map<string, Conversation>();
-      let changed = list.length !== prev.length;
-      
-      // Include previous items first to ensure we don't lose data
-      for (const c of prev) {
-        dedupMap.set(c.contact_phone, c);
-      }
-      
-      for (const conversation of list) {
-        const key = conversation.contact_phone;
-        const previous = dedupMap.get(key);
-        if (!previous) {
-          dedupMap.set(key, conversation);
-          continue;
-        }
-        const previousAt = +new Date(previous.last_message_at);
-        const currentAt = +new Date(conversation.last_message_at);
-        const previousLen = previous.transcript?.length ?? 0;
-        const currentLen = conversation.transcript?.length ?? 0;
-        
-        // Update if more recent or has more messages
-        if (currentAt > previousAt || (currentAt === previousAt && currentLen >= previousLen)) {
-          const hasActuallyChanged = currentAt > previousAt || currentLen > previousLen;
-          if (hasActuallyChanged) changed = true;
-
-          dedupMap.set(key, {
-            ...previous,
-            ...conversation,
-            transcript: currentLen >= previousLen ? conversation.transcript : previous.transcript
-          });
-        }
-      }
-      
-      const sorted = [...dedupMap.values()].sort(
-        (a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at)
-      );
+   const applyConversations = (list: Conversation[], notify = false, forceReplace = false) => {
+     setItems((prev) => {
+       if (forceReplace) {
+         const sorted = [...list].sort(
+           (a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at)
+         );
+         if (notify) sorted.forEach(maybeNotifyIncoming);
+         else sorted.forEach(rememberConversation);
+         return sorted;
+       }
+ 
+       const dedupMap = new Map<string, Conversation>();
+       let changed = false;
+       
+       for (const c of prev) {
+         dedupMap.set(c.contact_phone, c);
+       }
+       
+       for (const conversation of list) {
+         const key = conversation.contact_phone;
+         const previous = dedupMap.get(key);
+         if (!previous) {
+           dedupMap.set(key, conversation);
+           changed = true;
+           continue;
+         }
+         const previousAt = +new Date(previous.last_message_at);
+         const currentAt = +new Date(conversation.last_message_at);
+         const previousLen = previous.transcript?.length ?? 0;
+         const currentLen = conversation.transcript?.length ?? 0;
+         
+         if (currentAt > previousAt || currentLen > previousLen) {
+           changed = true;
+           dedupMap.set(key, {
+             ...previous,
+             ...conversation,
+             transcript: currentLen >= previousLen ? conversation.transcript : previous.transcript
+           });
+         }
+       }
+       
+       const sorted = [...dedupMap.values()].sort(
+         (a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at)
+       );
 
       if (notify) {
         sorted.forEach(maybeNotifyIncoming);
@@ -425,9 +431,10 @@ function ConversasPage() {
     const details = availableInstances.find(i => i.instanceName === newInstance);
     if (details) setInstanceDetails(details);
     
-    setLoading(true);
-    setItems([]);
-    setSelectedId(null);
+     setLoading(true);
+     setSelectedId(null);
+     // Clean up local items for the old instance immediately
+     setItems([]);
 
     try {
       await supabase.from("bot_settings").upsert(
@@ -435,9 +442,10 @@ function ConversasPage() {
         { onConflict: "user_id" }
       );
       
-      toast.success(`Instância alterada para ${newInstance}`);
-      await load(false);
-      await syncFromWhatsApp(false);
+       toast.success(`Instância alterada para ${newInstance}`);
+       // Load from DB first, then sync from WhatsApp replacing old data
+       await load(false);
+       await syncFromWhatsApp(false, true);
     } catch (e) {
       toast.error("Erro ao trocar de instância");
     } finally {
@@ -524,7 +532,7 @@ function ConversasPage() {
     }
   };
 
-  const syncFromWhatsApp = async (showToast = false) => {
+   const syncFromWhatsApp = async (showToast = false, forceReplace = false) => {
     if (syncLockRef.current) return;
     syncLockRef.current = true;
     setSyncing(true);
@@ -598,10 +606,10 @@ function ConversasPage() {
         })
         .filter((row): row is Conversation => !!row);
 
-      if (previewRows.length > 0) {
-        applyConversations(previewRows, lastIncomingMessageRef.current.size > 0);
-        setLoading(false);
-      }
+       if (previewRows.length > 0) {
+         applyConversations(previewRows, lastIncomingMessageRef.current.size > 0, forceReplace);
+         setLoading(false);
+       }
 
       // Limite aumentado e processamento em lotes para evitar sobrecarga
       const MAX_CHATS = 60;
@@ -688,12 +696,12 @@ function ConversasPage() {
         if (upsertError) throw upsertError;
       }
 
-      if (user?.id) {
-        await load(true);
-      } else {
-        applyConversations(valid, lastIncomingMessageRef.current.size > 0);
-        setLoading(false);
-      }
+       if (user?.id) {
+         await load(true);
+       } else {
+         applyConversations(valid, lastIncomingMessageRef.current.size > 0, forceReplace);
+         setLoading(false);
+       }
 
       if (showToast) toast.success("Conversas sincronizadas.");
     } catch (e: any) {
