@@ -897,7 +897,7 @@ type Deal = {
                       }} 
                     > 
                       <X className="h-3 w-3" /> 
-                      Limpar Tudo 
+                       Excluir Cards 
                     </Button>
                     <div className="w-[180px]">
                       <Select
