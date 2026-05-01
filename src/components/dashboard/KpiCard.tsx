@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -26,12 +26,71 @@ type Tone = "info" | "success" | "warning" | "primary" | "destructive";
    destructive: { icon: "bg-destructive/10 text-destructive",         gradient: "from-destructive/10 to-transparent", ring: "ring-destructive/20" },
  };
 
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { startOfDay, endOfDay } from "date-fns";
+
 export function KpiCard({
-  label, value, trend, sub, icon, tone, onClick
+  label, value: initialValue, trend, sub, icon, tone, onClick
 }: { label: string; value: string; trend: string; sub: string; icon: string; tone: string; onClick?: () => void }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [displayValue, setDisplayValue] = useState(initialValue);
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+
   const IconsMap: Record<string, any> = { ShoppingBag, Wrench, Box, DollarSign, Users, TrendingUp };
+
+  useEffect(() => {
+    if (!isModalOpen || !date || !user?.id) return;
+
+    const fetchDayData = async () => {
+      setIsLoading(true);
+      try {
+        const start = startOfDay(date);
+        const end = endOfDay(date);
+        const l = label.toLowerCase();
+
+        if (l.includes("vendas") || l.includes("faturamento")) {
+          const { data } = await supabase
+            .from("sales_orders")
+            .select("total_amount")
+            .eq("user_id", user.id)
+            .eq("status", "concluded")
+            .gte("created_at", start.toISOString())
+            .lte("created_at", end.toISOString());
+          
+          const total = (data || []).reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+          setDisplayValue(total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+        } else if (l.includes("leads")) {
+          const { count } = await supabase
+            .from("leads")
+            .select("*", { count: 'exact', head: true })
+            .eq("user_id", user.id)
+            .gte("created_at", start.toISOString())
+            .lte("created_at", end.toISOString());
+          
+          setDisplayValue(String(count || 0));
+        } else if (l.includes("os")) {
+          const { count } = await supabase
+            .from("service_orders")
+            .select("*", { count: 'exact', head: true })
+            .eq("user_id", user.id)
+            .gte("created_at", start.toISOString())
+            .lte("created_at", end.toISOString());
+          
+          setDisplayValue(String(count || 0));
+        }
+      } catch (error) {
+        console.error("Error fetching day data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDayData();
+  }, [date, isModalOpen, user?.id, label]);
+
   const Icon = IconsMap[icon] ?? Activity;
   const navigate = useNavigate();
   const styles = toneStyles[tone as Tone] ?? toneStyles.primary;
@@ -71,7 +130,7 @@ export function KpiCard({
           <div className="min-w-0 flex-1">
             <div className="text-[11.5px] text-muted-foreground font-medium group-hover:text-foreground transition-colors pr-5">{label}</div>
             <div className="mt-0.5 flex items-baseline gap-1.5 flex-wrap">
-              <span className="text-[17px] sm:text-[20px] lg:text-[22px] font-bold tracking-tight font-display truncate max-w-full">{value}</span>
+              <span className="text-[17px] sm:text-[20px] lg:text-[22px] font-bold tracking-tight font-display truncate max-w-full">{initialValue}</span>
               {trend && <span className="text-[10px] font-semibold text-success whitespace-nowrap">↑ {trend.replace("+","")}</span>}
             </div>
             <div className="text-[11px] text-muted-foreground mt-0.5">{sub}</div>
@@ -94,9 +153,9 @@ export function KpiCard({
           </DialogHeader>
           
           <div className="grid gap-4 py-4">
-            <div className="bg-muted/30 rounded-2xl p-6 border border-border/50 text-center">
+            <div className={`bg-muted/30 rounded-2xl p-6 border border-border/50 text-center transition-opacity ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
               <span className="text-sm text-muted-foreground block mb-1">Valor Atual</span>
-              <span className="text-4xl font-black font-display tracking-tight text-primary">{value}</span>
+              <span className="text-4xl font-black font-display tracking-tight text-primary">{displayValue}</span>
               {trend && (
                 <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success/10 text-success text-xs font-bold">
                   <TrendingUp className="h-3 w-3" />
