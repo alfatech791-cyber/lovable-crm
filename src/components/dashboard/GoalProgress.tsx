@@ -199,147 +199,172 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-12 w-12 rounded-2xl bg-primary/10 grid place-items-center">
-                <Trophy className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <DialogTitle className="text-xl font-bold">Definição de Metas</DialogTitle>
-                <DialogDescription>Ajuste seus objetivos de vendas diários, semanais e mensais.</DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            <div className="space-y-4">
-              <div className="grid gap-2">
-                <Label className="text-sm font-bold">Tipo de Meta</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  <Button 
-                    type="button"
-                    variant={editGoals.type === 'revenue' ? 'default' : 'outline'}
-                    className="text-xs h-9"
-                    onClick={() => setEditGoals({ ...editGoals, type: 'revenue' })}
-                  >
-                    Faturamento
-                  </Button>
-                  <Button 
-                    type="button"
-                    variant={editGoals.type === 'units' ? 'default' : 'outline'}
-                    className="text-xs h-9"
-                    onClick={() => setEditGoals({ ...editGoals, type: 'units' })}
-                  >
-                    Aparelhos
-                  </Button>
-                  <Button 
-                    type="button"
-                    variant={editGoals.type === 'profit' ? 'default' : 'outline'}
-                    className="text-xs h-9"
-                    onClick={() => setEditGoals({ ...editGoals, type: 'profit' })}
-                  >
-                    Lucro
-                  </Button>
-                </div>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="daily" className="text-sm font-bold flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-warning" />
-                  Meta Diária
-                </Label>
-                <div className="relative">
-                  {editGoals.type !== 'units' && <span className="absolute left-3 top-2.5 text-muted-foreground text-sm">R$</span>}
-                  <Input
-                    id="daily"
-                    type="number"
-                    value={editGoals.daily}
-                    onChange={(e) => setEditGoals({ ...editGoals, daily: Number(e.target.value) })}
-                    className={`${editGoals.type !== 'units' ? 'pl-9' : 'pl-3'} bg-muted/30 border-border/50 font-bold`}
-                  />
-                  {editGoals.type === 'units' && <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">un.</span>}
-                </div>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="weekly" className="text-sm font-bold flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-info" />
-                  Meta Semanal
-                </Label>
-                <div className="relative">
-                  {editGoals.type !== 'units' && <span className="absolute left-3 top-2.5 text-muted-foreground text-sm">R$</span>}
-                  <Input
-                    id="weekly"
-                    type="number"
-                    value={editGoals.weekly}
-                    onChange={(e) => setEditGoals({ ...editGoals, weekly: Number(e.target.value) })}
-                    className={`${editGoals.type !== 'units' ? 'pl-9' : 'pl-3'} bg-muted/30 border-border/50 font-bold`}
-                  />
-                  {editGoals.type === 'units' && <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">un.</span>}
-                </div>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="monthly" className="text-sm font-bold flex items-center gap-2">
-                  <Target className="h-4 w-4 text-primary" />
-                  Meta Mensal
-                </Label>
-                <div className="relative">
-                  {editGoals.type !== 'units' && <span className="absolute left-3 top-2.5 text-muted-foreground text-sm">R$</span>}
-                  <Input
-                    id="monthly"
-                    type="number"
-                    value={editGoals.monthly}
-                    onChange={(e) => setEditGoals({ ...editGoals, monthly: Number(e.target.value) })}
-                    className={`${editGoals.type !== 'units' ? 'pl-9' : 'pl-3'} bg-muted/30 border-border/50 font-bold`}
-                  />
-                  {editGoals.type === 'units' && <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">un.</span>}
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-primary/5 rounded-xl p-4 border border-primary/10 mt-2">
-              <div className="flex items-center gap-2 mb-2">
-                <Activity className="h-4 w-4 text-primary" />
-                <h4 className="text-xs font-bold uppercase tracking-wider text-primary">Progresso Atual</h4>
-              </div>
-              <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Realizado este mês</p>
-                  <p className="text-lg font-black text-foreground">
-                    {editGoals.type === 'units' 
-                      ? `${current} un.` 
-                      : current.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Faltam</p>
-                  <p className="text-sm font-bold text-primary">
-                    {editGoals.type === 'units'
-                      ? `${remaining} un.`
-                      : remaining.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="flex gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1 sm:flex-none">
-              <X className="h-4 w-4 mr-2" />
-              Cancelar
-            </Button>
-            <Button onClick={handleSave} disabled={isLoading} className="flex-1 sm:flex-none">
-              {isLoading ? (
-                <Activity className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4 mr-2" />
-              )}
-              Salvar Metas
-            </Button>
-          </DialogFooter>
-        </DialogContent>
+         <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden rounded-3xl border-none shadow-2xl">
+           <div className="bg-gradient-to-br from-primary/10 via-background to-background p-6">
+             <DialogHeader className="mb-6">
+               <div className="flex items-center gap-4">
+                 <div className="h-14 w-14 rounded-2xl bg-primary shadow-lg shadow-primary/20 flex items-center justify-center transform -rotate-3 hover:rotate-0 transition-transform">
+                   <Trophy className="h-8 w-8 text-primary-foreground" />
+                 </div>
+                 <div>
+                   <DialogTitle className="text-2xl font-black tracking-tight">Definição de Metas</DialogTitle>
+                   <DialogDescription className="text-muted-foreground font-medium">
+                     Configure seus objetivos e acelere seus resultados.
+                   </DialogDescription>
+                 </div>
+               </div>
+             </DialogHeader>
+             
+             <div className="space-y-6">
+               {/* Goal Type Selection with Better UX */}
+               <div className="space-y-3">
+                 <div className="flex items-center justify-between">
+                   <Label className="text-[13px] font-bold uppercase tracking-wider text-muted-foreground">Focar em:</Label>
+                   <TooltipProvider>
+                     <Tooltip>
+                       <TooltipTrigger asChild>
+                         <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                       </TooltipTrigger>
+                       <TooltipContent>
+                         <p className="max-w-xs text-xs">Escolha a métrica principal que deseja acompanhar no seu dashboard.</p>
+                       </TooltipContent>
+                     </Tooltip>
+                   </TooltipProvider>
+                 </div>
+                 <ToggleGroup 
+                   type="single" 
+                   value={editGoals.type} 
+                   onValueChange={(val) => val && setEditGoals({ ...editGoals, type: val as any })}
+                   className="grid grid-cols-3 gap-3"
+                 >
+                   <ToggleGroupItem 
+                     value="revenue" 
+                     className="flex flex-col gap-2 h-auto py-4 rounded-2xl border-2 data-[state=on]:border-primary data-[state=on]:bg-primary/5 transition-all"
+                   >
+                     <DollarSign className="h-5 w-5" />
+                     <span className="text-[11px] font-bold">Faturamento</span>
+                   </ToggleGroupItem>
+                   <ToggleGroupItem 
+                     value="units" 
+                     className="flex flex-col gap-2 h-auto py-4 rounded-2xl border-2 data-[state=on]:border-primary data-[state=on]:bg-primary/5 transition-all"
+                   >
+                     <Package className="h-5 w-5" />
+                     <span className="text-[11px] font-bold">Vendas (un)</span>
+                   </ToggleGroupItem>
+                   <ToggleGroupItem 
+                     value="profit" 
+                     className="flex flex-col gap-2 h-auto py-4 rounded-2xl border-2 data-[state=on]:border-primary data-[state=on]:bg-primary/5 transition-all"
+                   >
+                     <BarChart3 className="h-5 w-5" />
+                     <span className="text-[11px] font-bold">Lucro</span>
+                   </ToggleGroupItem>
+                 </ToggleGroup>
+               </div>
+ 
+               <Separator className="bg-border/50" />
+ 
+               {/* Inputs Grid */}
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div className="space-y-4">
+                   <div className="grid gap-2">
+                     <Label htmlFor="daily" className="text-[13px] font-bold flex items-center gap-2">
+                       <Zap className="h-4 w-4 text-warning fill-warning/20" />
+                       Meta Diária
+                     </Label>
+                     <div className="relative group">
+                       {editGoals.type !== 'units' && <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">R$</span>}
+                       <Input
+                         id="daily"
+                         type="number"
+                         value={editGoals.daily}
+                         onChange={(e) => setEditGoals({ ...editGoals, daily: Number(e.target.value) })}
+                         className={`${editGoals.type !== 'units' ? 'pl-10' : 'pl-4'} h-12 rounded-xl bg-card border-border/50 focus:border-primary focus:ring-primary/20 font-black text-lg transition-all`}
+                       />
+                       {editGoals.type === 'units' && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">un.</span>}
+                     </div>
+                   </div>
+ 
+                   <div className="grid gap-2">
+                     <Label htmlFor="weekly" className="text-[13px] font-bold flex items-center gap-2">
+                       <Calendar className="h-4 w-4 text-sky-500 fill-sky-500/20" />
+                       Meta Semanal
+                     </Label>
+                     <div className="relative group">
+                       {editGoals.type !== 'units' && <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">R$</span>}
+                       <Input
+                         id="weekly"
+                         type="number"
+                         value={editGoals.weekly}
+                         onChange={(e) => setEditGoals({ ...editGoals, weekly: Number(e.target.value) })}
+                         className={`${editGoals.type !== 'units' ? 'pl-10' : 'pl-4'} h-12 rounded-xl bg-card border-border/50 focus:border-primary focus:ring-primary/20 font-black text-lg transition-all`}
+                       />
+                       {editGoals.type === 'units' && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">un.</span>}
+                     </div>
+                   </div>
+                 </div>
+ 
+                 <div className="space-y-4">
+                   <div className="grid gap-2 h-full">
+                     <Label htmlFor="monthly" className="text-[13px] font-bold flex items-center gap-2">
+                       <Target className="h-4 w-4 text-primary fill-primary/20" />
+                       Meta Mensal (Foco)
+                     </Label>
+                     <div className="relative group">
+                       {editGoals.type !== 'units' && <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">R$</span>}
+                       <Input
+                         id="monthly"
+                         type="number"
+                         value={editGoals.monthly}
+                         onChange={(e) => setEditGoals({ ...editGoals, monthly: Number(e.target.value) })}
+                         className={`${editGoals.type !== 'units' ? 'pl-10' : 'pl-4'} h-full min-h-[112px] rounded-xl bg-card border-border/50 focus:border-primary focus:ring-primary/20 font-black text-2xl transition-all text-primary`}
+                       />
+                       {editGoals.type === 'units' && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">un.</span>}
+                     </div>
+                   </div>
+                 </div>
+               </div>
+ 
+               {/* Insight/Projection Box */}
+               <div className={`p-4 rounded-2xl border transition-all ${Math.abs(dailyProjection - editGoals.monthly) < 10 ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
+                 <div className="flex gap-3">
+                   <div className={`h-10 w-10 shrink-0 rounded-xl flex items-center justify-center ${Math.abs(dailyProjection - editGoals.monthly) < 10 ? 'bg-emerald-500/20 text-emerald-600' : 'bg-amber-500/20 text-amber-600'}`}>
+                     {Math.abs(dailyProjection - editGoals.monthly) < 10 ? <CheckCircle2 className="h-5 w-5" /> : <Rocket className="h-5 w-5" />}
+                   </div>
+                   <div>
+                     <h4 className="text-[13px] font-bold">Projeção Baseada no Dia</h4>
+                     <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                       Mantendo a meta diária de <span className="font-bold text-foreground">{formatValue(editGoals.daily)}</span>, seu resultado mensal será de <span className="font-black text-primary">{formatValue(dailyProjection)}</span>.
+                     </p>
+                   </div>
+                 </div>
+               </div>
+ 
+               {/* Footer / Actions */}
+               <div className="flex items-center gap-3 pt-4">
+                 <Button 
+                   variant="ghost" 
+                   onClick={() => setIsModalOpen(false)} 
+                   className="flex-1 h-12 rounded-xl font-bold text-muted-foreground hover:bg-muted"
+                 >
+                   <X className="h-4 w-4 mr-2" />
+                   Cancelar
+                 </Button>
+                 <Button 
+                   onClick={handleSave} 
+                   disabled={isLoading} 
+                   className="flex-[2] h-12 rounded-xl font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25 active:scale-[0.98] transition-all"
+                 >
+                   {isLoading ? (
+                     <Activity className="h-4 w-4 mr-2 animate-spin" />
+                   ) : (
+                     <Save className="h-4 w-4 mr-2" />
+                   )}
+                   Definir Novas Metas
+                 </Button>
+               </div>
+             </div>
+           </div>
+         </DialogContent>
       </Dialog>
     </>
   );
