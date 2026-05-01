@@ -927,16 +927,30 @@ type Deal = {
                   />
                 </div>
                 <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-xl border border-border/20">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      disabled={syncing}
-                      className={cn("h-8 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all", syncing ? "bg-primary/20 text-primary animate-pulse" : "hover:bg-primary/10 hover:text-primary")}
-                      onClick={() => syncFromWhatsApp(true)}
-                    >
-                      {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wifi className="h-3 w-3" />}
-                      {syncing ? "Sincronizando..." : "Sincronizar WhatsApp"}
-                    </Button>
+                    <div className="flex items-center gap-1 bg-primary/5 p-0.5 rounded-xl border border-primary/10">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        disabled={syncing}
+                        className={cn("h-8 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all", syncing ? "bg-primary/20 text-primary animate-pulse" : "hover:bg-primary/10 hover:text-primary")}
+                        onClick={() => syncFromWhatsApp(true)}
+                      >
+                        {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wifi className="h-3 w-3" />}
+                        {syncing ? "Sincronizando..." : "Sincronizar WhatsApp"}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={loading || syncing}
+                        className="h-8 w-8 rounded-lg hover:bg-primary/10 text-primary"
+                        onClick={() => {
+                          toast.info("Recarregando pipeline...");
+                          load(false);
+                        }}
+                      >
+                        <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+                      </Button>
+                    </div>
                     <Button 
                       variant="ghost" 
                       size="sm" 
