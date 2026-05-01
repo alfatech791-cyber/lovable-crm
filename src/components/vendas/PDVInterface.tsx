@@ -632,43 +632,47 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
             </div>
           </ScrollArea>
  
-          <div className="p-6 bg-card border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.05)] space-y-4">
-           <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground font-medium">Subtotal</span>
-              <span className="font-bold">{subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-           </div>
-           <div className="flex items-center justify-between text-sm">
-               <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-success/10 rounded-md">
-                    <Percent className="h-3 w-3 text-success" />
-                  </div>
+          <div className="p-5 bg-card border-t border-border shadow-[0_-10px_40px_rgba(0,0,0,0.04)] space-y-4 relative z-10">
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between text-xs px-1">
+                <span className="text-muted-foreground font-semibold flex items-center gap-1.5">
+                  <ReceiptText className="h-3 w-3" /> Subtotal Bruto
+                </span>
+                <span className="font-bold text-foreground/80">{subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+              </div>
+              
+              <div className="flex items-center justify-between text-xs px-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground font-semibold flex items-center gap-1.5">
+                    <Tag className="h-3 w-3" /> Desconto Aplicado
+                  </span>
                   <button 
                     onClick={() => {
                       const val = prompt("Valor do desconto (R$):", "0");
                       if (val !== null) setDiscountValue(Math.max(0, parseFloat(val) || 0));
                     }}
-                    className="text-muted-foreground hover:text-primary font-medium transition"
+                    className="text-[10px] bg-success/10 text-success px-2 py-0.5 rounded-full font-black hover:bg-success/20 transition-colors"
                   >
-                    Desconto
+                    EDITAR
                   </button>
-                 {discountValue > 0 && (
-                   <button 
-                     onClick={() => setDiscountValue(0)}
-                      className="text-destructive hover:bg-destructive/10 p-1 rounded-full transition"
-                     title="Remover desconto"
-                   >
-                     <X className="h-3 w-3" />
-                   </button>
-                 )}
-               </div>
-               <span className="text-success font-black">
-                - {discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-              </span>
-           </div>
-            <div className="flex items-center justify-between text-2xl font-black pt-2 border-t border-dashed border-border mt-2">
-              <span className="text-foreground">Total</span>
-             <span className="text-primary">{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-           </div>
+                </div>
+                <span className={`font-black ${discountValue > 0 ? 'text-success' : 'text-muted-foreground/50'}`}>
+                  - {discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                </span>
+              </div>
+
+              <div className="relative pt-4 mt-2 border-t border-dashed border-border">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-card px-3 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                  Total a Receber
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-black text-foreground/60 uppercase">Total</span>
+                  <span className="text-3xl font-black text-primary tracking-tight">
+                    {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </span>
+                </div>
+              </div>
+            </div>
  
            <div className="grid grid-cols-3 gap-2 py-2">
              {[
