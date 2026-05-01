@@ -44,7 +44,8 @@ serve(async (req) => {
 
     const phone = remoteJid.split("@")[0];
     // Pega o nome do contato ou o subject do grupo
-    const contactName = data?.pushName ?? data?.subject ?? null;
+     const contactName = data?.pushName ?? data?.subject ?? payload?.pushName ?? null;
+     const avatarUrl = data?.profilePicUrl ?? payload?.profilePicUrl ?? null;
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -262,13 +263,19 @@ async function persist(
     { onConflict: "user_id,contact_phone" }
   );
 
-  // Garante lead + card no pipeline
-  await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
-    _user_id: userId,
-    _phone: phone,
-    _name: name,
-    _instance_name: instanceName
-  });
+     try {
+       // Garante lead + card no pipeline (pipeline_leads)
+       const { error: rpcError } = await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
+         _user_id: userId,
+         _phone: phone,
+         _name: name,
+         _instance_name: instanceName,
+         _avatar_url: avatarUrl
+       });
+       if (rpcError) console.error("RPC Error ensure_lead:", rpcError);
+     } catch (err) {
+       console.error("Failed to call rpc ensure_lead:", err);
+     }
 
   // Pega lead_id e insere as últimas mensagens em public.messages (para pipeline ver)
   const { data: lead } = await supabase
