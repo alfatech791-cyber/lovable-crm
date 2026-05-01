@@ -1210,30 +1210,23 @@ type Deal = {
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Nenhuma conversa</p>
                       </div>
                     ) : (
-       conversations
-         .filter(c => {
-           const matchSearch = !searchTerm || 
-             (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
-             c.contact_phone.includes(searchTerm);
-           
-           if (!matchSearch) return false;
-           
-           if (statusFilter === "bot") return c.status !== "handed_off";
-           if (statusFilter === "manual") return c.status === "handed_off";
-           if (statusFilter === "unread") {
-             // Simulação simples de contagem de não lidas similar à página de conversas
-             const incoming = (c.transcript ?? []).filter((m) => m.role === "user").length;
-             return incoming > 0; // Para simplificar no funil, apenas mostra se tem mensagens do usuário
-           }
-           return true;
-         })
-         .map((conv) => (
-                        <button
-                          key={conv.id}
-                          onClick={() => {
-                            setCurrentConversation(conv);
-                            setChatOpen(true);
-                          }}
+                    {conversations
+                      .filter(c => {
+                        const matchSearch = !searchTerm || 
+                          (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
+                          c.contact_phone.includes(searchTerm);
+                        
+                        if (!matchSearch) return false;
+                        
+                        if (statusFilter === "bot") return c.status !== "handed_off";
+                        if (statusFilter === "manual") return c.status === "handed_off";
+                        if (statusFilter === "unread") {
+                          const incoming = (c.transcript ?? []).filter((m) => m.role === "user").length;
+                          return incoming > 0;
+                        }
+                        return true;
+                      })
+                      .map((conv) => (
                         <button
                           key={conv.id}
                           onClick={() => {
@@ -1245,7 +1238,9 @@ type Deal = {
                             currentConversation?.id === conv.id ? "bg-primary/10 shadow-inner" : "bg-transparent"
                           )}
                         >
-                          {currentConversation?.id === conv.id && <div className="absolute left-0 top-2 bottom-2 w-1.5 bg-primary rounded-r-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" />}
+                          {currentConversation?.id === conv.id && (
+                            <div className="absolute left-0 top-2 bottom-2 w-1.5 bg-primary rounded-r-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
+                          )}
                           <div className="relative shrink-0">
                             <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 grid place-items-center group-hover:scale-105 transition-transform">
                               <User className="h-6 w-6 text-primary" />
