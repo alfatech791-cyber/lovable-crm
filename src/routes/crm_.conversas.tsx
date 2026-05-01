@@ -751,7 +751,7 @@ function ConversasPage() {
         if (statusFilter === "unread") return unreadCount(c) > 0;
         return true;
       }),
-    [items, search, statusFilter, readState]
+    [items, search, statusFilter, readState, resolvedInstance]
   );
 
   const selected = useMemo(
