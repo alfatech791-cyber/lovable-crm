@@ -34,7 +34,13 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
     monthly: initialGoal,
     type: 'revenue' as 'revenue' | 'units' | 'profit'
   });
-  const [editGoals, setEditGoals] = useState({ ...goals });
+   const [editGoals, setEditGoals] = useState({
+     ...goals,
+     goal_name: "",
+     start_date: new Date().toISOString().split('T')[0],
+     end_date: "",
+     notes: ""
+   });
 
   useEffect(() => {
     if (user?.id) {
@@ -50,14 +56,18 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
       .maybeSingle();
 
     if (data) {
-      const fetchedGoals = {
-        daily: Number(data.daily_goal) || 0,
-        weekly: Number(data.weekly_goal) || 0,
-        monthly: Number(data.monthly_goal) || initialGoal,
-        type: (data.goal_type as any) || 'revenue'
-      };
-      setGoals(fetchedGoals);
-      setEditGoals(fetchedGoals);
+       const fetchedGoals = {
+         daily: Number(data.daily_goal) || 0,
+         weekly: Number(data.weekly_goal) || 0,
+         monthly: Number(data.monthly_goal) || initialGoal,
+         type: (data.goal_type as any) || 'revenue',
+         goal_name: data.goal_name || "",
+         start_date: data.start_date || new Date().toISOString().split('T')[0],
+         end_date: data.end_date || "",
+         notes: data.notes || ""
+       };
+       setGoals(fetchedGoals);
+       setEditGoals(fetchedGoals);
     }
   };
 
@@ -69,11 +79,15 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
         .from('business_goals')
         .upsert({
           user_id: user.id,
-          daily_goal: editGoals.daily,
-          weekly_goal: editGoals.weekly,
-          monthly_goal: editGoals.monthly,
-          goal_type: editGoals.type,
-          updated_at: new Date().toISOString()
+         daily_goal: editGoals.daily,
+         weekly_goal: editGoals.weekly,
+         monthly_goal: editGoals.monthly,
+         goal_type: editGoals.type,
+         goal_name: editGoals.goal_name,
+         start_date: editGoals.start_date,
+         end_date: editGoals.end_date,
+         notes: editGoals.notes,
+         updated_at: new Date().toISOString()
         });
 
       if (error) throw error;
@@ -304,6 +318,38 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
                {/* Inputs Grid */}
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div className="space-y-4">
+                   <div className="grid gap-2">
+                     <Label htmlFor="name" className="text-[13px] font-bold">Nome da Meta</Label>
+                     <Input
+                       id="name"
+                       value={editGoals.goal_name}
+                       onChange={(e) => setEditGoals({ ...editGoals, goal_name: e.target.value })}
+                       className="h-12 rounded-xl bg-card border-border/50"
+                       placeholder="Ex: Vendas de Verão"
+                     />
+                   </div>
+                   <div className="grid grid-cols-2 gap-4">
+                     <div className="grid gap-2">
+                       <Label htmlFor="start" className="text-[13px] font-bold">Início</Label>
+                       <Input
+                         id="start"
+                         type="date"
+                         value={editGoals.start_date}
+                         onChange={(e) => setEditGoals({ ...editGoals, start_date: e.target.value })}
+                         className="h-12 rounded-xl bg-card border-border/50"
+                       />
+                     </div>
+                     <div className="grid gap-2">
+                       <Label htmlFor="end" className="text-[13px] font-bold">Término</Label>
+                       <Input
+                         id="end"
+                         type="date"
+                         value={editGoals.end_date}
+                         onChange={(e) => setEditGoals({ ...editGoals, end_date: e.target.value })}
+                         className="h-12 rounded-xl bg-card border-border/50"
+                       />
+                     </div>
+                   </div>
                    <div className="grid gap-2">
                      <Label htmlFor="daily" className="text-[13px] font-bold flex items-center gap-2">
                        <Zap className="h-4 w-4 text-warning fill-warning/20" />
