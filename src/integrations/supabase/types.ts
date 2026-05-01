@@ -608,6 +608,7 @@ export type Database = {
       }
       leads: {
         Row: {
+          avatar_url: string | null
           created_at: string
           email: string | null
           id: string
@@ -620,6 +621,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -632,6 +634,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -1138,6 +1141,16 @@ export type Database = {
       ensure_lead_and_pipeline_from_conversation:
         | {
             Args: { _name?: string; _phone: string; _user_id: string }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              _avatar_url?: string
+              _instance_name?: string
+              _name?: string
+              _phone: string
+              _user_id: string
+            }
             Returns: undefined
           }
         | {
