@@ -1528,56 +1528,111 @@ type Deal = {
               </div>
             </div>
 
-           {/* Área de Mensagens */}
-           <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-6 bg-muted/5 scrollbar-thin">
-             {chatLoading ? (
-               <div className="grid place-items-center h-full">
-                 <div className="flex flex-col items-center gap-3">
-                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Carregando conversa...</span>
-                 </div>
-               </div>
-             ) : !currentConversation ? (
-               <div className="grid place-items-center h-full text-center px-10">
-                 <div className="bg-muted/30 p-8 rounded-[40px] border-2 border-dashed border-border/50">
-                   <MessageSquare className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-                   <p className="text-xs font-bold text-muted-foreground leading-relaxed">
-                     Nenhuma conversa encontrada. Inicie um atendimento agora mesmo enviando uma mensagem.
-                   </p>
-                 </div>
-               </div>
-             ) : (
-               <div className="flex flex-col gap-4">
-                 {currentConversation.transcript?.map((m, i) => {
-                   const mine = m.role === "agent" || m.sent;
-                   const isBot = m.role === "assistant";
-                   
-                   return (
-                     <div key={i} className={cn("flex flex-col max-w-[85%]", mine ? "ml-auto items-end" : "items-start")}>
-                       <div className={cn(
-                         "relative px-4 py-3 rounded-2xl text-sm shadow-sm transition-all hover:shadow-md",
-                         mine ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-card border border-border rounded-tl-none",
-                         isBot && "border-primary/30 bg-primary/5 text-foreground"
-                       )}>
-                         {isBot && (
-                           <div className="flex items-center gap-1 mb-1 opacity-60">
-                             <Bot className="h-3 w-3" />
-                             <span className="text-[9px] font-black uppercase">Auto-Atendimento</span>
-                           </div>
-                         )}
-                         <p className="whitespace-pre-wrap break-words leading-relaxed font-medium">{m.content}</p>
-                       </div>
-                       {m.at && (
-                         <span className="text-[9px] font-bold text-muted-foreground/50 mt-1.5 px-1 uppercase tracking-tighter">
-                           {formatDistanceToNow(new Date(m.at), { addSuffix: true, locale: ptBR })}
-                         </span>
-                       )}
-                     </div>
-                   );
-                 })}
-               </div>
-             )}
-           </div>
+            {/* Tabs de Atendimento/Notas */}
+            <div className="flex flex-1 overflow-hidden">
+              <div className="flex-1 flex flex-col min-w-0 border-r border-border/40">
+                {/* Área de Mensagens */}
+                <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-6 bg-muted/5 scrollbar-thin">
+                  {chatLoading ? (
+                    <div className="grid place-items-center h-full">
+                      <div className="flex flex-col items-center gap-3">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Carregando conversa...</span>
+                      </div>
+                    </div>
+                  ) : !currentConversation ? (
+                    <div className="grid place-items-center h-full text-center px-10">
+                      <div className="bg-muted/30 p-8 rounded-[40px] border-2 border-dashed border-border/50">
+                        <MessageSquare className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+                        <p className="text-xs font-bold text-muted-foreground leading-relaxed">
+                          Nenhuma conversa encontrada. Inicie um atendimento agora mesmo enviando uma mensagem.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-4">
+                      {currentConversation.transcript?.map((m, i) => {
+                        const mine = m.role === "agent" || m.sent;
+                        const isBot = m.role === "assistant";
+                        
+                        return (
+                          <div key={i} className={cn("flex flex-col max-w-[85%]", mine ? "ml-auto items-end" : "items-start")}>
+                            <div className={cn(
+                              "relative px-4 py-3 rounded-2xl text-sm shadow-sm transition-all hover:shadow-md",
+                              mine ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-card border border-border rounded-tl-none",
+                              isBot && "border-primary/30 bg-primary/5 text-foreground"
+                            )}>
+                              {isBot && (
+                                <div className="flex items-center gap-1 mb-1 opacity-60">
+                                  <Bot className="h-3 w-3" />
+                                  <span className="text-[9px] font-black uppercase">Auto-Atendimento</span>
+                                </div>
+                              )}
+                              <p className="whitespace-pre-wrap break-words leading-relaxed font-medium">{m.content}</p>
+                            </div>
+                            {m.at && (
+                              <span className="text-[9px] font-bold text-muted-foreground/50 mt-1.5 px-1 uppercase tracking-tighter">
+                                {formatDistanceToNow(new Date(m.at), { addSuffix: true, locale: ptBR })}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Sidebar de Notas e Tags */}
+              {editingDeal && (
+                <div className="w-72 bg-card p-6 overflow-y-auto space-y-6 flex flex-col border-l border-border/40">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                      <Tag className="h-3.5 w-3.5" />
+                      Tags do Lead
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {dealTags.map((tag) => (
+                        <span key={tag} className="flex items-center gap-1 bg-primary/10 text-primary text-[10px] font-black px-2 py-1 rounded-lg border border-primary/20">
+                          {tag}
+                          <button onClick={() => removeTag(tag)} className="hover:text-destructive transition-colors"><X className="h-3 w-3" /></button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input 
+                        placeholder="Nova tag..." 
+                        className="h-9 text-xs rounded-lg"
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && addTag()}
+                      />
+                      <Button size="sm" variant="secondary" onClick={addTag} className="h-9 w-9 rounded-lg px-0"><Plus className="h-4 w-4" /></Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 flex-1 flex flex-col">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                      <FileText className="h-3.5 w-3.5" />
+                      Notas Internas
+                    </div>
+                    <textarea
+                      className="flex-1 w-full bg-muted/30 rounded-xl p-4 text-xs font-medium border-none resize-none focus:ring-1 focus:ring-primary/20 min-h-[200px]"
+                      placeholder="Escreva notas importantes sobre este lead aqui..."
+                      value={dealNotes}
+                      onChange={(e) => setDealNotes(e.target.value)}
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={saveDealDetails}
+                    className="w-full h-11 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/10"
+                  >
+                    Salvar Detalhes
+                  </Button>
+                </div>
+              )}
+            </div>
  
             {/* Input de Mensagem */}
             <div className="p-6 border-t border-border bg-background shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
