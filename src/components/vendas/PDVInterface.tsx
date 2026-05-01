@@ -700,66 +700,6 @@
      } finally {
        setIsFinishing(false);
      }
-   };
- 
-               <div style="margin-top: 10px;">
-                 ${itemsHtml}
-               </div>
-             </div>
-
-            <div class="section">
-              <span class="section-title">1. PRAZO DE GARANTIA</span>
-              <p>O aparelho acima descrito possui garantia legal e contratual totalizando o prazo de <strong>${warrantyTime}</strong>, a contar da data de compra/entrega do produto. Esta garantia cobre exclusivamente defeitos de fabricação ou vícios ocultos nos componentes internos do aparelho.</p>
-            </div>
-
-            <div class="section">
-              <span class="section-title">2. COBERTURA DA GARANTIA</span>
-              <p>A garantia abrange o reparo ou substituição de peças que apresentarem defeitos funcionais de hardware. Para iPhones Seminovos, a bateria é garantida apenas se apresentar saúde inferior a 80% nos primeiros 3 meses.</p>
-            </div>
-
-            <div class="section">
-              <span class="section-title">3. EXCLUSÕES DE GARANTIA</span>
-              <p>A garantia será automaticamente <strong>CANCELADA</strong> nos seguintes casos:</p>
-              <ul>
-                <li>Danos causados por queda, impacto ou pressão excessiva (telas quebradas, trincadas ou com manchas);</li>
-                <li>Danos causados por líquidos (oxidação), mesmo em aparelhos com certificação IP67/IP68;</li>
-                <li>Aparelho aberto, reparado ou manuseado por assistência técnica não autorizada por nós;</li>
-                <li>Uso de carregadores e cabos não homologados ou de má qualidade;</li>
-                <li>Danos no software por tentativas de "jailbreak", "root" ou instalações indevidas;</li>
-                <li>Ausência ou violação do selo de garantia interno/externo.</li>
-              </ul>
-            </div>
-
-            <div class="section">
-              <span class="section-title">4. PROCEDIMENTO PARA ACIONAMENTO</span>
-              <p>Em caso de defeito, o cliente deverá entrar em contato imediatamente. O prazo para análise e reparo é de até 30 dias, conforme o Código de Defesa do Consumidor.</p>
-            </div>
-
-            <div class="footer">
-              <p style="text-align: center; margin-bottom: 40px;">
-                Local e Data: ________________________________, ${new Date().toLocaleDateString('pt-BR')}
-              </p>
-              
-              <div class="signatures">
-                <div>
-                  <div class="sig-line">ASSINATURA DO CLIENTE</div>
-                  <small>Declaro que recebi o aparelho em perfeitas condições e concordo com os termos acima.</small>
-                </div>
-                <div>
-                  <div class="sig-line">RESPONSÁVEL PELA LOJA</div>
-                  <small>Carimbo e Assinatura</small>
-                </div>
-              </div>
-            </div>
-
-            <div class="no-print" style="margin-top: 50px; text-align: center;">
-              <button onclick="window.print()" style="padding: 10px 20px; cursor: pointer; background: #000; color: #fff; border: none; border-radius: 4px; font-weight: bold;">IMPRIMIR AGORA</button>
-            </div>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-    };
 
     const handleCreateCustomer = async () => {
       if (!user?.id || !newCustomerName) return;
