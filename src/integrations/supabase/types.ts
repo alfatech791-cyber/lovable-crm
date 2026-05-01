@@ -827,6 +827,7 @@ export type Database = {
           customer_id: string | null
           discount_amount: number | null
           id: string
+          items: Json | null
           notes: string | null
           payment_method: string | null
           status: string | null
@@ -839,6 +840,7 @@ export type Database = {
           customer_id?: string | null
           discount_amount?: number | null
           id?: string
+          items?: Json | null
           notes?: string | null
           payment_method?: string | null
           status?: string | null
@@ -851,6 +853,7 @@ export type Database = {
           customer_id?: string | null
           discount_amount?: number | null
           id?: string
+          items?: Json | null
           notes?: string | null
           payment_method?: string | null
           status?: string | null
