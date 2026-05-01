@@ -51,13 +51,16 @@
    const [isFinishing, setIsFinishing] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [lastSaleId, setLastSaleId] = useState<string | null>(null);
-   const [lastSaleData, setLastSaleData] = useState<{ 
-     items: CartItem[], 
-     total: number, 
-     discount: number, 
-     customer: { id?: string; name: string; phone?: string; document?: string; address?: string } | null, 
-     paymentMethod: string,
-     storeInfo?: { name: string; cnpj: string; phone: string; address: string }
+   const [lastSaleData, setLastSaleData] = useState<{
+     id?: string;
+     items: CartItem[];
+     total: number;
+     discount: number;
+     customer: { id?: string; name: string; phone?: string; document?: string; address?: string } | null;
+     paymentMethod: string;
+     storeInfo?: { name: string; cnpj: string; phone: string; address: string };
+     vendedor?: string;
+     data?: string;
    } | null>(null);
   const [selectedCartItemId, setSelectedCartItemId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -315,21 +318,7 @@
            }
          }
 
-         const saleSnapshot = {
-           items: [...cart],
-           total: total,
-           discount: discountValue,
-           customer: customerDetails,
-           paymentMethod: finalPaymentMethod,
-           storeInfo: {
-             name: "MINHA LOJA",
-             cnpj: "00.000.000/0001-00",
-             phone: "(00) 0000-0000",
-             address: "Rua Exemplo, 123 - Centro, Cidade - UF"
-           }
-         };
-
-        // 1. Criar a ordem de venda
+        // 1. Criar a ordem de venda primeiro para ter o ID
         const { data: sale, error: saleError } = await supabase
           .from("sales_orders")
           .insert({
@@ -353,7 +342,26 @@
          .select()
          .single();
  
-       if (saleError) throw saleError;
+        if (saleError) throw saleError;
+
+        const storeConfig = {
+          name: "APPLE JAU",
+          cnpj: "54.123.456/0001-89",
+          phone: "(14) 99876-5432",
+          address: "Rua Major Prado, 123 - Centro, Jaú - SP"
+        };
+
+        const saleSnapshot = {
+          id: sale.id,
+          items: [...cart],
+          total: total,
+          discount: discountValue,
+          customer: customerDetails,
+          paymentMethod: finalPaymentMethod,
+          vendedor: user?.email?.split('@')[0] || 'Sistema',
+          data: new Date().toLocaleString('pt-BR'),
+          storeInfo: storeConfig
+        };
  
        // 2. Atualizar estoque dos produtos
        for (const item of cart) {
@@ -434,9 +442,9 @@
           </head>
           <body>
             <div class="header">
-              <h2 style="margin: 0;">MINHA LOJA</h2>
-              <p style="margin: 5px 0;">CNPJ: 00.000.000/0001-00</p>
-              <p style="margin: 0;">Tel: (00) 0000-0000</p>
+               <h2 style="margin: 0;">${lastSaleData.storeInfo?.name || 'APPLE JAU'}</h2>
+               <p style="margin: 5px 0;">CNPJ: ${lastSaleData.storeInfo?.cnpj || '54.123.456/0001-89'}</p>
+               <p style="margin: 0;">Tel: ${lastSaleData.storeInfo?.phone || '(14) 99876-5432'}</p>
             </div>
             
             <div class="section">
