@@ -399,6 +399,10 @@ type Deal = {
     const [messageText, setMessageText] = useState("");
     const [sending, setSending] = useState(false);
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [dealTags, setDealTags] = useState<string[]>([]);
+    const [dealNotes, setDealNotes] = useState("");
+    const [editingDeal, setEditingDeal] = useState<any>(null);
+    const [tagInput, setTagInput] = useState("");
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -657,6 +661,47 @@ type Deal = {
        });
  
    const totalPipeline = deals.reduce((sum, d) => sum + Number(d.deal_value ?? 0), 0);
+
+   const saveDealDetails = async () => {
+     if (!editingDeal || !user?.id) return;
+     try {
+       const { error } = await supabase
+         .from("pipeline_leads")
+         .update({
+           tags: dealTags,
+           notes: dealNotes
+         })
+         .eq("id", editingDeal.id);
+
+       if (error) throw error;
+       toast.success("Detalhes salvos com sucesso!");
+       load(true);
+     } catch (err: any) {
+       toast.error("Erro ao salvar detalhes: " + err.message);
+     }
+   };
+
+   const addTag = () => {
+     if (!tagInput.trim()) return;
+     if (dealTags.includes(tagInput.trim())) {
+       setTagInput("");
+       return;
+     }
+     setDealTags([...dealTags, tagInput.trim()]);
+     setTagInput("");
+   };
+
+   const removeTag = (tag: string) => {
+     setDealTags(dealTags.filter(t => t !== tag));
+   };
+
+   const handleSelectDeal = (deal: any) => {
+     setEditingDeal(deal);
+     setDealTags(deal.tags || []);
+     setDealNotes(deal.notes || "");
+     loadConversation(deal.lead?.phone || "");
+     setChatOpen(true);
+   };
 
    const load = async (silent = false) => {
      if (!user?.id) {
