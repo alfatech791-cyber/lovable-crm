@@ -304,32 +304,71 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
                </div>
              </div>
  
-             <div className="space-y-4">
-               <div className="space-y-2">
-                 <Label>Valor Recebido</Label>
-                 <div className="relative">
-                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">R$</span>
-                   <Input 
-                     type="number" 
-                     placeholder="0,00" 
-                     className="pl-10 h-12 text-lg font-bold"
-                     value={receivedAmount}
-                     onChange={(e) => setReceivedAmount(e.target.value)}
-                     autoFocus
-                   />
-                 </div>
-               </div>
- 
+              <div className="space-y-4 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1.5">
+                      <Banknote className="h-3 w-3" /> Dinheiro
+                    </Label>
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs">R$</span>
+                      <Input 
+                        type="number" 
+                        placeholder="0,00" 
+                        className="pl-8 h-10 font-bold text-sm"
+                        value={moneyAmount}
+                        onChange={(e) => setMoneyAmount(e.target.value)}
+                        autoFocus={paymentMethod === 'money'}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1.5">
+                      <CreditCard className="h-3 w-3" /> Cartão
+                    </Label>
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs">R$</span>
+                      <Input 
+                        type="number" 
+                        placeholder="0,00" 
+                        className="pl-8 h-10 font-bold text-sm"
+                        value={cardAmount}
+                        onChange={(e) => setCardAmount(e.target.value)}
+                        autoFocus={paymentMethod === 'card'}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1.5">
+                      <QrCode className="h-3 w-3" /> PIX
+                    </Label>
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs">R$</span>
+                      <Input 
+                        type="number" 
+                        placeholder="0,00" 
+                        className="pl-8 h-10 font-bold text-sm"
+                        value={pixAmount}
+                        onChange={(e) => setPixAmount(e.target.value)}
+                        autoFocus={paymentMethod === 'pix'}
+                      />
+                    </div>
+                  </div>
+                </div>
+
                <div className="bg-muted/50 p-4 rounded-xl space-y-2 border border-border">
-                 <div className="flex justify-between text-sm">
-                   <span className="text-muted-foreground">Forma de Pagamento:</span>
-                   <span className="font-bold uppercase text-primary flex items-center gap-2">
-                     {paymentMethod === 'money' && <Banknote className="h-4 w-4" />}
-                     {paymentMethod === 'card' && <CreditCard className="h-4 w-4" />}
-                     {paymentMethod === 'pix' && <QrCode className="h-4 w-4" />}
-                     {paymentMethod}
-                   </span>
-                 </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Total Recebido:</span>
+                    <span className="font-black text-foreground">
+                      {totalReceived.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </span>
+                  </div>
+                  <div className="border-t border-border/50 my-1 pt-1 flex justify-between text-[11px]">
+                    <span className="text-muted-foreground italic">Restante:</span>
+                    <span className={`font-bold ${totalReceived >= total ? 'text-success' : 'text-destructive'}`}>
+                      {Math.max(0, total - totalReceived).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </span>
+                  </div>
                  <div className="flex justify-between text-sm">
                    <span className="text-muted-foreground">Cliente:</span>
                    <span className="font-bold">{selectedCustomer?.name || 'Consumidor Final'}</span>
@@ -339,11 +378,11 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
            </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsCheckoutModalOpen(false)} disabled={isFinishing}>Voltar</Button>
-              <Button 
-                className="bg-primary hover:bg-primary/90 min-w-[150px]" 
-                onClick={handleFinishSale}
-                disabled={!receivedAmount || parseFloat(receivedAmount) < total || isFinishing}
-              >
+               <Button 
+                 className="bg-primary hover:bg-primary/90 min-w-[180px] font-bold" 
+                 onClick={handleFinishSale}
+                 disabled={totalReceived < total || isFinishing}
+               >
                 {isFinishing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
