@@ -750,10 +750,10 @@ type Deal = {
           .order("last_message_at", { ascending: false });
 
           // Busca dados da instância atual ou órfãos (null/vazio) para evitar que sumam
-          if (currentInstance) {
-            dlQuery = dlQuery.or(`instance_name.eq."${currentInstance}",instance_name.is.null,instance_name.eq.""`);
-            convQuery = convQuery.or(`instance_name.eq."${currentInstance}",instance_name.is.null,instance_name.eq.""`);
-          } else {
+        if (currentInstance) {
+          dlQuery = dlQuery.or(`instance_name.eq.${currentInstance},instance_name.is.null,instance_name.eq.""`);
+          convQuery = convQuery.or(`instance_name.eq.${currentInstance},instance_name.is.null,instance_name.eq.""`);
+        } else {
             dlQuery = dlQuery.is("instance_name", null);
             convQuery = convQuery.is("instance_name", null);
           }
@@ -764,6 +764,27 @@ type Deal = {
           ldQuery,
           convQuery
         ]);
+
+        // Reconciliação em tempo real: se temos uma instância ativa e dados sem instância,
+        // chama a função de sincronização silenciosa para cada um para vinculá-los.
+        if (currentInstance && dlRes.data && (dlRes.data as any[]).some(d => !d.instance_name || d.instance_name === '')) {
+          const orphanDeals = (dlRes.data as any[]).filter(d => !d.instance_name || d.instance_name === '');
+          await Promise.all(orphanDeals.map(async (d) => {
+            if (d.lead?.phone) {
+              await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
+                _user_id: user.id,
+                _phone: d.lead.phone,
+                _name: d.lead.name,
+                _instance_name: currentInstance,
+                _avatar_url: d.lead.avatar_url
+              } as any);
+            }
+          }));
+          
+          // Recarrega os dados do pipeline após a vinculação para refletir as mudanças
+          const { data: refreshedDeals } = await dlQuery;
+          if (refreshedDeals) (dlRes as any).data = refreshedDeals;
+        }
 
       // Reconcilia conversas órfãs (sem card no funil) — cobre casos de telefone divergente
       const convsRaw = (convRes.data as any[]) ?? [];
