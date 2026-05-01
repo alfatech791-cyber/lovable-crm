@@ -654,7 +654,7 @@ type Deal = {
       fetchAvailableInstances();
 
         const stQuery = supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index");
-        const ldQuery = supabase.from("leads").select("id, name, phone").eq("user_id", user.id).order("created_at", { ascending: false });
+        const ldQuery = supabase.from("leads").select("id, name, phone, avatar_url").eq("user_id", user.id).order("created_at", { ascending: false });
         
          let dlQuery = supabase.from("pipeline_leads")
            .select("*, lead:leads(name, phone, source, avatar_url)")
