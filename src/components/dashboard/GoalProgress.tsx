@@ -90,12 +90,6 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
     }
   };
 
-    // If goal type is 'revenue' or 'profit', use the 'current' prop (which is usually the month's revenue)
-    // If it's 'units', we might need to fetch the count of sold units, but for now we'll use a placeholder
-    // or the 'current' if the parent passes the correct metric.
-    // For now, let's make it respect the current metric type.
-    const pct = Math.min(100, Math.round((current / (goals.monthly || 1)) * 100)) || 0;
-    const remaining = Math.max(0, (goals.monthly || 0) - current);
   const dayOfMonth = new Date().getDate();
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
    const expectedPct = Math.round((dayOfMonth / daysInMonth) * 100);
