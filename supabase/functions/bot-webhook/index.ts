@@ -33,12 +33,8 @@ serve(async (req) => {
       return json({ ok: true, skipped: "fromMe or no remoteJid" });
     }
 
-    // Ignora COMPLETAMENTE mensagens de grupos: não responde, não cria lead, não cria card.
     const isGroup = remoteJid.endsWith("@g.us") || remoteJid.endsWith("@broadcast");
     const participant: string = data?.key?.participant ?? "";
-    if (isGroup || participant) {
-      return json({ ok: true, skipped: "group" });
-    }
 
     const messageText: string =
       data?.message?.conversation ??
