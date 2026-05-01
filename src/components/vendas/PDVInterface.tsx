@@ -263,7 +263,7 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-6 flex-1 overflow-hidden">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-6 flex-1 overflow-hidden">
           <Dialog open={isCheckoutModalOpen} onOpenChange={setIsCheckoutModalOpen}>
          <DialogContent className="sm:max-w-[500px]">
            <DialogHeader>
@@ -424,15 +424,16 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
           </DialogContent>
         </Dialog>
  
-       {/* Left Side: Product Selection */}
-       <div className="flex flex-col gap-6 overflow-hidden">
-         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+        {/* Lado Esquerdo: Seleção de Produtos */}
+        <div className="flex flex-col gap-6 overflow-hidden animate-in slide-in-from-left duration-500">
+          <div className="bg-card border border-border rounded-2xl p-4 shadow-sm relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-focus-within:opacity-100 transition-opacity" />
            <div className="relative">
-             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
              <input
                type="text"
-               placeholder="Buscar por nome, código ou IMEI..."
-               className="w-full h-14 pl-12 pr-4 rounded-xl bg-muted/50 border-none focus:ring-2 focus:ring-primary text-lg outline-none transition"
+                placeholder="Pressione F2 ou digite para buscar produtos..."
+                className="w-full h-14 pl-12 pr-4 rounded-xl bg-muted/30 border border-transparent focus:border-primary/20 focus:bg-background focus:ring-4 focus:ring-primary/10 text-lg outline-none transition-all font-medium"
                value={search}
                onChange={(e) => setSearch(e.target.value)}
                autoFocus
@@ -440,11 +441,11 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
            </div>
  
             {(search || loadingProducts) && (
-              <div className="mt-4 border border-border rounded-xl overflow-hidden max-h-[400px] overflow-y-auto bg-card">
+              <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 border border-border rounded-xl shadow-2xl overflow-hidden max-h-[450px] overflow-y-auto bg-card animate-in zoom-in-95 duration-200">
                 {loadingProducts ? (
-                  <div className="p-8 flex items-center justify-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Carregando produtos...
+                  <div className="p-12 flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <span className="text-sm font-medium">Sincronizando catálogo...</span>
                   </div>
                 ) : filteredProducts.length > 0 ? (
                   filteredProducts.map(product => (
@@ -452,26 +453,33 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
                       key={product.id}
                       onClick={() => addToCart(product)}
                       disabled={product.stock <= 0}
-                      className={`w-full flex items-center gap-4 p-4 hover:bg-muted transition text-left border-b border-border last:border-none ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`w-full flex items-center gap-4 p-4 hover:bg-primary/5 transition text-left border-b border-border/50 last:border-none group ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                      <div className="h-12 w-12 rounded-lg bg-primary/10 grid place-items-center shrink-0">
+                      <div className="h-14 w-14 rounded-xl bg-muted group-hover:bg-primary/10 grid place-items-center shrink-0 transition-colors">
                         <Package className="h-6 w-6 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold truncate">{product.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {product.category} • Estoque: {product.stock}
-                        </div>
+                         <div className="font-bold text-base truncate group-hover:text-primary transition-colors">{product.name}</div>
+                         <div className="flex items-center gap-2 mt-0.5">
+                            <Badge variant="secondary" className="text-[10px] h-5">{product.category}</Badge>
+                            <span className={`text-xs font-medium ${product.stock <= 5 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                              Estoque: {product.stock} un
+                            </span>
+                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-bold text-primary">
+                      <div className="text-right shrink-0">
+                        <div className="font-black text-lg text-primary">
                           {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                         </div>
+                        <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">Clique para adicionar</div>
                       </div>
                     </button>
                   ))
                 ) : (
-                  <div className="p-8 text-center text-muted-foreground text-sm">Nenhum produto encontrado.</div>
+                  <div className="p-12 text-center text-muted-foreground space-y-2">
+                    <Info className="h-8 w-8 mx-auto opacity-20" />
+                    <p className="font-medium">Nenhum produto encontrado com "{search}"</p>
+                  </div>
                 )}
               </div>
             )}
