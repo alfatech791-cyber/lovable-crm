@@ -612,6 +612,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          last_message_direction: string | null
           metadata: Json | null
           name: string
           phone: string | null
@@ -619,12 +620,14 @@ export type Database = {
           status: string | null
           updated_at: string
           user_id: string
+          whatsapp_tags: string[] | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          last_message_direction?: string | null
           metadata?: Json | null
           name: string
           phone?: string | null
@@ -632,12 +635,14 @@ export type Database = {
           status?: string | null
           updated_at?: string
           user_id: string
+          whatsapp_tags?: string[] | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          last_message_direction?: string | null
           metadata?: Json | null
           name?: string
           phone?: string | null
@@ -645,6 +650,7 @@ export type Database = {
           status?: string | null
           updated_at?: string
           user_id?: string
+          whatsapp_tags?: string[] | null
         }
         Relationships: []
       }
@@ -1153,6 +1159,17 @@ export type Database = {
               _name?: string
               _phone: string
               _user_id: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              _avatar_url?: string
+              _instance_name?: string
+              _name?: string
+              _phone: string
+              _user_id: string
+              _whatsapp_tags?: string[]
             }
             Returns: undefined
           }

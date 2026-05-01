@@ -385,7 +385,7 @@ type Deal = {
    const [deals, setDeals] = useState<Deal[]>([]);
    const [leads, setLeads] = useState<{ id: string; name: string; phone?: string | null }[]>([]);
    const [conversations, setConversations] = useState<Conversation[]>([]);
-   const [statusFilter, setStatusFilter] = useState<"all" | "bot" | "manual" | "unread">("all");
+   const [statusFilter, setStatusFilter] = useState<"all" | "bot" | "manual" | "unread" | "pending">("all");
    const [loading, setLoading] = useState(true);
    const [dragId, setDragId] = useState<string | null>(null);
    const [adding, setAdding] = useState<{ stage_id: string; initial: boolean } | null>(null);
@@ -1221,13 +1221,14 @@ type Deal = {
                            onChange={(e) => setSearchTerm(e.target.value)}
                          />
                        </div>
-                       <div className="flex flex-wrap gap-1">
-                         {[
-                           { id: 'all', label: 'Todas' },
-                           { id: 'bot', label: 'Bot' },
-                           { id: 'manual', label: 'Humano' },
-                           { id: 'unread', label: 'Não Lidas' }
-                         ].map((f) => (
+                    <div className="flex flex-wrap gap-1">
+                      {[
+                        { id: 'all', label: 'Todas' },
+                        { id: 'bot', label: 'Bot' },
+                        { id: 'manual', label: 'Humano' },
+                        { id: 'unread', label: 'Não Lidas' },
+                        { id: 'pending', label: 'Pendentes' }
+                      ].map((f) => (
                            <button
                              key={f.id}
                              onClick={() => setStatusFilter(f.id as any)}
@@ -1264,6 +1265,10 @@ type Deal = {
                           if (statusFilter === "unread") {
                             const incoming = (c.transcript ?? []).filter((m) => m.role === "user").length;
                             return incoming > 0;
+                          }
+                          if (statusFilter === "pending") {
+                            const lastMsg = c.transcript?.[c.transcript.length - 1];
+                            return lastMsg?.role === "user";
                           }
                           return true;
                         })

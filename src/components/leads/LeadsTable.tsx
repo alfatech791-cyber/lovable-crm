@@ -15,12 +15,14 @@ import { PipelineTabs } from "@/components/pipeline/PipelineTabs";
 type Lead = {
   id: string;
   name: string;
-  email: string | null;
-  phone: string | null;
-  source: string | null;
-  status: string | null;
-  created_at: string;
-};
+   email: string | null;
+   phone: string | null;
+   source: string | null;
+   status: string | null;
+   created_at: string;
+   whatsapp_tags?: string[];
+   avatar_url?: string | null;
+ };
 
 const STATUS = [
   { value: "new", label: "Novo", className: "bg-primary/10 text-primary border-primary/20" },
@@ -217,9 +219,9 @@ export function LeadsTable() {
                   <tr className="bg-muted/30">
                     <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border">Nome / Contato</th>
                     <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border">Canal</th>
-                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border">Status</th>
-                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border">Criado em</th>
-                    <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border text-right">Ações</th>
+                     <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border">Tags</th>
+                     <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border">Status</th>
+                     <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -233,9 +235,13 @@ export function LeadsTable() {
                     <tr key={lead.id} className="hover:bg-muted/20 transition group">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-xl bg-gradient-primary text-white grid place-items-center font-bold text-sm">
-                            {lead.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
-                          </div>
+                           <div className="h-10 w-10 rounded-xl bg-gradient-primary text-white grid place-items-center font-bold text-sm overflow-hidden">
+                             {lead.avatar_url ? (
+                               <img src={lead.avatar_url} className="w-full h-full object-cover" alt="" />
+                             ) : (
+                               lead.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
+                             )}
+                           </div>
                           <div>
                             <div className="text-sm font-bold group-hover:text-primary transition">{lead.name}</div>
                             <div className="text-[11px] text-muted-foreground mt-0.5">{lead.phone || lead.email || "—"}</div>
@@ -252,9 +258,18 @@ export function LeadsTable() {
                           <span className="text-xs font-medium capitalize">{lead.source || "manual"}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4">{statusBadge(lead.status)}</td>
-                      <td className="px-6 py-4 text-xs font-medium text-muted-foreground">{new Date(lead.created_at).toLocaleDateString("pt-BR")}</td>
-                      <td className="px-6 py-4 text-right">
+                       <td className="px-6 py-4">
+                         <div className="flex flex-wrap gap-1">
+                           {lead.whatsapp_tags?.map((tag, i) => (
+                             <span key={i} className="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[9px] font-black uppercase">
+                               {tag}
+                             </span>
+                           ))}
+                           {(!lead.whatsapp_tags || lead.whatsapp_tags.length === 0) && <span className="text-muted-foreground/30">—</span>}
+                         </div>
+                       </td>
+                       <td className="px-6 py-4">{statusBadge(lead.status)}</td>
+                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1">
                           {lead.phone && (
                             <a href={`https://wa.me/${lead.phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="h-8 w-8 grid place-items-center rounded-lg hover:bg-success/10 hover:text-success transition text-muted-foreground"><MessageSquare className="h-4 w-4" /></a>
