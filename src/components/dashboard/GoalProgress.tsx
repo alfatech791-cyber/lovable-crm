@@ -177,6 +177,7 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
           </div>
         </div>
       </div>
+      </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
