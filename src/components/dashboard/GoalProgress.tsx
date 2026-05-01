@@ -42,7 +42,7 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
     const { data, error } = await supabase
       .from('business_goals')
       .select('daily_goal, weekly_goal, monthly_goal')
-      .eq('user_id', user?.id)
+      .eq('user_id', user?.id || '')
       .maybeSingle();
 
     if (data) {
