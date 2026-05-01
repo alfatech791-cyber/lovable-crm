@@ -45,7 +45,7 @@ export const sidebarItems = [
       { title: "Checklists", url: "/servicos/checklists" },
     ]
   },
-   { title: "Agendamentos", url: "/", icon: "Calendar" as const },
+   { title: "Dashboard", url: "/", icon: "Calendar" as const },
   { title: "Base de Clientes", url: "/clientes", icon: "Users" as const },
 
   { type: "header", title: "Logística & Estoque" },
