@@ -133,3 +133,368 @@
      onOpenChange(false);
    };
  
+   return (
+     <ShadcnDialog open={open} onOpenChange={onOpenChange}>
+       <ShadcnDialogContent className="sm:max-w-[650px] max-h-[95vh] p-0 overflow-hidden flex flex-col outline-none rounded-3xl border-none shadow-2xl">
+         <div className="w-12 h-1.5 bg-muted rounded-full mx-auto my-3 sm:hidden shrink-0" />
+         
+         <ShadcnDialogHeader className="px-6 pt-4 sm:pt-6 pb-2">
+           <div className="flex items-center justify-between">
+             <div>
+               <ShadcnDialogTitle className="text-xl font-black text-slate-900">
+                 {transaction ? "Editar Lançamento" : "Novo Lançamento"}
+               </ShadcnDialogTitle>
+               <p className="text-xs text-muted-foreground font-medium">Preencha os detalhes da transação financeira</p>
+             </div>
+             <div className={cn(
+               "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
+               formData.type === 'income' ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+             )}>
+               {formData.type === 'income' ? "Receita" : "Despesa"}
+             </div>
+           </div>
+         </ShadcnDialogHeader>
+ 
+         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+           <div className="px-6 border-b">
+             <TabsList className="w-full justify-start h-12 bg-transparent p-0 gap-6">
+               <TabsTrigger value="geral" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none px-0 h-12 text-xs font-bold uppercase tracking-wider">
+                 <FileText className="w-4 h-4 mr-2" /> Geral
+               </TabsTrigger>
+               <TabsTrigger value="pagamento" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none px-0 h-12 text-xs font-bold uppercase tracking-wider">
+                 <Wallet className="w-4 h-4 mr-2" /> Pagamento
+               </TabsTrigger>
+               <TabsTrigger value="anexos" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none px-0 h-12 text-xs font-bold uppercase tracking-wider">
+                 <Upload className="w-4 h-4 mr-2" /> Anexos
+               </TabsTrigger>
+             </TabsList>
+           </div>
+ 
+           <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+             <ScrollArea className="flex-1 px-6 py-4">
+               <TabsContent value="geral" className="mt-0 space-y-6">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                   <div className="space-y-2 sm:col-span-2">
+                     <Label htmlFor="description" className="text-xs font-black uppercase tracking-widest text-slate-500">Descrição</Label>
+                     <Input 
+                       id="description" 
+                       value={formData.description} 
+                       onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
+                       placeholder="Ex: Aluguel, Venda de Produto..."
+                       className="h-11 rounded-xl border-slate-200 focus:ring-blue-600"
+                       required
+                     />
+                   </div>
+ 
+                   <div className="space-y-2">
+                     <Label htmlFor="amount" className="text-xs font-black uppercase tracking-widest text-slate-500">Valor Total</Label>
+                     <div className="relative">
+                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">R$</span>
+                       <Input 
+                         id="amount" 
+                         type="number" 
+                         step="0.01"
+                         value={formData.amount} 
+                         onChange={(e) => setFormData({ ...formData, amount: e.target.value })} 
+                         placeholder="0,00"
+                         className="h-11 pl-10 rounded-xl border-slate-200 text-lg font-black focus:ring-blue-600"
+                         required
+                       />
+                     </div>
+                   </div>
+ 
+                   <div className="space-y-2">
+                     <Label htmlFor="type" className="text-xs font-black uppercase tracking-widest text-slate-500">Tipo</Label>
+                     <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
+                       <button
+                         type="button"
+                         onClick={() => setFormData({ ...formData, type: "income" })}
+                         className={cn(
+                           "py-2 rounded-lg text-xs font-black uppercase transition-all",
+                           formData.type === "income" ? "bg-white text-green-600 shadow-sm" : "text-slate-500 hover:bg-white/50"
+                         )}
+                       >
+                         Receita
+                       </button>
+                       <button
+                         type="button"
+                         onClick={() => setFormData({ ...formData, type: "expense" })}
+                         className={cn(
+                           "py-2 rounded-lg text-xs font-black uppercase transition-all",
+                           formData.type === "expense" ? "bg-white text-red-600 shadow-sm" : "text-slate-500 hover:bg-white/50"
+                         )}
+                       >
+                         Despesa
+                       </button>
+                     </div>
+                   </div>
+ 
+                   <div className="space-y-2">
+                     <Label htmlFor="category" className="text-xs font-black uppercase tracking-widest text-slate-500">Categoria</Label>
+                     <Input 
+                       id="category" 
+                       value={formData.category} 
+                       onChange={(e) => setFormData({ ...formData, category: e.target.value })} 
+                       placeholder="Ex: Vendas, Operacional..."
+                       className="h-11 rounded-xl border-slate-200"
+                     />
+                   </div>
+ 
+                   <div className="space-y-2">
+                     <Label htmlFor="status" className="text-xs font-black uppercase tracking-widest text-slate-500">Status</Label>
+                     <Select 
+                       value={formData.status} 
+                       onValueChange={(value) => setFormData({ ...formData, status: value })}
+                     >
+                       <SelectTrigger className="h-11 rounded-xl border-slate-200">
+                         <SelectValue placeholder="Selecione o status" />
+                       </SelectTrigger>
+                       <SelectContent className="rounded-xl">
+                         <SelectItem value="paid">Pago / Recebido</SelectItem>
+                         <SelectItem value="pending">Pendente</SelectItem>
+                         <SelectItem value="overdue">Atrasado</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+                 </div>
+ 
+                 <div className="space-y-4 pt-4 border-t">
+                   <div className="flex items-center justify-between">
+                     <div className="flex items-center gap-2">
+                       <Repeat className="w-4 h-4 text-blue-600" />
+                       <span className="text-xs font-black uppercase tracking-widest text-slate-900">Lançamento Recorrente</span>
+                     </div>
+                     <Switch 
+                       checked={formData.recurring} 
+                       onCheckedChange={(checked) => setFormData({ ...formData, recurring: checked })} 
+                     />
+                   </div>
+                   
+                   {formData.recurring && (
+                     <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
+                       <div className="space-y-2">
+                         <Label htmlFor="recurrence_period" className="text-[10px] font-black uppercase tracking-widest text-slate-500">Frequência</Label>
+                         <Select 
+                           value={formData.recurrence_period} 
+                           onValueChange={(value) => setFormData({ ...formData, recurrence_period: value })}
+                         >
+                           <SelectTrigger className="h-10 rounded-xl border-slate-200">
+                             <SelectValue />
+                           </SelectTrigger>
+                           <SelectContent className="rounded-xl">
+                             <SelectItem value="daily">Diário</SelectItem>
+                             <SelectItem value="weekly">Semanal</SelectItem>
+                             <SelectItem value="monthly">Mensal</SelectItem>
+                             <SelectItem value="yearly">Anual</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       </div>
+                     </div>
+                   )}
+                 </div>
+ 
+                 <div className="space-y-2 pt-2">
+                   <Label htmlFor="tags" className="text-xs font-black uppercase tracking-widest text-slate-500">Tags (opcional)</Label>
+                   <Input 
+                     id="tags" 
+                     value={formData.tags} 
+                     onChange={(e) => setFormData({ ...formData, tags: e.target.value })} 
+                     placeholder="Urgente, Fornecedor, etc..."
+                     className="h-11 rounded-xl border-slate-200"
+                   />
+                 </div>
+               </TabsContent>
+ 
+               <TabsContent value="pagamento" className="mt-0 space-y-6">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                   <div className="space-y-2">
+                     <Label htmlFor="payment_date" className="text-xs font-black uppercase tracking-widest text-slate-500">Data do Lançamento</Label>
+                     <div className="relative">
+                       <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                       <Input 
+                         id="payment_date" 
+                         type="date"
+                         className="h-11 pl-10 rounded-xl border-slate-200"
+                         value={formData.payment_date} 
+                         onChange={(e) => setFormData({ ...formData, payment_date: e.target.value })} 
+                         required
+                       />
+                     </div>
+                   </div>
+ 
+                   <div className="space-y-2">
+                     <Label htmlFor="payment_account" className="text-xs font-black uppercase tracking-widest text-slate-500">Conta / Caixa</Label>
+                     <Select 
+                       value={formData.payment_account} 
+                       onValueChange={(value) => setFormData({ ...formData, payment_account: value })}
+                     >
+                       <SelectTrigger className="h-11 rounded-xl border-slate-200">
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent className="rounded-xl">
+                         <SelectItem value="Conta Principal">Conta Principal</SelectItem>
+                         <SelectItem value="Caixa da Loja">Caixa da Loja</SelectItem>
+                         <SelectItem value="Reserva">Reserva</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+                 </div>
+ 
+                 <div className="space-y-4 pt-2">
+                   <div className="flex items-center justify-between">
+                     <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Formas de Pagamento</Label>
+                     <Button 
+                       type="button" 
+                       variant="outline" 
+                       size="sm" 
+                       onClick={addPaymentMethod}
+                       className="h-8 rounded-lg text-[10px] font-black uppercase tracking-wider gap-1"
+                     >
+                       <PlusCircle className="w-3 h-3" /> Adicionar Outra
+                     </Button>
+                   </div>
+ 
+                   <div className="space-y-3">
+                     {formData.payment_methods.map((pm: any, index: number) => (
+                       <div key={index} className="flex items-end gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 animate-in fade-in slide-in-from-right-2">
+                         <div className="flex-1 space-y-2">
+                           <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Método</Label>
+                           <Select 
+                             value={pm.method} 
+                             onValueChange={(value) => updatePaymentMethod(index, "method", value)}
+                           >
+                             <SelectTrigger className="h-9 rounded-lg bg-white border-slate-200">
+                               <SelectValue />
+                             </SelectTrigger>
+                             <SelectContent className="rounded-xl">
+                               <SelectItem value="Pix">Pix</SelectItem>
+                               <SelectItem value="Cartão de Crédito">Cartão de Crédito</SelectItem>
+                               <SelectItem value="Cartão de Débito">Cartão de Débito</SelectItem>
+                               <SelectItem value="Dinheiro">Dinheiro</SelectItem>
+                               <SelectItem value="Boleto">Boleto</SelectItem>
+                               <SelectItem value="Transferência">Transferência</SelectItem>
+                             </SelectContent>
+                           </Select>
+                         </div>
+                         <div className="w-1/3 space-y-2">
+                           <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Valor</Label>
+                           <Input 
+                             type="number"
+                             step="0.01"
+                             placeholder="0,00"
+                             value={pm.amount}
+                             onChange={(e) => updatePaymentMethod(index, "amount", e.target.value)}
+                             className="h-9 rounded-lg bg-white border-slate-200 font-bold"
+                           />
+                         </div>
+                         {formData.payment_methods.length > 1 && (
+                           <Button 
+                             type="button" 
+                             variant="ghost" 
+                             size="icon" 
+                             onClick={() => removePaymentMethod(index)}
+                             className="h-9 w-9 text-red-400 hover:text-red-600 hover:bg-red-50"
+                           >
+                             <Trash2 className="w-4 h-4" />
+                           </Button>
+                         )}
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+ 
+                 <div className="space-y-2 pt-2">
+                   <Label htmlFor="notes" className="text-xs font-black uppercase tracking-widest text-slate-500">Observações / Notas</Label>
+                   <Textarea 
+                     id="notes" 
+                     value={formData.notes} 
+                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })} 
+                     placeholder="Alguma informação adicional importante?"
+                     className="resize-none min-h-[100px] rounded-xl border-slate-200"
+                   />
+                 </div>
+               </TabsContent>
+ 
+               <TabsContent value="anexos" className="mt-0 space-y-6">
+                 <div 
+                   onClick={() => fileInputRef.current?.click()}
+                   className="border-2 border-dashed border-slate-200 rounded-3xl p-10 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-slate-50 hover:border-blue-300 transition-all group"
+                 >
+                   <div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-600 grid place-items-center group-hover:scale-110 transition-transform">
+                     <Upload className="w-6 h-6" />
+                   </div>
+                   <div className="text-center">
+                     <p className="text-sm font-black text-slate-900">Clique para anexar arquivos</p>
+                     <p className="text-xs text-muted-foreground font-medium">Comprovantes, Notas Fiscais, PDFs, etc.</p>
+                   </div>
+                   <input 
+                     type="file" 
+                     multiple 
+                     ref={fileInputRef} 
+                     onChange={handleFileChange} 
+                     className="hidden" 
+                   />
+                 </div>
+ 
+                 {attachments.length > 0 && (
+                   <div className="space-y-3">
+                     <Label className="text-xs font-black uppercase tracking-widest text-slate-500">Arquivos Selecionados</Label>
+                     <div className="grid grid-cols-1 gap-2">
+                       {attachments.map((file, index) => (
+                         <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                           <div className="flex items-center gap-3">
+                             <div className="h-8 w-8 rounded-lg bg-white border border-slate-200 grid place-items-center">
+                               <FileText className="w-4 h-4 text-blue-600" />
+                             </div>
+                             <div className="overflow-hidden">
+                               <p className="text-xs font-bold text-slate-900 truncate max-w-[200px]">{file.name}</p>
+                               <p className="text-[10px] text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
+                             </div>
+                           </div>
+                           <Button 
+                             type="button" 
+                             variant="ghost" 
+                             size="icon" 
+                             onClick={() => removeFile(index)}
+                             className="h-8 w-8 text-slate-400 hover:text-red-600"
+                           >
+                             <X className="w-4 h-4" />
+                           </Button>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                 )}
+ 
+                 <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100 flex gap-3">
+                   <AlertCircle className="w-5 h-5 text-amber-500 shrink-0" />
+                   <p className="text-[11px] text-amber-700 font-medium">
+                     Arquivos anexados serão salvos e vinculados a este lançamento para consulta futura.
+                   </p>
+                 </div>
+               </TabsContent>
+             </ScrollArea>
+ 
+             <div className="p-6 pt-4 border-t bg-slate-50/50 flex gap-3 items-center">
+               <Button 
+                 type="button" 
+                 variant="ghost" 
+                 onClick={() => onOpenChange(false)}
+                 className="flex-1 h-12 rounded-2xl font-black uppercase tracking-wider text-slate-500 hover:bg-slate-100"
+               >
+                 Cancelar
+               </Button>
+               <Button 
+                 type="submit" 
+                 className="flex-[2] h-12 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black uppercase tracking-wider shadow-lg shadow-blue-200"
+               >
+                 {transaction ? "Salvar Alterações" : "Confirmar Lançamento"}
+               </Button>
+             </div>
+           </form>
+         </Tabs>
+       </ShadcnDialogContent>
+     </ShadcnDialog>
+   );
+ }
+ 
