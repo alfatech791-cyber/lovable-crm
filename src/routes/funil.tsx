@@ -749,13 +749,14 @@ type Deal = {
           .eq("user_id", user.id)
           .order("last_message_at", { ascending: false });
 
-         if (currentInstance) {
-           dlQuery = dlQuery.eq("instance_name", currentInstance);
-           convQuery = convQuery.eq("instance_name", currentInstance);
-         } else {
-           dlQuery = dlQuery.is("instance_name", null);
-           convQuery = convQuery.is("instance_name", null);
-         }
+          // Busca dados da instância atual ou órfãos (null/vazio) para evitar que sumam
+          if (currentInstance) {
+            dlQuery = dlQuery.or(`instance_name.eq."${currentInstance}",instance_name.is.null,instance_name.eq.""`);
+            convQuery = convQuery.or(`instance_name.eq."${currentInstance}",instance_name.is.null,instance_name.eq.""`);
+          } else {
+            dlQuery = dlQuery.is("instance_name", null);
+            convQuery = convQuery.is("instance_name", null);
+          }
 
         const [stRes, dlRes, ldRes, convRes] = await Promise.all([
           stQuery,
