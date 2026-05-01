@@ -1,9 +1,14 @@
- import { useState } from "react";
+ import { useState, useEffect } from "react";
  import { Button } from "@/components/ui/button";
  import { Input } from "@/components/ui/input";
  import { Label } from "@/components/ui/label";
  import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
  import { Dialog as ShadcnDialog, DialogContent as ShadcnDialogContent, DialogHeader as ShadcnDialogHeader, DialogTitle as ShadcnDialogTitle, DialogFooter as ShadcnDialogFooter } from "@/components/ui/dialog";
+ import { Textarea } from "@/components/ui/textarea";
+ import { Switch } from "@/components/ui/switch";
+ import { ScrollArea } from "@/components/ui/scroll-area";
+ import { Separator } from "@/components/ui/separator";
+ import { Wallet, Calendar, Tag, FileText, Repeat } from "lucide-react";
  
  interface TransactionFormProps {
    open: boolean;
@@ -13,20 +18,61 @@
  }
  
  export function TransactionForm({ open, onOpenChange, onSave, transaction }: TransactionFormProps) {
-   const [formData, setFormData] = useState({
-     description: transaction?.description || "",
-     amount: transaction?.amount || "",
-     type: transaction?.type || "income",
-     category: transaction?.category || "Geral",
-     status: transaction?.status || "paid",
-     payment_date: transaction?.payment_date || new Date().toISOString().split('T')[0],
+   const [formData, setFormData] = useState<any>({
+     description: "",
+     amount: "",
+     type: "income",
+     category: "Geral",
+     status: "paid",
+     payment_date: new Date().toISOString().split('T')[0],
+     payment_method: "Pix",
+     payment_account: "Conta Principal",
+     notes: "",
+     tags: "",
+     recurring: false,
+     recurrence_period: "monthly",
    });
+ 
+   useEffect(() => {
+     if (transaction) {
+       setFormData({
+         description: transaction.description || "",
+         amount: transaction.amount || "",
+         type: transaction.type || "income",
+         category: transaction.category || "Geral",
+         status: transaction.status || "paid",
+         payment_date: transaction.payment_date || new Date().toISOString().split('T')[0],
+         payment_method: transaction.payment_method || "Pix",
+         payment_account: transaction.payment_account || "Conta Principal",
+         notes: transaction.notes || "",
+         tags: transaction.tags?.join(", ") || "",
+         recurring: transaction.recurring || false,
+         recurrence_period: transaction.recurrence_period || "monthly",
+       });
+     } else if (open) {
+       setFormData({
+         description: "",
+         amount: "",
+         type: "income",
+         category: "Geral",
+         status: "paid",
+         payment_date: new Date().toISOString().split('T')[0],
+         payment_method: "Pix",
+         payment_account: "Conta Principal",
+         notes: "",
+         tags: "",
+         recurring: false,
+         recurrence_period: "monthly",
+       });
+     }
+   }, [transaction, open]);
  
    const handleSubmit = (e: React.FormEvent) => {
      e.preventDefault();
      onSave({
        ...formData,
        amount: parseFloat(formData.amount.toString()),
+       tags: formData.tags ? formData.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [],
      });
      onOpenChange(false);
    };
