@@ -763,7 +763,7 @@
                    onChange={(e) => setSearch(e.target.value)}
                    autoFocus
                  />
-                 {(search || loadingProducts) && (
+                  {(search === "" || search || loadingProducts) && searchInputRef.current === document.activeElement && (
                    <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 border border-border rounded-xl shadow-2xl overflow-hidden max-h-[300px] overflow-y-auto bg-card">
                      {loadingProducts ? (
                        <div className="p-8 flex flex-col items-center justify-center gap-2">
