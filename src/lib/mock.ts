@@ -185,8 +185,9 @@ export interface Automation {
     reference?: string;
     brand?: string;
     ncm?: string;
-    ean?: string;
-    unit?: string;
+     ean?: string;
+     unit?: string;
+     description?: string;
   }
   
   export const products: Product[] = [];
