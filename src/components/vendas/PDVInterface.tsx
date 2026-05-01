@@ -144,10 +144,10 @@
               address: "Rua Major Prado, 123 - Centro, Jaú - SP"
             };
 
-            const saleSnapshot = {
+            const saleSnapshot: any = {
               id: sale.id,
-              items: sale.items || [],
-              total: sale.total_amount,
+              items: (sale.items as any[]) || [],
+              total: sale.total_amount || 0,
               discount: sale.discount_amount || 0,
               customer: sale.customers ? {
                 id: sale.customers.id,
@@ -156,7 +156,7 @@
                 document: sale.customers.document,
                 address: `${sale.customers.address_street || ''}, ${sale.customers.address_number || ''}`.trim()
               } : null,
-              paymentMethod: sale.payment_method,
+              paymentMethod: sale.payment_method || 'Não informado',
               vendedor: 'Sistema',
               data: new Date(sale.created_at).toLocaleString('pt-BR'),
               storeInfo: storeConfig
@@ -210,7 +210,7 @@
                         <div class="total-row">
                           <div style="display: flex; justify-content: space-between;">
                             <span>TOTAL:</span>
-                            <span>${sale.total_amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                            <span>${(sale.total_amount || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                           </div>
                         </div>
                         <div class="footer"><p>Obrigado pela preferência!</p></div>
