@@ -171,10 +171,10 @@ type Deal = {
 
        await ensureWebhook(instance);
 
-       const { data: existingRows, error: existingError } = await supabase
-         .from("bot_conversations")
-         .select("id, contact_phone, contact_name, transcript, status, last_message_at")
-         .eq("user_id", user.id);
+        const { data: existingRows, error: existingError } = await supabase
+          .from("bot_conversations")
+          .select("id, contact_phone, contact_name, transcript, status, last_message_at, instance_name")
+          .eq("user_id", user.id);
 
        if (existingError) throw existingError;
 
@@ -182,57 +182,70 @@ type Deal = {
          ((existingRows as any[]) ?? []).map((row) => [normalizePhone(row.contact_phone), row])
        );
 
-       const rawChats = await evolution.findChats(instance);
-       const chats = Array.isArray(rawChats) ? rawChats : (rawChats?.records || rawChats?.chats || []);
+        let chats: any[] = [];
+        try {
+          const rawChats = await evolution.findChats(instance);
+          chats = Array.isArray(rawChats) ? rawChats : (rawChats?.records || rawChats?.chats || []);
+        } catch (e) {
+          console.warn("Falha ao buscar chats via Evolution API:", e);
+        }
 
-       if (!Array.isArray(chats) || chats.length === 0) {
-         if (showToast) toast.info("Nenhuma conversa encontrada na instância");
-         return;
-       }
+        if (!Array.isArray(chats) || chats.length === 0) {
+          // Se não houver chats remotos, apenas tentamos carregar o que já temos no banco
+          await load(true);
+          if (showToast) toast.info("Sincronização concluída (apenas dados locais)");
+          return;
+        }
 
-       const upsertRows = chats
-         .slice(0, 50)
-         .map((chat: any) => {
-           const remoteJid = chat.remoteJid || chat.id || "";
-           if (!remoteJid || remoteJid.endsWith("@g.us")) return null;
+        const upsertRows = chats
+          .slice(0, 50)
+          .map((chat: any) => {
+            const remoteJid = chat.remoteJid || chat.id || "";
+            if (!remoteJid || remoteJid.endsWith("@g.us")) return null;
 
-           const phone = normalizePhone(remoteJid);
-           if (!phone) return null;
+            const phone = normalizePhone(remoteJid);
+            if (!phone) return null;
 
-           const existing = existingByPhone.get(phone);
-           const lastMsg = chat.lastMessage;
-           const fallbackContent =
-             lastMsg?.message?.conversation ||
-             lastMsg?.message?.extendedTextMessage?.text ||
-             existing?.transcript?.[existing.transcript.length - 1]?.content ||
-             "Nova conversa";
+            const existing = existingByPhone.get(phone);
+            
+            // Se já existe e é de outra instância, evitamos duplicar ou sobrescrever indevidamente
+            if (existing && (existing as any).instance_name && (existing as any).instance_name !== instance) {
+              return null;
+            }
 
-           const previewTranscript = Array.isArray(existing?.transcript) && existing.transcript.length > 0
-             ? existing.transcript
-             : [{
-                 role: lastMsg?.key?.fromMe ? "assistant" : "user",
-                 content: fallbackContent,
-                 at: new Date(lastMsg?.messageTimestamp ? lastMsg.messageTimestamp * 1000 : Date.now()).toISOString(),
-               }];
+            const lastMsg = chat.lastMessage;
+            const fallbackContent =
+              lastMsg?.message?.conversation ||
+              lastMsg?.message?.extendedTextMessage?.text ||
+              existing?.transcript?.[existing.transcript.length - 1]?.content ||
+              "Nova conversa";
 
-           const lastAt =
-             previewTranscript[previewTranscript.length - 1]?.at ||
-             existing?.last_message_at ||
-             new Date().toISOString();
+            const previewTranscript = Array.isArray(existing?.transcript) && existing.transcript.length > 0
+              ? existing.transcript
+              : [{
+                  role: lastMsg?.key?.fromMe ? "assistant" : "user",
+                  content: fallbackContent,
+                  at: new Date(lastMsg?.messageTimestamp ? lastMsg.messageTimestamp * 1000 : Date.now()).toISOString(),
+                }];
 
-            return {
-              ...(existing?.id ? { id: existing.id } : {}),
-              user_id: user.id,
-              contact_phone: phone,
-              contact_name: chat.name || chat.pushName || chat.verifiedName || existing?.contact_name || null,
-              transcript: previewTranscript,
-              status: existing?.status ?? "active",
-              messages_count: previewTranscript.length,
-              last_message_at: lastAt,
-              instance_name: instance,
-            };
-         })
-         .filter(Boolean);
+            const lastAt =
+              previewTranscript[previewTranscript.length - 1]?.at ||
+              existing?.last_message_at ||
+              new Date().toISOString();
+
+             return {
+               ...(existing?.id ? { id: existing.id } : {}),
+               user_id: user.id,
+               contact_phone: phone,
+               contact_name: chat.name || chat.pushName || chat.verifiedName || existing?.contact_name || null,
+               transcript: previewTranscript,
+               status: existing?.status ?? "active",
+               messages_count: previewTranscript.length,
+               last_message_at: lastAt,
+               instance_name: instance,
+             };
+          })
+          .filter(Boolean);
 
        if (upsertRows.length === 0) {
          if (showToast) toast.info("Nenhuma conversa válida encontrada");
@@ -490,22 +503,39 @@ type Deal = {
       if (!user?.id) return;
 
       const ch = supabase
-        .channel(`funil_realtime_sync:${user.id}`)
+        .channel(`funil_realtime_sync:${user.id}:${activeInstance || 'no-instance'}`)
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "bot_conversations", filter: `user_id=eq.${user.id}` },
           (payload: any) => {
-            // Atualiza chat aberto se for o mesmo
-            if (payload.eventType !== "DELETE" && currentConversation?.id === (payload.new as any)?.id) {
-              setCurrentConversation(payload.new as any);
+            if (payload.eventType === "DELETE") {
+               load(true);
+               return;
             }
-            load(true);
+            
+            const conv = payload.new as any;
+            // Apenas reage se for da instância ativa (ou se não houver filtro de instância)
+            if (!activeInstance || conv.instance_name === activeInstance) {
+              if (currentConversation?.id === conv.id) {
+                setCurrentConversation(conv);
+              }
+              load(true);
+            }
           }
         )
         .on(
           "postgres_changes",
-          { event: "*", schema: "public", table: "pipeline_deals", filter: `user_id=eq.${user.id}` },
-          () => load(true)
+          { event: "*", schema: "public", table: "pipeline_leads", filter: `user_id=eq.${user.id}` },
+          (payload: any) => {
+            if (payload.eventType === "DELETE") {
+               load(true);
+               return;
+            }
+            const deal = payload.new as any;
+            if (!activeInstance || deal.instance_name === activeInstance) {
+              load(true);
+            }
+          }
         )
         .on(
           "postgres_changes",
@@ -522,7 +552,7 @@ type Deal = {
       return () => {
         supabase.removeChannel(ch);
       };
-    }, [user?.id, currentConversation?.id]);
+    }, [user?.id, currentConversation?.id, activeInstance]);
 
     // Dedupe defensivo: nunca renderiza dois cards com mesmo id ou mesmo lead_id
     const dedupedDeals = (() => {
