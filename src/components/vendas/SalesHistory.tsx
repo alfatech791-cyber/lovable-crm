@@ -208,7 +208,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
          <div className="overflow-x-auto">
            <table className="w-full text-left border-collapse">
              <thead>
-               <tr className="border-b border-border bg-muted/30">
                 <tr className="border-b border-border/40 bg-muted/10">
                   <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">ID Venda</th>
                   <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">Cliente</th>
