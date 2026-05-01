@@ -51,7 +51,14 @@
    const [isFinishing, setIsFinishing] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [lastSaleId, setLastSaleId] = useState<string | null>(null);
-  const [lastSaleData, setLastSaleData] = useState<{ items: CartItem[], total: number, discount: number, customer: { name: string } | null, paymentMethod: string } | null>(null);
+   const [lastSaleData, setLastSaleData] = useState<{ 
+     items: CartItem[], 
+     total: number, 
+     discount: number, 
+     customer: { id?: string; name: string; phone?: string; document?: string; address?: string } | null, 
+     paymentMethod: string,
+     storeInfo?: { name: string; cnpj: string; phone: string; address: string }
+   } | null>(null);
   const [selectedCartItemId, setSelectedCartItemId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -286,14 +293,41 @@
         ? 'Múltiplo (' + usedMethods.join(', ') + ')' 
         : usedMethods[0] || (paymentMethod === 'money' ? 'Dinheiro' : paymentMethod === 'card' ? 'Cartão' : paymentMethod === 'pix' ? 'PIX' : 'Não informado');
 
-      try {
-        const saleSnapshot = {
-          items: [...cart],
-          total: total,
-          discount: discountValue,
-          customer: selectedCustomer ? { name: selectedCustomer.name } : null,
-          paymentMethod: finalPaymentMethod
-        };
+       try {
+         // Buscar dados completos do cliente para o snapshot
+         let customerDetails = selectedCustomer ? { name: selectedCustomer.name, id: selectedCustomer.id } : null;
+         
+         if (selectedCustomer?.id) {
+           const { data: fullCustomer } = await supabase
+             .from("customers")
+             .select("*")
+             .eq("id", selectedCustomer.id)
+             .single();
+             
+           if (fullCustomer) {
+             customerDetails = {
+               id: fullCustomer.id,
+               name: fullCustomer.full_name,
+               phone: fullCustomer.phone,
+               document: fullCustomer.document,
+               address: `${fullCustomer.address_street || ''}, ${fullCustomer.address_number || ''} ${fullCustomer.address_neighborhood || ''} ${fullCustomer.address_city || ''}-${fullCustomer.address_state || ''}`.trim().replace(/^,/, '').trim()
+             };
+           }
+         }
+
+         const saleSnapshot = {
+           items: [...cart],
+           total: total,
+           discount: discountValue,
+           customer: customerDetails,
+           paymentMethod: finalPaymentMethod,
+           storeInfo: {
+             name: "MINHA LOJA",
+             cnpj: "00.000.000/0001-00",
+             phone: "(00) 0000-0000",
+             address: "Rua Exemplo, 123 - Centro, Cidade - UF"
+           }
+         };
 
         // 1. Criar a ordem de venda
         const { data: sale, error: saleError } = await supabase
@@ -462,9 +496,16 @@
       const warrantyTime = type === 'seminovo' ? '7 meses' : '1 ano';
       const typeLabel = type === 'seminovo' ? 'iPhone Seminovo' : type === 'lacrado' ? 'iPhone Lacrado' : 'Aparelho Android';
 
-      const itemsHtml = lastSaleData.items.map(item => `
-        <li>${item.name} ${item.model || ''} ${item.capacity || ''} ${item.color || ''}</li>
-      `).join('');
+       const itemsHtml = lastSaleData.items.map(item => `
+         <div style="border: 1px solid #eee; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+           <strong>${item.name}</strong><br>
+           ${item.model ? `<span>Modelo: ${item.model}</span><br>` : ''}
+           ${item.capacity ? `<span>Capacidade: ${item.capacity}</span><br>` : ''}
+           ${item.color ? `<span>Cor: ${item.color}</span><br>` : ''}
+           ${item.battery_health ? `<span>Saúde da Bateria: ${item.battery_health}%</span><br>` : ''}
+           ${item.id ? `<small style="color: #666;">ID/IMEI: ${item.id}</small>` : ''}
+         </div>
+       `).join('');
 
       printWindow.document.write(`
         <html>
@@ -490,19 +531,29 @@
               <div style="font-size: 14px; font-weight: bold;">${typeLabel.toUpperCase()}</div>
             </div>
 
-            <div class="grid">
-              <div class="info-box">
-                <span class="section-title">DADOS DO CLIENTE</span>
-                <strong>Nome:</strong> ${lastSaleData.customer?.name || '________________________________'}<br>
-                <strong>Data da Venda:</strong> ${new Date().toLocaleDateString('pt-BR')}
-              </div>
-              <div class="info-box">
-                <span class="section-title">PRODUTO(S)</span>
-                <ul style="margin: 5px 0; padding-left: 20px;">
-                  ${itemsHtml}
-                </ul>
-              </div>
-            </div>
+             <div class="grid">
+               <div class="info-box">
+                 <span class="section-title">DADOS DA LOJA</span>
+                 <strong>${lastSaleData.storeInfo?.name || 'LOJA EXEMPLO'}</strong><br>
+                 CNPJ: ${lastSaleData.storeInfo?.cnpj || '00.000.000/0001-00'}<br>
+                 Tel: ${lastSaleData.storeInfo?.phone || '(00) 0000-0000'}<br>
+                 End: ${lastSaleData.storeInfo?.address || 'Endereço da Loja'}
+               </div>
+               <div class="info-box">
+                 <span class="section-title">DADOS DO CLIENTE</span>
+                 <strong>Nome:</strong> ${lastSaleData.customer?.name || '________________________________'}<br>
+                 <strong>CPF/CNPJ:</strong> ${lastSaleData.customer?.document || '________________________________'}<br>
+                 <strong>Tel:</strong> ${lastSaleData.customer?.phone || '________________________________'}<br>
+                 <strong>End:</strong> ${lastSaleData.customer?.address || '________________________________'}
+               </div>
+             </div>
+
+             <div class="section">
+               <span class="section-title">DADOS DO(S) APARELHO(S)</span>
+               <div style="margin-top: 10px;">
+                 ${itemsHtml}
+               </div>
+             </div>
 
             <div class="section">
               <span class="section-title">1. PRAZO DE GARANTIA</span>
