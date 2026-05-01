@@ -171,10 +171,16 @@ type Deal = {
 
        await ensureWebhook(instance);
 
-        const { data: existingRows, error: existingError } = await supabase
+        let existingQuery = supabase
           .from("bot_conversations")
           .select("id, contact_phone, contact_name, transcript, status, last_message_at, instance_name")
           .eq("user_id", user.id);
+        
+        if (instance) {
+          existingQuery = existingQuery.eq("instance_name", instance);
+        }
+
+        const { data: existingRows, error: existingError } = await existingQuery;
 
        if (existingError) throw existingError;
 
@@ -630,20 +636,31 @@ type Deal = {
       
       fetchAvailableInstances();
 
+        const stQuery = supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index");
+        const ldQuery = supabase.from("leads").select("id, name, phone").eq("user_id", user.id).order("created_at", { ascending: false });
+        const allDealsQuery = supabase.from("pipeline_leads").select("lead_id").eq("user_id", user.id);
+
+        let dlQuery = supabase.from("pipeline_leads")
+          .select("*, lead:leads(name, phone, source)")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+
+        let convQuery = supabase.from("bot_conversations")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("last_message_at", { ascending: false });
+
+        if (currentInstance) {
+          dlQuery = dlQuery.eq("instance_name", currentInstance);
+          convQuery = convQuery.eq("instance_name", currentInstance);
+        }
+
         const [stRes, dlRes, ldRes, convRes, allDealsRes] = await Promise.all([
-          supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
-          supabase.from("pipeline_leads")
-            .select("*, lead:leads(name, phone, source)")
-            .eq("user_id", user.id)
-            .eq("instance_name", currentInstance || "")
-            .order("created_at", { ascending: false }),
-          supabase.from("leads").select("id, name, phone").eq("user_id", user.id).order("created_at", { ascending: false }),
-          supabase.from("bot_conversations")
-            .select("*")
-            .eq("user_id", user.id)
-            .eq("instance_name", currentInstance || "")
-            .order("last_message_at", { ascending: false }),
-          supabase.from("pipeline_leads").select("lead_id")
+          stQuery,
+          dlQuery,
+          ldQuery,
+          convQuery,
+          allDealsQuery
         ]);
 
       // Reconcilia conversas órfãs (sem card no funil) — cobre casos de telefone divergente
@@ -885,12 +902,22 @@ type Deal = {
                          setLoading(true);
                          try {
                            let dealQuery = supabase.from("pipeline_leads").delete().eq("user_id", user.id);
+                           let convQuery = supabase.from("bot_conversations").delete().eq("user_id", user.id);
+                           
                            if (activeInstance) {
                              dealQuery = dealQuery.eq("instance_name", activeInstance);
+                             convQuery = convQuery.eq("instance_name", activeInstance);
                            }
-                           const { error } = await dealQuery;
-                           if (error) throw error;
-                           toast.success("Cards removidos com sucesso");
+                           
+                           const [{ error: dealError }, { error: convError }] = await Promise.all([
+                             dealQuery,
+                             convQuery
+                           ]);
+                           
+                           if (dealError) throw dealError;
+                           if (convError) throw convError;
+                           
+                           toast.success("Pipeline da instância limpo com sucesso");
                            await load(true);
                          } catch (err: any) {
                            console.error("Erro ao excluir cards:", err);
