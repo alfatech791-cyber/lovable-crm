@@ -750,10 +750,10 @@ type Deal = {
           .order("last_message_at", { ascending: false });
 
           // Busca dados da instância atual ou órfãos (null/vazio) para evitar que sumam
-          if (currentInstance) {
-            dlQuery = dlQuery.or(`instance_name.eq."${currentInstance}",instance_name.is.null,instance_name.eq.""`);
-            convQuery = convQuery.or(`instance_name.eq."${currentInstance}",instance_name.is.null,instance_name.eq.""`);
-          } else {
+        if (currentInstance) {
+          dlQuery = dlQuery.or(`instance_name.eq.${currentInstance},instance_name.is.null,instance_name.eq.""`);
+          convQuery = convQuery.or(`instance_name.eq.${currentInstance},instance_name.is.null,instance_name.eq.""`);
+        } else {
             dlQuery = dlQuery.is("instance_name", null);
             convQuery = convQuery.is("instance_name", null);
           }
