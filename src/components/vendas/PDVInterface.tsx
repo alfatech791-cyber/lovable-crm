@@ -1,5 +1,5 @@
- import { useState, useMemo, useEffect, useCallback } from "react";
- import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2, ArrowLeft, History, Calculator, Percent, Tag, ReceiptText, Printer, FileText, CheckCircle2 } from "lucide-react";
+ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2, ArrowLeft, History, Calculator, Percent, Tag, ReceiptText, Printer, FileText, CheckCircle2, Eraser } from "lucide-react";
  import { Product } from "@/lib/mock";
  import { toast } from "sonner";
  import { supabase } from "@/integrations/supabase/client";
@@ -42,6 +42,8 @@
   const [lastSaleId, setLastSaleId] = useState<string | null>(null);
   const [lastSaleData, setLastSaleData] = useState<{ items: CartItem[], total: number, discount: number, customer: { name: string } | null, paymentMethod: string } | null>(null);
   const [selectedCartItemId, setSelectedCartItemId] = useState<string | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const barcodeInputRef = useRef<HTMLInputElement>(null);
  
    const fetchProducts = useCallback(async () => {
      if (!user?.id) return;
@@ -97,6 +99,54 @@
    const [activeCategory, setActiveCategory] = useState<string>("all");
    const [customerSearch, setCustomerSearch] = useState("");
  
+  // Atalhos de Teclado
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // F2: Focar Busca de Produtos
+      if (e.key === 'F2') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+      // F1: Focar Código de Barras
+      if (e.key === 'F1') {
+        e.preventDefault();
+        barcodeInputRef.current?.focus();
+      }
+      // F4: Focar Vendedor
+      if (e.key === 'F4') {
+        e.preventDefault();
+        const vendorSelect = document.querySelector('select');
+        vendorSelect?.focus();
+      }
+      // F8: Abrir Checkout (se carrinho não estiver vazio)
+      if (e.key === 'F8' && cart.length > 0) {
+        e.preventDefault();
+        if (!selectedCustomer) {
+          setIsCustomerModalOpen(true);
+        } else {
+          setIsCheckoutModalOpen(true);
+        }
+      }
+      // F9: Vincular Cliente
+      if (e.key === 'F9') {
+        e.preventDefault();
+        setIsCustomerModalOpen(true);
+      }
+      // F10: Finalizar (se tudo OK)
+      if (e.key === 'F10' && cart.length > 0 && paymentMethod) {
+        e.preventDefault();
+        if (!selectedCustomer) {
+          setIsCustomerModalOpen(true);
+        } else {
+          setIsCheckoutModalOpen(true);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [cart.length, paymentMethod, selectedCustomer]);
+
    const filteredProducts = useMemo(() => {
      return allProducts.filter(p => {
        const matchesSearch = !search || 
@@ -146,6 +196,7 @@
        return [...current, { ...product, quantity: 1 }];
      });
      setSearch("");
+    searchInputRef.current?.focus();
    };
  
    const updateQuantity = (id: string, delta: number) => {
@@ -162,6 +213,15 @@
      setCart(current => current.filter(item => item.id !== id));
    };
  
+  const clearCart = () => {
+    if (cart.length === 0) return;
+    if (confirm("Tem certeza que deseja limpar o carrinho?")) {
+      setCart([]);
+      setPaymentMethod(null);
+      toast.success("Carrinho limpo");
+    }
+  };
+
     const subtotal = useMemo(() => cart.reduce((acc, item) => acc + (item.price * item.quantity), 0), [cart]);
     const total = useMemo(() => subtotal - discountValue, [subtotal, discountValue]);
     
@@ -171,6 +231,12 @@
 
     const change = useMemo(() => Math.max(0, totalReceived - total), [totalReceived, total]);
  
+  const handleCheckoutKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && totalReceived >= total && !isFinishing && selectedCustomer) {
+      handleFinishSale();
+    }
+  };
+
     const handleFinishSale = async () => {
       if (!user?.id) return;
       
@@ -438,6 +504,7 @@
                         className="pl-8 h-10 font-bold text-sm"
                         value={moneyAmount}
                         onChange={(e) => setMoneyAmount(e.target.value)}
+                        onKeyDown={handleCheckoutKeyDown}
                         autoFocus={paymentMethod === 'money'}
                       />
                     </div>
@@ -454,6 +521,7 @@
                         className="pl-8 h-10 font-bold text-sm"
                         value={cardAmount}
                         onChange={(e) => setCardAmount(e.target.value)}
+                        onKeyDown={handleCheckoutKeyDown}
                         autoFocus={paymentMethod === 'card'}
                       />
                     </div>
@@ -470,6 +538,7 @@
                         className="pl-8 h-10 font-bold text-sm"
                         value={pixAmount}
                         onChange={(e) => setPixAmount(e.target.value)}
+                        onKeyDown={handleCheckoutKeyDown}
                         autoFocus={paymentMethod === 'pix'}
                       />
                     </div>
@@ -649,11 +718,12 @@
          <div className="flex flex-col gap-4 overflow-hidden animate-in slide-in-from-left duration-500">
            {/* Barra Superior de Busca e Campos */}
            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-card border border-border rounded-2xl p-4 shadow-sm">
-             <div className="md:col-span-3 space-y-1.5">
-               <Label className="text-[10px] font-bold uppercase text-muted-foreground">Código / EAN</Label>
+              <div className="md:col-span-2 space-y-1.5">
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground">Código (F1)</Label>
                <div className="relative">
                  <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                  <Input 
+                    ref={barcodeInputRef}
                    placeholder="Código de barras" 
                    className="pl-9 h-11 bg-muted/20"
                    value={barcode}
@@ -663,11 +733,12 @@
                </div>
              </div>
  
-             <div className="md:col-span-5 space-y-1.5">
-               <Label className="text-[10px] font-bold uppercase text-muted-foreground">Descrição do Produto (F2)</Label>
+              <div className="md:col-span-6 space-y-1.5">
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground">Produto (F2)</Label>
                <div className="relative">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                  <Input 
+                    ref={searchInputRef}
                    placeholder="Digite o nome do produto..." 
                    className="pl-9 h-11 bg-muted/20"
                    value={search}
@@ -786,15 +857,26 @@
         {/* Lado Direito: Carrinho e Checkout */}
         <div className="bg-card border border-border rounded-2xl flex flex-col shadow-xl overflow-hidden animate-in slide-in-from-right duration-500">
           <div className="p-5 border-b border-border bg-muted/20 flex items-center justify-between">
-           <div className="flex items-center gap-2 font-bold text-lg">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <ShoppingCart className="h-5 w-5 text-primary" />
-              </div>
-              <span>Carrinho</span>
+           <div className="flex items-center gap-2">
+             <div className="flex items-center gap-2 font-bold text-lg">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <ShoppingCart className="h-5 w-5 text-primary" />
+                </div>
+                <span>Carrinho</span>
+             </div>
+              <span className="px-3 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest">
+               {cart.length} itens
+             </span>
            </div>
-            <span className="px-3 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest">
-             {cart.length} itens
-           </span>
+           <Button 
+             variant="ghost" 
+             size="icon" 
+             className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" 
+             onClick={clearCart}
+             title="Limpar Carrinho"
+           >
+             <Eraser className="h-4 w-4" />
+           </Button>
          </div>
  
           <ScrollArea className="flex-1 px-4">
