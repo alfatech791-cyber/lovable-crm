@@ -685,10 +685,15 @@
                          onClick={() => addToCart(product)}
                          className="w-full flex items-center gap-3 p-3 hover:bg-primary/5 transition text-left border-b border-border last:border-none"
                        >
-                         <div className="flex-1 min-w-0">
-                           <div className="font-bold text-sm truncate">{product.name}</div>
-                           <div className="text-[10px] text-muted-foreground">Estoque: {product.stock}</div>
-                         </div>
+                          <div className="flex-1 min-w-0 flex flex-col">
+                            <div className="font-bold text-sm truncate">{product.name}</div>
+                            {product.description && (
+                              <div className="text-[10px] text-muted-foreground line-clamp-1 italic">
+                                {product.description}
+                              </div>
+                            )}
+                            <div className="text-[10px] text-muted-foreground mt-0.5">Estoque: {product.stock}</div>
+                          </div>
                          <div className="font-black text-sm text-primary">
                            {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                          </div>
