@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { 
-  Search, Filter, Download, MoreHorizontal, ShoppingBag, Eye, Printer, 
-  Calendar, ArrowUpRight, ArrowDownRight, CheckCircle2, XCircle, 
-  AlertCircle, Loader2, FileText, TrendingUp, TrendingDown, Clock, User
+   Search, Filter, Download, MoreHorizontal, ShoppingBag, Eye, Printer, 
+   Calendar, ArrowUpRight, ArrowDownRight, CheckCircle2, XCircle, 
+   AlertCircle, Loader2, FileText, TrendingUp, TrendingDown, Clock, User,
+   MessageSquare, Share2, ReceiptText
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
  import { Badge } from "@/components/ui/badge";
@@ -287,27 +288,92 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
                     <td className="px-6 py-5 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/10 transition-colors">
-                            <MoreHorizontal className="h-5 w-5" />
+                          <Button variant="ghost" size="sm" className="h-9 px-3 rounded-xl hover:bg-primary/10 transition-colors border border-border/40 flex items-center gap-2">
+                            <span className="font-bold text-[10px] uppercase tracking-widest text-primary">Ação</span>
+                            <MoreHorizontal className="h-4 w-4 text-primary" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl shadow-2xl border-border/40">
-                          <DropdownMenuItem className="gap-3 py-2.5 rounded-lg cursor-pointer">
-                            <Eye className="h-4 w-4 text-primary" /> 
-                            <span className="font-semibold text-xs">Visualizar Detalhes</span>
+                        <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl shadow-2xl border-border/40 bg-card/95 backdrop-blur-md">
+                          <div className="px-3 py-2 mb-1">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Operações</span>
+                          </div>
+                          
+                          <DropdownMenuItem className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group">
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                              <Eye className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-xs">Visualizar Venda</span>
+                              <span className="text-[9px] text-muted-foreground">Ver detalhes completos</span>
+                            </div>
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="gap-3 py-2.5 rounded-lg cursor-pointer">
-                            <Printer className="h-4 w-4 text-primary" /> 
-                            <span className="font-semibold text-xs">Imprimir Cupom</span>
+
+                          <DropdownMenuItem className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group">
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                              <Printer className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-xs">Imprimir Cupom</span>
+                              <span className="text-[9px] text-muted-foreground">Formato térmico 80mm</span>
+                            </div>
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="gap-3 py-2.5 rounded-lg cursor-pointer">
-                            <FileText className="h-4 w-4 text-primary" /> 
-                            <span className="font-semibold text-xs">Termo de Garantia</span>
+
+                          <DropdownMenuItem className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group">
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                              <FileText className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-xs">Termo de Garantia</span>
+                              <span className="text-[9px] text-muted-foreground">Gerar PDF de garantia</span>
+                            </div>
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator className="my-2 bg-border/40" />
-                          <DropdownMenuItem className="gap-3 py-2.5 rounded-lg text-destructive focus:text-destructive focus:bg-destructive/5 cursor-pointer">
-                            <XCircle className="h-4 w-4" /> 
-                            <span className="font-bold text-xs">Estornar Venda</span>
+
+                          <DropdownMenuItem className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group">
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                              <ReceiptText className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-xs">Gerar Nota Fiscal</span>
+                              <span className="text-[9px] text-muted-foreground">Emitir NF-e ou NFC-e</span>
+                            </div>
+                          </DropdownMenuItem>
+
+                          <div className="h-px bg-border/40 my-2 mx-1" />
+                          
+                          <div className="px-3 py-2 mb-1">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Interação</span>
+                          </div>
+
+                          <DropdownMenuItem className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-green-500/10 transition-all group">
+                            <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
+                              <MessageSquare className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-xs">Enviar WhatsApp</span>
+                              <span className="text-[9px] text-muted-foreground">Enviar comprovante</span>
+                            </div>
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group">
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                              <Share2 className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-xs">Compartilhar Link</span>
+                              <span className="text-[9px] text-muted-foreground">Link de visualização</span>
+                            </div>
+                          </DropdownMenuItem>
+
+                          <div className="h-px bg-border/40 my-2 mx-1" />
+
+                          <DropdownMenuItem className="gap-3 py-3 rounded-xl text-destructive focus:text-destructive focus:bg-destructive/5 cursor-pointer group">
+                            <div className="h-8 w-8 rounded-lg bg-destructive/10 flex items-center justify-center text-destructive group-hover:scale-110 transition-transform">
+                              <XCircle className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-black text-xs">Estornar Venda</span>
+                              <span className="text-[9px] opacity-70 font-bold uppercase">Operação Irreversível</span>
+                            </div>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
