@@ -55,16 +55,35 @@ function Dashboard() {
     avgTicket: 0
   });
 
-  const fetchStats = useCallback(async () => {
+   const fetchStats = useCallback(async (currentPeriod: Period) => {
     if (!user?.id) {
       setLoading(false);
       return;
     }
     setLoading(true);
     try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const firstDayMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+       const now = new Date();
+       let startDate: Date;
+       let endDate = endOfDay(now);
+
+       switch (currentPeriod) {
+         case 'today':
+           startDate = startOfDay(now);
+           break;
+         case 'week':
+           startDate = startOfWeek(now, { weekStartsOn: 0 });
+           break;
+         case 'month':
+           startDate = startOfMonth(now);
+           break;
+         case 'last30':
+           startDate = startOfDay(subDays(now, 30));
+           break;
+         default:
+           startDate = startOfDay(now);
+       }
+
+       const firstDayMonth = startOfMonth(now);
 
       // Run all queries in parallel; never throw — log errors and continue
       const [salesRes, productsRes, leadsRes, osRes] = await Promise.all([
