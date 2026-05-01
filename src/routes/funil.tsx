@@ -157,18 +157,34 @@ type Deal = {
      }
    };
 
-   const syncFromWhatsApp = async (showToast = true) => {
-     if (!user?.id || syncLockRef.current) return;
+    const syncFromWhatsApp = async (showToast = true, resetPipeline = false) => {
+      if (!user?.id || syncLockRef.current) return;
 
      syncLockRef.current = true;
      setSyncing(true);
 
-     try {
-       const instance = await resolveInstance();
-       if (!instance) {
-         if (showToast) toast.error("Nenhuma instância do WhatsApp conectada");
-         return;
-       }
+      try {
+        const instance = await resolveInstance();
+        if (!instance) {
+          if (showToast) toast.error("Nenhuma instância do WhatsApp conectada");
+          return;
+        }
+
+        if (resetPipeline) {
+          const { error: resetError } = await supabase
+            .from("pipeline_leads")
+            .delete()
+            .eq("user_id", user.id)
+            .eq("instance_name", instance);
+          
+          if (resetError) {
+            console.error("Erro ao resetar pipeline:", resetError);
+            toast.error("Erro ao limpar pipeline antes da sincronização");
+          } else {
+            setDeals([]); // Limpa localmente para feedback visual imediato
+            toast.info("Pipeline resetado. Iniciando sincronização completa...");
+          }
+        }
 
        await ensureWebhook(instance);
 
@@ -933,7 +949,7 @@ type Deal = {
                         size="sm" 
                         disabled={syncing}
                         className={cn("h-8 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all", syncing ? "bg-primary/20 text-primary animate-pulse" : "hover:bg-primary/10 hover:text-primary")}
-                        onClick={() => syncFromWhatsApp(true)}
+                        onClick={() => syncFromWhatsApp(true, true)}
                       >
                         {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wifi className="h-3 w-3" />}
                         {syncing ? "Sincronizando..." : "Sincronizar WhatsApp"}
