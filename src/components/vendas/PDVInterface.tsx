@@ -853,14 +853,20 @@
                             {/* Seletor de Quantidade Moderno */}
                             <div className="flex items-center bg-muted/40 rounded-full border border-border/30 p-1 ring-1 ring-transparent group-hover:ring-primary/10 transition-all">
                               <button 
-                                onClick={() => updateQuantity(item.id, -1)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  updateQuantity(item.id, -1);
+                                }}
                                 className="h-7 w-7 flex items-center justify-center rounded-full hover:bg-background hover:text-primary hover:shadow-sm transition-all active:scale-90"
                               >
                                 <Minus className="h-3 w-3" />
                               </button>
                               <span className="w-8 text-center text-xs font-black">{item.quantity}</span>
                               <button 
-                                onClick={() => updateQuantity(item.id, 1)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  updateQuantity(item.id, 1);
+                                }}
                                 className="h-7 w-7 flex items-center justify-center rounded-full hover:bg-background hover:text-primary hover:shadow-sm transition-all active:scale-90"
                               >
                                 <Plus className="h-3 w-3" />
