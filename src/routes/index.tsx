@@ -13,16 +13,9 @@ import { QuickActions } from "@/components/dashboard/QuickActions";
 import { HeroHeader } from "@/components/dashboard/HeroHeader";
 import { GoalProgress } from "@/components/dashboard/GoalProgress";
  import { MonthComparison } from "@/components/dashboard/MonthComparison";
- import { useState, useEffect, useCallback, useMemo } from "react";
- import { supabase } from "@/integrations/supabase/client";
- import { useAuth } from "@/contexts/AuthContext";
- import { 
-   startOfDay, 
-   endOfDay, 
-   startOfWeek, 
-   startOfMonth, 
-   subDays 
- } from "date-fns";
+  import { useState, Suspense, lazy } from "react";
+  import { useAuth } from "@/contexts/AuthContext";
+  import { useDashboardStats, type Period } from "@/hooks/useDashboardStats";
  import { 
    DropdownMenu, 
    DropdownMenuContent, 
@@ -32,126 +25,31 @@ import { GoalProgress } from "@/components/dashboard/GoalProgress";
  import { Button } from "@/components/ui/button";
  import { Calendar, ChevronDown } from "lucide-react";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Painel — ConectaCRM" },
-      { name: "description", content: "Dashboard ConectaCRM: leads, vendas, atendimentos e automações em um só lugar." },
-    ],
-  }),
-  component: Dashboard,
-});
+ // Lazy load secondary components to improve initial paint
+ const SalesChart = lazy(() => import("@/components/dashboard/SalesChart").then(m => ({ default: m.SalesChart })));
+ const OriginDonut = lazy(() => import("@/components/dashboard/OriginDonut").then(m => ({ default: m.OriginDonut })));
+ const ChannelMini = lazy(() => import("@/components/dashboard/ChannelMini").then(m => ({ default: m.ChannelMini })));
+ const Funnel = lazy(() => import("@/components/dashboard/Funnel").then(m => ({ default: m.Funnel })));
+ const MessagesPanel = lazy(() => import("@/components/dashboard/MessagesPanel").then(m => ({ default: m.MessagesPanel })));
+ const RecentService = lazy(() => import("@/components/dashboard/RecentPanels").then(m => ({ default: m.RecentService })));
+ const RecentLeads = lazy(() => import("@/components/dashboard/RecentPanels").then(m => ({ default: m.RecentLeads })));
+ const MonthComparison = lazy(() => import("@/components/dashboard/MonthComparison").then(m => ({ default: m.MonthComparison })));
 
- type Period = 'today' | 'week' | 'month' | 'last30';
+ export const Route = createFileRoute("/")({
+   head: () => ({
+     meta: [
+       { title: "Painel — ConectaCRM" },
+       { name: "description", content: "Dashboard ConectaCRM: leads, vendas, atendimentos e automações em um só lugar." },
+     ],
+   }),
+   component: Dashboard,
+ });
 
  function Dashboard() {
-  const { user } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-   const [period, setPeriod] = useState<Period>('today');
-  const [stats, setStats] = useState({
-    todaySales: 0,
-    monthRevenue: 0,
-    activeOS: 0,
-    lowStock: 0,
-    newLeads: 0,
-    avgTicket: 0
-  });
-
-   const fetchStats = useCallback(async (currentPeriod: Period) => {
-    if (!user?.id) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-       const now = new Date();
-       let startDate: Date;
-       let endDate = endOfDay(now);
-
-       switch (currentPeriod) {
-         case 'today':
-           startDate = startOfDay(now);
-           break;
-         case 'week':
-           startDate = startOfWeek(now, { weekStartsOn: 0 });
-           break;
-         case 'month':
-           startDate = startOfMonth(now);
-           break;
-         case 'last30':
-           startDate = startOfDay(subDays(now, 30));
-           break;
-         default:
-           startDate = startOfDay(now);
-       }
-
-       const firstDayMonth = startOfMonth(now);
-
-      // Run all queries in parallel; never throw — log errors and continue
-      const [salesRes, productsRes, leadsRes, osRes] = await Promise.all([
-        supabase.from("sales_orders").select("total_amount, created_at, status").eq("user_id", user.id),
-        supabase.from("products").select("stock_quantity, min_stock").eq("user_id", user.id),
-        supabase.from("leads").select("created_at").eq("user_id", user.id),
-        supabase.from("service_orders").select("status").eq("user_id", user.id),
-      ]);
-      if (salesRes.error) console.warn("[dashboard] sales:", salesRes.error.message);
-      if (productsRes.error) console.warn("[dashboard] products:", productsRes.error.message);
-      if (leadsRes.error) console.warn("[dashboard] leads:", leadsRes.error.message);
-      if (osRes.error) console.warn("[dashboard] service_orders:", osRes.error.message);
-
-      const sales = salesRes.data || [];
-      const products = productsRes.data || [];
-      const leads = leadsRes.data || [];
-      const os = osRes.data || [];
-
-       const todaySales = sales
-         .filter(s => {
-           const date = new Date(s.created_at!);
-           return date >= startDate && date <= endDate && s.status === 'concluded';
-         })
-         .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
-
-      const monthRevenue = sales
-        .filter(s => new Date(s.created_at!) >= firstDayMonth && s.status === 'concluded')
-        .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
-
-      const lowStockCount = products
-        .filter(p => (p.stock_quantity || 0) <= (p.min_stock || 5))
-        .length;
-
-       const newLeadsCount = leads
-         .filter(l => {
-           const date = new Date(l.created_at);
-           return date >= startDate && date <= endDate;
-         })
-         .length;
-
-      const activeOSCount = os
-        .filter(o => o.status !== 'delivered' && o.status !== 'canceled')
-        .length;
-
-       const monthSales = sales.filter(s => new Date(s.created_at!) >= firstDayMonth && s.status === 'concluded');
-       const avgTicket = monthSales.length > 0 ? monthRevenue / monthSales.length : 0;
-
-      setStats({
-        todaySales,
-        monthRevenue,
-        activeOS: activeOSCount,
-        lowStock: lowStockCount,
-        newLeads: newLeadsCount,
-        avgTicket
-      });
-    } catch (error) {
-      console.error("Erro dashboard:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user?.id]);
-
-   useEffect(() => {
-     fetchStats(period);
-   }, [fetchStats, period]);
+   const { user } = useAuth();
+   const [sidebarOpen, setSidebarOpen] = useState(false);
+   const [period] = useState<Period>('today');
+   const { stats, loading, refresh } = useDashboardStats(period);
 
    const kpis = [
      { label: "Vendas de hoje", value: stats.todaySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "", sub: "Total faturado no dia", icon: "ShoppingBag", tone: "success" },
@@ -194,33 +92,49 @@ export const Route = createFileRoute("/")({
                 </div>
 
                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
-                  <SalesChart />
-                  </div>
-                  <GoalProgress current={stats.monthRevenue} goal={50000} onGoalUpdate={() => fetchStats(period)} />
-                </div>
+                   <div className="lg:col-span-2">
+                     <Suspense fallback={<div className="h-[340px] rounded-2xl bg-card border border-border animate-pulse" />}>
+                       <SalesChart />
+                     </Suspense>
+                   </div>
+                   <GoalProgress current={stats.monthRevenue} goal={50000} onGoalUpdate={refresh} />
+                 </div>
 
-                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <MonthComparison />
-                  <OriginDonut />
-                  <ChannelMini />
-                </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <Suspense fallback={<div className="h-[200px] rounded-2xl bg-card border border-border animate-pulse" />}>
+                      <MonthComparison />
+                    </Suspense>
+                    <Suspense fallback={<div className="h-[200px] rounded-2xl bg-card border border-border animate-pulse" />}>
+                      <OriginDonut />
+                    </Suspense>
+                    <Suspense fallback={<div className="h-[200px] rounded-2xl bg-card border border-border animate-pulse" />}>
+                      <ChannelMini />
+                    </Suspense>
+                 </div>
 
-                <Funnel />
+                 <Suspense fallback={<div className="h-[300px] rounded-2xl bg-card border border-border animate-pulse" />}>
+                   <Funnel />
+                 </Suspense>
 
-                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <RecentService />
-                  <TasksCard />
-                </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Suspense fallback={<div className="h-[200px] rounded-2xl bg-card border border-border animate-pulse" />}>
+                      <RecentService />
+                    </Suspense>
+                    <TasksCard />
+                 </div>
 
-                <RecentLeads />
+                 <Suspense fallback={<div className="h-[200px] rounded-2xl bg-card border border-border animate-pulse" />}>
+                   <RecentLeads />
+                 </Suspense>
                 <AutomationsCard />
               </div>
 
-              <div className="w-full xl:w-[380px] shrink-0 flex flex-col gap-6">
-                <div className="xl:sticky xl:top-24">
-                  <MessagesPanel />
-                </div>
+               <div className="w-full xl:w-[380px] shrink-0 flex flex-col gap-6">
+                 <div className="xl:sticky xl:top-24">
+                   <Suspense fallback={<div className="h-[400px] rounded-2xl bg-card border border-border animate-pulse" />}>
+                     <MessagesPanel />
+                   </Suspense>
+                 </div>
                 <div className="hidden xl:flex flex-col gap-6">
                   <AgendaCard />
                   <DispatchCard />
