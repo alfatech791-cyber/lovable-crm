@@ -254,8 +254,9 @@
           setCardAmount("");
           setPixAmount("");
          setDiscountValue(0);
-        setLastSaleId(sale.id);
-        setIsSuccessModalOpen(true);
+         setLastSaleId(sale.id);
+         setLastSaleData(saleSnapshot);
+         setIsSuccessModalOpen(true);
        fetchProducts(); // Atualiza estoque na interface
      } catch (error) {
        console.error("Erro ao finalizar venda:", error);
