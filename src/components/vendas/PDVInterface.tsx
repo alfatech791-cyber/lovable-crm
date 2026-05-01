@@ -685,10 +685,15 @@
                          onClick={() => addToCart(product)}
                          className="w-full flex items-center gap-3 p-3 hover:bg-primary/5 transition text-left border-b border-border last:border-none"
                        >
-                         <div className="flex-1 min-w-0">
-                           <div className="font-bold text-sm truncate">{product.name}</div>
-                           <div className="text-[10px] text-muted-foreground">Estoque: {product.stock}</div>
-                         </div>
+                          <div className="flex-1 min-w-0 flex flex-col">
+                            <div className="font-bold text-sm truncate">{product.name}</div>
+                            {product.description && (
+                              <div className="text-[10px] text-muted-foreground line-clamp-1 italic">
+                                {product.description}
+                              </div>
+                            )}
+                            <div className="text-[10px] text-muted-foreground mt-0.5">Estoque: {product.stock}</div>
+                          </div>
                          <div className="font-black text-sm text-primary">
                            {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                          </div>
@@ -802,11 +807,18 @@
                         <Package className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
                       </div>
 
-                      <div className="flex-1 min-w-0 flex flex-col justify-center">
+                         <div className="flex-1 min-w-0 flex flex-col justify-start">
                         <div className="flex items-start justify-between gap-2">
-                          <span className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
-                            {item.name}
-                          </span>
+                           <div className="flex flex-col min-w-0">
+                              <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                               {item.name}
+                             </span>
+                             {item.description && (
+                               <p className="text-[10px] text-muted-foreground line-clamp-2 leading-tight mt-0.5 italic">
+                                 {item.description}
+                               </p>
+                             )}
+                           </div>
                           <button 
                             onClick={() => removeFromCart(item.id)}
                             className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all"
