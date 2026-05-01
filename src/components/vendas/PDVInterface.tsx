@@ -285,7 +285,17 @@
             total_amount: total,
             discount_amount: discountValue,
             payment_method: finalPaymentMethod,
-            status: "concluded"
+            status: "concluded",
+            items: cart.map(item => ({
+              id: item.id,
+              name: item.name,
+              price: item.price,
+              quantity: item.quantity,
+              model: item.model,
+              capacity: item.capacity,
+              color: item.color,
+              battery_health: item.battery_health
+            }))
           })
          .select()
          .single();
