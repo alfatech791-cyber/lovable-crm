@@ -235,13 +235,15 @@ async function persist(
   phone: string,
   name: string | null,
   transcript: any[],
-  status: string
+  status: string,
+  remoteJid?: string
 ) {
   await supabase.from("bot_conversations").upsert(
     {
       user_id: userId,
       contact_phone: phone,
       contact_name: name,
+      remote_jid: remoteJid,
       transcript,
       status,
       messages_count: transcript.length,
