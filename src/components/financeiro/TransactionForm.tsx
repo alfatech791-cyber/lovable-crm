@@ -25,6 +25,11 @@ import { Wallet, Calendar, Tag, Plus, FileText, Repeat, Upload, X, PlusCircle, T
     const [isAddingCategory, setIsAddingCategory] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState("");
     const [categories, setCategories] = useState(["Geral", "Compra", "Despesa", "Vendas", "Operacional"]);
+    
+    const [isAddingAccount, setIsAddingAccount] = useState(false);
+    const [newAccountName, setNewAccountName] = useState("");
+    const [accounts, setAccounts] = useState(["Conta Principal", "Caixa da Loja", "Reserva"]);
+
     const [formData, setFormData] = useState<any>({
      description: "",
      amount: "",
@@ -92,7 +97,20 @@ import { Wallet, Calendar, Tag, Plus, FileText, Repeat, Upload, X, PlusCircle, T
       }
     };
 
-   const addPaymentMethod = () => {
+    const handleAddAccount = () => {
+      if (newAccountName.trim()) {
+        const account = newAccountName.trim();
+        if (!accounts.includes(account)) {
+          setAccounts(prev => [...prev, account]);
+        }
+        setFormData({ ...formData, payment_account: account });
+        setNewAccountName("");
+        setIsAddingAccount(false);
+        toast.success(`Conta "${account}" cadastrada`);
+      }
+    };
+
+    const addPaymentMethod = () => {
      setFormData({
        ...formData,
        payment_methods: [...formData.payment_methods, { method: "Dinheiro", amount: "" }]
@@ -395,22 +413,73 @@ import { Wallet, Calendar, Tag, Plus, FileText, Repeat, Upload, X, PlusCircle, T
                      </div>
                    </div>
  
-                   <div className="space-y-2">
-                     <Label htmlFor="payment_account" className="text-xs font-black uppercase tracking-widest text-slate-500">Conta / Caixa</Label>
-                     <Select 
-                       value={formData.payment_account} 
-                       onValueChange={(value) => setFormData({ ...formData, payment_account: value })}
-                     >
-                       <SelectTrigger className="h-11 rounded-xl border-slate-200">
-                         <SelectValue />
-                       </SelectTrigger>
-                       <SelectContent className="rounded-xl">
-                         <SelectItem value="Conta Principal">Conta Principal</SelectItem>
-                         <SelectItem value="Caixa da Loja">Caixa da Loja</SelectItem>
-                         <SelectItem value="Reserva">Reserva</SelectItem>
-                       </SelectContent>
-                     </Select>
-                   </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="payment_account" className="text-xs font-black uppercase tracking-widest text-slate-500">Conta / Caixa</Label>
+                      {isAddingAccount ? (
+                        <div className="flex gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                          <Input 
+                            value={newAccountName}
+                            onChange={(e) => setNewAccountName(e.target.value)}
+                            placeholder="Nome da conta"
+                            className="h-11 rounded-xl border-slate-200 focus:ring-blue-600"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddAccount();
+                              }
+                              if (e.key === 'Escape') {
+                                setIsAddingAccount(false);
+                                setNewAccountName("");
+                              }
+                            }}
+                          />
+                          <Button 
+                            type="button" 
+                            onClick={handleAddAccount}
+                            className="h-11 w-11 p-0 rounded-xl bg-blue-600 hover:bg-blue-700 shrink-0 shadow-lg shadow-blue-200"
+                          >
+                            <Plus className="w-5 h-5" />
+                          </Button>
+                          <Button 
+                            type="button" 
+                            variant="ghost"
+                            onClick={() => setIsAddingAccount(false)}
+                            className="h-11 w-11 p-0 rounded-xl text-slate-400 shrink-0"
+                          >
+                            <X className="w-5 h-5" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <Select 
+                          value={formData.payment_account} 
+                          onValueChange={(value) => {
+                            if (value === "add_new_account") {
+                              setIsAddingAccount(true);
+                            } else {
+                              setFormData({ ...formData, payment_account: value });
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="h-11 rounded-xl border-slate-200 focus:ring-blue-600">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl border-slate-200 shadow-xl overflow-hidden">
+                            <ScrollArea className="h-[150px]">
+                              {accounts.map((acc) => (
+                                <SelectItem key={acc} value={acc} className="focus:bg-blue-50 focus:text-blue-700 rounded-lg mx-1">{acc}</SelectItem>
+                              ))}
+                            </ScrollArea>
+                            <Separator className="my-1" />
+                            <SelectItem value="add_new_account" className="text-blue-600 font-black focus:bg-blue-600 focus:text-white rounded-lg mx-1 cursor-pointer">
+                              <div className="flex items-center gap-2">
+                                <PlusCircle className="w-4 h-4" /> CADASTRAR NOVA
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
                  </div>
  
                  <div className="space-y-4 pt-2">
