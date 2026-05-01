@@ -292,7 +292,7 @@ type Deal = {
                 console.warn("Não foi possível buscar foto para:", row.contact_phone);
               }
 
-              const finalName = row.contact_name || "Lead WhatsApp " + row.contact_phone;
+              const finalName = (row.contact_name && row.contact_name !== row.contact_phone) ? row.contact_name : ("Lead WhatsApp " + row.contact_phone);
               await supabase.from('leads').upsert({
                 user_id: user.id,
                 phone: row.contact_phone,
@@ -729,7 +729,7 @@ type Deal = {
               } catch (e) {
                 console.warn("Não foi possível buscar foto para órfão:", c.contact_phone);
               }
-              const finalName = c.contact_name || "Lead WhatsApp " + c.contact_phone;
+              const finalName = (c.contact_name && c.contact_name !== c.contact_phone) ? c.contact_name : ("Lead WhatsApp " + c.contact_phone);
               await supabase.from('leads').upsert({
                 user_id: user.id,
                 phone: c.contact_phone,
