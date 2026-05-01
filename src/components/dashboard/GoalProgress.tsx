@@ -367,23 +367,33 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
                      </div>
                    </div>
  
-                   <div className="grid gap-2">
-                     <Label htmlFor="weekly" className="text-[13px] font-bold flex items-center gap-2">
-                       <Calendar className="h-4 w-4 text-sky-500 fill-sky-500/20" />
-                       Meta Semanal
-                     </Label>
-                     <div className="relative group">
-                       {editGoals.type !== 'units' && <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">R$</span>}
-                       <Input
-                         id="weekly"
-                         type="number"
-                         value={editGoals.weekly}
-                         onChange={(e) => setEditGoals({ ...editGoals, weekly: Number(e.target.value) })}
-                         className={`${editGoals.type !== 'units' ? 'pl-10' : 'pl-4'} h-12 rounded-xl bg-card border-border/50 focus:border-primary focus:ring-primary/20 font-black text-lg transition-all`}
-                       />
-                       {editGoals.type === 'units' && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">un.</span>}
-                     </div>
-                   </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="weekly" className="text-[13px] font-bold flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-sky-500 fill-sky-500/20" />
+                        Meta Semanal
+                      </Label>
+                      <div className="relative group">
+                        {editGoals.type !== 'units' && <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">R$</span>}
+                        <Input
+                          id="weekly"
+                          type="number"
+                          value={editGoals.weekly}
+                          onChange={(e) => setEditGoals({ ...editGoals, weekly: Number(e.target.value) })}
+                          className={`${editGoals.type !== 'units' ? 'pl-10' : 'pl-4'} h-12 rounded-xl bg-card border-border/50 focus:border-primary focus:ring-primary/20 font-black text-lg transition-all`}
+                        />
+                        {editGoals.type === 'units' && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">un.</span>}
+                      </div>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="notes" className="text-[13px] font-bold">Observações / Plano de Ação</Label>
+                      <textarea
+                        id="notes"
+                        value={editGoals.notes}
+                        onChange={(e) => setEditGoals({ ...editGoals, notes: e.target.value })}
+                        className="flex min-h-[80px] w-full rounded-xl border border-border/50 bg-card px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all resize-none"
+                        placeholder="Quais estratégias você vai usar para bater essa meta?"
+                      />
+                    </div>
                  </div>
  
                  <div className="space-y-4">
