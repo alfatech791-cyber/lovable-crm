@@ -17,6 +17,7 @@ import {
   Smile,
   RefreshCw,
   PauseCircle,
+  Settings2,
   PlayCircle,
   Image as ImageIcon,
    Trash2,
@@ -35,6 +36,13 @@ import {
   Plus,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow, format, isToday, isYesterday, isThisWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -189,6 +197,7 @@ function ConversasPage() {
   const [sending, setSending] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [resolvedInstance, setResolvedInstance] = useState<string | null>(null);
+  const [availableInstances, setAvailableInstances] = useState<any[]>([]);
   const [instanceDetails, setInstanceDetails] = useState<any>(null);
   const [recording, setRecording] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
@@ -347,72 +356,93 @@ function ConversasPage() {
     });
   };
 
-  const resolveInstance = async () => {
-    if (!user?.id) {
-      let remoteInstances = await evolution.getInstances();
-      // Filter only open/active instances as per user requirement to eliminate inactive ones
+  const fetchAvailableInstances = async () => {
+    try {
       const activeStatus = ["open", "connected", "active", "online"];
-      remoteInstances = remoteInstances.filter(instance => activeStatus.includes(String(instance.status ?? "").toLowerCase()));
-      
-      const candidate = remoteInstances[0] || null;
-      const remoteCandidate = candidate?.instanceName ?? null;
+      const instances = await evolution.getInstances();
+      const active = instances.filter(i => activeStatus.includes(String(i.status ?? "").toLowerCase()));
+      setAvailableInstances(active);
+      return active;
+    } catch (e) {
+      console.error("Erro ao buscar instâncias:", e);
+      return [];
+    }
+  };
 
+  const resolveInstance = async (forceInstance?: string) => {
+    if (forceInstance) {
+      setResolvedInstance(forceInstance);
+      return forceInstance;
+    }
+
+    if (!user?.id) {
+      const active = await fetchAvailableInstances();
+      const candidate = active[0] || null;
+      const remoteCandidate = candidate?.instanceName ?? null;
       setResolvedInstance(remoteCandidate);
       setInstanceDetails(candidate);
       return remoteCandidate;
     }
 
-    const [{ data: settings, error: settingsError }, { data: savedInstances, error: instancesError }] = await Promise.all([
-      supabase.from("bot_settings").select("whatsapp_instance, webhook_secret").eq("user_id", user.id).maybeSingle(),
-      supabase
-        .from("whatsapp_instances")
-        .select("instance_name, status, created_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false }),
-    ]);
+    const { data: settings, error: settingsError } = await supabase
+      .from("bot_settings")
+      .select("whatsapp_instance, webhook_secret")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
     if (settingsError) throw settingsError;
-    if (instancesError) throw instancesError;
 
     const configured = settings?.whatsapp_instance?.trim();
     if (configured) {
       setResolvedInstance(configured);
+      const instances = await fetchAvailableInstances();
+      const details = instances.find(i => i.instanceName === configured);
+      if (details) setInstanceDetails(details);
       return configured;
     }
 
-    const activeStatus = ["open", "connected", "active", "online"];
-    const dbCandidateObj = (savedInstances ?? []).find((instance) =>
-      activeStatus.includes(String(instance.status ?? "").toLowerCase())
-    );
-    const dbCandidate = dbCandidateObj?.instance_name;
-
-    if (dbCandidate) {
-      setResolvedInstance(dbCandidate);
-      setInstanceDetails({ instanceName: dbCandidate, status: dbCandidateObj?.status });
-      return dbCandidate;
-    }
-
-    let remoteInstances = await evolution.getInstances();
-    remoteInstances = remoteInstances.filter(instance => activeStatus.includes(String(instance.status ?? "").toLowerCase()));
-    
-    const remoteCandidateObj = remoteInstances[0] || null;
+    const active = await fetchAvailableInstances();
+    const remoteCandidateObj = active[0] || null;
     const remoteCandidate = remoteCandidateObj?.instanceName ?? null;
 
     if (remoteCandidate) {
       setResolvedInstance(remoteCandidate);
       setInstanceDetails(remoteCandidateObj);
-      const { error: upsertError } = await supabase.from("bot_settings").upsert(
+      await supabase.from("bot_settings").upsert(
         { user_id: user.id, whatsapp_instance: remoteCandidate },
         { onConflict: "user_id" }
       );
-      if (upsertError) console.error("[conversas] erro ao salvar bot_settings:", upsertError);
     } else if (!settings) {
-      // Se não há instância mas também não há settings, cria ao menos o registro básico para gerar o webhook_secret
       await supabase.from("bot_settings").insert({ user_id: user.id });
     }
 
-    console.log("[conversas] instância resolvida:", remoteCandidate || "nenhuma");
     return remoteCandidate;
+  };
+
+  const handleInstanceChange = async (newInstance: string) => {
+    if (!user?.id) return;
+    setResolvedInstance(newInstance);
+    const details = availableInstances.find(i => i.instanceName === newInstance);
+    if (details) setInstanceDetails(details);
+    
+    setLoading(true);
+    setItems([]);
+    setSelectedId(null);
+
+    try {
+      await supabase.from("bot_settings").upsert(
+        { user_id: user.id, whatsapp_instance: newInstance },
+        { onConflict: "user_id" }
+      );
+      
+      toast.success(`Instância alterada para ${newInstance}`);
+      await load(false);
+      await syncFromWhatsApp(false);
+    } catch (e) {
+      toast.error("Erro ao trocar de instância");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Garante que o webhook da Evolution está apontando para o nosso bot-webhook
@@ -676,7 +706,7 @@ function ConversasPage() {
   };
 
   useEffect(() => {
-    load();
+    fetchAvailableInstances().then(() => load());
     const ch = user?.id
       ? supabase
           .channel("conv:bot_conversations:" + user.id)
@@ -966,7 +996,7 @@ function ConversasPage() {
           {/* Sidebar conversas */}
           <div className="w-[380px] border-r border-border/20 flex flex-col bg-card/50 backdrop-blur-xl">
             <div className="p-4 border-b border-border/20 space-y-4">
-               <div className="flex items-center justify-between px-1 mb-2">
+               <div className="flex items-center justify-between px-1 mb-1">
                  <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
                     <MessageSquare className="h-4 w-4 text-primary" />
@@ -984,30 +1014,50 @@ function ConversasPage() {
                     </span>
                   )}
                 </div>
-                <button 
-                  onClick={() => syncFromWhatsApp(true)}
-                  className="h-8 w-8 rounded-full hover:bg-muted/80 transition-colors flex items-center justify-center text-muted-foreground"
-                  title="Sincronizar"
-                >
-                  <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button 
+                    onClick={() => { fetchAvailableInstances(); syncFromWhatsApp(true); }}
+                    className="h-8 w-8 rounded-full hover:bg-muted/80 transition-colors flex items-center justify-center text-muted-foreground"
+                    title="Sincronizar"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+                  </button>
+                </div>
               </div>
               
-              {resolvedInstance && (
-                <div className="flex items-center justify-between px-3 py-1.5 bg-primary/5 rounded-lg border border-primary/10 mb-1">
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <Phone className="h-3 w-3 text-primary/70" />
-                    <span className="text-[10px] font-bold text-primary/80 truncate">
-                      {resolvedInstance}
-                    </span>
-                  </div>
-                  {instanceDetails?.owner && (
-                    <span className="text-[9px] font-black text-primary/60 px-1.5 py-0.5 rounded bg-primary/10 uppercase tracking-tighter">
-                      {instanceDetails.owner.split('@')[0]}
-                    </span>
-                  )}
-                </div>
-              )}
+               <div className="px-1">
+                 <Select
+                   value={resolvedInstance || ""}
+                   onValueChange={handleInstanceChange}
+                 >
+                   <SelectTrigger className="h-9 bg-primary/5 border-primary/10 text-primary hover:bg-primary/10 transition-all rounded-lg px-3">
+                     <div className="flex items-center gap-2 overflow-hidden mr-2">
+                       <Phone className="h-3.5 w-3.5 shrink-0" />
+                       <SelectValue placeholder="Selecionar instância" />
+                     </div>
+                   </SelectTrigger>
+                   <SelectContent>
+                     {availableInstances.length === 0 ? (
+                       <div className="p-2 text-xs text-muted-foreground text-center">
+                         Nenhuma instância ativa
+                       </div>
+                     ) : (
+                       availableInstances.map((ins) => (
+                         <SelectItem key={ins.instanceName} value={ins.instanceName} className="text-xs">
+                           <div className="flex items-center justify-between w-full gap-4">
+                             <span className="font-medium">{ins.instanceName}</span>
+                             {ins.owner && (
+                               <span className="text-[9px] opacity-60">
+                                 ({ins.owner.split('@')[0]})
+                               </span>
+                             )}
+                           </div>
+                         </SelectItem>
+                       ))
+                     )}
+                   </SelectContent>
+                 </Select>
+               </div>
 
               <div className="relative group">
                 <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
