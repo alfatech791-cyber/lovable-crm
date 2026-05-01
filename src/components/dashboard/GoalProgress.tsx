@@ -164,7 +164,7 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
           <div className="min-w-0">
             <div className="text-[11px] text-muted-foreground">Meta</div>
             <div className="text-xs sm:text-sm font-semibold text-foreground/70 truncate">
-              {goal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+              {goals.monthly.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </div>
           </div>
           <div className="pt-2 border-t border-border min-w-0">
