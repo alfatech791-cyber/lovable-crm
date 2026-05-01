@@ -24,6 +24,7 @@
    const { user } = useAuth();
    const [cart, setCart] = useState<CartItem[]>([]);
    const [search, setSearch] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
    const [allProducts, setAllProducts] = useState<Product[]>([]);
    const [loadingProducts, setLoadingProducts] = useState(true);
    const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
@@ -47,6 +48,7 @@
   const [lastSaleData, setLastSaleData] = useState<{ items: CartItem[], total: number, discount: number, customer: { name: string } | null, paymentMethod: string } | null>(null);
   const [selectedCartItemId, setSelectedCartItemId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   const barcodeInputRef = useRef<HTMLInputElement>(null);
  
    const fetchProducts = useCallback(async () => {
@@ -102,6 +104,7 @@
    useEffect(() => {
      fetchProducts();
      fetchCustomers();
+  useEffect(() => { const handleClickOutside = (event: MouseEvent) => { if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) { setIsSearchFocused(false); } }; document.addEventListener("mousedown", handleClickOutside); return () => { document.removeEventListener("mousedown", handleClickOutside); }; }, []);
    }, [fetchProducts, fetchCustomers]);
  
    const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -514,7 +517,7 @@
                     <Label className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1.5">
                       <Banknote className="h-3 w-3" /> Dinheiro
                     </Label>
-                    <div className="relative">
+                    <div className="relative" ref={searchContainerRef}>
                       <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs">R$</span>
                       <Input 
                         type="number" 
@@ -531,7 +534,7 @@
                     <Label className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1.5">
                       <CreditCard className="h-3 w-3" /> Cartão
                     </Label>
-                    <div className="relative">
+                    <div className="relative" ref={searchContainerRef}>
                       <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs">R$</span>
                       <Input 
                         type="number" 
@@ -548,7 +551,7 @@
                     <Label className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1.5">
                       <QrCode className="h-3 w-3" /> PIX
                     </Label>
-                    <div className="relative">
+                    <div className="relative" ref={searchContainerRef}>
                       <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs">R$</span>
                       <Input 
                         type="number" 
@@ -652,7 +655,7 @@
              <DialogTitle>Vincular Cliente</DialogTitle>
            </DialogHeader>
            <div className="space-y-4 py-4">
-             <div className="relative">
+             <div className="relative" ref={searchContainerRef}>
                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                <Input 
                  placeholder="Buscar cliente por nome..." 
@@ -738,7 +741,7 @@
            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-card border border-border rounded-2xl p-4 shadow-sm">
               <div className="md:col-span-2 space-y-1.5">
                 <Label className="text-[10px] font-bold uppercase text-muted-foreground">Código (F1)</Label>
-               <div className="relative">
+               <div className="relative" ref={searchContainerRef}>
                  <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                  <Input 
                     ref={barcodeInputRef}
@@ -753,17 +756,17 @@
  
               <div className="md:col-span-6 space-y-1.5">
                 <Label className="text-[10px] font-bold uppercase text-muted-foreground">Produto (F2)</Label>
-               <div className="relative">
+               <div className="relative" ref={searchContainerRef}>
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                  <Input 
                     ref={searchInputRef}
                    placeholder="Digite o nome do produto..." 
                    className="pl-9 h-11 bg-muted/20"
                    value={search}
-                   onChange={(e) => setSearch(e.target.value)}
+                   onChange={(e) => setSearch(e.target.value)} onFocus={() => setIsSearchFocused(true)}
                    autoFocus
                  />
-                  {(search === "" || search || loadingProducts) && searchInputRef.current === document.activeElement && (
+                  {(search === "" || search || loadingProducts) && isSearchFocused && (
                    <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 border border-border rounded-xl shadow-2xl overflow-hidden max-h-[300px] overflow-y-auto bg-card">
                      {loadingProducts ? (
                        <div className="p-8 flex flex-col items-center justify-center gap-2">
@@ -772,7 +775,7 @@
                       ) : filteredProducts.slice(0, 50).map(product => (
                        <button
                          key={product.id}
-                         onClick={() => addToCart(product)}
+                         onClick={() => { addToCart(product); setIsSearchFocused(false); }}
                          className="w-full flex items-center gap-3 p-3 hover:bg-primary/5 transition text-left border-b border-border last:border-none"
                        >
                           <div className="flex-1 min-w-0 flex flex-col">
@@ -796,7 +799,7 @@
  
              <div className="md:col-span-4 space-y-1.5">
                <Label className="text-[10px] font-bold uppercase text-muted-foreground">Vendedor (F4)</Label>
-               <div className="relative">
+               <div className="relative" ref={searchContainerRef}>
                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                  <select 
                    className="w-full h-11 pl-9 pr-3 rounded-md bg-muted/20 border border-input text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none"
@@ -843,7 +846,7 @@
                      .map(product => (
                        <button
                          key={product.id}
-                         onClick={() => addToCart(product)}
+                         onClick={() => { addToCart(product); setIsSearchFocused(false); }}
                          disabled={product.stock <= 0}
                          className={`h-28 rounded-2xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition flex flex-col items-center justify-center gap-2 font-medium group relative ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                        >
