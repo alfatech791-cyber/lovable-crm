@@ -21,6 +21,7 @@ export const sidebarItems = [
   },
 
   { type: "header", title: "Operação Comercial" },
+  { title: "Histórico de Venda", url: "/vendas/historico", icon: "History" as const },
   {
     title: "Vendas & PDV",
     url: "/vendas",
