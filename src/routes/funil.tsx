@@ -4,7 +4,7 @@ import { Topbar } from "@/components/layout/Topbar";
  import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-    import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp, MessageSquare, MessageCircle, X, Send, Bot, User, UserCog, PauseCircle, PlayCircle, RefreshCw, ChevronRight, Sparkles, CreditCard, Users, Clock, Wifi, Image as ImageIcon, Smile, Type, Pencil, Download, Crop } from "lucide-react";
+    import { Loader2, Plus, Search, Filter, LayoutGrid, List, ArrowUpDown, TrendingUp, MessageSquare, MessageCircle, X, Send, Bot, User, UserCog, PauseCircle, PlayCircle, RefreshCw, ChevronRight, Sparkles, CreditCard, Users, Clock, Wifi, Image as ImageIcon, Smile, Type, Pencil, Download, Crop, Tag, FileText } from "lucide-react";
  import { formatDistanceToNow } from "date-fns";
  import { ptBR } from "date-fns/locale";
  import { evolution } from "@/lib/evolution";
@@ -399,6 +399,10 @@ type Deal = {
     const [messageText, setMessageText] = useState("");
     const [sending, setSending] = useState(false);
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [dealTags, setDealTags] = useState<string[]>([]);
+    const [dealNotes, setDealNotes] = useState("");
+    const [editingDeal, setEditingDeal] = useState<any>(null);
+    const [tagInput, setTagInput] = useState("");
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -657,6 +661,47 @@ type Deal = {
        });
  
    const totalPipeline = deals.reduce((sum, d) => sum + Number(d.deal_value ?? 0), 0);
+
+   const saveDealDetails = async () => {
+     if (!editingDeal || !user?.id) return;
+     try {
+       const { error } = await supabase
+         .from("pipeline_leads")
+         .update({
+           tags: dealTags,
+           notes: dealNotes
+         })
+         .eq("id", editingDeal.id);
+
+       if (error) throw error;
+       toast.success("Detalhes salvos com sucesso!");
+       load(true);
+     } catch (err: any) {
+       toast.error("Erro ao salvar detalhes: " + err.message);
+     }
+   };
+
+   const addTag = () => {
+     if (!tagInput.trim()) return;
+     if (dealTags.includes(tagInput.trim())) {
+       setTagInput("");
+       return;
+     }
+     setDealTags([...dealTags, tagInput.trim()]);
+     setTagInput("");
+   };
+
+   const removeTag = (tag: string) => {
+     setDealTags(dealTags.filter(t => t !== tag));
+   };
+
+   const handleSelectDeal = (deal: any) => {
+     setEditingDeal(deal);
+     setDealTags(deal.tags || []);
+     setDealNotes(deal.notes || "");
+     loadConversation(deal.lead?.phone || "");
+     setChatOpen(true);
+   };
 
    const load = async (silent = false) => {
      if (!user?.id) {
@@ -1133,15 +1178,7 @@ type Deal = {
                       dragId={dragId}
                       setDragId={setDragId}
                       onDeleteStage={deleteStage}
-                      onSelectDeal={(deal) => {
-                        if (deal.lead?.phone) {
-                          setSelectedDealId(deal.id);
-                          loadConversation(deal.lead.phone);
-                          setChatOpen(true);
-                        } else {
-                          toast.error("Lead sem telefone para conversa");
-                        }
-                      }}
+                       onSelectDeal={handleSelectDeal}
                     />
                   ))}
                   
@@ -1491,56 +1528,111 @@ type Deal = {
               </div>
             </div>
 
-           {/* Área de Mensagens */}
-           <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-6 bg-muted/5 scrollbar-thin">
-             {chatLoading ? (
-               <div className="grid place-items-center h-full">
-                 <div className="flex flex-col items-center gap-3">
-                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Carregando conversa...</span>
-                 </div>
-               </div>
-             ) : !currentConversation ? (
-               <div className="grid place-items-center h-full text-center px-10">
-                 <div className="bg-muted/30 p-8 rounded-[40px] border-2 border-dashed border-border/50">
-                   <MessageSquare className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-                   <p className="text-xs font-bold text-muted-foreground leading-relaxed">
-                     Nenhuma conversa encontrada. Inicie um atendimento agora mesmo enviando uma mensagem.
-                   </p>
-                 </div>
-               </div>
-             ) : (
-               <div className="flex flex-col gap-4">
-                 {currentConversation.transcript?.map((m, i) => {
-                   const mine = m.role === "agent" || m.sent;
-                   const isBot = m.role === "assistant";
-                   
-                   return (
-                     <div key={i} className={cn("flex flex-col max-w-[85%]", mine ? "ml-auto items-end" : "items-start")}>
-                       <div className={cn(
-                         "relative px-4 py-3 rounded-2xl text-sm shadow-sm transition-all hover:shadow-md",
-                         mine ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-card border border-border rounded-tl-none",
-                         isBot && "border-primary/30 bg-primary/5 text-foreground"
-                       )}>
-                         {isBot && (
-                           <div className="flex items-center gap-1 mb-1 opacity-60">
-                             <Bot className="h-3 w-3" />
-                             <span className="text-[9px] font-black uppercase">Auto-Atendimento</span>
-                           </div>
-                         )}
-                         <p className="whitespace-pre-wrap break-words leading-relaxed font-medium">{m.content}</p>
-                       </div>
-                       {m.at && (
-                         <span className="text-[9px] font-bold text-muted-foreground/50 mt-1.5 px-1 uppercase tracking-tighter">
-                           {formatDistanceToNow(new Date(m.at), { addSuffix: true, locale: ptBR })}
-                         </span>
-                       )}
-                     </div>
-                   );
-                 })}
-               </div>
-             )}
-           </div>
+            {/* Tabs de Atendimento/Notas */}
+            <div className="flex flex-1 overflow-hidden">
+              <div className="flex-1 flex flex-col min-w-0 border-r border-border/40">
+                {/* Área de Mensagens */}
+                <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-6 bg-muted/5 scrollbar-thin">
+                  {chatLoading ? (
+                    <div className="grid place-items-center h-full">
+                      <div className="flex flex-col items-center gap-3">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Carregando conversa...</span>
+                      </div>
+                    </div>
+                  ) : !currentConversation ? (
+                    <div className="grid place-items-center h-full text-center px-10">
+                      <div className="bg-muted/30 p-8 rounded-[40px] border-2 border-dashed border-border/50">
+                        <MessageSquare className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
+                        <p className="text-xs font-bold text-muted-foreground leading-relaxed">
+                          Nenhuma conversa encontrada. Inicie um atendimento agora mesmo enviando uma mensagem.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-4">
+                      {currentConversation.transcript?.map((m, i) => {
+                        const mine = m.role === "agent" || m.sent;
+                        const isBot = m.role === "assistant";
+                        
+                        return (
+                          <div key={i} className={cn("flex flex-col max-w-[85%]", mine ? "ml-auto items-end" : "items-start")}>
+                            <div className={cn(
+                              "relative px-4 py-3 rounded-2xl text-sm shadow-sm transition-all hover:shadow-md",
+                              mine ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-card border border-border rounded-tl-none",
+                              isBot && "border-primary/30 bg-primary/5 text-foreground"
+                            )}>
+                              {isBot && (
+                                <div className="flex items-center gap-1 mb-1 opacity-60">
+                                  <Bot className="h-3 w-3" />
+                                  <span className="text-[9px] font-black uppercase">Auto-Atendimento</span>
+                                </div>
+                              )}
+                              <p className="whitespace-pre-wrap break-words leading-relaxed font-medium">{m.content}</p>
+                            </div>
+                            {m.at && (
+                              <span className="text-[9px] font-bold text-muted-foreground/50 mt-1.5 px-1 uppercase tracking-tighter">
+                                {formatDistanceToNow(new Date(m.at), { addSuffix: true, locale: ptBR })}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Sidebar de Notas e Tags */}
+              {editingDeal && (
+                <div className="w-72 bg-card p-6 overflow-y-auto space-y-6 flex flex-col border-l border-border/40">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                      <Tag className="h-3.5 w-3.5" />
+                      Tags do Lead
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {dealTags.map((tag) => (
+                        <span key={tag} className="flex items-center gap-1 bg-primary/10 text-primary text-[10px] font-black px-2 py-1 rounded-lg border border-primary/20">
+                          {tag}
+                          <button onClick={() => removeTag(tag)} className="hover:text-destructive transition-colors"><X className="h-3 w-3" /></button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input 
+                        placeholder="Nova tag..." 
+                        className="h-9 text-xs rounded-lg"
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && addTag()}
+                      />
+                      <Button size="sm" variant="secondary" onClick={addTag} className="h-9 w-9 rounded-lg px-0"><Plus className="h-4 w-4" /></Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 flex-1 flex flex-col">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                      <FileText className="h-3.5 w-3.5" />
+                      Notas Internas
+                    </div>
+                    <textarea
+                      className="flex-1 w-full bg-muted/30 rounded-xl p-4 text-xs font-medium border-none resize-none focus:ring-1 focus:ring-primary/20 min-h-[200px]"
+                      placeholder="Escreva notas importantes sobre este lead aqui..."
+                      value={dealNotes}
+                      onChange={(e) => setDealNotes(e.target.value)}
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={saveDealDetails}
+                    className="w-full h-11 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/10"
+                  >
+                    Salvar Detalhes
+                  </Button>
+                </div>
+              )}
+            </div>
  
             {/* Input de Mensagem */}
             <div className="p-6 border-t border-border bg-background shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
