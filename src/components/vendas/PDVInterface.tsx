@@ -709,11 +709,12 @@
          <div className="flex flex-col gap-4 overflow-hidden animate-in slide-in-from-left duration-500">
            {/* Barra Superior de Busca e Campos */}
            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-card border border-border rounded-2xl p-4 shadow-sm">
-             <div className="md:col-span-3 space-y-1.5">
-               <Label className="text-[10px] font-bold uppercase text-muted-foreground">Código / EAN</Label>
+              <div className="md:col-span-2 space-y-1.5">
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground">Código (F1)</Label>
                <div className="relative">
                  <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                  <Input 
+                    ref={barcodeInputRef}
                    placeholder="Código de barras" 
                    className="pl-9 h-11 bg-muted/20"
                    value={barcode}
@@ -723,11 +724,12 @@
                </div>
              </div>
  
-             <div className="md:col-span-5 space-y-1.5">
-               <Label className="text-[10px] font-bold uppercase text-muted-foreground">Descrição do Produto (F2)</Label>
+              <div className="md:col-span-6 space-y-1.5">
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground">Produto (F2)</Label>
                <div className="relative">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                  <Input 
+                    ref={searchInputRef}
                    placeholder="Digite o nome do produto..." 
                    className="pl-9 h-11 bg-muted/20"
                    value={search}
@@ -846,15 +848,26 @@
         {/* Lado Direito: Carrinho e Checkout */}
         <div className="bg-card border border-border rounded-2xl flex flex-col shadow-xl overflow-hidden animate-in slide-in-from-right duration-500">
           <div className="p-5 border-b border-border bg-muted/20 flex items-center justify-between">
-           <div className="flex items-center gap-2 font-bold text-lg">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <ShoppingCart className="h-5 w-5 text-primary" />
-              </div>
-              <span>Carrinho</span>
+           <div className="flex items-center gap-2">
+             <div className="flex items-center gap-2 font-bold text-lg">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <ShoppingCart className="h-5 w-5 text-primary" />
+                </div>
+                <span>Carrinho</span>
+             </div>
+              <span className="px-3 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest">
+               {cart.length} itens
+             </span>
            </div>
-            <span className="px-3 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest">
-             {cart.length} itens
-           </span>
+           <Button 
+             variant="ghost" 
+             size="icon" 
+             className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" 
+             onClick={clearCart}
+             title="Limpar Carrinho"
+           >
+             <Eraser className="h-4 w-4" />
+           </Button>
          </div>
  
           <ScrollArea className="flex-1 px-4">
