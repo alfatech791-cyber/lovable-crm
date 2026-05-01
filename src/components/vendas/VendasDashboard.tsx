@@ -1,91 +1,78 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, ShoppingCart, History, FileText, Calculator, Truck, ShieldCheck, Receipt } from "lucide-react";
+import { Plus, ShoppingCart, History, FileText, ArrowRight } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import { SalesHistory } from "./SalesHistory";
 
 export default function Vendas() {
   const navigate = useNavigate();
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Vendas</h1>
-        <Button onClick={() => navigate({ to: "/pdv" })} className="flex items-center gap-2">
+    <div className="p-4 md:p-6 space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Gestão de Vendas</h1>
+          <p className="text-muted-foreground mt-1">Controle comercial e histórico de operações.</p>
+        </div>
+        <Button onClick={() => navigate({ to: "/pdv" })} className="flex items-center gap-2 h-11 px-6 bg-primary shadow-lg shadow-primary/20 text-primary-foreground">
           <Plus className="h-4 w-4" /> Nova Venda (PDV)
         </Button>
       </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate({ to: "/pdv" })}>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="cursor-pointer group hover:border-primary/50 transition-all border-border/40 bg-card/50 shadow-sm" onClick={() => navigate({ to: "/pdv" })}>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">PDV</CardTitle>
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Frente de Caixa</div>
-            <p className="text-xs text-muted-foreground">Venda rápida e intuitiva</p>
+            <div className="text-2xl font-bold group-hover:text-primary transition-colors">Frente de Caixa</div>
+            <p className="text-xs text-muted-foreground mt-1">Terminal de vendas rápidas</p>
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate({ to: "/vendas/historico" })}>
+        <Card className="cursor-pointer group hover:border-primary/50 transition-all border-border/40 bg-card/50 shadow-sm" onClick={() => navigate({ to: "/vendas/historico" })}>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Histórico</CardTitle>
             <History className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Relatórios</div>
-            <p className="text-xs text-muted-foreground">Visualize vendas passadas</p>
+            <div className="text-2xl font-bold group-hover:text-primary transition-colors">Relatórios</div>
+            <p className="text-xs text-muted-foreground mt-1">Análise completa de movimentações</p>
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate({ to: "/vendas/orcamentos" })}>
+        <Card className="cursor-pointer group hover:border-primary/50 transition-all border-border/40 bg-card/50 shadow-sm" onClick={() => navigate({ to: "/vendas/orcamentos" })}>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Orçamentos</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Cotações</div>
-            <p className="text-xs text-muted-foreground">Gestão de orçamentos pendentes</p>
+            <div className="text-2xl font-bold group-hover:text-primary transition-colors">Cotações</div>
+            <p className="text-xs text-muted-foreground mt-1">Gestão de propostas comerciais</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Calculator className="h-5 w-5" /> Ferramentas
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-2">
-            <Button variant="outline" className="justify-start">Calculadora de Dispositivos</Button>
-            <Button variant="outline" className="justify-start">Simulador de Impostos</Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Truck className="h-5 w-5" /> Logística
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-2">
-            <Button variant="outline" className="justify-start">Gestão de Entregas</Button>
-            <Button variant="outline" className="justify-start">Acompanhamento de Frete</Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5" /> Pós-Venda
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-2">
-            <Button variant="outline" className="justify-start">Monitoramento de Garantia</Button>
-            <Button variant="outline" className="justify-start">Trocas e Devoluções</Button>
-          </CardContent>
-        </Card>
+      {/* Sales History Integration */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-1">
+          <div>
+            <h2 className="text-xl font-bold tracking-tight">Histórico Recente</h2>
+            <p className="text-xs text-muted-foreground">Últimas transações realizadas em tempo real.</p>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => navigate({ to: "/vendas/historico" })}
+            className="text-primary font-bold hover:bg-primary/5"
+          >
+            Ver histórico completo <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+        
+        <div className="rounded-3xl border border-border/40 bg-card/30 p-2 backdrop-blur-sm shadow-xl shadow-black/5">
+          <SalesHistory />
+        </div>
       </div>
     </div>
   );
