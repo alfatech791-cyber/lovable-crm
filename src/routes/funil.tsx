@@ -440,134 +440,41 @@ type Deal = {
      return () => { supabase.removeChannel(ch); };
    }, [user?.id, chatOpen, currentConversation?.id]);
  
-    // Realtime unificado: reage a conversas, mensagens, leads e cards do pipeline
-    // sem recarregar a página inteira. Faz patch local imediato e agenda um
-    // refetch leve com debounce para reconciliar relacionamentos novos.
+    // Realtime unificado para sicronização em tempo real das mensagens e pipeline
     useEffect(() => {
       if (!user?.id) return;
 
-      let reloadTimer: ReturnType<typeof setTimeout> | null = null;
-      const scheduleReload = () => {
-        if (reloadTimer) clearTimeout(reloadTimer);
-        reloadTimer = setTimeout(() => load(true), 350);
-      };
-
       const ch = supabase
-        .channel(`funil_realtime:${user.id}`)
-        // Conversas: atualiza lista lateral e injeta last_message no card correspondente
+        .channel(`funil_realtime_sync:${user.id}`)
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "bot_conversations", filter: `user_id=eq.${user.id}` },
           (payload: any) => {
-            const row = (payload.new ?? payload.old) as Conversation | undefined;
-            if (!row) return;
-
-            // Atualiza lista de conversas
-            setConversations((prev) => {
-              const exists = prev.some((c) => c.id === row.id);
-              if (payload.eventType === "DELETE") return prev.filter((c) => c.id !== row.id);
-              const next = exists
-                ? prev.map((c) => (c.id === row.id ? (payload.new as Conversation) : c))
-                : [payload.new as Conversation, ...prev];
-              return next.sort(
-                (a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()
-              );
-            });
-
             // Atualiza chat aberto se for o mesmo
             if (payload.eventType !== "DELETE" && currentConversation?.id === (payload.new as any)?.id) {
               setCurrentConversation(payload.new as any);
             }
-
-            // Patch local nos deals (last_message + reordenação)
-            if (payload.eventType !== "DELETE") {
-              const conv = payload.new as Conversation;
-              const phone = normalizePhone(conv.contact_phone);
-              const transcript = (conv.transcript as Msg[]) || [];
-              const last = transcript[transcript.length - 1];
-              setDeals((prev) =>
-                prev.map((d) =>
-                  normalizePhone(d.lead?.phone ?? null) === phone
-                    ? {
-                        ...d,
-                        last_message: last?.content ?? d.last_message,
-                        last_message_at: conv.last_message_at ?? d.last_message_at,
-                        last_message_role: (last?.role as any) ?? d.last_message_role,
-                      }
-                    : d
-                )
-              );
-            }
-
-            // Se a conversa é nova ou ainda não existe card vinculado, refetch leve
-            if (payload.eventType === "INSERT") scheduleReload();
+            load(true);
           }
         )
-        // Mensagens individuais: reposiciona o card no topo imediatamente
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "pipeline_deals", filter: `user_id=eq.${user.id}` },
+          () => load(true)
+        )
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "messages", filter: `user_id=eq.${user.id}` },
-          (payload: any) => {
-            const msg = payload.new as { lead_id: string | null; content: string; created_at: string; direction: string };
-            if (!msg?.lead_id) return;
-            setDeals((prev) =>
-              prev.map((d) =>
-                d.lead_id === msg.lead_id
-                  ? {
-                      ...d,
-                      last_message: msg.content,
-                      last_message_at: msg.created_at,
-                      last_message_role: msg.direction === "inbound" ? "user" : "agent",
-                    }
-                  : d
-              )
-            );
-          }
+          () => load(true)
         )
-        // Pipeline_leads: inserts/updates/deletes
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "pipeline_leads", filter: `user_id=eq.${user.id}` },
-          (payload: any) => {
-            if (payload.eventType === "DELETE") {
-              const oldId = (payload.old as any)?.id;
-              if (oldId) setDeals((prev) => prev.filter((d) => d.id !== oldId));
-              return;
-            }
-            if (payload.eventType === "UPDATE") {
-              const row = payload.new as any;
-              setDeals((prev) =>
-                prev.map((d) =>
-                  d.id === row.id
-                    ? { ...d, stage_id: row.stage_id, deal_value: row.deal_value, priority: row.priority }
-                    : d
-                )
-              );
-              return;
-            }
-            // INSERT — precisa carregar o lead vinculado
-            scheduleReload();
-          }
-        )
-        // Leads: nome/telefone podem mudar
         .on(
           "postgres_changes",
           { event: "UPDATE", schema: "public", table: "leads", filter: `user_id=eq.${user.id}` },
-          (payload: any) => {
-            const row = payload.new as { id: string; name: string; phone: string | null; source: string | null };
-            setDeals((prev) =>
-              prev.map((d) =>
-                d.lead_id === row.id
-                  ? { ...d, lead: { name: row.name, phone: row.phone, source: row.source } }
-                  : d
-              )
-            );
-          }
+          () => load(true)
         )
         .subscribe();
 
       return () => {
-        if (reloadTimer) clearTimeout(reloadTimer);
         supabase.removeChannel(ch);
       };
     }, [user?.id, currentConversation?.id]);
