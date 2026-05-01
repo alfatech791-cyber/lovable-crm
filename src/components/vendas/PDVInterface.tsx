@@ -30,7 +30,9 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
    const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false);
    const [newCustomerName, setNewCustomerName] = useState("");
    const [newCustomerPhone, setNewCustomerPhone] = useState("");
-   const [receivedAmount, setReceivedAmount] = useState<string>("");
+    const [moneyAmount, setMoneyAmount] = useState<string>("");
+    const [cardAmount, setCardAmount] = useState<string>("");
+    const [pixAmount, setPixAmount] = useState<string>("");
    const [barcode, setBarcode] = useState("");
    const [vendedorId, setVendedorId] = useState<string>("");
    const [obs, setObs] = useState("");
@@ -153,10 +155,14 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
      setCart(current => current.filter(item => item.id !== id));
    };
  
-   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-   const total = subtotal - discountValue;
-   
-   const change = receivedAmount ? Math.max(0, parseFloat(receivedAmount) - total) : 0;
+    const subtotal = useMemo(() => cart.reduce((acc, item) => acc + (item.price * item.quantity), 0), [cart]);
+    const total = useMemo(() => subtotal - discountValue, [subtotal, discountValue]);
+    
+    const totalReceived = useMemo(() => {
+      return (parseFloat(moneyAmount) || 0) + (parseFloat(cardAmount) || 0) + (parseFloat(pixAmount) || 0);
+    }, [moneyAmount, cardAmount, pixAmount]);
+
+    const change = useMemo(() => Math.max(0, totalReceived - total), [totalReceived, total]);
  
    const handleFinishSale = async () => {
      if (!user?.id) return;
@@ -170,7 +176,7 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
            customer_id: selectedCustomer?.id || null,
            total_amount: total,
            discount_amount: discountValue,
-           payment_method: paymentMethod,
+            payment_method: paymentMethod === 'multiple' ? 'Múltiplo' : paymentMethod,
            status: "concluded"
          })
          .select()
@@ -211,7 +217,9 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
          setPaymentMethod(null);
          setSelectedCustomer(null);
          setIsCheckoutModalOpen(false);
-         setReceivedAmount("");
+          setMoneyAmount("");
+          setCardAmount("");
+          setPixAmount("");
          setDiscountValue(0);
        fetchProducts(); // Atualiza estoque na interface
      } catch (error) {
