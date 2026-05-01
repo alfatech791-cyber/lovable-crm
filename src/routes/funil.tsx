@@ -1178,15 +1178,7 @@ type Deal = {
                       dragId={dragId}
                       setDragId={setDragId}
                       onDeleteStage={deleteStage}
-                      onSelectDeal={(deal) => {
-                        if (deal.lead?.phone) {
-                          setSelectedDealId(deal.id);
-                          loadConversation(deal.lead.phone);
-                          setChatOpen(true);
-                        } else {
-                          toast.error("Lead sem telefone para conversa");
-                        }
-                      }}
+                       onSelectDeal={handleSelectDeal}
                     />
                   ))}
                   
