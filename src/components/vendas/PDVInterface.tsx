@@ -1,5 +1,5 @@
  import { useState, useMemo, useEffect, useCallback, useRef } from "react";
- import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2, ArrowLeft, History, Calculator, Percent, Tag, ReceiptText, Printer, FileText, CheckCircle2, Eraser } from "lucide-react";
+ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2, ArrowLeft, History, Calculator, Percent, Tag, ReceiptText, Printer, FileText, CheckCircle2, Eraser, ChevronDown } from "lucide-react";
  import { Product } from "@/lib/mock";
  import { toast } from "sonner";
  import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,12 @@
  import { Badge } from "@/components/ui/badge";
  import { ScrollArea } from "@/components/ui/scroll-area";
  import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+ import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuTrigger,
+ } from "@/components/ui/dropdown-menu";
  
  interface CartItem extends Product {
    quantity: number;
@@ -447,6 +453,111 @@
       printWindow.print();
     };
 
+    const handlePrintWarranty = (type: 'seminovo' | 'lacrado' | 'android') => {
+      if (!lastSaleData) return;
+      
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) return;
+
+      const warrantyTime = type === 'seminovo' ? '7 meses' : '1 ano';
+      const typeLabel = type === 'seminovo' ? 'iPhone Seminovo' : type === 'lacrado' ? 'iPhone Lacrado' : 'Aparelho Android';
+
+      const itemsHtml = lastSaleData.items.map(item => `
+        <li>${item.name} ${item.model || ''} ${item.capacity || ''} ${item.color || ''}</li>
+      `).join('');
+
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Termo de Garantia - ${typeLabel}</title>
+            <style>
+              body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5; max-width: 800px; margin: 0 auto; padding: 40px; color: #333; }
+              .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 20px; }
+              .title { font-size: 18px; font-weight: bold; text-transform: uppercase; margin: 10px 0; }
+              .section { margin-bottom: 20px; }
+              .section-title { font-weight: bold; text-decoration: underline; margin-bottom: 10px; display: block; }
+              .grid { display: grid; grid-template-cols: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+              .info-box { border: 1px solid #ccc; padding: 10px; border-radius: 4px; }
+              .footer { margin-top: 50px; }
+              .signatures { display: grid; grid-template-cols: 1fr 1fr; gap: 50px; margin-top: 60px; text-align: center; }
+              .sig-line { border-top: 1px solid #000; padding-top: 5px; }
+              @media print { body { padding: 20px; } .no-print { display: none; } }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <div class="title">TERMO DE GARANTIA E CONDIÇÕES DE USO</div>
+              <div style="font-size: 14px; font-weight: bold;">${typeLabel.toUpperCase()}</div>
+            </div>
+
+            <div class="grid">
+              <div class="info-box">
+                <span class="section-title">DADOS DO CLIENTE</span>
+                <strong>Nome:</strong> ${lastSaleData.customer?.name || '________________________________'}<br>
+                <strong>Data da Venda:</strong> ${new Date().toLocaleDateString('pt-BR')}
+              </div>
+              <div class="info-box">
+                <span class="section-title">PRODUTO(S)</span>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                  ${itemsHtml}
+                </ul>
+              </div>
+            </div>
+
+            <div class="section">
+              <span class="section-title">1. PRAZO DE GARANTIA</span>
+              <p>O aparelho acima descrito possui garantia legal e contratual totalizando o prazo de <strong>${warrantyTime}</strong>, a contar da data de compra/entrega do produto. Esta garantia cobre exclusivamente defeitos de fabricação ou vícios ocultos nos componentes internos do aparelho.</p>
+            </div>
+
+            <div class="section">
+              <span class="section-title">2. COBERTURA DA GARANTIA</span>
+              <p>A garantia abrange o reparo ou substituição de peças que apresentarem defeitos funcionais de hardware. Para iPhones Seminovos, a bateria é garantida apenas se apresentar saúde inferior a 80% nos primeiros 3 meses.</p>
+            </div>
+
+            <div class="section">
+              <span class="section-title">3. EXCLUSÕES DE GARANTIA</span>
+              <p>A garantia será automaticamente <strong>CANCELADA</strong> nos seguintes casos:</p>
+              <ul>
+                <li>Danos causados por queda, impacto ou pressão excessiva (telas quebradas, trincadas ou com manchas);</li>
+                <li>Danos causados por líquidos (oxidação), mesmo em aparelhos com certificação IP67/IP68;</li>
+                <li>Aparelho aberto, reparado ou manuseado por assistência técnica não autorizada por nós;</li>
+                <li>Uso de carregadores e cabos não homologados ou de má qualidade;</li>
+                <li>Danos no software por tentativas de "jailbreak", "root" ou instalações indevidas;</li>
+                <li>Ausência ou violação do selo de garantia interno/externo.</li>
+              </ul>
+            </div>
+
+            <div class="section">
+              <span class="section-title">4. PROCEDIMENTO PARA ACIONAMENTO</span>
+              <p>Em caso de defeito, o cliente deverá entrar em contato imediatamente. O prazo para análise e reparo é de até 30 dias, conforme o Código de Defesa do Consumidor.</p>
+            </div>
+
+            <div class="footer">
+              <p style="text-align: center; margin-bottom: 40px;">
+                Local e Data: ________________________________, ${new Date().toLocaleDateString('pt-BR')}
+              </p>
+              
+              <div class="signatures">
+                <div>
+                  <div class="sig-line">ASSINATURA DO CLIENTE</div>
+                  <small>Declaro que recebi o aparelho em perfeitas condições e concordo com os termos acima.</small>
+                </div>
+                <div>
+                  <div class="sig-line">RESPONSÁVEL PELA LOJA</div>
+                  <small>Carimbo e Assinatura</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="no-print" style="margin-top: 50px; text-align: center;">
+              <button onclick="window.print()" style="padding: 10px 20px; cursor: pointer; background: #000; color: #fff; border: none; border-radius: 4px; font-weight: bold;">IMPRIMIR AGORA</button>
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    };
+
     const handleCreateCustomer = async () => {
       if (!user?.id || !newCustomerName) return;
      try {
@@ -639,16 +750,38 @@
                 >
                  <Printer className="h-4 w-4" /> Imprimir Recibo
                </Button>
-               <Button 
-                 variant="outline" 
-                 className="w-full gap-2 h-12 font-bold"
-                 onClick={() => {
-                   toast.info("Gerando termo de garantia...");
-                   // Aqui integraria com a lógica de termo de garantia
-                 }}
-               >
-                 <FileText className="h-4 w-4" /> Imprimir Termo
-               </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="w-full gap-2 h-12 font-bold"
+                    >
+                      <FileText className="h-4 w-4" /> 
+                      Imprimir Termo
+                      <ChevronDown className="h-4 w-4 ml-auto opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-[350px]" align="end">
+                    <DropdownMenuItem 
+                      className="cursor-pointer py-3 font-semibold"
+                      onClick={() => handlePrintWarranty('seminovo')}
+                    >
+                      iPhone Seminovo (7 meses de garantia)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="cursor-pointer py-3 font-semibold"
+                      onClick={() => handlePrintWarranty('lacrado')}
+                    >
+                      iPhone Lacrado (1 ano de garantia)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="cursor-pointer py-3 font-semibold"
+                      onClick={() => handlePrintWarranty('android')}
+                    >
+                      Aparelho Android (1 ano de garantia)
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
              </div>
            </div>
            <DialogFooter>
