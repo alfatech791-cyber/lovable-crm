@@ -295,11 +295,10 @@ type Deal = {
 
               if (leadData?.id) {
                 await supabase.from('pipeline_leads').upsert({
-                  user_id: user.id,
                   lead_id: leadData.id,
                   instance_name: instance,
-                  stage_id: stages[0]?.id || (await supabase.from('funnel_stages').select('id').eq('user_id', user.id).order('order_index').limit(1).single()).data?.id
-                }, { onConflict: 'user_id,lead_id' });
+                  stage_id: stages[0]?.id || (await supabase.from('funnel_stages').select('id').or(`user_id.eq.${user.id},user_id.is.null`).order('order_index').limit(1).single()).data?.id
+                } as any, { onConflict: 'user_id,lead_id' });
               }
             } catch (e) {
               console.error("Erro ao processar lead individual:", row.contact_phone, e);
