@@ -1198,7 +1198,7 @@ type Deal = {
                          variant="outline" 
                          size="sm" 
                          className="mt-4"
-                         onClick={() => supabase.rpc("ensure_default_funnel_stages", { _user_id: user?.id }).then(() => load())}
+                         onClick={() => user?.id && supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id }).then(() => load())}
                        >
                          Criar etapas padrão
                        </Button>
