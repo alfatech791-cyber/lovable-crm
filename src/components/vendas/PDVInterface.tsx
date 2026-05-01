@@ -1,5 +1,5 @@
  import { useState, useMemo, useEffect, useCallback } from "react";
-import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2, ArrowLeft, History, Calculator, Percent, Tag, ReceiptText } from "lucide-react";
+ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2, ArrowLeft, History, Calculator, Percent, Tag, ReceiptText, Printer, FileText, CheckCircle2 } from "lucide-react";
  import { Product } from "@/lib/mock";
  import { toast } from "sonner";
  import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +38,8 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
    const [obs, setObs] = useState("");
    const [discountValue, setDiscountValue] = useState<number>(0);
    const [isFinishing, setIsFinishing] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [lastSaleId, setLastSaleId] = useState<string | null>(null);
  
    const fetchProducts = useCallback(async () => {
      if (!user?.id) return;
@@ -240,6 +242,8 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
           setCardAmount("");
           setPixAmount("");
          setDiscountValue(0);
+        setLastSaleId(sale.id);
+        setIsSuccessModalOpen(true);
        fetchProducts(); // Atualiza estoque na interface
      } catch (error) {
        console.error("Erro ao finalizar venda:", error);
@@ -414,6 +418,50 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
                 )}
               </Button>
             </DialogFooter>
+         </DialogContent>
+       </Dialog>
+
+       <Dialog open={isSuccessModalOpen} onOpenChange={setIsSuccessModalOpen}>
+         <DialogContent className="sm:max-w-[400px] text-center">
+           <DialogHeader>
+             <DialogTitle className="flex flex-col items-center gap-2">
+               <div className="h-16 w-16 bg-success/10 text-success rounded-full flex items-center justify-center mb-2">
+                 <CheckCircle2 className="h-10 w-10" />
+               </div>
+               Venda Realizada!
+             </DialogTitle>
+           </DialogHeader>
+           <div className="py-6 space-y-4">
+             <p className="text-muted-foreground text-sm">
+               A venda foi processada e registrada com sucesso no sistema.
+             </p>
+             <div className="grid grid-cols-1 gap-3">
+               <Button 
+                 className="w-full gap-2 h-12 font-bold" 
+                 onClick={() => {
+                   toast.info("Imprimindo recibo...");
+                   // Aqui integraria com a lógica de impressão real
+                 }}
+               >
+                 <Printer className="h-4 w-4" /> Imprimir Recibo
+               </Button>
+               <Button 
+                 variant="outline" 
+                 className="w-full gap-2 h-12 font-bold"
+                 onClick={() => {
+                   toast.info("Gerando termo de garantia...");
+                   // Aqui integraria com a lógica de termo de garantia
+                 }}
+               >
+                 <FileText className="h-4 w-4" /> Imprimir Termo
+               </Button>
+             </div>
+           </div>
+           <DialogFooter>
+             <Button variant="ghost" className="w-full" onClick={() => setIsSuccessModalOpen(false)}>
+               Fechar e Iniciar Nova Venda
+             </Button>
+           </DialogFooter>
          </DialogContent>
        </Dialog>
  
