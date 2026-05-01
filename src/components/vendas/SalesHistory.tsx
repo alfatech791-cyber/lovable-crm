@@ -67,7 +67,30 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
  
    useEffect(() => {
      fetchSales();
-   }, [fetchSales]);
+
+     if (!user?.id) return;
+
+     // Inscrever em mudanças na tabela sales_orders para atualização automática
+     const channel = supabase
+       .channel('sales-history-changes')
+       .on(
+         'postgres_changes',
+         {
+           event: '*',
+           schema: 'public',
+           table: 'sales_orders',
+           filter: `user_id=eq.${user.id}`
+         },
+         () => {
+           fetchSales();
+         }
+       )
+       .subscribe();
+
+     return () => {
+       supabase.removeChannel(channel);
+     };
+   }, [fetchSales, user?.id]);
  
    const filteredSales = sales.filter(sale => {
      const s = searchTerm.toLowerCase();
