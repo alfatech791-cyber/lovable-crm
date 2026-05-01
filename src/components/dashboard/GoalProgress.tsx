@@ -1,4 +1,4 @@
-import { Target, TrendingUp, Edit2, Save, X, Calendar, Trophy, Zap, Activity } from "lucide-react";
+ import { Target, TrendingUp, Edit2, Save, X, Calendar, Trophy, Zap, Activity, Info, BarChart3, Rocket, DollarSign, Package, TrendingDown, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,7 +12,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+ import { Button } from "@/components/ui/button";
+ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
 interface GoalProgressProps {
