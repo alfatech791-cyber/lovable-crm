@@ -203,17 +203,91 @@ export function KpiCard({
               </div>
             </div>
 
-            <div className="p-4 rounded-xl border border-border bg-orange-50/50 dark:bg-orange-900/10 flex items-start gap-3">
-              <div className="h-8 w-8 rounded-lg bg-orange-100 dark:bg-orange-900/20 grid place-items-center shrink-0">
-                <Info className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+            {salesData.length > 0 && (label.toLowerCase().includes("vendas") || label.toLowerCase().includes("faturamento")) && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <h4 className="text-sm font-bold flex items-center gap-2">
+                    <ShoppingBag className="h-4 w-4 text-primary" />
+                    Vendas Realizadas
+                  </h4>
+                  <Badge variant="outline" className="text-[10px] font-bold">
+                    {salesData.length} {salesData.length === 1 ? 'venda' : 'vendas'}
+                  </Badge>
+                </div>
+                
+                <ScrollArea className="h-[200px] w-full rounded-xl border border-border bg-muted/20 p-3">
+                  <div className="space-y-3">
+                    {salesData.map((sale) => (
+                      <div key={sale.id} className="p-2.5 rounded-lg bg-card border border-border/50 shadow-sm space-y-2">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-2">
+                            <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
+                              <UserIcon className="h-3.5 w-3.5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="text-[11px] font-bold leading-none">{sale.customers?.full_name || 'Consumidor Final'}</p>
+                              <p className="text-[9px] text-muted-foreground mt-1">{formatDate(new Date(sale.created_at), "HH:mm", { locale: ptBR })} • #{sale.id.slice(0, 8)}</p>
+                            </div>
+                          </div>
+                          <span className="text-xs font-black text-primary">
+                            {(Number(sale.total_amount) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </span>
+                        </div>
+                        
+                        <div className="pt-1.5 border-t border-dashed border-border flex flex-wrap gap-1">
+                          {Array.isArray(sale.items) && sale.items.length > 0 ? (
+                            sale.items.map((item: any, idx: number) => (
+                              <div key={idx} className="flex flex-col gap-0.5 bg-muted/50 p-1.5 rounded-md border border-border/30 w-full">
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <Package className="h-3 w-3 text-muted-foreground shrink-0" />
+                                    <span className="text-[10px] font-bold truncate">
+                                      {item.quantity}x {item.name}
+                                    </span>
+                                  </div>
+                                  <span className="text-[9px] font-black text-muted-foreground shrink-0">
+                                    {(item.price * item.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                  </span>
+                                </div>
+                                {(item.model || item.capacity || item.color || item.battery_health) && (
+                                  <div className="flex flex-wrap gap-1 mt-0.5">
+                                    {item.model && <Badge variant="secondary" className="h-3.5 text-[8px] px-1 bg-primary/5 text-primary border-primary/10">{item.model}</Badge>}
+                                    {item.capacity && <Badge variant="secondary" className="h-3.5 text-[8px] px-1">{item.capacity}</Badge>}
+                                    {item.color && <Badge variant="secondary" className="h-3.5 text-[8px] px-1">{item.color}</Badge>}
+                                    {item.battery_health && (
+                                      <Badge variant="secondary" className="h-3.5 text-[8px] px-1 flex items-center gap-0.5">
+                                        <Activity className="h-2 w-2" />
+                                        {item.battery_health}%
+                                      </Badge>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground italic">Nenhum detalhe disponível</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
               </div>
-              <div>
-                <h4 className="text-sm font-bold text-orange-900 dark:text-orange-100">Dica Estratégica</h4>
-                <p className="text-xs text-orange-800/80 dark:text-orange-200/60 mt-0.5">
-                  Mantenha este indicador sempre monitorado para garantir a saúde do seu negócio.
-                </p>
+            )}
+
+            {!salesData.length && (
+              <div className="p-4 rounded-xl border border-border bg-orange-50/50 dark:bg-orange-900/10 flex items-start gap-3">
+                <div className="h-8 w-8 rounded-lg bg-orange-100 dark:bg-orange-900/20 grid place-items-center shrink-0">
+                  <Info className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-orange-900 dark:text-orange-100">Dica Estratégica</h4>
+                  <p className="text-xs text-orange-800/80 dark:text-orange-200/60 mt-0.5">
+                    Mantenha este indicador sempre monitorado para garantir a saúde do seu negócio.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="flex gap-2 mt-2">
