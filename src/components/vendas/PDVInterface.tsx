@@ -265,7 +265,7 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
 
         <div className="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-6 flex-1 overflow-hidden">
           <Dialog open={isCheckoutModalOpen} onOpenChange={setIsCheckoutModalOpen}>
-         <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="sm:max-w-[500px]">
            <DialogHeader>
              <DialogTitle>Finalizar Venda</DialogTitle>
            </DialogHeader>
