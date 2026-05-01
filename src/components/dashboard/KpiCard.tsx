@@ -28,7 +28,10 @@ type Tone = "info" | "success" | "warning" | "primary" | "destructive";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { startOfDay, endOfDay } from "date-fns";
+import { startOfDay, endOfDay, format as formatDate } from "date-fns";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Package, User as UserIcon } from "lucide-react";
 
 export function KpiCard({
   label, value: initialValue, trend, sub, icon, tone, onClick
@@ -37,6 +40,7 @@ export function KpiCard({
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [displayValue, setDisplayValue] = useState(initialValue);
   const [isLoading, setIsLoading] = useState(false);
+  const [salesData, setSalesData] = useState<any[]>([]);
   const { user } = useAuth();
 
   const IconsMap: Record<string, any> = { ShoppingBag, Wrench, Box, DollarSign, Users, TrendingUp };
@@ -54,13 +58,15 @@ export function KpiCard({
         if (l.includes("vendas") || l.includes("faturamento")) {
           const { data } = await supabase
             .from("sales_orders")
-            .select("total_amount")
+            .select("total_amount, items, created_at, id, customers(full_name)")
             .eq("user_id", user.id)
             .eq("status", "concluded")
             .gte("created_at", start.toISOString())
-            .lte("created_at", end.toISOString());
+            .lte("created_at", end.toISOString())
+            .order("created_at", { ascending: false });
           
-          const total = (data || []).reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+          setSalesData(data || []);
+          const total = (data || []).reduce((acc, curr) => acc + (Number(curr.total_amount) || 0), 0);
           setDisplayValue(total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
         } else if (l.includes("leads")) {
           const { count } = await supabase
