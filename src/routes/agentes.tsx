@@ -18,9 +18,9 @@ export const Route = createFileRoute("/agentes")({
    id: string;
    display_name: string | null;
    role: string | null;
-   email: string | null;
-   avatar_url: string | null;
- }
+    avatar_url: string | null;
+    email?: string | null;
+  }
  
  import { useState, useEffect, useCallback } from "react";
  import { supabase } from "@/integrations/supabase/client";
