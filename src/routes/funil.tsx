@@ -260,7 +260,7 @@ type Deal = {
             ...(existing?.id ? { id: existing.id } : {}),
             user_id: user.id,
             contact_phone: phone,
-            contact_name: chat.pushName || chat.name || chat.verifiedName || chat.id?.split("@")[0] || existing?.contact_name || null,
+            contact_name: (chat.pushName || chat.name || chat.verifiedName) && (chat.pushName || chat.name || chat.verifiedName) !== phone ? (chat.pushName || chat.name || chat.verifiedName) : existing?.contact_name || null,
             transcript: previewTranscript,
             status: existing?.status ?? "active",
             messages_count: previewTranscript.length,
