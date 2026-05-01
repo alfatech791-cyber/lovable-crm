@@ -265,14 +265,14 @@ type Deal = {
 
        if (upsertError) throw upsertError;
 
+        const validUpsertRows = (upsertRows as any[]).filter(row => row !== null);
+        
         const syncLeads = async () => {
-          for (const row of upsertRows) {
+          for (const row of validUpsertRows) {
             try {
-              // Buscamos a foto de perfil em tempo real se disponível
               let profilePic = null;
               try {
-                const contactInfo = await evolution.getContact(instance, row.contact_phone);
-                profilePic = contactInfo?.profilePictureUrl || contactInfo?.profilePicUrl || contactInfo?.profileUrl || null;
+                profilePic = await evolution.fetchProfilePictureUrl(instance, row.contact_phone);
               } catch (e) {
                 console.warn("Não foi possível buscar foto para:", row.contact_phone);
               }
