@@ -465,12 +465,16 @@ function ConversasPage() {
     setLoadError(null);
     try {
       const activeInstance = await resolveInstance();
-      const { data, error } = await supabase
-        .from("bot_conversations")
-        .select("*")
-        .eq("user_id", user.id)
-        .or(`instance_name.eq.${activeInstance},instance_name.is.null`)
-        .order("last_message_at", { ascending: false });
+       let query = supabase
+         .from("bot_conversations")
+         .select("*")
+         .eq("user_id", user.id);
+ 
+       if (activeInstance) {
+         query = query.eq("instance_name", activeInstance);
+       }
+ 
+       const { data, error } = await query.order("last_message_at", { ascending: false });
 
       if (error) throw error;
 
@@ -725,7 +729,12 @@ function ConversasPage() {
 
   const filtered = useMemo(
     () =>
-      items.filter((c) => {
+       items.filter((c: any) => {
+         // Filter by active instance
+         if (resolvedInstance && c.instance_name && c.instance_name !== resolvedInstance) {
+           return false;
+         }
+ 
         const matchSearch =
           !search ||
           (c.contact_name ?? "").toLowerCase().includes(search.toLowerCase()) ||
