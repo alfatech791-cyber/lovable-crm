@@ -1,6 +1,6 @@
  import { formatDistanceToNow } from "date-fns";
  import { ptBR } from "date-fns/locale";
- import { Trash2, Phone, Calendar, DollarSign, GripVertical, Instagram, MessageCircle, MessageSquare, Clock, AlertCircle, ExternalLink } from "lucide-react";
+   import { Trash2, Phone, Calendar, DollarSign, GripVertical, Instagram, MessageCircle, MessageSquare, Clock, AlertCircle, ExternalLink, User } from "lucide-react";
  import { cn } from "@/lib/utils";
  import { motion } from "framer-motion";
  
@@ -30,133 +30,131 @@
         onDragStart={() => onDragStart(deal.id)}
         onDragEnd={onDragEnd}
         onClick={onClick}
-        className={cn(
-          "bg-card border border-border rounded-xl p-3 shadow-sm hover:shadow-lg hover:border-primary/40 transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden active:scale-[0.98]",
-          isStale && "border-l-4 border-l-amber-400",
-          isNewFromUser && "ring-2 ring-green-500/20 bg-green-500/[0.02]"
-        )}
-      >
-       {/* Indicador de prioridade opcional */}
-       {deal.priority === 'high' && <div className="absolute top-0 right-0 w-20 h-20 bg-destructive/5 rounded-bl-full -mr-10 -mt-10" />}
-       
-       <div className="flex items-start justify-between mb-2">
-         <div className="flex items-center gap-2 flex-1 min-w-0">
-           <div className="bg-muted p-1 rounded-md group-hover:bg-primary/10 transition-colors">
-             <GripVertical className="h-3 w-3 text-muted-foreground/30 group-hover:text-primary/50 shrink-0" />
-           </div>
-           <div className="flex flex-col min-w-0">
-             <div className="text-sm font-black truncate text-foreground/90 leading-none mb-0.5">{deal.lead?.name ?? "Lead sem nome"}</div>
-             <div className="flex items-center gap-1">
-               {deal.lead?.phone && <span className="text-[10px] text-muted-foreground font-medium">{deal.lead.phone}</span>}
-             </div>
-           </div>
-         </div>
-         
-         <div className="flex items-center gap-1 shrink-0">
-           {deal.lead?.source === 'whatsapp' && (
-             <div className="h-6 w-6 rounded-full bg-green-500/10 flex items-center justify-center" title="WhatsApp">
-               <MessageCircle className="h-3.5 w-3.5 text-green-500" />
-             </div>
-           )}
-           {deal.lead?.source === 'instagram' && (
-             <div className="h-6 w-6 rounded-full bg-pink-500/10 flex items-center justify-center" title="Instagram">
-               <Instagram className="h-3.5 w-3.5 text-pink-500" />
-             </div>
-           )}
-           <button 
-             onClick={(e) => { e.stopPropagation(); onRemove(deal.id); }} 
-             className="opacity-0 group-hover:opacity-100 h-6 w-6 flex items-center justify-center rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
-           >
-             <Trash2 className="h-3.5 w-3.5" />
-           </button>
-         </div>
-       </div>
- 
-        {/* Preview da última mensagem - agora mais proeminente */}
-         <div 
-           className={cn(
-             "mb-3 px-3 py-2.5 rounded-xl border transition-all cursor-pointer group/msg relative",
-             isNewFromUser ? "bg-green-500/10 border-green-500/30 ring-1 ring-green-500/20" : "bg-muted/20 border-border/30 hover:bg-muted/40"
-           )}
-           title="Clique para abrir a conversa"
-         >
-           <div className="flex items-center gap-1.5 mb-2">
-             <div className={cn(
-               "h-5 w-5 rounded-full flex items-center justify-center",
-               isNewFromUser ? "bg-green-500 text-white" : "bg-primary/10 text-primary"
-             )}>
-               <MessageSquare className="h-2.5 w-2.5" />
-             </div>
-             <span className={cn("text-[9px] font-black uppercase tracking-widest", isNewFromUser ? "text-green-600" : "text-muted-foreground/70")}>
-               {isNewFromUser ? "WhatsApp: Nova Mensagem" : "Última Mensagem"}
-             </span>
-           {deal.last_message_at && (
-             <span className="text-[9px] text-muted-foreground/60 ml-auto flex items-center gap-1">
-               <Clock className="h-2.5 w-2.5" />
-               {formatDistanceToNow(new Date(deal.last_message_at), { addSuffix: true, locale: ptBR })}
-             </span>
-           )}
-         </div>
-           <div className="flex flex-col gap-1">
-             <p className={cn(
-               "text-[11px] leading-relaxed font-medium",
-               isNewFromUser ? "text-foreground font-bold line-clamp-3" : "text-foreground/70 italic line-clamp-2"
-             )}>
-               {deal.last_message ? deal.last_message : "Inicie uma conversa no WhatsApp..."}
-             </p>
-             
-             <div className="flex items-center gap-1 mt-1 opacity-0 group-hover/msg:opacity-100 transition-opacity">
-                <span className="text-[8px] font-black text-primary uppercase tracking-tighter">Abrir Chat Completo</span>
-                <ExternalLink className="h-2 w-2 text-primary" />
-             </div>
-           </div>
-           
-           {isNewFromUser && (
-             <div className="absolute -top-1 -right-1">
-               <div className="h-3 w-3 rounded-full bg-green-500 animate-ping opacity-75" />
-               <div className="absolute inset-0 h-3 w-3 rounded-full bg-green-500 border-2 border-background" />
-             </div>
-           )}
+         className={cn(
+           "bg-card border border-border/60 rounded-2xl p-4 shadow-sm hover:shadow-xl hover:border-primary/50 hover:bg-accent/5 transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden active:scale-[0.99] flex flex-col gap-3",
+           isStale && "border-l-4 border-l-amber-500",
+           isNewFromUser && "ring-2 ring-green-500/30 bg-green-500/[0.03]"
+         )}
+       >
+        {/* Background decorative element */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/10 transition-colors" />
+        
+        <div className="flex items-start justify-between relative z-10">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Lead Avatar */}
+            <div className="relative shrink-0">
+              <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center overflow-hidden shadow-inner group-hover:scale-105 transition-transform duration-300">
+                {deal.lead?.avatar_url ? (
+                  <img src={deal.lead.avatar_url} alt={deal.lead.name} className="h-full w-full object-cover" />
+                ) : (
+                  <User className="h-6 w-6 text-primary/40" />
+                )}
+              </div>
+              {deal.lead?.source === 'whatsapp' && (
+                <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-green-500 border-2 border-background flex items-center justify-center shadow-sm">
+                  <MessageCircle className="h-2.5 w-2.5 text-white" />
+                </div>
+              )}
+            </div>
 
-          {isStale && !isNewFromUser && (
-            <div className="absolute -top-1 -right-1">
-              <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.5)]" title="Sem resposta há mais de 24h" />
+            <div className="flex flex-col min-w-0">
+              <div className="text-[15px] font-black truncate text-foreground group-hover:text-primary transition-colors duration-300">
+                {deal.lead?.name ?? "Lead sem nome"}
+              </div>
+              <div className="flex items-center gap-1.5">
+                {deal.lead?.phone && (
+                  <span className="text-[11px] text-muted-foreground/80 font-bold bg-muted/50 px-1.5 py-0.5 rounded-md">
+                    {deal.lead.phone}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-1 shrink-0">
+            <button 
+              onClick={(e) => { e.stopPropagation(); onRemove(deal.id); }} 
+              className="opacity-0 group-hover:opacity-100 h-8 w-8 flex items-center justify-center rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-300"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+ 
+        {/* Message Preview */}
+        <div 
+          className={cn(
+            "relative px-4 py-3 rounded-2xl border transition-all cursor-pointer group/msg",
+            isNewFromUser 
+              ? "bg-green-500/[0.08] border-green-500/30 shadow-[0_0_15px_rgba(34,197,94,0.1)]" 
+              : "bg-muted/30 border-border/40 hover:bg-muted/50"
+          )}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className={cn(
+                "h-6 w-6 rounded-lg flex items-center justify-center shadow-sm",
+                isNewFromUser ? "bg-green-500 text-white" : "bg-primary/10 text-primary"
+              )}>
+                <MessageSquare className="h-3 w-3" />
+              </div>
+              <span className={cn("text-[10px] font-black uppercase tracking-widest", isNewFromUser ? "text-green-600" : "text-muted-foreground/70")}>
+                {isNewFromUser ? "Nova Mensagem" : "Conversa"}
+              </span>
+            </div>
+            {deal.last_message_at && (
+              <span className="text-[10px] text-muted-foreground/60 font-bold flex items-center gap-1 bg-background/50 px-1.5 py-0.5 rounded-md">
+                <Clock className="h-2.5 w-2.5" />
+                {formatDistanceToNow(new Date(deal.last_message_at), { addSuffix: true, locale: ptBR })}
+              </span>
+            )}
+          </div>
+
+          <p className={cn(
+            "text-[12px] leading-relaxed min-h-[1.5em]",
+            isNewFromUser ? "text-foreground font-extrabold line-clamp-3" : "text-foreground/70 line-clamp-2"
+          )}>
+            {deal.last_message || "Inicie uma conversa..."}
+          </p>
+
+          {isNewFromUser && (
+            <div className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500 border-2 border-background"></span>
             </div>
           )}
-       </div>
- 
-       <div className="flex items-center justify-between pt-2.5 border-t border-border/50">
-         <div className="flex flex-col">
-           <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-tighter leading-none mb-1">Valor do Negócio</span>
-           <div className="flex items-center gap-1 text-[13px] font-black text-primary">
-             <DollarSign className="h-3 w-3 -mt-0.5" />
-             <span>{fmt(Number(deal.deal_value ?? 0))}</span>
-           </div>
-         </div>
-         
-         <div className="flex flex-col items-end">
-           {deal.priority === 'high' ? (
-             <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-[9px] font-black uppercase tracking-wider">
-               <AlertCircle className="h-2.5 w-2.5" />
-               URGENTE
-             </div>
-           ) : (
-             <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/5 text-primary/60 text-[9px] font-black uppercase tracking-wider">
-                {deal.lead?.source || 'Geral'}
+        </div>
+
+        {/* Footer info */}
+        <div className="flex items-center justify-between mt-1 pt-3 border-t border-border/40 relative z-10">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-tighter">Valor estimado</span>
+            <div className="flex items-center gap-1 text-[15px] font-black text-primary tracking-tight">
+              <DollarSign className="h-3.5 w-3.5" />
+              <span>{fmt(Number(deal.deal_value ?? 0))}</span>
+            </div>
+          </div>
+          
+          <div className="flex flex-col items-end gap-1.5">
+            {deal.priority === 'high' ? (
+              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-destructive/10 text-destructive text-[9px] font-black uppercase tracking-wider border border-destructive/20 animate-pulse">
+                <AlertCircle className="h-3 w-3" />
+                URGENTE
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-muted-foreground/70 text-[9px] font-black uppercase tracking-widest border border-border/50">
+                {deal.lead?.source || 'Lead'}
               </div>
             )}
             
             {isNewFromUser && (
-              <div className="flex items-center gap-1 px-2 py-0.5 mt-1 rounded-full bg-primary text-primary-foreground text-[8px] font-black uppercase tracking-wider animate-pulse">
-                RESPONDER
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-[9px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
+                Responder
+                <ExternalLink className="h-2.5 w-2.5" />
               </div>
             )}
-            
-           <div className="text-[9px] text-muted-foreground/60 mt-1 font-bold">
-             {deal.created_at ? new Date(deal.created_at).toLocaleDateString('pt-BR') : ""}
-           </div>
-         </div>
-       </div>
+          </div>
+        </div>
       </motion.div>
     );
   }
