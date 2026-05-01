@@ -52,11 +52,12 @@ type Deal = {
   last_message?: string;
   last_message_at?: string;
   last_message_role?: "user" | "assistant" | "agent";
-  lead?: {
-    name: string;
-    phone: string | null;
-    source: string | null;
-  }
+   lead?: {
+     name: string;
+     phone: string | null;
+     source: string | null;
+     avatar_url?: string | null;
+   }
 };
 
   const normalizePhone = (p: string | null) => {
@@ -639,10 +640,10 @@ type Deal = {
         const stQuery = supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index");
         const ldQuery = supabase.from("leads").select("id, name, phone").eq("user_id", user.id).order("created_at", { ascending: false });
         
-        let dlQuery = supabase.from("pipeline_leads")
-          .select("*, lead:leads(name, phone, source)")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
+         let dlQuery = supabase.from("pipeline_leads")
+           .select("*, lead:leads(name, phone, source, avatar_url)")
+           .eq("user_id", user.id)
+           .order("created_at", { ascending: false });
 
         let convQuery = supabase.from("bot_conversations")
           .select("*")
@@ -683,11 +684,11 @@ type Deal = {
             )
           );
           // Recarrega após reconciliação
-          const { data: newDeals } = await supabase
-            .from("pipeline_leads")
-            .select("*, lead:leads(name, phone, source)")
-            .eq("user_id", user.id)
-            .order("created_at", { ascending: false });
+           const { data: newDeals } = await supabase
+             .from("pipeline_leads")
+             .select("*, lead:leads(name, phone, source, avatar_url)")
+             .eq("user_id", user.id)
+             .order("created_at", { ascending: false });
           if (newDeals) (dlRes as any).data = newDeals;
         } catch (e) {
           console.warn("Reconciliação de órfãos falhou:", e);
