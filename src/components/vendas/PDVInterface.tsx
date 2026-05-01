@@ -1,5 +1,5 @@
- import { useState, useMemo, useEffect, useCallback } from "react";
- import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2, ArrowLeft, History, Calculator, Percent, Tag, ReceiptText, Printer, FileText, CheckCircle2 } from "lucide-react";
+ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2, ArrowLeft, History, Calculator, Percent, Tag, ReceiptText, Printer, FileText, CheckCircle2, Eraser } from "lucide-react";
  import { Product } from "@/lib/mock";
  import { toast } from "sonner";
  import { supabase } from "@/integrations/supabase/client";
@@ -42,6 +42,8 @@
   const [lastSaleId, setLastSaleId] = useState<string | null>(null);
   const [lastSaleData, setLastSaleData] = useState<{ items: CartItem[], total: number, discount: number, customer: { name: string } | null, paymentMethod: string } | null>(null);
   const [selectedCartItemId, setSelectedCartItemId] = useState<string | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const barcodeInputRef = useRef<HTMLInputElement>(null);
  
    const fetchProducts = useCallback(async () => {
      if (!user?.id) return;
@@ -97,6 +99,54 @@
    const [activeCategory, setActiveCategory] = useState<string>("all");
    const [customerSearch, setCustomerSearch] = useState("");
  
+  // Atalhos de Teclado
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // F2: Focar Busca de Produtos
+      if (e.key === 'F2') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+      // F1: Focar Código de Barras
+      if (e.key === 'F1') {
+        e.preventDefault();
+        barcodeInputRef.current?.focus();
+      }
+      // F4: Focar Vendedor
+      if (e.key === 'F4') {
+        e.preventDefault();
+        const vendorSelect = document.querySelector('select');
+        vendorSelect?.focus();
+      }
+      // F8: Abrir Checkout (se carrinho não estiver vazio)
+      if (e.key === 'F8' && cart.length > 0) {
+        e.preventDefault();
+        if (!selectedCustomer) {
+          setIsCustomerModalOpen(true);
+        } else {
+          setIsCheckoutModalOpen(true);
+        }
+      }
+      // F9: Vincular Cliente
+      if (e.key === 'F9') {
+        e.preventDefault();
+        setIsCustomerModalOpen(true);
+      }
+      // F10: Finalizar (se tudo OK)
+      if (e.key === 'F10' && cart.length > 0 && paymentMethod) {
+        e.preventDefault();
+        if (!selectedCustomer) {
+          setIsCustomerModalOpen(true);
+        } else {
+          setIsCheckoutModalOpen(true);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [cart.length, paymentMethod, selectedCustomer]);
+
    const filteredProducts = useMemo(() => {
      return allProducts.filter(p => {
        const matchesSearch = !search || 
@@ -146,6 +196,7 @@
        return [...current, { ...product, quantity: 1 }];
      });
      setSearch("");
+    searchInputRef.current?.focus();
    };
  
    const updateQuantity = (id: string, delta: number) => {
@@ -162,6 +213,15 @@
      setCart(current => current.filter(item => item.id !== id));
    };
  
+  const clearCart = () => {
+    if (cart.length === 0) return;
+    if (confirm("Tem certeza que deseja limpar o carrinho?")) {
+      setCart([]);
+      setPaymentMethod(null);
+      toast.success("Carrinho limpo");
+    }
+  };
+
     const subtotal = useMemo(() => cart.reduce((acc, item) => acc + (item.price * item.quantity), 0), [cart]);
     const total = useMemo(() => subtotal - discountValue, [subtotal, discountValue]);
     
