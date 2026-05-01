@@ -79,10 +79,11 @@
  
    return (
      <ShadcnDialog open={open} onOpenChange={onOpenChange}>
-       <ShadcnDialogContent className="sm:max-w-[600px] max-h-[90vh] p-0 overflow-hidden flex flex-col">
-         <ShadcnDialogHeader className="p-6 pb-0">
-           <ShadcnDialogTitle>{transaction ? "Editar Lançamento" : "Novo Lançamento Financeiro"}</ShadcnDialogTitle>
-         </ShadcnDialogHeader>
+        <ShadcnDialogContent className="sm:max-w-[600px] max-h-[90vh] p-0 overflow-hidden flex flex-col outline-none">
+          <div className="w-12 h-1.5 bg-muted rounded-full mx-auto my-3 sm:hidden shrink-0" />
+          <ShadcnDialogHeader className="p-6 pt-0 sm:pt-6 pb-0 flex flex-col items-center sm:items-start">
+            <ShadcnDialogTitle>{transaction ? "Editar Lançamento" : "Novo Lançamento Financeiro"}</ShadcnDialogTitle>
+          </ShadcnDialogHeader>
          <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
            <ScrollArea className="flex-1 px-6 py-4">
              <div className="space-y-6">
