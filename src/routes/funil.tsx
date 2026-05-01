@@ -171,10 +171,16 @@ type Deal = {
 
        await ensureWebhook(instance);
 
-        const { data: existingRows, error: existingError } = await supabase
+        let existingQuery = supabase
           .from("bot_conversations")
           .select("id, contact_phone, contact_name, transcript, status, last_message_at, instance_name")
           .eq("user_id", user.id);
+        
+        if (instance) {
+          existingQuery = existingQuery.eq("instance_name", instance);
+        }
+
+        const { data: existingRows, error: existingError } = await existingQuery;
 
        if (existingError) throw existingError;
 
