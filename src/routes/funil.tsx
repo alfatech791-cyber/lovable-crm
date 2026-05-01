@@ -706,10 +706,19 @@ type Deal = {
               } catch (e) {
                 console.warn("Não foi possível buscar foto para órfão:", c.contact_phone);
               }
+              const finalName = c.contact_name || "Lead WhatsApp " + c.contact_phone;
+              await supabase.from('leads').upsert({
+                user_id: user.id,
+                phone: c.contact_phone,
+                name: finalName,
+                avatar_url: profilePic,
+                source: 'whatsapp'
+              }, { onConflict: 'user_id,phone' });
+              
               return supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
                 _user_id: user.id,
                 _phone: c.contact_phone,
-                _name: c.contact_name,
+                _name: finalName,
                 _instance_name: currentInstance,
                 _avatar_url: profilePic
               } as any);
