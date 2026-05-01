@@ -105,9 +105,12 @@ export const Route = createFileRoute("/")({
       const leads = leadsRes.data || [];
       const os = osRes.data || [];
 
-      const todaySales = sales
-        .filter(s => new Date(s.created_at!) >= today && s.status === 'concluded')
-        .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+       const todaySales = sales
+         .filter(s => {
+           const date = new Date(s.created_at!);
+           return date >= startDate && date <= endDate && s.status === 'concluded';
+         })
+         .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
 
       const monthRevenue = sales
         .filter(s => new Date(s.created_at!) >= firstDayMonth && s.status === 'concluded')
@@ -117,9 +120,12 @@ export const Route = createFileRoute("/")({
         .filter(p => (p.stock_quantity || 0) <= (p.min_stock || 5))
         .length;
 
-      const newLeadsCount = leads
-        .filter(l => new Date(l.created_at) >= today)
-        .length;
+       const newLeadsCount = leads
+         .filter(l => {
+           const date = new Date(l.created_at);
+           return date >= startDate && date <= endDate;
+         })
+         .length;
 
       const activeOSCount = os
         .filter(o => o.status !== 'delivered' && o.status !== 'canceled')
@@ -143,9 +149,9 @@ export const Route = createFileRoute("/")({
     }
   }, [user?.id]);
 
-  useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+   useEffect(() => {
+     fetchStats(period);
+   }, [fetchStats, period]);
 
    const kpis = [
      { label: "Vendas de hoje", value: stats.todaySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "", sub: "Total faturado no dia", icon: "ShoppingBag", tone: "success" },
