@@ -28,7 +28,8 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
   const [goals, setGoals] = useState({
     daily: 0,
     weekly: 0,
-    monthly: initialGoal
+    monthly: initialGoal,
+    type: 'revenue' as 'revenue' | 'units' | 'profit'
   });
   const [editGoals, setEditGoals] = useState({ ...goals });
 
@@ -41,7 +42,7 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
   const fetchGoals = async () => {
     const { data, error } = await supabase
       .from('business_goals')
-      .select('daily_goal, weekly_goal, monthly_goal')
+      .select('daily_goal, weekly_goal, monthly_goal, goal_type')
       .eq('user_id', user?.id || '')
       .maybeSingle();
 
@@ -49,7 +50,8 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
       const fetchedGoals = {
         daily: Number(data.daily_goal) || 0,
         weekly: Number(data.weekly_goal) || 0,
-        monthly: Number(data.monthly_goal) || initialGoal
+        monthly: Number(data.monthly_goal) || initialGoal,
+        type: (data.goal_type as any) || 'revenue'
       };
       setGoals(fetchedGoals);
       setEditGoals(fetchedGoals);
@@ -67,6 +69,7 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
           daily_goal: editGoals.daily,
           weekly_goal: editGoals.weekly,
           monthly_goal: editGoals.monthly,
+          goal_type: editGoals.type,
           updated_at: new Date().toISOString()
         });
 
@@ -84,8 +87,8 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
     }
   };
 
-  const pct = Math.min(100, Math.round((current / goals.monthly) * 100));
-  const remaining = Math.max(0, goals.monthly - current);
+  const pct = Math.min(100, Math.round((current / (goals.monthly || 1)) * 100));
+  const remaining = Math.max(0, (goals.monthly || 0) - current);
   const dayOfMonth = new Date().getDate();
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
   const expectedPct = Math.round((dayOfMonth / daysInMonth) * 100);
@@ -158,13 +161,17 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
           <div className="min-w-0">
             <div className="text-[11px] text-muted-foreground">Realizado</div>
             <div className="text-base sm:text-lg font-bold font-display truncate">
-              {current.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+              {goals.type === 'units' 
+                ? `${current} un.` 
+                : current.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </div>
           </div>
           <div className="min-w-0">
-            <div className="text-[11px] text-muted-foreground">Meta</div>
+            <div className="text-[11px] text-muted-foreground">Meta ({goals.type === 'revenue' ? 'Faturamento' : goals.type === 'units' ? 'Aparelhos' : 'Lucro'})</div>
             <div className="text-xs sm:text-sm font-semibold text-foreground/70 truncate">
-              {goals.monthly.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+              {goals.type === 'units'
+                ? `${goals.monthly} un.`
+                : (goals.monthly || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </div>
           </div>
           <div className="pt-2 border-t border-border min-w-0">
@@ -172,7 +179,9 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
               <TrendingUp className="h-3 w-3" /> Faltam
             </div>
             <div className="text-[13px] font-semibold text-primary truncate">
-              {remaining.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+              {goals.type === 'units'
+                ? `${remaining} un.`
+                : remaining.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </div>
           </div>
         </div>
@@ -196,19 +205,50 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
           <div className="grid gap-4 py-4">
             <div className="space-y-4">
               <div className="grid gap-2">
+                <Label className="text-sm font-bold">Tipo de Meta</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  <Button 
+                    type="button"
+                    variant={editGoals.type === 'revenue' ? 'default' : 'outline'}
+                    className="text-xs h-9"
+                    onClick={() => setEditGoals({ ...editGoals, type: 'revenue' })}
+                  >
+                    Faturamento
+                  </Button>
+                  <Button 
+                    type="button"
+                    variant={editGoals.type === 'units' ? 'default' : 'outline'}
+                    className="text-xs h-9"
+                    onClick={() => setEditGoals({ ...editGoals, type: 'units' })}
+                  >
+                    Aparelhos
+                  </Button>
+                  <Button 
+                    type="button"
+                    variant={editGoals.type === 'profit' ? 'default' : 'outline'}
+                    className="text-xs h-9"
+                    onClick={() => setEditGoals({ ...editGoals, type: 'profit' })}
+                  >
+                    Lucro
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid gap-2">
                 <Label htmlFor="daily" className="text-sm font-bold flex items-center gap-2">
                   <Zap className="h-4 w-4 text-warning" />
                   Meta Diária
                 </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-muted-foreground text-sm">R$</span>
+                  {editGoals.type !== 'units' && <span className="absolute left-3 top-2.5 text-muted-foreground text-sm">R$</span>}
                   <Input
                     id="daily"
                     type="number"
                     value={editGoals.daily}
                     onChange={(e) => setEditGoals({ ...editGoals, daily: Number(e.target.value) })}
-                    className="pl-9 bg-muted/30 border-border/50 font-bold"
+                    className={`${editGoals.type !== 'units' ? 'pl-9' : 'pl-3'} bg-muted/30 border-border/50 font-bold`}
                   />
+                  {editGoals.type === 'units' && <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">un.</span>}
                 </div>
               </div>
 
@@ -218,14 +258,15 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
                   Meta Semanal
                 </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-muted-foreground text-sm">R$</span>
+                  {editGoals.type !== 'units' && <span className="absolute left-3 top-2.5 text-muted-foreground text-sm">R$</span>}
                   <Input
                     id="weekly"
                     type="number"
                     value={editGoals.weekly}
                     onChange={(e) => setEditGoals({ ...editGoals, weekly: Number(e.target.value) })}
-                    className="pl-9 bg-muted/30 border-border/50 font-bold"
+                    className={`${editGoals.type !== 'units' ? 'pl-9' : 'pl-3'} bg-muted/30 border-border/50 font-bold`}
                   />
+                  {editGoals.type === 'units' && <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">un.</span>}
                 </div>
               </div>
 
@@ -235,14 +276,15 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
                   Meta Mensal
                 </Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-muted-foreground text-sm">R$</span>
+                  {editGoals.type !== 'units' && <span className="absolute left-3 top-2.5 text-muted-foreground text-sm">R$</span>}
                   <Input
                     id="monthly"
                     type="number"
                     value={editGoals.monthly}
                     onChange={(e) => setEditGoals({ ...editGoals, monthly: Number(e.target.value) })}
-                    className="pl-9 bg-muted/30 border-border/50 font-bold"
+                    className={`${editGoals.type !== 'units' ? 'pl-9' : 'pl-3'} bg-muted/30 border-border/50 font-bold`}
                   />
+                  {editGoals.type === 'units' && <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">un.</span>}
                 </div>
               </div>
             </div>
@@ -256,13 +298,17 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
                 <div>
                   <p className="text-[10px] text-muted-foreground uppercase font-bold">Realizado este mês</p>
                   <p className="text-lg font-black text-foreground">
-                    {current.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                    {editGoals.type === 'units' 
+                      ? `${current} un.` 
+                      : current.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] text-muted-foreground uppercase font-bold">Faltam</p>
                   <p className="text-sm font-bold text-primary">
-                    {remaining.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                    {editGoals.type === 'units'
+                      ? `${remaining} un.`
+                      : remaining.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                   </p>
                 </div>
               </div>
