@@ -795,6 +795,13 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
                        : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
                      }`}
                  >
+                 {(method.id === 'money' && parseFloat(moneyAmount) > 0) || 
+                  (method.id === 'card' && parseFloat(cardAmount) > 0) || 
+                  (method.id === 'pix' && parseFloat(pixAmount) > 0) ? (
+                   <div className="absolute -top-2 -right-2 h-5 w-5 bg-primary text-white text-[10px] rounded-full flex items-center justify-center border-2 border-card">
+                     ✓
+                   </div>
+                 ) : null}
                  <method.icon className="h-5 w-5" />
                  {method.label}
                </button>
