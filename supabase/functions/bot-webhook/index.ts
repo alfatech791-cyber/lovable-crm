@@ -72,9 +72,15 @@ serve(async (req) => {
     const transcript: any[] = (conv?.transcript as any[]) ?? [];
     transcript.push({ role: "user", content: messageText, at: new Date().toISOString(), sender: data?.pushName || null });
 
+    // Para grupos ou participantes de grupo, apenas grava a mensagem para o atendimento manual
+    if (isGroup || participant) {
+      await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active", remoteJid);
+      return json({ ok: true, stored: true, type: "group" });
+    }
+
     // Se o bot estiver inativo, apenas grava a mensagem para o atendimento manual
     if (!settings.is_active) {
-      await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active");
+      await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active", remoteJid);
       return json({ ok: true, inactive: true, stored: true });
     }
 
