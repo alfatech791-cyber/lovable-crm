@@ -465,12 +465,16 @@ function ConversasPage() {
     setLoadError(null);
     try {
       const activeInstance = await resolveInstance();
-      const { data, error } = await supabase
-        .from("bot_conversations")
-        .select("*")
-        .eq("user_id", user.id)
-        .or(`instance_name.eq.${activeInstance},instance_name.is.null`)
-        .order("last_message_at", { ascending: false });
+       let query = supabase
+         .from("bot_conversations")
+         .select("*")
+         .eq("user_id", user.id);
+ 
+       if (activeInstance) {
+         query = query.eq("instance_name", activeInstance);
+       }
+ 
+       const { data, error } = await query.order("last_message_at", { ascending: false });
 
       if (error) throw error;
 
@@ -680,7 +684,13 @@ function ConversasPage() {
                 return;
               }
 
-              const row = { ...(payload.new as any), transcript: (payload.new as any).transcript || [] } as any as Conversation;
+               const row = { ...(payload.new as any), transcript: (payload.new as any).transcript || [] } as any as Conversation & { instance_name?: string };
+               
+               // Ignore real-time updates for conversations not belonging to the resolved instance
+               if (resolvedInstance && row.instance_name && row.instance_name !== resolvedInstance) {
+                 return;
+               }
+ 
               setItems((prev) => {
                 const next = [row, ...prev.filter((c) => c.id !== row.id)].filter((c, i, a) => a.findIndex(t => t.contact_phone === c.contact_phone) === i);
                 next.sort((a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at));
@@ -725,7 +735,12 @@ function ConversasPage() {
 
   const filtered = useMemo(
     () =>
-      items.filter((c) => {
+       items.filter((c: any) => {
+         // Filter by active instance
+         if (resolvedInstance && c.instance_name && c.instance_name !== resolvedInstance) {
+           return false;
+         }
+ 
         const matchSearch =
           !search ||
           (c.contact_name ?? "").toLowerCase().includes(search.toLowerCase()) ||
