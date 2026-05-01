@@ -1203,7 +1203,7 @@ type Deal = {
                        </div>
                      </div>
                   </div>
-                  <div className="flex-1 overflow-y-auto">
+                  <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/10 hover:scrollbar-thumb-muted-foreground/20">
                     {conversations.length === 0 ? (
                       <div className="p-8 text-center">
                         <MessageSquare className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
@@ -1234,14 +1234,23 @@ type Deal = {
                             setCurrentConversation(conv);
                             setChatOpen(true);
                           }}
+                        <button
+                          key={conv.id}
+                          onClick={() => {
+                            setCurrentConversation(conv);
+                            setChatOpen(true);
+                          }}
                           className={cn(
-                            "w-full p-4 flex items-start gap-3 border-b border-border/50 hover:bg-primary/5 transition-all text-left relative",
-                            currentConversation?.id === conv.id && "bg-primary/5"
+                            "w-full p-4 flex items-start gap-3 border-b border-border/40 hover:bg-primary/5 transition-all text-left relative group",
+                            currentConversation?.id === conv.id ? "bg-primary/10 shadow-inner" : "bg-transparent"
                           )}
                         >
-                          {currentConversation?.id === conv.id && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />}
-                          <div className="h-10 w-10 rounded-xl bg-primary/10 grid place-items-center shrink-0">
-                            <User className="h-5 w-5 text-primary" />
+                          {currentConversation?.id === conv.id && <div className="absolute left-0 top-2 bottom-2 w-1.5 bg-primary rounded-r-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" />}
+                          <div className="relative shrink-0">
+                            <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 grid place-items-center group-hover:scale-105 transition-transform">
+                              <User className="h-6 w-6 text-primary" />
+                            </div>
+                            <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 border-2 border-background shadow-sm" />
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between mb-0.5">
