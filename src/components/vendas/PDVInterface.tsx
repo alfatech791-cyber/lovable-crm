@@ -279,10 +279,10 @@
         </tr>
       `).join('');
 
-      printWindow.document.write(\`
+      printWindow.document.write(`
         <html>
           <head>
-            <title>Recibo de Venda - #\${lastSaleId?.slice(0, 8)}</title>
+            <title>Recibo de Venda - #${lastSaleId?.slice(0, 8)}</title>
             <style>
               body { font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.2; width: 300px; margin: 0 auto; padding: 20px; }
               .header { text-align: center; margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
@@ -303,39 +303,39 @@
             
             <div class="section">
               <div class="section-title">Dados da Venda</div>
-              <p style="margin: 2px 0;">Pedido: #\${lastSaleId?.slice(0, 8)}</p>
-              <p style="margin: 2px 0;">Data: \${new Date().toLocaleString('pt-BR')}</p>
-              <p style="margin: 2px 0;">Vendedor: \${user?.email?.split('@')[0] || 'Sistema'}</p>
+              <p style="margin: 2px 0;">Pedido: #${lastSaleId?.slice(0, 8)}</p>
+              <p style="margin: 2px 0;">Data: ${new Date().toLocaleString('pt-BR')}</p>
+              <p style="margin: 2px 0;">Vendedor: ${user?.email?.split('@')[0] || 'Sistema'}</p>
             </div>
 
             <div class="section">
               <div class="section-title">Cliente</div>
-              <p style="margin: 2px 0;">Nome: \${lastSaleData.customer?.name || 'Consumidor Final'}</p>
+              <p style="margin: 2px 0;">Nome: ${lastSaleData.customer?.name || 'Consumidor Final'}</p>
             </div>
 
             <div class="section">
               <div class="section-title">Produtos</div>
               <table>
-                \${itemsHtml}
+                ${itemsHtml}
               </table>
             </div>
 
             <div class="total-row">
               <div style="display: flex; justify-content: space-between;">
                 <span>Subtotal:</span>
-                <span>\${(lastSaleData.total + lastSaleData.discount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                <span>${(lastSaleData.total + lastSaleData.discount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
               </div>
-              \${lastSaleData.discount > 0 ? \`
+              ${lastSaleData.discount > 0 ? `
                 <div style="display: flex; justify-content: space-between;">
                   <span>Desconto:</span>
-                  <span>-\${lastSaleData.discount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                  <span>-${lastSaleData.discount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                 </div>
-              \` : ''}
+              ` : ''}
               <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 5px;">
                 <span>TOTAL:</span>
-                <span>\${lastSaleData.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                <span>${lastSaleData.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
               </div>
-              <p style="margin: 10px 0 0 0; font-size: 10px;">Forma de Pagamento: \${lastSaleData.paymentMethod}</p>
+              <p style="margin: 10px 0 0 0; font-size: 10px;">Forma de Pagamento: ${lastSaleData.paymentMethod}</p>
             </div>
 
             <div class="footer">
@@ -344,7 +344,7 @@
             </div>
           </body>
         </html>
-      \`);
+      `);
       printWindow.document.close();
       printWindow.print();
     };
