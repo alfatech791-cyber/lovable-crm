@@ -996,7 +996,7 @@ function ConversasPage() {
           {/* Sidebar conversas */}
           <div className="w-[380px] border-r border-border/20 flex flex-col bg-card/50 backdrop-blur-xl">
             <div className="p-4 border-b border-border/20 space-y-4">
-               <div className="flex items-center justify-between px-1 mb-2">
+               <div className="flex items-center justify-between px-1 mb-1">
                  <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
                     <MessageSquare className="h-4 w-4 text-primary" />
@@ -1014,30 +1014,50 @@ function ConversasPage() {
                     </span>
                   )}
                 </div>
-                <button 
-                  onClick={() => syncFromWhatsApp(true)}
-                  className="h-8 w-8 rounded-full hover:bg-muted/80 transition-colors flex items-center justify-center text-muted-foreground"
-                  title="Sincronizar"
-                >
-                  <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button 
+                    onClick={() => { fetchAvailableInstances(); syncFromWhatsApp(true); }}
+                    className="h-8 w-8 rounded-full hover:bg-muted/80 transition-colors flex items-center justify-center text-muted-foreground"
+                    title="Sincronizar"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+                  </button>
+                </div>
               </div>
               
-              {resolvedInstance && (
-                <div className="flex items-center justify-between px-3 py-1.5 bg-primary/5 rounded-lg border border-primary/10 mb-1">
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <Phone className="h-3 w-3 text-primary/70" />
-                    <span className="text-[10px] font-bold text-primary/80 truncate">
-                      {resolvedInstance}
-                    </span>
-                  </div>
-                  {instanceDetails?.owner && (
-                    <span className="text-[9px] font-black text-primary/60 px-1.5 py-0.5 rounded bg-primary/10 uppercase tracking-tighter">
-                      {instanceDetails.owner.split('@')[0]}
-                    </span>
-                  )}
-                </div>
-              )}
+               <div className="px-1">
+                 <Select
+                   value={resolvedInstance || ""}
+                   onValueChange={handleInstanceChange}
+                 >
+                   <SelectTrigger className="h-9 bg-primary/5 border-primary/10 text-primary hover:bg-primary/10 transition-all rounded-lg px-3">
+                     <div className="flex items-center gap-2 overflow-hidden mr-2">
+                       <Phone className="h-3.5 w-3.5 shrink-0" />
+                       <SelectValue placeholder="Selecionar instância" />
+                     </div>
+                   </SelectTrigger>
+                   <SelectContent>
+                     {availableInstances.length === 0 ? (
+                       <div className="p-2 text-xs text-muted-foreground text-center">
+                         Nenhuma instância ativa
+                       </div>
+                     ) : (
+                       availableInstances.map((ins) => (
+                         <SelectItem key={ins.instanceName} value={ins.instanceName} className="text-xs">
+                           <div className="flex items-center justify-between w-full gap-4">
+                             <span className="font-medium">{ins.instanceName}</span>
+                             {ins.owner && (
+                               <span className="text-[9px] opacity-60">
+                                 ({ins.owner.split('@')[0]})
+                               </span>
+                             )}
+                           </div>
+                         </SelectItem>
+                       ))
+                     )}
+                   </SelectContent>
+                 </Select>
+               </div>
 
               <div className="relative group">
                 <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
