@@ -886,43 +886,43 @@ type Deal = {
             </div>
             {/* Stats Summary Panel */}
             <div className="px-6 py-4 bg-background border-b border-border/40 grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-primary/5 rounded-2xl p-3 border border-primary/10 flex items-center gap-3">
+               <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-4 border border-primary/10 flex items-center gap-3 shadow-sm hover:shadow-md transition-shadow">
                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <CreditCard className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Total em Pipeline</p>
-                  <p className="text-lg font-black text-primary leading-none">{fmt(totalPipeline)}</p>
+                   <p className="text-[10px] font-bold uppercase tracking-widest text-primary/70">Total em Pipeline</p>
+                   <p className="text-xl font-black text-primary leading-none mt-1">{fmt(totalPipeline)}</p>
                 </div>
               </div>
               
-              <div className="bg-muted/30 rounded-2xl p-3 border border-border/50 flex items-center gap-3">
+               <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-2xl p-4 border border-border/50 flex items-center gap-3 shadow-sm hover:shadow-md transition-shadow">
                 <div className="h-10 w-10 rounded-xl bg-background flex items-center justify-center text-muted-foreground">
                   <Users className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Total de Leads</p>
-                  <p className="text-lg font-black text-foreground leading-none">{deals.length}</p>
+                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">Total de Leads</p>
+                   <p className="text-xl font-black text-foreground leading-none mt-1">{deals.length}</p>
                 </div>
               </div>
 
-              <div className="bg-amber-500/5 rounded-2xl p-3 border border-amber-500/10 flex items-center gap-3">
+               <div className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 rounded-2xl p-4 border border-amber-500/10 flex items-center gap-3 shadow-sm hover:shadow-md transition-shadow">
                 <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600">
                   <Clock className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Aguardando Resposta</p>
-                  <p className="text-lg font-black text-amber-600 leading-none">{deals.filter(d => d.last_message_at && (new Date().getTime() - new Date(d.last_message_at).getTime() > 24 * 60 * 60 * 1000)).length}</p>
+                   <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700/70">Aguardando Resposta</p>
+                   <p className="text-xl font-black text-amber-600 leading-none mt-1">{deals.filter(d => d.last_message_at && (new Date().getTime() - new Date(d.last_message_at).getTime() > 24 * 60 * 60 * 1000)).length}</p>
                 </div>
               </div>
 
-              <div className="bg-green-500/5 rounded-2xl p-3 border border-green-500/10 flex items-center gap-3">
+               <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-2xl p-4 border border-green-500/10 flex items-center gap-3 shadow-sm hover:shadow-md transition-shadow">
                 <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600">
                   <TrendingUp className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Taxa de Conversão</p>
-                  <p className="text-lg font-black text-green-600 leading-none">12.5%</p>
+                   <p className="text-[10px] font-bold uppercase tracking-widest text-green-700/70">Taxa de Conversão</p>
+                   <p className="text-xl font-black text-green-600 leading-none mt-1">12.5%</p>
                 </div>
               </div>
             </div>
