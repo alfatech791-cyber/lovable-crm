@@ -871,6 +871,29 @@ type Deal = {
                       {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wifi className="h-3 w-3" />}
                       {syncing ? "Sincronizando..." : "Sincronizar WhatsApp"}
                     </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all hover:bg-destructive/10 hover:text-destructive text-muted-foreground" 
+                      onClick={async () => { 
+                        if (!user?.id) return; 
+                        if (!confirm("Tem certeza que deseja apagar todas as conversas do pipeline?")) return; 
+                        setLoading(true); 
+                        try { 
+                          const { error } = await supabase.from("bot_conversations").delete().eq("user_id", user.id); 
+                          if (error) throw error; 
+                          toast.success("Mensagens removidas"); 
+                          await load(true); 
+                        } catch (err: any) { 
+                          toast.error("Erro ao limpar mensagens"); 
+                        } finally { 
+                          setLoading(false); 
+                        } 
+                      }} 
+                    > 
+                      <X className="h-3 w-3" /> 
+                      Limpar Tudo 
+                    </Button>
                     <div className="w-[180px]">
                       <Select
                         value={activeInstance || ""}
