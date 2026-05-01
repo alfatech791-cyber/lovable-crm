@@ -1,5 +1,5 @@
  import { useState, useMemo, useEffect, useCallback } from "react";
- import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2 } from "lucide-react";
+import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2, ArrowLeft, History, Calculator, Percent } from "lucide-react";
  import { Product } from "@/lib/mock";
  import { toast } from "sonner";
  import { supabase } from "@/integrations/supabase/client";
@@ -237,10 +237,35 @@
      }
    };
 
-   return (
-     <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-6 h-[calc(100vh-160px)]">
-       <Dialog open={isCheckoutModalOpen} onOpenChange={setIsCheckoutModalOpen}>
-         <DialogContent className="sm:max-w-[500px]">
+    return (
+      <div className="flex flex-col gap-4 h-[calc(100vh-140px)] animate-in fade-in duration-500">
+        {/* Header de Ações Rápidas */}
+        <div className="flex items-center justify-between bg-card p-4 border border-border rounded-2xl shadow-sm">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="rounded-full xl:hidden">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                Frente de Caixa
+                <Badge variant="outline" className="text-[10px] uppercase tracking-wider bg-primary/5">Operacional</Badge>
+              </h2>
+              <p className="text-xs text-muted-foreground">Terminal 01 • Atendente: {user?.email?.split('@')[0] || 'Usuário'}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="hidden sm:flex gap-2">
+              <History className="h-4 w-4" /> Histórico
+            </Button>
+            <Button variant="outline" size="sm" className="hidden sm:flex gap-2">
+              <Calculator className="h-4 w-4" /> Calculadora
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-6 flex-1 overflow-hidden">
+          <Dialog open={isCheckoutModalOpen} onOpenChange={setIsCheckoutModalOpen}>
+            <DialogContent className="sm:max-w-[500px]">
            <DialogHeader>
              <DialogTitle>Finalizar Venda</DialogTitle>
            </DialogHeader>
@@ -399,15 +424,16 @@
           </DialogContent>
         </Dialog>
  
-       {/* Left Side: Product Selection */}
-       <div className="flex flex-col gap-6 overflow-hidden">
-         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+        {/* Lado Esquerdo: Seleção de Produtos */}
+        <div className="flex flex-col gap-6 overflow-hidden animate-in slide-in-from-left duration-500">
+          <div className="bg-card border border-border rounded-2xl p-4 shadow-sm relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-focus-within:opacity-100 transition-opacity" />
            <div className="relative">
-             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
              <input
                type="text"
-               placeholder="Buscar por nome, código ou IMEI..."
-               className="w-full h-14 pl-12 pr-4 rounded-xl bg-muted/50 border-none focus:ring-2 focus:ring-primary text-lg outline-none transition"
+                placeholder="Pressione F2 ou digite para buscar produtos..."
+                className="w-full h-14 pl-12 pr-4 rounded-xl bg-muted/30 border border-transparent focus:border-primary/20 focus:bg-background focus:ring-4 focus:ring-primary/10 text-lg outline-none transition-all font-medium"
                value={search}
                onChange={(e) => setSearch(e.target.value)}
                autoFocus
@@ -415,11 +441,11 @@
            </div>
  
             {(search || loadingProducts) && (
-              <div className="mt-4 border border-border rounded-xl overflow-hidden max-h-[400px] overflow-y-auto bg-card">
+              <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 border border-border rounded-xl shadow-2xl overflow-hidden max-h-[450px] overflow-y-auto bg-card animate-in zoom-in-95 duration-200">
                 {loadingProducts ? (
-                  <div className="p-8 flex items-center justify-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Carregando produtos...
+                  <div className="p-12 flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <span className="text-sm font-medium">Sincronizando catálogo...</span>
                   </div>
                 ) : filteredProducts.length > 0 ? (
                   filteredProducts.map(product => (
@@ -427,26 +453,33 @@
                       key={product.id}
                       onClick={() => addToCart(product)}
                       disabled={product.stock <= 0}
-                      className={`w-full flex items-center gap-4 p-4 hover:bg-muted transition text-left border-b border-border last:border-none ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`w-full flex items-center gap-4 p-4 hover:bg-primary/5 transition text-left border-b border-border/50 last:border-none group ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                      <div className="h-12 w-12 rounded-lg bg-primary/10 grid place-items-center shrink-0">
+                      <div className="h-14 w-14 rounded-xl bg-muted group-hover:bg-primary/10 grid place-items-center shrink-0 transition-colors">
                         <Package className="h-6 w-6 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold truncate">{product.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {product.category} • Estoque: {product.stock}
-                        </div>
+                         <div className="font-bold text-base truncate group-hover:text-primary transition-colors">{product.name}</div>
+                         <div className="flex items-center gap-2 mt-0.5">
+                            <Badge variant="secondary" className="text-[10px] h-5">{product.category}</Badge>
+                            <span className={`text-xs font-medium ${product.stock <= 5 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                              Estoque: {product.stock} un
+                            </span>
+                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-bold text-primary">
+                      <div className="text-right shrink-0">
+                        <div className="font-black text-lg text-primary">
                           {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                         </div>
+                        <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">Clique para adicionar</div>
                       </div>
                     </button>
                   ))
                 ) : (
-                  <div className="p-8 text-center text-muted-foreground text-sm">Nenhum produto encontrado.</div>
+                  <div className="p-12 text-center text-muted-foreground space-y-2">
+                    <Info className="h-8 w-8 mx-auto opacity-20" />
+                    <p className="font-medium">Nenhum produto encontrado com "{search}"</p>
+                  </div>
                 )}
               </div>
             )}
@@ -501,35 +534,37 @@
           </div>
        </div>
  
-       {/* Right Side: Cart & Checkout */}
-       <div className="bg-card border border-border rounded-2xl flex flex-col shadow-card overflow-hidden">
-         <div className="p-5 border-b border-border flex items-center justify-between">
+        {/* Lado Direito: Carrinho e Checkout */}
+        <div className="bg-card border border-border rounded-2xl flex flex-col shadow-xl overflow-hidden animate-in slide-in-from-right duration-500">
+          <div className="p-5 border-b border-border bg-muted/20 flex items-center justify-between">
            <div className="flex items-center gap-2 font-bold text-lg">
-             <ShoppingCart className="h-5 w-5 text-primary" />
-             Carrinho
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <ShoppingCart className="h-5 w-5 text-primary" />
+              </div>
+              <span>Carrinho</span>
            </div>
-           <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold">
+            <span className="px-3 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest">
              {cart.length} itens
            </span>
          </div>
  
-         <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/5">
            {cart.length > 0 ? (
              cart.map(item => (
-               <div key={item.id} className="flex gap-3">
+                <div key={item.id} className="flex gap-3 p-3 bg-card border border-border/50 rounded-xl hover:border-primary/30 transition-all group">
                  <div className="flex-1 min-w-0">
-                   <div className="text-sm font-semibold truncate">{item.name}</div>
-                   <div className="text-xs text-muted-foreground">
+                    <div className="text-sm font-bold truncate group-hover:text-primary transition-colors">{item.name}</div>
+                    <div className="text-xs font-medium text-muted-foreground mt-1">
                      {item.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                    </div>
                  </div>
                  <div className="flex items-center gap-2">
-                   <div className="flex items-center bg-muted rounded-lg border border-border px-1">
-                     <button onClick={() => updateQuantity(item.id, -1)} className="p-1 hover:text-primary transition"><Minus className="h-3 w-3" /></button>
+                    <div className="flex items-center bg-muted/50 rounded-lg border border-border/50 p-1">
+                      <button onClick={() => updateQuantity(item.id, -1)} className="p-1.5 hover:bg-background rounded-md hover:text-primary transition-all"><Minus className="h-3 w-3" /></button>
                      <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
-                     <button onClick={() => updateQuantity(item.id, 1)} className="p-1 hover:text-primary transition"><Plus className="h-3 w-3" /></button>
+                      <button onClick={() => updateQuantity(item.id, 1)} className="p-1.5 hover:bg-background rounded-md hover:text-primary transition-all"><Plus className="h-3 w-3" /></button>
                    </div>
-                   <button onClick={() => removeFromCart(item.id)} className="p-2 text-muted-foreground hover:text-destructive transition">
+                    <button onClick={() => removeFromCart(item.id)} className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-lg transition-all">
                      <Trash2 className="h-4 w-4" />
                    </button>
                  </div>
@@ -544,38 +579,41 @@
            )}
          </div>
  
-         <div className="p-6 bg-muted/30 border-t border-border space-y-4">
+          <div className="p-6 bg-card border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.05)] space-y-4">
            <div className="flex items-center justify-between text-sm">
-             <span className="text-muted-foreground">Subtotal</span>
-             <span>{subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+              <span className="text-muted-foreground font-medium">Subtotal</span>
+              <span className="font-bold">{subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
            </div>
            <div className="flex items-center justify-between text-sm">
                <div className="flex items-center gap-2">
-                 <button 
-                   onClick={() => {
-                     const val = prompt("Valor do desconto (R$):", "0");
-                     if (val !== null) setDiscountValue(Math.max(0, parseFloat(val) || 0));
-                   }}
-                   className="text-muted-foreground hover:text-primary underline underline-offset-4 decoration-dotted transition"
-                 >
-                   Aplicar Desconto
-                 </button>
+                  <div className="p-1.5 bg-success/10 rounded-md">
+                    <Percent className="h-3 w-3 text-success" />
+                  </div>
+                  <button 
+                    onClick={() => {
+                      const val = prompt("Valor do desconto (R$):", "0");
+                      if (val !== null) setDiscountValue(Math.max(0, parseFloat(val) || 0));
+                    }}
+                    className="text-muted-foreground hover:text-primary font-medium transition"
+                  >
+                    Desconto
+                  </button>
                  {discountValue > 0 && (
                    <button 
                      onClick={() => setDiscountValue(0)}
-                     className="text-destructive hover:text-destructive/80"
+                      className="text-destructive hover:bg-destructive/10 p-1 rounded-full transition"
                      title="Remover desconto"
                    >
                      <X className="h-3 w-3" />
                    </button>
                  )}
                </div>
-              <span className="text-success font-medium">
+               <span className="text-success font-black">
                 - {discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </span>
            </div>
-           <div className="flex items-center justify-between text-xl font-black pt-2">
-             <span>Total</span>
+            <div className="flex items-center justify-between text-2xl font-black pt-2 border-t border-dashed border-border mt-2">
+              <span className="text-foreground">Total</span>
              <span className="text-primary">{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
            </div>
  
@@ -600,17 +638,17 @@
              ))}
            </div>
  
-           <button 
-             disabled={cart.length === 0 || !paymentMethod}
+            <Button 
+              disabled={cart.length === 0 || !paymentMethod}
               onClick={() => setIsCheckoutModalOpen(true)}
-             className="w-full h-14 bg-gradient-primary text-white rounded-xl font-bold text-lg shadow-glow hover:opacity-95 transition disabled:opacity-50 disabled:shadow-none"
-           >
-             Finalizar Venda
-           </button>
+              className="w-full h-16 bg-primary hover:bg-primary/90 text-white rounded-2xl font-black text-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+            >
+              FINALIZAR (F10)
+            </Button>
  
             <button 
               onClick={() => setIsCustomerModalOpen(true)}
-              className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary transition py-1"
+              className="w-full flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-tighter text-muted-foreground hover:text-primary transition-all py-2 border border-dashed border-border rounded-xl hover:border-primary/50"
             >
              <User className="h-3 w-3" />
               {selectedCustomer ? (
