@@ -8,7 +8,9 @@ export const Route = createFileRoute("/configuracoes")({
   component: SettingsPage,
 });
 
- import { useState } from "react";
+  import { useState, useEffect } from "react";
+  import { useAuth } from "@/contexts/AuthContext";
+  import { supabase } from "@/integrations/supabase/client";
  import { Input } from "@/components/ui/input";
  import { Button } from "@/components/ui/button";
  import { Label } from "@/components/ui/label";
