@@ -12,10 +12,25 @@ import { RecentService, RecentLeads } from "@/components/dashboard/RecentPanels"
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { HeroHeader } from "@/components/dashboard/HeroHeader";
 import { GoalProgress } from "@/components/dashboard/GoalProgress";
-import { MonthComparison } from "@/components/dashboard/MonthComparison";
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+ import { MonthComparison } from "@/components/dashboard/MonthComparison";
+ import { useState, useEffect, useCallback, useMemo } from "react";
+ import { supabase } from "@/integrations/supabase/client";
+ import { useAuth } from "@/contexts/AuthContext";
+ import { 
+   startOfDay, 
+   endOfDay, 
+   startOfWeek, 
+   startOfMonth, 
+   subDays 
+ } from "date-fns";
+ import { 
+   DropdownMenu, 
+   DropdownMenuContent, 
+   DropdownMenuItem, 
+   DropdownMenuTrigger 
+ } from "@/components/ui/dropdown-menu";
+ import { Button } from "@/components/ui/button";
+ import { Calendar, ChevronDown } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
