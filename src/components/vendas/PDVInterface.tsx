@@ -534,35 +534,37 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
           </div>
        </div>
  
-       {/* Right Side: Cart & Checkout */}
-       <div className="bg-card border border-border rounded-2xl flex flex-col shadow-card overflow-hidden">
-         <div className="p-5 border-b border-border flex items-center justify-between">
+        {/* Lado Direito: Carrinho e Checkout */}
+        <div className="bg-card border border-border rounded-2xl flex flex-col shadow-xl overflow-hidden animate-in slide-in-from-right duration-500">
+          <div className="p-5 border-b border-border bg-muted/20 flex items-center justify-between">
            <div className="flex items-center gap-2 font-bold text-lg">
-             <ShoppingCart className="h-5 w-5 text-primary" />
-             Carrinho
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <ShoppingCart className="h-5 w-5 text-primary" />
+              </div>
+              <span>Carrinho</span>
            </div>
-           <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold">
+            <span className="px-3 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest">
              {cart.length} itens
            </span>
          </div>
  
-         <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/5">
            {cart.length > 0 ? (
              cart.map(item => (
-               <div key={item.id} className="flex gap-3">
+                <div key={item.id} className="flex gap-3 p-3 bg-card border border-border/50 rounded-xl hover:border-primary/30 transition-all group">
                  <div className="flex-1 min-w-0">
-                   <div className="text-sm font-semibold truncate">{item.name}</div>
-                   <div className="text-xs text-muted-foreground">
+                    <div className="text-sm font-bold truncate group-hover:text-primary transition-colors">{item.name}</div>
+                    <div className="text-xs font-medium text-muted-foreground mt-1">
                      {item.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                    </div>
                  </div>
                  <div className="flex items-center gap-2">
-                   <div className="flex items-center bg-muted rounded-lg border border-border px-1">
-                     <button onClick={() => updateQuantity(item.id, -1)} className="p-1 hover:text-primary transition"><Minus className="h-3 w-3" /></button>
+                    <div className="flex items-center bg-muted/50 rounded-lg border border-border/50 p-1">
+                      <button onClick={() => updateQuantity(item.id, -1)} className="p-1.5 hover:bg-background rounded-md hover:text-primary transition-all"><Minus className="h-3 w-3" /></button>
                      <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
-                     <button onClick={() => updateQuantity(item.id, 1)} className="p-1 hover:text-primary transition"><Plus className="h-3 w-3" /></button>
+                      <button onClick={() => updateQuantity(item.id, 1)} className="p-1.5 hover:bg-background rounded-md hover:text-primary transition-all"><Plus className="h-3 w-3" /></button>
                    </div>
-                   <button onClick={() => removeFromCart(item.id)} className="p-2 text-muted-foreground hover:text-destructive transition">
+                    <button onClick={() => removeFromCart(item.id)} className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-lg transition-all">
                      <Trash2 className="h-4 w-4" />
                    </button>
                  </div>
@@ -577,38 +579,41 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
            )}
          </div>
  
-         <div className="p-6 bg-muted/30 border-t border-border space-y-4">
+          <div className="p-6 bg-card border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.05)] space-y-4">
            <div className="flex items-center justify-between text-sm">
-             <span className="text-muted-foreground">Subtotal</span>
-             <span>{subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+              <span className="text-muted-foreground font-medium">Subtotal</span>
+              <span className="font-bold">{subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
            </div>
            <div className="flex items-center justify-between text-sm">
                <div className="flex items-center gap-2">
-                 <button 
-                   onClick={() => {
-                     const val = prompt("Valor do desconto (R$):", "0");
-                     if (val !== null) setDiscountValue(Math.max(0, parseFloat(val) || 0));
-                   }}
-                   className="text-muted-foreground hover:text-primary underline underline-offset-4 decoration-dotted transition"
-                 >
-                   Aplicar Desconto
-                 </button>
+                  <div className="p-1.5 bg-success/10 rounded-md">
+                    <Percent className="h-3 w-3 text-success" />
+                  </div>
+                  <button 
+                    onClick={() => {
+                      const val = prompt("Valor do desconto (R$):", "0");
+                      if (val !== null) setDiscountValue(Math.max(0, parseFloat(val) || 0));
+                    }}
+                    className="text-muted-foreground hover:text-primary font-medium transition"
+                  >
+                    Desconto
+                  </button>
                  {discountValue > 0 && (
                    <button 
                      onClick={() => setDiscountValue(0)}
-                     className="text-destructive hover:text-destructive/80"
+                      className="text-destructive hover:bg-destructive/10 p-1 rounded-full transition"
                      title="Remover desconto"
                    >
                      <X className="h-3 w-3" />
                    </button>
                  )}
                </div>
-              <span className="text-success font-medium">
+               <span className="text-success font-black">
                 - {discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </span>
            </div>
-           <div className="flex items-center justify-between text-xl font-black pt-2">
-             <span>Total</span>
+            <div className="flex items-center justify-between text-2xl font-black pt-2 border-t border-dashed border-border mt-2">
+              <span className="text-foreground">Total</span>
              <span className="text-primary">{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
            </div>
  
@@ -633,17 +638,17 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
              ))}
            </div>
  
-           <button 
-             disabled={cart.length === 0 || !paymentMethod}
+            <Button 
+              disabled={cart.length === 0 || !paymentMethod}
               onClick={() => setIsCheckoutModalOpen(true)}
-             className="w-full h-14 bg-gradient-primary text-white rounded-xl font-bold text-lg shadow-glow hover:opacity-95 transition disabled:opacity-50 disabled:shadow-none"
-           >
-             Finalizar Venda
-           </button>
+              className="w-full h-16 bg-primary hover:bg-primary/90 text-white rounded-2xl font-black text-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+            >
+              FINALIZAR (F10)
+            </Button>
  
             <button 
               onClick={() => setIsCustomerModalOpen(true)}
-              className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-primary transition py-1"
+              className="w-full flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-tighter text-muted-foreground hover:text-primary transition-all py-2 border border-dashed border-border rounded-xl hover:border-primary/50"
             >
              <User className="h-3 w-3" />
               {selectedCustomer ? (
