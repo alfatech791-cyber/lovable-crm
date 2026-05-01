@@ -189,6 +189,7 @@ function ConversasPage() {
   const [sending, setSending] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [resolvedInstance, setResolvedInstance] = useState<string | null>(null);
+  const [instanceDetails, setInstanceDetails] = useState<any>(null);
   const [recording, setRecording] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
   const [stickerOpen, setStickerOpen] = useState(false);
