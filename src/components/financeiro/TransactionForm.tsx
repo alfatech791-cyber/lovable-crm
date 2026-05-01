@@ -287,13 +287,11 @@
                </div>
              </div>
            </ScrollArea>
-           <div className="p-6 pt-2">
-             <ShadcnDialogFooter>
-               <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-11 text-base font-semibold">
-                 {transaction ? "Salvar Alterações" : "Confirmar Lançamento"}
-               </Button>
-             </ShadcnDialogFooter>
-           </div>
+            <div className="p-6 pt-2 border-t mt-auto">
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-11 text-base font-semibold rounded-xl">
+                {transaction ? "Salvar Alterações" : "Confirmar Lançamento"}
+              </Button>
+            </div>
          </form>
        </ShadcnDialogContent>
      </ShadcnDialog>

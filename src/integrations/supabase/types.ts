@@ -493,6 +493,7 @@ export type Database = {
           payment_account: string | null
           payment_date: string | null
           payment_method: string | null
+          payment_methods: Json | null
           recurrence_period: string | null
           recurring: boolean | null
           status: string | null
@@ -512,6 +513,7 @@ export type Database = {
           payment_account?: string | null
           payment_date?: string | null
           payment_method?: string | null
+          payment_methods?: Json | null
           recurrence_period?: string | null
           recurring?: boolean | null
           status?: string | null
@@ -531,6 +533,7 @@ export type Database = {
           payment_account?: string | null
           payment_date?: string | null
           payment_method?: string | null
+          payment_methods?: Json | null
           recurrence_period?: string | null
           recurring?: boolean | null
           status?: string | null
