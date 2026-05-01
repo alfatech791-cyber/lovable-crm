@@ -221,6 +221,36 @@ export type Database = {
         }
         Relationships: []
       }
+      business_goals: {
+        Row: {
+          created_at: string
+          daily_goal: number | null
+          id: string
+          monthly_goal: number | null
+          updated_at: string
+          user_id: string
+          weekly_goal: number | null
+        }
+        Insert: {
+          created_at?: string
+          daily_goal?: number | null
+          id?: string
+          monthly_goal?: number | null
+          updated_at?: string
+          user_id: string
+          weekly_goal?: number | null
+        }
+        Update: {
+          created_at?: string
+          daily_goal?: number | null
+          id?: string
+          monthly_goal?: number | null
+          updated_at?: string
+          user_id?: string
+          weekly_goal?: number | null
+        }
+        Relationships: []
+      }
       calendar_events: {
         Row: {
           created_at: string
