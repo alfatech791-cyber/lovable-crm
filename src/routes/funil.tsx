@@ -703,7 +703,7 @@ type Deal = {
      setChatOpen(true);
    };
 
-   const load = async (silent = false) => {
+   const load = async (silent = false, retryCount = 0) => {
      if (!user?.id) {
        if (!authLoading) setLoading(false);
        return;
@@ -736,7 +736,7 @@ type Deal = {
       
       fetchAvailableInstances();
 
-        const stQuery = supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index");
+         const stQuery = supabase.from("funnel_stages").select("*").eq("user_id", user.id).order("order_index");
         const ldQuery = supabase.from("leads").select("id, name, phone, avatar_url").eq("user_id", user.id).order("created_at", { ascending: false });
         
          let dlQuery = supabase.from("pipeline_leads")
@@ -813,12 +813,25 @@ type Deal = {
         }
       }
       
-      if (stRes.error) toast.error("Erro ao carregar estágios: " + stRes.error.message);
-      if (dlRes.error) toast.error("Erro ao carregar negociações: " + dlRes.error.message);
-      if (ldRes.error) toast.error("Erro ao carregar leads: " + ldRes.error.message);
-      if (convRes.error) toast.error("Erro ao carregar conversas: " + convRes.error.message);
-
-      setStages((stRes.data as Stage[]) ?? []);
+       if (stRes.error) {
+         console.error("Erro ao carregar estágios:", stRes.error);
+         toast.error("Erro ao carregar estágios");
+       }
+       if (dlRes.error) {
+         console.error("Erro ao carregar negociações:", dlRes.error);
+         toast.error("Erro ao carregar negociações");
+       }
+       
+       const stageData = (stRes.data as Stage[]) ?? [];
+       
+       // Se não houver estágios, tenta garantir os estágios padrão e recarrega uma vez
+       if (stageData.length === 0 && retryCount < 1) {
+         console.log("Nenhum estágio encontrado, tentando criar estágios padrão...");
+         await supabase.rpc("ensure_default_funnel_stages", { _user_id: user.id });
+         return load(silent, retryCount + 1);
+       }
+       
+       setStages(stageData);
       const convs = (convRes.data as any as Conversation[]) ?? [];
       setConversations(convs);
       
@@ -870,13 +883,23 @@ type Deal = {
       
       // Dedupe por lead_id — mantém apenas o card mais recente por lead
       const seenLead = new Set<string>();
-      const uniqueDeals = dealsWithLastMessage.filter((d: any) => {
-        if (!d.lead_id) return true;
-        if (seenLead.has(d.lead_id)) return false;
-        seenLead.add(d.lead_id);
-        return true;
-      });
-      setDeals(uniqueDeals);
+       // Garante que todos os deals tenham um stage_id válido antes de setar
+       const uniqueDeals = dealsWithLastMessage
+         .filter((d: any) => {
+           if (!d.lead_id) return true;
+           if (seenLead.has(d.lead_id)) return false;
+           seenLead.add(d.lead_id);
+           return true;
+         })
+         .map(d => {
+           // Fallback para o primeiro estágio se stage_id for inválido ou nulo
+           if (!d.stage_id || !stageData.some(s => s.id === d.stage_id)) {
+             return { ...d, stage_id: stageData[0]?.id };
+           }
+           return d;
+         });
+         
+       setDeals(uniqueDeals.filter(d => d.stage_id)); // Apenas deals com stage
       const loadedLeads = (ldRes.data as any) ?? [];
       setLeads(loadedLeads);
 
