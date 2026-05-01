@@ -166,6 +166,15 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
  
     const handleFinishSale = async () => {
       if (!user?.id) return;
+      
+      if (!selectedCustomer) {
+        toast.error("Cliente obrigatório", {
+          description: "Por favor, identifique o cliente antes de finalizar a venda."
+        });
+        setIsCustomerModalOpen(true);
+        return;
+      }
+
       setIsFinishing(true);
 
       const usedMethods = [];
@@ -379,20 +388,22 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
                       {Math.max(0, total - totalReceived).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                     </span>
                   </div>
-                 <div className="flex justify-between text-sm">
-                   <span className="text-muted-foreground">Cliente:</span>
-                   <span className="font-bold">{selectedCustomer?.name || 'Consumidor Final'}</span>
-                 </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Cliente:</span>
+                    <span className={`font-bold ${!selectedCustomer ? 'text-destructive animate-pulse' : ''}`}>
+                      {selectedCustomer?.name || 'Não Identificado'}
+                    </span>
+                  </div>
                </div>
              </div>
            </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsCheckoutModalOpen(false)} disabled={isFinishing}>Voltar</Button>
-               <Button 
-                 className="bg-primary hover:bg-primary/90 min-w-[180px] font-bold" 
-                 onClick={handleFinishSale}
-                 disabled={totalReceived < total || isFinishing}
-               >
+                <Button 
+                  className="bg-primary hover:bg-primary/90 min-w-[180px] font-bold" 
+                  onClick={handleFinishSale}
+                  disabled={totalReceived < total || isFinishing || !selectedCustomer}
+                >
                 {isFinishing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -872,23 +883,36 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
  
             <Button 
               disabled={cart.length === 0 || !paymentMethod}
-              onClick={() => setIsCheckoutModalOpen(true)}
-              className="w-full h-16 bg-primary hover:bg-primary/90 text-white rounded-2xl font-black text-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+              onClick={() => {
+                if (!selectedCustomer) {
+                  toast.error("Identifique o cliente", {
+                    description: "O cadastro do cliente é obrigatório para realizar vendas."
+                  });
+                  setIsCustomerModalOpen(true);
+                  return;
+                }
+                setIsCheckoutModalOpen(true);
+              }}
+              className={`w-full h-16 bg-primary hover:bg-primary/90 text-white rounded-2xl font-black text-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 ${!selectedCustomer && cart.length > 0 && paymentMethod ? 'ring-2 ring-destructive ring-offset-2' : ''}`}
             >
               FINALIZAR (F10)
             </Button>
  
             <button 
               onClick={() => setIsCustomerModalOpen(true)}
-              className="w-full flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-tighter text-muted-foreground hover:text-primary transition-all py-2 border border-dashed border-border rounded-xl hover:border-primary/50"
+              className={`w-full flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-tighter transition-all py-2 border border-dashed rounded-xl ${
+                selectedCustomer 
+                  ? 'text-primary border-primary/50 bg-primary/5 hover:border-primary' 
+                  : 'text-destructive border-destructive/50 hover:bg-destructive/5 hover:border-destructive'
+              }`}
             >
-             <User className="h-3 w-3" />
+              <User className="h-3 w-3" />
               {selectedCustomer ? (
-                <span className="font-bold text-primary">{selectedCustomer.name}</span>
+                <span className="font-bold">{selectedCustomer.name}</span>
               ) : (
-                "Identificar Cliente (Opcional)"
+                "Identificar Cliente (Obrigatório)"
               )}
-             <ChevronRight className="h-3 w-3" />
+              <ChevronRight className="h-3 w-3" />
             </button>
          </div>
        </div>
