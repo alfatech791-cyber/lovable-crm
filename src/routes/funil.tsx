@@ -749,13 +749,14 @@ type Deal = {
           .eq("user_id", user.id)
           .order("last_message_at", { ascending: false });
 
-         if (currentInstance) {
-           dlQuery = dlQuery.eq("instance_name", currentInstance);
-           convQuery = convQuery.eq("instance_name", currentInstance);
-         } else {
-           dlQuery = dlQuery.is("instance_name", null);
-           convQuery = convQuery.is("instance_name", null);
-         }
+          // Busca dados da instância atual ou órfãos (null/vazio) para evitar que sumam
+          if (currentInstance) {
+            dlQuery = dlQuery.or(`instance_name.eq."${currentInstance}",instance_name.is.null,instance_name.eq.""`);
+            convQuery = convQuery.or(`instance_name.eq."${currentInstance}",instance_name.is.null,instance_name.eq.""`);
+          } else {
+            dlQuery = dlQuery.is("instance_name", null);
+            convQuery = convQuery.is("instance_name", null);
+          }
 
         const [stRes, dlRes, ldRes, convRes] = await Promise.all([
           stQuery,
@@ -1134,18 +1135,6 @@ type Deal = {
                   <Sparkles className="h-3.5 w-3.5 text-primary" />
                   <span className="text-[10px] font-black text-primary uppercase tracking-widest">IA Ativa</span>
                 </div>
-                
-                 <div className="h-8 w-[1px] bg-border/40" />
-                 
-                 <Button 
-                   variant="ghost" 
-                   size="icon" 
-                   className="h-10 w-10 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
-                   onClick={() => load()}
-                   disabled={loading}
-                 >
-                   <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-                 </Button>
                 
                 <Button className="h-10 px-6 gap-2 text-xs font-black shadow-lg shadow-primary/20 rounded-xl hover:scale-105 transition-all" onClick={() => setAdding({ stage_id: stages[0]?.id || "", initial: true })}>
                   <Plus className="h-4 w-4" /> NOVO NEGÓCIO
