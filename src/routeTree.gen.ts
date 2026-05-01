@@ -14,6 +14,7 @@ import { Route as VendasRouteImport } from './routes/vendas'
 import { Route as ServicosRouteImport } from './routes/servicos'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as ProdutosRouteImport } from './routes/produtos'
+import { Route as PipelineRouteImport } from './routes/pipeline'
 import { Route as PdvRouteImport } from './routes/pdv'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LeadsRouteImport } from './routes/leads'
@@ -80,6 +81,11 @@ const RelatoriosRoute = RelatoriosRouteImport.update({
 const ProdutosRoute = ProdutosRouteImport.update({
   id: '/produtos',
   path: '/produtos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PipelineRoute = PipelineRouteImport.update({
+  id: '/pipeline',
+  path: '/pipeline',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PdvRoute = PdvRouteImport.update({
@@ -310,6 +316,7 @@ export interface FileRoutesByFullPath {
   '/leads': typeof LeadsRoute
   '/login': typeof LoginRoute
   '/pdv': typeof PdvRoute
+  '/pipeline': typeof PipelineRoute
   '/produtos': typeof ProdutosRoute
   '/relatorios': typeof RelatoriosRoute
   '/servicos': typeof ServicosRouteWithChildren
@@ -359,6 +366,7 @@ export interface FileRoutesByTo {
   '/leads': typeof LeadsRoute
   '/login': typeof LoginRoute
   '/pdv': typeof PdvRoute
+  '/pipeline': typeof PipelineRoute
   '/produtos': typeof ProdutosRoute
   '/relatorios': typeof RelatoriosRoute
   '/servicos': typeof ServicosRouteWithChildren
@@ -409,6 +417,7 @@ export interface FileRoutesById {
   '/leads': typeof LeadsRoute
   '/login': typeof LoginRoute
   '/pdv': typeof PdvRoute
+  '/pipeline': typeof PipelineRoute
   '/produtos': typeof ProdutosRoute
   '/relatorios': typeof RelatoriosRoute
   '/servicos': typeof ServicosRouteWithChildren
@@ -460,6 +469,7 @@ export interface FileRouteTypes {
     | '/leads'
     | '/login'
     | '/pdv'
+    | '/pipeline'
     | '/produtos'
     | '/relatorios'
     | '/servicos'
@@ -509,6 +519,7 @@ export interface FileRouteTypes {
     | '/leads'
     | '/login'
     | '/pdv'
+    | '/pipeline'
     | '/produtos'
     | '/relatorios'
     | '/servicos'
@@ -558,6 +569,7 @@ export interface FileRouteTypes {
     | '/leads'
     | '/login'
     | '/pdv'
+    | '/pipeline'
     | '/produtos'
     | '/relatorios'
     | '/servicos'
@@ -608,6 +620,7 @@ export interface RootRouteChildren {
   LeadsRoute: typeof LeadsRoute
   LoginRoute: typeof LoginRoute
   PdvRoute: typeof PdvRoute
+  PipelineRoute: typeof PipelineRoute
   ProdutosRoute: typeof ProdutosRoute
   RelatoriosRoute: typeof RelatoriosRoute
   ServicosRoute: typeof ServicosRouteWithChildren
@@ -654,6 +667,13 @@ declare module '@tanstack/react-router' {
       path: '/produtos'
       fullPath: '/produtos'
       preLoaderRoute: typeof ProdutosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pipeline': {
+      id: '/pipeline'
+      path: '/pipeline'
+      fullPath: '/pipeline'
+      preLoaderRoute: typeof PipelineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pdv': {
@@ -1052,6 +1072,7 @@ const rootRouteChildren: RootRouteChildren = {
   LeadsRoute: LeadsRoute,
   LoginRoute: LoginRoute,
   PdvRoute: PdvRoute,
+  PipelineRoute: PipelineRoute,
   ProdutosRoute: ProdutosRoute,
   RelatoriosRoute: RelatoriosRoute,
   ServicosRoute: ServicosRouteWithChildren,
