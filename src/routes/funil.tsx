@@ -1007,10 +1007,10 @@ type Deal = {
                         value={activeInstance || ""}
                         onValueChange={handleInstanceChange}
                       >
-                        <SelectTrigger className="h-8 bg-primary/5 border-primary/10 text-primary hover:bg-primary/10 transition-all rounded-lg px-3">
+                        <SelectTrigger className="h-9 bg-background border-border hover:border-primary/50 hover:bg-muted/50 transition-all rounded-xl px-3 shadow-sm">
                           <div className="flex items-center gap-2 overflow-hidden mr-2">
-                            <div className="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0" />
-                            <SelectValue placeholder="Instância" />
+                            <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] shrink-0 animate-pulse" />
+                            <SelectValue placeholder="Selecionar Instância" className="text-xs font-bold" />
                           </div>
                         </SelectTrigger>
                         <SelectContent>
