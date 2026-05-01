@@ -30,7 +30,9 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
    const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false);
    const [newCustomerName, setNewCustomerName] = useState("");
    const [newCustomerPhone, setNewCustomerPhone] = useState("");
-   const [receivedAmount, setReceivedAmount] = useState<string>("");
+    const [moneyAmount, setMoneyAmount] = useState<string>("");
+    const [cardAmount, setCardAmount] = useState<string>("");
+    const [pixAmount, setPixAmount] = useState<string>("");
    const [barcode, setBarcode] = useState("");
    const [vendedorId, setVendedorId] = useState<string>("");
    const [obs, setObs] = useState("");
@@ -153,26 +155,40 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
      setCart(current => current.filter(item => item.id !== id));
    };
  
-   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-   const total = subtotal - discountValue;
-   
-   const change = receivedAmount ? Math.max(0, parseFloat(receivedAmount) - total) : 0;
+    const subtotal = useMemo(() => cart.reduce((acc, item) => acc + (item.price * item.quantity), 0), [cart]);
+    const total = useMemo(() => subtotal - discountValue, [subtotal, discountValue]);
+    
+    const totalReceived = useMemo(() => {
+      return (parseFloat(moneyAmount) || 0) + (parseFloat(cardAmount) || 0) + (parseFloat(pixAmount) || 0);
+    }, [moneyAmount, cardAmount, pixAmount]);
+
+    const change = useMemo(() => Math.max(0, totalReceived - total), [totalReceived, total]);
  
-   const handleFinishSale = async () => {
-     if (!user?.id) return;
-     setIsFinishing(true);
-     try {
-       // 1. Criar a ordem de venda
-       const { data: sale, error: saleError } = await supabase
-         .from("sales_orders")
-         .insert({
-           user_id: user.id,
-           customer_id: selectedCustomer?.id || null,
-           total_amount: total,
-           discount_amount: discountValue,
-           payment_method: paymentMethod,
-           status: "concluded"
-         })
+    const handleFinishSale = async () => {
+      if (!user?.id) return;
+      setIsFinishing(true);
+
+      const usedMethods = [];
+      if (parseFloat(moneyAmount) > 0) usedMethods.push('Dinheiro');
+      if (parseFloat(cardAmount) > 0) usedMethods.push('Cartão');
+      if (parseFloat(pixAmount) > 0) usedMethods.push('PIX');
+      
+      const finalPaymentMethod = usedMethods.length > 1 
+        ? 'Múltiplo (' + usedMethods.join(', ') + ')' 
+        : usedMethods[0] || (paymentMethod === 'money' ? 'Dinheiro' : paymentMethod === 'card' ? 'Cartão' : paymentMethod === 'pix' ? 'PIX' : 'Não informado');
+
+      try {
+        // 1. Criar a ordem de venda
+        const { data: sale, error: saleError } = await supabase
+          .from("sales_orders")
+          .insert({
+            user_id: user.id,
+            customer_id: selectedCustomer?.id || null,
+            total_amount: total,
+            discount_amount: discountValue,
+            payment_method: finalPaymentMethod,
+            status: "concluded"
+          })
          .select()
          .single();
  
@@ -211,7 +227,9 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
          setPaymentMethod(null);
          setSelectedCustomer(null);
          setIsCheckoutModalOpen(false);
-         setReceivedAmount("");
+          setMoneyAmount("");
+          setCardAmount("");
+          setPixAmount("");
          setDiscountValue(0);
        fetchProducts(); // Atualiza estoque na interface
      } catch (error) {
@@ -296,32 +314,71 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
                </div>
              </div>
  
-             <div className="space-y-4">
-               <div className="space-y-2">
-                 <Label>Valor Recebido</Label>
-                 <div className="relative">
-                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">R$</span>
-                   <Input 
-                     type="number" 
-                     placeholder="0,00" 
-                     className="pl-10 h-12 text-lg font-bold"
-                     value={receivedAmount}
-                     onChange={(e) => setReceivedAmount(e.target.value)}
-                     autoFocus
-                   />
-                 </div>
-               </div>
- 
+              <div className="space-y-4 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1.5">
+                      <Banknote className="h-3 w-3" /> Dinheiro
+                    </Label>
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs">R$</span>
+                      <Input 
+                        type="number" 
+                        placeholder="0,00" 
+                        className="pl-8 h-10 font-bold text-sm"
+                        value={moneyAmount}
+                        onChange={(e) => setMoneyAmount(e.target.value)}
+                        autoFocus={paymentMethod === 'money'}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1.5">
+                      <CreditCard className="h-3 w-3" /> Cartão
+                    </Label>
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs">R$</span>
+                      <Input 
+                        type="number" 
+                        placeholder="0,00" 
+                        className="pl-8 h-10 font-bold text-sm"
+                        value={cardAmount}
+                        onChange={(e) => setCardAmount(e.target.value)}
+                        autoFocus={paymentMethod === 'card'}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1.5">
+                      <QrCode className="h-3 w-3" /> PIX
+                    </Label>
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-xs">R$</span>
+                      <Input 
+                        type="number" 
+                        placeholder="0,00" 
+                        className="pl-8 h-10 font-bold text-sm"
+                        value={pixAmount}
+                        onChange={(e) => setPixAmount(e.target.value)}
+                        autoFocus={paymentMethod === 'pix'}
+                      />
+                    </div>
+                  </div>
+                </div>
+
                <div className="bg-muted/50 p-4 rounded-xl space-y-2 border border-border">
-                 <div className="flex justify-between text-sm">
-                   <span className="text-muted-foreground">Forma de Pagamento:</span>
-                   <span className="font-bold uppercase text-primary flex items-center gap-2">
-                     {paymentMethod === 'money' && <Banknote className="h-4 w-4" />}
-                     {paymentMethod === 'card' && <CreditCard className="h-4 w-4" />}
-                     {paymentMethod === 'pix' && <QrCode className="h-4 w-4" />}
-                     {paymentMethod}
-                   </span>
-                 </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Total Recebido:</span>
+                    <span className="font-black text-foreground">
+                      {totalReceived.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </span>
+                  </div>
+                  <div className="border-t border-border/50 my-1 pt-1 flex justify-between text-[11px]">
+                    <span className="text-muted-foreground italic">Restante:</span>
+                    <span className={`font-bold ${totalReceived >= total ? 'text-success' : 'text-destructive'}`}>
+                      {Math.max(0, total - totalReceived).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </span>
+                  </div>
                  <div className="flex justify-between text-sm">
                    <span className="text-muted-foreground">Cliente:</span>
                    <span className="font-bold">{selectedCustomer?.name || 'Consumidor Final'}</span>
@@ -331,11 +388,11 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
            </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsCheckoutModalOpen(false)} disabled={isFinishing}>Voltar</Button>
-              <Button 
-                className="bg-primary hover:bg-primary/90 min-w-[150px]" 
-                onClick={handleFinishSale}
-                disabled={!receivedAmount || parseFloat(receivedAmount) < total || isFinishing}
-              >
+               <Button 
+                 className="bg-primary hover:bg-primary/90 min-w-[180px] font-bold" 
+                 onClick={handleFinishSale}
+                 disabled={totalReceived < total || isFinishing}
+               >
                 {isFinishing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -676,23 +733,19 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
               </div>
               
               <div className="flex items-center justify-between text-xs px-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground font-semibold flex items-center gap-1.5">
-                    <Tag className="h-3 w-3" /> Desconto Aplicado
-                  </span>
-                  <button 
-                    onClick={() => {
-                      const val = prompt("Valor do desconto (R$):", "0");
-                      if (val !== null) setDiscountValue(Math.max(0, parseFloat(val) || 0));
-                    }}
-                    className="text-[10px] bg-success/10 text-success px-2 py-0.5 rounded-full font-black hover:bg-success/20 transition-colors"
-                  >
-                    EDITAR
-                  </button>
-                </div>
-                <span className={`font-black ${discountValue > 0 ? 'text-success' : 'text-muted-foreground/50'}`}>
-                  - {discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                <span className="text-muted-foreground font-semibold flex items-center gap-1.5">
+                  <Tag className="h-3 w-3" /> Desconto (R$)
                 </span>
+                <div className="relative w-28">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground font-bold">R$</span>
+                  <Input 
+                    type="number" 
+                    className="h-7 pl-7 pr-1 text-[11px] font-bold bg-muted/30 border-none text-right"
+                    placeholder="0,00"
+                    value={discountValue || ""}
+                    onChange={(e) => setDiscountValue(Math.max(0, parseFloat(e.target.value) || 0))}
+                  />
+                </div>
               </div>
 
               <div className="relative pt-4 mt-2 border-t border-dashed border-border">
@@ -714,15 +767,23 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
                { id: 'card', icon: CreditCard, label: 'Cartão' },
                { id: 'pix', icon: QrCode, label: 'PIX' },
              ].map(method => (
-               <button
-                 key={method.id}
-                 onClick={() => setPaymentMethod(method.id)}
-                 className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition text-[11px] font-bold uppercase
-                   ${paymentMethod === method.id 
-                     ? 'border-primary bg-primary/5 text-primary' 
-                     : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
-                   }`}
-               >
+                 <button
+                   key={method.id}
+                   onClick={() => {
+                     setPaymentMethod(method.id);
+                     // Auto-preencher se nada foi digitado
+                     if (totalReceived === 0) {
+                       if (method.id === 'money') setMoneyAmount(total.toFixed(2));
+                       if (method.id === 'card') setCardAmount(total.toFixed(2));
+                       if (method.id === 'pix') setPixAmount(total.toFixed(2));
+                     }
+                   }}
+                   className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition text-[11px] font-bold uppercase
+                     ${paymentMethod === method.id 
+                       ? 'border-primary bg-primary/5 text-primary' 
+                       : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
+                     }`}
+                 >
                  <method.icon className="h-5 w-5" />
                  {method.label}
                </button>
