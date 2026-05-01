@@ -14,6 +14,10 @@
  
  interface CartItem extends Product {
    quantity: number;
+  model?: string;
+  capacity?: string;
+  color?: string;
+  battery_health?: string;
  }
  
  export function PDVInterface() {
@@ -62,8 +66,12 @@
          category: p.category || "Geral",
          price: p.price || 0,
          stock: p.stock_quantity || 0,
-         description: p.description || "",
-         image: p.image_url || undefined
+          description: p.description || "",
+          image: p.image_url || undefined,
+          model: p.model,
+          capacity: p.capacity,
+          color: p.color,
+          battery_health: p.battery_health
        }));
        
        setAllProducts(formattedProducts);
@@ -904,13 +912,40 @@
                               <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
                                {item.name}
                              </span>
-                              {item.description && (
-                                <p className={`text-[10px] text-muted-foreground leading-tight mt-0.5 italic ${
-                                  selectedCartItemId === item.id ? '' : 'line-clamp-2'
-                                }`}>
-                                  {item.description}
-                                </p>
-                              )}
+                             
+                             {/* Detalhes do Aparelho (Modelo, Gigas, Cor, Saúde) */}
+                             {(item.model || item.capacity || item.color || item.battery_health) && (
+                               <div className="flex flex-wrap gap-1 mt-1">
+                                 {item.model && (
+                                   <Badge variant="outline" className="text-[9px] h-4 px-1.5 py-0 bg-muted/30 border-muted-foreground/20 text-muted-foreground font-medium">
+                                     {item.model}
+                                   </Badge>
+                                 )}
+                                 {item.capacity && (
+                                   <Badge variant="outline" className="text-[9px] h-4 px-1.5 py-0 bg-primary/5 border-primary/20 text-primary font-bold">
+                                     {item.capacity}
+                                   </Badge>
+                                 )}
+                                 {item.color && (
+                                   <Badge variant="outline" className="text-[9px] h-4 px-1.5 py-0 bg-muted/30 border-muted-foreground/20 text-muted-foreground">
+                                     {item.color}
+                                   </Badge>
+                                 )}
+                                 {item.battery_health && (
+                                   <Badge variant="outline" className="text-[9px] h-4 px-1.5 py-0 bg-green-500/5 border-green-500/20 text-green-600 font-bold">
+                                     🔋 {item.battery_health}%
+                                   </Badge>
+                                 )}
+                               </div>
+                             )}
+
+                             {item.description && (
+                               <p className={`text-[10px] text-muted-foreground leading-tight mt-1 italic ${
+                                 selectedCartItemId === item.id ? '' : 'line-clamp-1'
+                               }`}>
+                                 {item.description}
+                               </p>
+                             )}
                            </div>
                           <button 
                             onClick={(e) => {
