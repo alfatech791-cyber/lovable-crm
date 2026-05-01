@@ -292,30 +292,14 @@ type Deal = {
                 console.warn("Não foi possível buscar foto para:", row.contact_phone);
               }
 
-              const finalName = (row.contact_name && row.contact_name !== row.contact_phone) ? row.contact_name : ("Lead WhatsApp " + row.contact_phone);
-              await supabase.from('leads').upsert({
-                user_id: user.id,
-                phone: row.contact_phone,
-                name: finalName,
-                avatar_url: profilePic,
-                source: 'whatsapp'
-              }, { onConflict: 'user_id,phone' });
-              
-              const { data: leadData } = await supabase.from('leads').upsert({
-                user_id: user.id,
-                phone: row.contact_phone,
-                name: finalName,
-                avatar_url: profilePic,
-                source: 'whatsapp'
-              }, { onConflict: 'user_id,phone' }).select('id').single();
-
-              if (leadData?.id) {
-                await supabase.from('pipeline_leads').upsert({
-                  lead_id: leadData.id,
-                  instance_name: instance,
-                  stage_id: stages[0]?.id || (await supabase.from('funnel_stages').select('id').or(`user_id.eq.${user.id},user_id.is.null`).order('order_index').limit(1).single()).data?.id
-                } as any, { onConflict: 'user_id,lead_id' });
-              }
+               // Usamos a função RPC para garantir a sincronização atômica e correta do nome
+               await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
+                 _user_id: user.id,
+                 _phone: row.contact_phone,
+                 _name: row.contact_name,
+                 _instance_name: instance,
+                 _avatar_url: profilePic
+               } as any);
             } catch (e) {
               console.error("Erro ao processar lead individual:", row.contact_phone, e);
             }
