@@ -220,16 +220,17 @@ type Deal = {
              existing?.last_message_at ||
              new Date().toISOString();
 
-           return {
-             ...(existing?.id ? { id: existing.id } : {}),
-             user_id: user.id,
-             contact_phone: phone,
-             contact_name: chat.name || chat.pushName || chat.verifiedName || existing?.contact_name || null,
-             transcript: previewTranscript,
-             status: existing?.status ?? "active",
-             messages_count: previewTranscript.length,
-             last_message_at: lastAt,
-           };
+            return {
+              ...(existing?.id ? { id: existing.id } : {}),
+              user_id: user.id,
+              contact_phone: phone,
+              contact_name: chat.name || chat.pushName || chat.verifiedName || existing?.contact_name || null,
+              transcript: previewTranscript,
+              status: existing?.status ?? "active",
+              messages_count: previewTranscript.length,
+              last_message_at: lastAt,
+              instance_name: instance,
+            };
          })
          .filter(Boolean);
 
@@ -538,11 +539,21 @@ type Deal = {
         console.warn("ensure_default_funnel_stages falhou:", e);
       }
 
+      const activeInstance = await resolveInstance();
+
       const [stRes, dlRes, ldRes, convRes, allDealsRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
-        supabase.from("pipeline_leads").select("*, lead:leads(name, phone, source)").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("pipeline_leads")
+          .select("*, lead:leads(name, phone, source)")
+          .eq("user_id", user.id)
+          .or(`instance_name.eq.${activeInstance},instance_name.is.null`) // fallback para legados
+          .order("created_at", { ascending: false }),
         supabase.from("leads").select("id, name, phone").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("bot_conversations").select("*").eq("user_id", user.id).order("last_message_at", { ascending: false }),
+        supabase.from("bot_conversations")
+          .select("*")
+          .eq("user_id", user.id)
+          .or(`instance_name.eq.${activeInstance},instance_name.is.null`) // fallback para legados
+          .order("last_message_at", { ascending: false }),
         supabase.from("pipeline_leads").select("lead_id")
       ]);
 
