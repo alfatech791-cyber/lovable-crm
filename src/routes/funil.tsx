@@ -440,26 +440,33 @@ type Deal = {
      return () => { supabase.removeChannel(ch); };
    }, [user?.id, chatOpen, currentConversation?.id]);
  
-    // Realtime unificado: reage a conversas, mensagens, leads e cards do pipeline
-    // sem recarregar a página inteira. Faz patch local imediato e agenda um
-    // refetch leve com debounce para reconciliar relacionamentos novos.
+    // Realtime unificado para sicronização em tempo real
     useEffect(() => {
       if (!user?.id) return;
 
-      let reloadTimer: ReturnType<typeof setTimeout> | null = null;
-      const scheduleReload = () => {
-        if (reloadTimer) clearTimeout(reloadTimer);
-        reloadTimer = setTimeout(() => load(true), 350);
-      };
-
       const ch = supabase
-        .channel(`funil_realtime:${user.id}`)
-        // Conversas: atualiza lista lateral e injeta last_message no card correspondente
+        .channel(`funil_realtime_sync:${user.id}`)
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "bot_conversations", filter: `user_id=eq.${user.id}` },
-          (payload: any) => {
-            const row = (payload.new ?? payload.old) as Conversation | undefined;
+          () => load(true)
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "pipeline_deals", filter: `user_id=eq.${user.id}` },
+          () => load(true)
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "messages", filter: `user_id=eq.${user.id}` },
+          () => load(true)
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(ch);
+      };
+    }, [user?.id]);
             if (!row) return;
 
             // Atualiza lista de conversas
