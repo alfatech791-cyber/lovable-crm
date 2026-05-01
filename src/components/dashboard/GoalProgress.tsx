@@ -28,13 +28,18 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [goals, setGoals] = useState({
-    daily: 0,
-    weekly: 0,
-    monthly: initialGoal,
-    type: 'revenue' as 'revenue' | 'units' | 'profit'
-  });
-  const [editGoals, setEditGoals] = useState({ ...goals });
+   const initialGoalState = {
+     daily: 0,
+     weekly: 0,
+     monthly: initialGoal,
+     type: 'revenue' as 'revenue' | 'units' | 'profit',
+     goal_name: "",
+     start_date: new Date().toISOString().split('T')[0],
+     end_date: "",
+     notes: ""
+   };
+   const [goals, setGoals] = useState(initialGoalState);
+   const [editGoals, setEditGoals] = useState(initialGoalState);
 
   useEffect(() => {
     if (user?.id) {
@@ -43,21 +48,25 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
   }, [user?.id]);
 
   const fetchGoals = async () => {
-    const { data, error } = await supabase
-      .from('business_goals')
-      .select('daily_goal, weekly_goal, monthly_goal, goal_type')
-      .eq('user_id', user?.id || '')
+     const { data, error } = await (supabase
+       .from('business_goals')
+       .select('*') as any)
+       .eq('user_id', user?.id || '')
       .maybeSingle();
 
     if (data) {
-      const fetchedGoals = {
-        daily: Number(data.daily_goal) || 0,
-        weekly: Number(data.weekly_goal) || 0,
-        monthly: Number(data.monthly_goal) || initialGoal,
-        type: (data.goal_type as any) || 'revenue'
-      };
-      setGoals(fetchedGoals);
-      setEditGoals(fetchedGoals);
+       const fetchedGoals = {
+         daily: Number(data.daily_goal) || 0,
+         weekly: Number(data.weekly_goal) || 0,
+         monthly: Number(data.monthly_goal) || initialGoal,
+         type: (data.goal_type as any) || 'revenue',
+         goal_name: data.goal_name || "",
+         start_date: data.start_date || new Date().toISOString().split('T')[0],
+         end_date: data.end_date || "",
+         notes: data.notes || ""
+       };
+       setGoals(fetchedGoals);
+       setEditGoals(fetchedGoals);
     }
   };
 
@@ -65,16 +74,20 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
     if (!user?.id) return;
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('business_goals')
-        .upsert({
-          user_id: user.id,
-          daily_goal: editGoals.daily,
-          weekly_goal: editGoals.weekly,
-          monthly_goal: editGoals.monthly,
-          goal_type: editGoals.type,
-          updated_at: new Date().toISOString()
-        });
+       const { error } = await (supabase
+         .from('business_goals')
+         .upsert({
+           user_id: user.id,
+           daily_goal: editGoals.daily,
+           weekly_goal: editGoals.weekly,
+           monthly_goal: editGoals.monthly,
+           goal_type: editGoals.type,
+           goal_name: editGoals.goal_name,
+           start_date: editGoals.start_date,
+           end_date: editGoals.end_date,
+           notes: editGoals.notes,
+           updated_at: new Date().toISOString()
+         } as any));
 
       if (error) throw error;
 
@@ -305,6 +318,38 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div className="space-y-4">
                    <div className="grid gap-2">
+                     <Label htmlFor="name" className="text-[13px] font-bold">Nome da Meta</Label>
+                     <Input
+                       id="name"
+                       value={editGoals.goal_name}
+                       onChange={(e) => setEditGoals({ ...editGoals, goal_name: e.target.value })}
+                       className="h-12 rounded-xl bg-card border-border/50"
+                       placeholder="Ex: Vendas de Verão"
+                     />
+                   </div>
+                   <div className="grid grid-cols-2 gap-4">
+                     <div className="grid gap-2">
+                       <Label htmlFor="start" className="text-[13px] font-bold">Início</Label>
+                       <Input
+                         id="start"
+                         type="date"
+                         value={editGoals.start_date}
+                         onChange={(e) => setEditGoals({ ...editGoals, start_date: e.target.value })}
+                         className="h-12 rounded-xl bg-card border-border/50"
+                       />
+                     </div>
+                     <div className="grid gap-2">
+                       <Label htmlFor="end" className="text-[13px] font-bold">Término</Label>
+                       <Input
+                         id="end"
+                         type="date"
+                         value={editGoals.end_date}
+                         onChange={(e) => setEditGoals({ ...editGoals, end_date: e.target.value })}
+                         className="h-12 rounded-xl bg-card border-border/50"
+                       />
+                     </div>
+                   </div>
+                   <div className="grid gap-2">
                      <Label htmlFor="daily" className="text-[13px] font-bold flex items-center gap-2">
                        <Zap className="h-4 w-4 text-warning fill-warning/20" />
                        Meta Diária
@@ -322,23 +367,33 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
                      </div>
                    </div>
  
-                   <div className="grid gap-2">
-                     <Label htmlFor="weekly" className="text-[13px] font-bold flex items-center gap-2">
-                       <Calendar className="h-4 w-4 text-sky-500 fill-sky-500/20" />
-                       Meta Semanal
-                     </Label>
-                     <div className="relative group">
-                       {editGoals.type !== 'units' && <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">R$</span>}
-                       <Input
-                         id="weekly"
-                         type="number"
-                         value={editGoals.weekly}
-                         onChange={(e) => setEditGoals({ ...editGoals, weekly: Number(e.target.value) })}
-                         className={`${editGoals.type !== 'units' ? 'pl-10' : 'pl-4'} h-12 rounded-xl bg-card border-border/50 focus:border-primary focus:ring-primary/20 font-black text-lg transition-all`}
-                       />
-                       {editGoals.type === 'units' && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">un.</span>}
-                     </div>
-                   </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="weekly" className="text-[13px] font-bold flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-sky-500 fill-sky-500/20" />
+                        Meta Semanal
+                      </Label>
+                      <div className="relative group">
+                        {editGoals.type !== 'units' && <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">R$</span>}
+                        <Input
+                          id="weekly"
+                          type="number"
+                          value={editGoals.weekly}
+                          onChange={(e) => setEditGoals({ ...editGoals, weekly: Number(e.target.value) })}
+                          className={`${editGoals.type !== 'units' ? 'pl-10' : 'pl-4'} h-12 rounded-xl bg-card border-border/50 focus:border-primary focus:ring-primary/20 font-black text-lg transition-all`}
+                        />
+                        {editGoals.type === 'units' && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">un.</span>}
+                      </div>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="notes" className="text-[13px] font-bold">Observações / Plano de Ação</Label>
+                      <textarea
+                        id="notes"
+                        value={editGoals.notes}
+                        onChange={(e) => setEditGoals({ ...editGoals, notes: e.target.value })}
+                        className="flex min-h-[80px] w-full rounded-xl border border-border/50 bg-card px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all resize-none"
+                        placeholder="Quais estratégias você vai usar para bater essa meta?"
+                      />
+                    </div>
                  </div>
  
                  <div className="space-y-4">

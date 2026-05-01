@@ -224,30 +224,51 @@ export type Database = {
       business_goals: {
         Row: {
           created_at: string
+          current_value: number | null
           daily_goal: number | null
+          end_date: string | null
+          goal_name: string | null
           goal_type: string | null
           id: string
           monthly_goal: number | null
+          notes: string | null
+          start_date: string | null
+          status: string | null
+          target_value: number | null
           updated_at: string
           user_id: string
           weekly_goal: number | null
         }
         Insert: {
           created_at?: string
+          current_value?: number | null
           daily_goal?: number | null
+          end_date?: string | null
+          goal_name?: string | null
           goal_type?: string | null
           id?: string
           monthly_goal?: number | null
+          notes?: string | null
+          start_date?: string | null
+          status?: string | null
+          target_value?: number | null
           updated_at?: string
           user_id: string
           weekly_goal?: number | null
         }
         Update: {
           created_at?: string
+          current_value?: number | null
           daily_goal?: number | null
+          end_date?: string | null
+          goal_name?: string | null
           goal_type?: string | null
           id?: string
           monthly_goal?: number | null
+          notes?: string | null
+          start_date?: string | null
+          status?: string | null
+          target_value?: number | null
           updated_at?: string
           user_id?: string
           weekly_goal?: number | null
