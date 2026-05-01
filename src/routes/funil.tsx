@@ -877,15 +877,27 @@ type Deal = {
                       className="h-8 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all hover:bg-destructive/10 hover:text-destructive text-muted-foreground" 
                       onClick={async () => { 
                         if (!user?.id) return; 
-                        if (!confirm("Tem certeza que deseja apagar todas as conversas do pipeline?")) return; 
+                        if (!confirm("Tem certeza que deseja apagar todas as conversas e cards deste pipeline?")) return; 
                         setLoading(true); 
                         try { 
-                          const { error } = await supabase.from("bot_conversations").delete().eq("user_id", user.id); 
-                          if (error) throw error; 
-                          toast.success("Mensagens removidas"); 
+                          let convQuery = supabase.from("bot_conversations").delete().eq("user_id", user.id);
+                          let dealQuery = supabase.from("pipeline_leads").delete().eq("user_id", user.id);
+
+                          if (activeInstance) {
+                            convQuery = convQuery.eq("instance_name", activeInstance);
+                            dealQuery = dealQuery.eq("instance_name", activeInstance);
+                          }
+
+                          const [convRes, dealRes] = await Promise.all([convQuery, dealQuery]);
+                          
+                          if (convRes.error) throw convRes.error; 
+                          if (dealRes.error) throw dealRes.error;
+
+                          toast.success("Pipeline limpo com sucesso"); 
                           await load(true); 
                         } catch (err: any) { 
-                          toast.error("Erro ao limpar mensagens"); 
+                          console.error("Erro ao limpar pipeline:", err);
+                          toast.error("Erro ao limpar dados"); 
                         } finally { 
                           setLoading(false); 
                         } 
