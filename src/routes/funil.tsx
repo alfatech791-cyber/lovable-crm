@@ -535,13 +535,18 @@ type Deal = {
       return out;
     })();
 
-    const filteredDeals = dedupedDeals
-      .filter(d => {
-        const leadName = d.lead?.name?.toLowerCase() || "";
-        const leadPhone = d.lead?.phone || "";
-        const search = searchTerm.toLowerCase();
-        return leadName.includes(search) || leadPhone.includes(searchTerm);
-      })
+     const filteredDeals = dedupedDeals
+       .filter(d => {
+         // Filter by active instance
+         if (activeInstance && (d as any).instance_name && (d as any).instance_name !== activeInstance) {
+           return false;
+         }
+ 
+         const leadName = d.lead?.name?.toLowerCase() || "";
+         const leadPhone = d.lead?.phone || "";
+         const search = searchTerm.toLowerCase();
+         return leadName.includes(search) || leadPhone.includes(searchTerm);
+       })
        .sort((a, b) => {
          if (sortBy === "value") return Number(b.deal_value || 0) - Number(a.deal_value || 0);
          if (sortBy === "whatsapp") {
