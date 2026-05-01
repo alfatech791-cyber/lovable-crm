@@ -181,7 +181,7 @@ const blobToBase64 = (blob: Blob): Promise<string> =>
 function ConversasPage() {
   const { user, loading: authLoading } = useAuth();
   const [items, setItems] = useState<Conversation[]>([]);
-  const [loading, setLoading] = useState(true);
+   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -466,29 +466,28 @@ function ConversasPage() {
       return;
     }
 
-    if (!silent) setLoading(true);
+    if (!silent && items.length === 0) setLoading(true);
     setLoadError(null);
     try {
       const activeInstance = await resolveInstance();
-       let query = supabase
-         .from("bot_conversations")
-         .select("*")
-         .eq("user_id", user.id);
- 
-       if (activeInstance) {
-         query = query.eq("instance_name", activeInstance);
-       }
- 
-       const { data, error } = await query.order("last_message_at", { ascending: false });
+      let query = supabase
+        .from("bot_conversations")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (activeInstance) {
+        query = query.eq("instance_name", activeInstance);
+      }
+
+      const { data, error } = await query.order("last_message_at", { ascending: false });
 
       if (error) throw error;
 
-      applyConversations((data ?? []) as any as Conversation[]);
+      const list = (data ?? []) as any as Conversation[];
+      applyConversations(list);
     } catch (error: any) {
       console.error("Erro ao carregar conversas", error);
       setLoadError(error?.message ?? "Não foi possível carregar as conversas.");
-      setItems([]);
-      setSelectedId(null);
       toast.error(error?.message ?? "Não foi possível carregar as conversas.");
     } finally {
       setLoading(false);
@@ -574,8 +573,10 @@ function ConversasPage() {
         setLoading(false);
       }
 
+      // Limite aumentado e processamento em lotes para evitar sobrecarga
+      const MAX_CHATS = 60;
       const rows = await Promise.all(
-        chats.slice(0, 50).map(async (chat) => {
+        chats.slice(0, MAX_CHATS).map(async (chat) => {
           const phone = getContactPhone(chat);
           if (!phone) return null;
           const isGroup = String(chat.remoteJid ?? "").endsWith("@g.us");
@@ -714,8 +715,8 @@ function ConversasPage() {
     // syncFromWhatsApp(false) já é chamado pelo Realtime e visibilitychange
     const initialTimer = window.setTimeout(() => syncFromWhatsApp(false), 300);
 
-     // Sincronização automática em background a cada 15s
-     const poller = window.setInterval(() => syncFromWhatsApp(false), 15000);
+     // Sincronização automática em background a cada 30s para evitar excesso de requisições
+     const poller = window.setInterval(() => syncFromWhatsApp(false), 30000);
 
     const handleVisibility = () => {
       if (document.visibilityState === "visible") {
