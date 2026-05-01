@@ -90,12 +90,19 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
     }
   };
 
-  const pct = Math.min(100, Math.round((current / (goals.monthly || 1)) * 100));
-  const remaining = Math.max(0, (goals.monthly || 0) - current);
+   const pct = Math.min(100, Math.round((current / (goals.monthly || 1)) * 100)) || 0;
+   const remaining = Math.max(0, (goals.monthly || 0) - current);
   const dayOfMonth = new Date().getDate();
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-  const expectedPct = Math.round((dayOfMonth / daysInMonth) * 100);
-  const onTrack = pct >= expectedPct;
+   const expectedPct = Math.round((dayOfMonth / daysInMonth) * 100);
+   const onTrack = pct >= expectedPct;
+   
+   // Projections
+   const dailyProjection = editGoals.daily * daysInMonth;
+   const formatValue = (val: number) => {
+     if (editGoals.type === 'units') return `${val} un.`;
+     return val.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+   };
 
   // SVG ring
   const radius = 56;
