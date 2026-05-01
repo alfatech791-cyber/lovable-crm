@@ -44,7 +44,23 @@ serve(async (req) => {
 
     const phone = remoteJid.split("@")[0];
     // Pega o nome do contato ou o subject do grupo
-     const contactName = data?.pushName ?? data?.subject ?? payload?.pushName ?? null;
+    const contactNameRaw = data?.pushName ?? data?.subject ?? payload?.pushName ?? null;
+    
+    // Filtro defensivo agressivo para nomes "bugados" (IDs do WhatsApp)
+    const isBuggyName = (name: string | null) => {
+      if (!name) return true;
+      if (name === phone) return true;
+      // IDs longos alfanuméricos (ex: cmonbjx...)
+      if (/^[a-zA-Z0-9]{15,}$/.test(name)) return true;
+      // Apenas números
+      if (/^\d+$/.test(name)) return true;
+      // Termos técnicos comuns em IDs
+      if (/cmonb/i.test(name)) return true;
+      if (/@g\.us/i.test(name)) return true;
+      return false;
+    };
+
+    const contactName = isBuggyName(contactNameRaw) ? null : contactNameRaw;
      const avatarUrl = data?.profilePicUrl ?? payload?.profilePicUrl ?? data?.profilePic ?? null;
 
     const supabase = createClient(
@@ -270,15 +286,17 @@ async function persist(
   );
 
      try {
-       // Garante lead + card no pipeline (pipeline_leads)
-        const { error: rpcError } = await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
-          _user_id: userId,
-          _phone: phone,
-          _name: name,
-          _instance_name: instanceName,
-          _avatar_url: avatarUrl
-        });
-       if (rpcError) console.error("RPC Error ensure_lead:", rpcError);
+    // Garante lead + card no pipeline (pipeline_leads)
+    // Priorizamos o nome vindo da Evolution se ele for válido
+    const { error: rpcError } = await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
+      _user_id: userId,
+      _phone: phone,
+      _name: name,
+      _instance_name: instanceName,
+      _avatar_url: avatarUrl
+    });
+    
+    if (rpcError) console.error("RPC Error ensure_lead:", rpcError);
      } catch (err) {
        console.error("Failed to call rpc ensure_lead:", err);
      }
