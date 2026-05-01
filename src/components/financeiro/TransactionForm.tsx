@@ -8,7 +8,7 @@
  import { Switch } from "@/components/ui/switch";
  import { ScrollArea } from "@/components/ui/scroll-area";
  import { Separator } from "@/components/ui/separator";
- import { Wallet, Calendar, Tag, FileText, Repeat, Upload, X, PlusCircle, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Wallet, Calendar, Tag, Plus, FileText, Repeat, Upload, X, PlusCircle, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
  import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
  import { cn } from "@/lib/utils";
  import { toast } from "sonner";
@@ -20,9 +20,12 @@
    transaction?: any;
  }
  
- export function TransactionForm({ open, onOpenChange, onSave, transaction }: TransactionFormProps) {
-   const [activeTab, setActiveTab] = useState("geral");
-   const [formData, setFormData] = useState<any>({
+  export function TransactionForm({ open, onOpenChange, onSave, transaction }: TransactionFormProps) {
+    const [activeTab, setActiveTab] = useState("geral");
+    const [isAddingCategory, setIsAddingCategory] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState("");
+    const [categories, setCategories] = useState(["Geral", "Compra", "Despesa", "Vendas", "Operacional"]);
+    const [formData, setFormData] = useState<any>({
      description: "",
      amount: "",
      type: "income",
@@ -76,6 +79,19 @@
      }
    }, [transaction, open]);
  
+    const handleAddCategory = () => {
+      if (newCategoryName.trim()) {
+        const category = newCategoryName.trim();
+        if (!categories.includes(category)) {
+          setCategories(prev => [...prev, category]);
+        }
+        setFormData({ ...formData, category });
+        setNewCategoryName("");
+        setIsAddingCategory(false);
+        toast.success(`Categoria "${category}" adicionada`);
+      }
+    };
+
    const addPaymentMethod = () => {
      setFormData({
        ...formData,
@@ -231,13 +247,70 @@
  
                    <div className="space-y-2">
                      <Label htmlFor="category" className="text-xs font-black uppercase tracking-widest text-slate-500">Categoria</Label>
-                     <Input 
-                       id="category" 
-                       value={formData.category} 
-                       onChange={(e) => setFormData({ ...formData, category: e.target.value })} 
-                       placeholder="Ex: Vendas, Operacional..."
-                       className="h-11 rounded-xl border-slate-200"
-                     />
+                     {isAddingCategory ? (
+                       <div className="flex gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                         <Input 
+                           value={newCategoryName}
+                           onChange={(e) => setNewCategoryName(e.target.value)}
+                           placeholder="Nome da categoria"
+                           className="h-11 rounded-xl border-slate-200 focus:ring-blue-600"
+                           autoFocus
+                           onKeyDown={(e) => {
+                             if (e.key === 'Enter') {
+                               e.preventDefault();
+                               handleAddCategory();
+                             }
+                             if (e.key === 'Escape') {
+                               setIsAddingCategory(false);
+                               setNewCategoryName("");
+                             }
+                           }}
+                         />
+                         <Button 
+                           type="button" 
+                           onClick={handleAddCategory}
+                           className="h-11 w-11 p-0 rounded-xl bg-blue-600 hover:bg-blue-700 shrink-0 shadow-lg shadow-blue-200"
+                         >
+                           <Plus className="w-5 h-5" />
+                         </Button>
+                         <Button 
+                           type="button" 
+                           variant="ghost"
+                           onClick={() => setIsAddingCategory(false)}
+                           className="h-11 w-11 p-0 rounded-xl text-slate-400 shrink-0"
+                         >
+                           <X className="w-5 h-5" />
+                         </Button>
+                       </div>
+                     ) : (
+                       <Select 
+                         value={formData.category} 
+                         onValueChange={(value) => {
+                           if (value === "add_new") {
+                             setIsAddingCategory(true);
+                           } else {
+                             setFormData({ ...formData, category: value });
+                           }
+                         }}
+                       >
+                         <SelectTrigger className="h-11 rounded-xl border-slate-200 focus:ring-blue-600 transition-all duration-200">
+                           <SelectValue placeholder="Selecione uma categoria" />
+                         </SelectTrigger>
+                         <SelectContent className="rounded-xl border-slate-200 shadow-xl overflow-hidden">
+                           <ScrollArea className="h-[200px]">
+                             {categories.map((cat) => (
+                               <SelectItem key={cat} value={cat} className="focus:bg-blue-50 focus:text-blue-700 rounded-lg mx-1">{cat}</SelectItem>
+                             ))}
+                           </ScrollArea>
+                           <Separator className="my-1" />
+                           <SelectItem value="add_new" className="text-blue-600 font-black focus:bg-blue-600 focus:text-white rounded-lg mx-1 cursor-pointer">
+                             <div className="flex items-center gap-2">
+                               <PlusCircle className="w-4 h-4" /> CADASTRAR NOVA
+                             </div>
+                           </SelectItem>
+                         </SelectContent>
+                       </Select>
+                     )}
                    </div>
  
                    <div className="space-y-2">
