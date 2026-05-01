@@ -739,24 +739,28 @@ type Deal = {
          const stQuery = supabase.from("funnel_stages").select("*").eq("user_id", user.id).order("order_index");
         const ldQuery = supabase.from("leads").select("id, name, phone, avatar_url").eq("user_id", user.id).order("created_at", { ascending: false });
         
+         // Busca leads do pipeline filtrados estritamente pela instância ativa
          let dlQuery = supabase.from("pipeline_leads")
            .select("*, lead:leads(name, phone, source, avatar_url)")
-           .eq("user_id", user.id)
-           .order("created_at", { ascending: false });
-
-        let convQuery = supabase.from("bot_conversations")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("last_message_at", { ascending: false });
-
-          // Busca dados da instância atual ou órfãos (null/vazio) para evitar que sumam
-        if (currentInstance) {
-          dlQuery = dlQuery.or(`instance_name.eq.${currentInstance},instance_name.is.null,instance_name.eq.""`);
-          convQuery = convQuery.or(`instance_name.eq.${currentInstance},instance_name.is.null,instance_name.eq.""`);
-        } else {
-            dlQuery = dlQuery.is("instance_name", null);
-            convQuery = convQuery.is("instance_name", null);
-          }
+           .eq("user_id", user.id);
+ 
+         // Busca conversas filtradas estritamente pela instância ativa
+         let convQuery = supabase.from("bot_conversations")
+           .select("*")
+           .eq("user_id", user.id);
+ 
+         if (currentInstance) {
+           dlQuery = dlQuery.eq("instance_name", currentInstance);
+           convQuery = convQuery.eq("instance_name", currentInstance);
+         } else {
+           // Se não houver instância selecionada, não mostra nada para evitar confusão
+           // ou mostra apenas registros sem instância se o usuário preferir
+           dlQuery = dlQuery.is("instance_name", null);
+           convQuery = convQuery.is("instance_name", null);
+         }
+ 
+         dlQuery = dlQuery.order("created_at", { ascending: false });
+         convQuery = convQuery.order("last_message_at", { ascending: false });
 
         const [stRes, dlRes, ldRes, convRes] = await Promise.all([
           stQuery,
