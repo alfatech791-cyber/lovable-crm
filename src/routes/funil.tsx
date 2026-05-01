@@ -262,11 +262,13 @@ type Deal = {
             contact_phone: phone,
             contact_name: (() => {
               const rawName = chat.pushName || chat.name || chat.verifiedName;
-              // Filtro defensivo no frontend também para nomes "bugados"
+              // Filtro defensivo agressivo no frontend para nomes "bugados"
               const isBuggy = !rawName || 
                              rawName === phone || 
                              /^[a-zA-Z0-9]{15,}$/.test(rawName) || 
-                             /^\d+$/.test(rawName);
+                             /^\d+$/.test(rawName) ||
+                             /cmonb/i.test(rawName) ||
+                             /@g\.us/i.test(rawName);
               return isBuggy ? (existing?.contact_name || null) : rawName;
             })(),
             transcript: previewTranscript,
