@@ -1,5 +1,5 @@
  import { useState, useMemo, useEffect, useCallback } from "react";
- import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2 } from "lucide-react";
+import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2, ArrowLeft, History, Calculator, Percent } from "lucide-react";
  import { Product } from "@/lib/mock";
  import { toast } from "sonner";
  import { supabase } from "@/integrations/supabase/client";
@@ -237,9 +237,34 @@
      }
    };
 
-   return (
-     <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-6 h-[calc(100vh-160px)]">
-       <Dialog open={isCheckoutModalOpen} onOpenChange={setIsCheckoutModalOpen}>
+    return (
+      <div className="flex flex-col gap-4 h-[calc(100vh-140px)] animate-in fade-in duration-500">
+        {/* Header de Ações Rápidas */}
+        <div className="flex items-center justify-between bg-card p-4 border border-border rounded-2xl shadow-sm">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" className="rounded-full xl:hidden">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                Frente de Caixa
+                <Badge variant="outline" className="text-[10px] uppercase tracking-wider bg-primary/5">Operacional</Badge>
+              </h2>
+              <p className="text-xs text-muted-foreground">Terminal 01 • Atendente: {user?.email?.split('@')[0] || 'Usuário'}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="hidden sm:flex gap-2">
+              <History className="h-4 w-4" /> Histórico
+            </Button>
+            <Button variant="outline" size="sm" className="hidden sm:flex gap-2">
+              <Calculator className="h-4 w-4" /> Calculadora
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-6 flex-1 overflow-hidden">
+          <Dialog open={isCheckoutModalOpen} onOpenChange={setIsCheckoutModalOpen}>
          <DialogContent className="sm:max-w-[500px]">
            <DialogHeader>
              <DialogTitle>Finalizar Venda</DialogTitle>
