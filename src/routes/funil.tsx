@@ -1190,20 +1190,35 @@ type Deal = {
             ) : viewMode === "kanban" ? (
               <div className="flex-1 overflow-x-auto p-6 scrollbar-thin">
                 <div className="flex gap-6 h-full min-w-max">
-                  {stages.map((stage) => (
-                    <StageColumn
-                      key={stage.id}
-                      stage={stage}
-                      deals={filteredDeals.filter((d) => d.stage_id === stage.id)}
-                      onAddDeal={(stageId) => setAdding({ stage_id: stageId, initial: true })}
-                      onRemoveDeal={removeDeal}
-                      onMoveDeal={moveDeal}
-                      dragId={dragId}
-                      setDragId={setDragId}
-                      onDeleteStage={deleteStage}
-                       onSelectDeal={handleSelectDeal}
-                    />
-                  ))}
+                   {stages.length === 0 ? (
+                     <div className="flex-1 flex flex-col items-center justify-center p-12 opacity-50">
+                       <LayoutGrid className="h-12 w-12 text-muted-foreground mb-4" />
+                       <p className="text-xs font-bold uppercase tracking-widest">Nenhuma etapa encontrada</p>
+                       <Button 
+                         variant="outline" 
+                         size="sm" 
+                         className="mt-4"
+                         onClick={() => supabase.rpc("ensure_default_funnel_stages", { _user_id: user?.id }).then(() => load())}
+                       >
+                         Criar etapas padrão
+                       </Button>
+                     </div>
+                   ) : (
+                     stages.map((stage) => (
+                       <StageColumn
+                         key={stage.id}
+                         stage={stage}
+                         deals={filteredDeals.filter((d) => d.stage_id === stage.id)}
+                         onAddDeal={(stageId) => setAdding({ stage_id: stageId, initial: true })}
+                         onRemoveDeal={removeDeal}
+                         onMoveDeal={moveDeal}
+                         dragId={dragId}
+                         setDragId={setDragId}
+                         onDeleteStage={deleteStage}
+                         onSelectDeal={handleSelectDeal}
+                       />
+                     ))
+                   )}
                   
                    {/* Coluna de "Adicionar Etapa" Melhorada */}
                     <div 
