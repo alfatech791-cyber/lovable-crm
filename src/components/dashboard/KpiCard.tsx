@@ -1,6 +1,6 @@
 import {
-  Activity, ShoppingBag, Wrench, Box, DollarSign, Users,
-  TrendingUp, ArrowUpRight, Calendar, Info, Target, AlertTriangle
+   Activity, ShoppingBag, Wrench, Box, DollarSign, Users, 
+   TrendingUp, ArrowUpRight, Calendar as CalendarIcon, Info, Target, AlertTriangle
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -11,6 +11,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useState } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 type Tone = "info" | "success" | "warning" | "primary" | "destructive";
  const toneStyles: Record<Tone, { icon: string; gradient: string; ring: string }> = {
@@ -25,6 +30,7 @@ export function KpiCard({
   label, value, trend, sub, icon, tone, onClick
 }: { label: string; value: string; trend: string; sub: string; icon: string; tone: string; onClick?: () => void }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [date, setDate] = useState<Date | undefined>(new Date());
   const IconsMap: Record<string, any> = { ShoppingBag, Wrench, Box, DollarSign, Users, TrendingUp };
   const Icon = IconsMap[icon] ?? Activity;
   const navigate = useNavigate();
@@ -100,13 +106,29 @@ export function KpiCard({
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-4 rounded-xl border border-border bg-card/50">
-                <div className="flex items-center gap-2 mb-1 text-muted-foreground">
-                  <Calendar className="h-3.5 w-3.5" />
-                  <span className="text-[10px] uppercase font-bold tracking-wider">Período</span>
-                </div>
-                <p className="text-sm font-semibold">Hoje</p>
-              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div className="p-4 rounded-xl border border-border bg-card/50 cursor-pointer hover:bg-accent/50 transition-colors">
+                    <div className="flex items-center gap-2 mb-1 text-muted-foreground">
+                      <CalendarIcon className="h-3.5 w-3.5" />
+                      <span className="text-[10px] uppercase font-bold tracking-wider">Período</span>
+                    </div>
+                    <p className="text-sm font-semibold truncate">
+                      {date ? format(date, "dd 'de' MMMM", { locale: ptBR }) : "Hoje"}
+                    </p>
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                    locale={ptBR}
+                  />
+                </PopoverContent>
+              </Popover>
+
               <div className="p-4 rounded-xl border border-border bg-card/50">
                 <div className="flex items-center gap-2 mb-1 text-muted-foreground">
                   <Target className="h-3.5 w-3.5" />
