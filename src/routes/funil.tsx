@@ -1136,18 +1136,6 @@ type Deal = {
                   <span className="text-[10px] font-black text-primary uppercase tracking-widest">IA Ativa</span>
                 </div>
                 
-                 <div className="h-8 w-[1px] bg-border/40" />
-                 
-                 <Button 
-                   variant="ghost" 
-                   size="icon" 
-                   className="h-10 w-10 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
-                   onClick={() => load()}
-                   disabled={loading}
-                 >
-                   <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-                 </Button>
-                
                 <Button className="h-10 px-6 gap-2 text-xs font-black shadow-lg shadow-primary/20 rounded-xl hover:scale-105 transition-all" onClick={() => setAdding({ stage_id: stages[0]?.id || "", initial: true })}>
                   <Plus className="h-4 w-4" /> NOVO NEGÓCIO
                 </Button>
