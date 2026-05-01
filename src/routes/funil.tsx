@@ -877,12 +877,23 @@ type Deal = {
       // Removemos o poller automático e o sync on visibility para evitar loop de sincronização infinito
       // A sincronização manual via botão "Sincronizar WhatsApp" é preferida para controle do usuário.
       
+      // Auto-sincronização ao carregar a página se houver uma instância ativa
+      const autoSync = async () => {
+        const instance = activeInstance || await resolveInstance();
+        if (instance) {
+          console.log("Iniciando auto-sincronização para instância:", instance);
+          syncFromWhatsApp(false);
+        }
+      };
+      
+      autoSync();
+
       // Timeout de segurança: garante que o loading termine mesmo se algo travar
       const safety = setTimeout(() => setLoading(false), 8000);
       return () => {
         clearTimeout(safety);
       };
-    }, [user?.id, authLoading]);
+    }, [user?.id, authLoading, activeInstance]);
 
   const moveDeal = async (dealId: string, newStageId: string) => {
     setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, stage_id: newStageId } : d)));
