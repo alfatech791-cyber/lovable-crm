@@ -113,6 +113,46 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (pct / 100) * circumference;
 
+  // We need to fetch the actual value based on the goal type (revenue, units, profit)
+  // since the parent might only pass revenue.
+  const [calculatedCurrent, setCalculatedCurrent] = useState(current);
+
+  useEffect(() => {
+    const calculateValue = async () => {
+      if (!user?.id) return;
+      
+      const firstDayMonth = new Date();
+      firstDayMonth.setDate(1);
+      firstDayMonth.setHours(0, 0, 0, 0);
+
+      const { data: sales, error } = await supabase
+        .from("sales_orders")
+        .select("total_amount, status, created_at")
+        .eq("user_id", user.id)
+        .gte("created_at", firstDayMonth.toISOString())
+        .eq("status", "concluded");
+
+      if (error) return;
+
+      if (goals.type === 'units') {
+        setCalculatedCurrent(sales?.length || 0);
+      } else if (goals.type === 'profit') {
+        // Assuming 30% profit if no cost data is available, otherwise sum profit field
+        const revenue = sales?.reduce((acc, s) => acc + (s.total_amount || 0), 0) || 0;
+        setCalculatedCurrent(revenue * 0.3);
+      } else {
+        const revenue = sales?.reduce((acc, s) => acc + (s.total_amount || 0), 0) || 0;
+        setCalculatedCurrent(revenue);
+      }
+    };
+
+    calculateValue();
+  }, [goals.type, user?.id, current]);
+
+  const displayCurrent = calculatedCurrent;
+  const pct = Math.min(100, Math.round((displayCurrent / (goals.monthly || 1)) * 100)) || 0;
+  const remaining = Math.max(0, (goals.monthly || 0) - displayCurrent);
+
   return (
     <>
       <div 
@@ -176,8 +216,8 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
             <div className="text-[11px] text-muted-foreground">Realizado</div>
             <div className="text-base sm:text-lg font-bold font-display truncate">
               {goals.type === 'units' 
-                ? `${current} un.` 
-                : current.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                ? `${displayCurrent} un.` 
+                : displayCurrent.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </div>
           </div>
           <div className="min-w-0">
