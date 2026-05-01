@@ -267,6 +267,8 @@ type Deal = {
      }
    };
 
+    const [activeInstance, setActiveInstance] = useState<string | null>(null);
+
     const [viewMode, setViewMode] = useState<"kanban" | "chat">("kanban");
    const [stages, setStages] = useState<Stage[]>([]);
    const [deals, setDeals] = useState<Deal[]>([]);
@@ -540,20 +542,21 @@ type Deal = {
         console.warn("ensure_default_funnel_stages falhou:", e);
       }
 
-      const activeInstance = await resolveInstance();
+      const currentInstance = await resolveInstance();
+      setActiveInstance(currentInstance);
 
       const [stRes, dlRes, ldRes, convRes, allDealsRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
         supabase.from("pipeline_leads")
           .select("*, lead:leads(name, phone, source)")
           .eq("user_id", user.id)
-          .or(`instance_name.eq.${activeInstance},instance_name.is.null`) // fallback para legados
+          .or(`instance_name.eq.${currentInstance},instance_name.is.null`) // fallback para legados
           .order("created_at", { ascending: false }),
         supabase.from("leads").select("id, name, phone").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("bot_conversations")
           .select("*")
           .eq("user_id", user.id)
-          .or(`instance_name.eq.${activeInstance},instance_name.is.null`) // fallback para legados
+          .or(`instance_name.eq.${currentInstance},instance_name.is.null`) // fallback para legados
           .order("last_message_at", { ascending: false }),
         supabase.from("pipeline_leads").select("lead_id")
       ]);
@@ -575,7 +578,7 @@ type Deal = {
                 _user_id: user.id,
                 _phone: c.contact_phone,
                 _name: c.contact_name,
-                _instance_name: activeInstance,
+                _instance_name: currentInstance,
               } as any)
             )
           );
@@ -787,6 +790,12 @@ type Deal = {
                       {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wifi className="h-3 w-3" />}
                       {syncing ? "Sincronizando..." : "Sincronizar WhatsApp"}
                     </Button>
+                    {activeInstance && (
+                      <div className="flex items-center gap-1.5 px-2 py-1 bg-green-500/10 rounded-lg border border-green-500/20">
+                        <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-[9px] font-black text-green-600 uppercase tracking-tighter">{activeInstance}</span>
+                      </div>
+                    )}
                     <div className="w-[1px] h-4 bg-border/40 mx-1" />
                    <Button 
                     variant={sortBy === "recent" ? "secondary" : "ghost"} 
