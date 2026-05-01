@@ -12,9 +12,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
  import { 
    DropdownMenu, 
    DropdownMenuContent, 
-   DropdownMenuItem, 
-   DropdownMenuTrigger,
-   DropdownMenuSeparator
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+    DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuPortal
  } from "@/components/ui/dropdown-menu";
  
  const mockSales = [
@@ -328,18 +332,42 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
                             </div>
                           </DropdownMenuItem>
 
-                           <DropdownMenuItem 
-                             onClick={() => window.open(`/pdv?print=warranty&id=${sale.id}`, '_blank')}
-                             className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group"
-                           >
-                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                              <FileText className="h-4 w-4" />
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="font-bold text-xs">Termo de Garantia</span>
-                              <span className="text-[9px] text-muted-foreground">Gerar PDF de garantia</span>
-                            </div>
-                          </DropdownMenuItem>
+                           <DropdownMenuSub>
+                             <DropdownMenuSubTrigger className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group border-none outline-none data-[state=open]:bg-primary/10">
+                               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                                 <FileText className="h-4 w-4" />
+                               </div>
+                               <div className="flex flex-col text-left">
+                                 <span className="font-bold text-xs">Termo de Garantia</span>
+                                 <span className="text-[9px] text-muted-foreground">Gerar PDF de garantia</span>
+                               </div>
+                             </DropdownMenuSubTrigger>
+                             <DropdownMenuPortal>
+                               <DropdownMenuSubContent className="w-64 p-2 rounded-xl shadow-2xl border-border/40 bg-card/95 backdrop-blur-md">
+                                 <div className="px-3 py-2 mb-1">
+                                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Escolha o Tipo</span>
+                                 </div>
+                                 <DropdownMenuItem 
+                                   onClick={() => window.open(`/pdv?print=warranty&type=seminovo&id=${sale.id}`, '_blank')}
+                                   className="py-2.5 rounded-lg cursor-pointer focus:bg-primary/10 font-bold text-xs"
+                                 >
+                                   iPhone Seminovo (7 meses)
+                                 </DropdownMenuItem>
+                                 <DropdownMenuItem 
+                                   onClick={() => window.open(`/pdv?print=warranty&type=lacrado&id=${sale.id}`, '_blank')}
+                                   className="py-2.5 rounded-lg cursor-pointer focus:bg-primary/10 font-bold text-xs"
+                                 >
+                                   iPhone Lacrado (1 ano)
+                                 </DropdownMenuItem>
+                                 <DropdownMenuItem 
+                                   onClick={() => window.open(`/pdv?print=warranty&type=android&id=${sale.id}`, '_blank')}
+                                   className="py-2.5 rounded-lg cursor-pointer focus:bg-primary/10 font-bold text-xs"
+                                 >
+                                   Aparelho Android (1 ano)
+                                 </DropdownMenuItem>
+                               </DropdownMenuSubContent>
+                             </DropdownMenuPortal>
+                           </DropdownMenuSub>
 
                            <DropdownMenuItem 
                              onClick={() => toast.success("Nota Fiscal emitida com sucesso e enviada ao SEFAZ.")}

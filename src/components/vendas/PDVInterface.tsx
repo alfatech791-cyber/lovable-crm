@@ -51,17 +51,7 @@
    const [isFinishing, setIsFinishing] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [lastSaleId, setLastSaleId] = useState<string | null>(null);
-   const [lastSaleData, setLastSaleData] = useState<{
-     id?: string;
-     items: CartItem[];
-     total: number;
-     discount: number;
-     customer: { id?: string; name: string; phone?: string; document?: string; address?: string } | null;
-     paymentMethod: string;
-     storeInfo?: { name: string; cnpj: string; phone: string; address: string };
-     vendedor?: string;
-     data?: string;
-   } | null>(null);
+  const [lastSaleData, setLastSaleData] = useState<any | null>(null);
   const [selectedCartItemId, setSelectedCartItemId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -101,21 +91,259 @@
      }
    }, [user?.id]);
  
-   const fetchCustomers = useCallback(async () => {
-     if (!user?.id) return;
-     try {
-       const { data, error } = await supabase
-         .from("customers")
-         .select("id, full_name")
-         .eq("user_id", user.id)
-         .limit(50);
-       
-       if (error) throw error;
-       setCustomersList(data || []);
-     } catch (error) {
-       console.error("Erro ao carregar clientes:", error);
-     }
-   }, [user?.id]);
+  const fetchCustomers = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const { data, error } = await supabase
+        .from("customers")
+        .select("id, full_name")
+        .eq("user_id", user.id)
+        .limit(50);
+      
+      if (error) throw error;
+      setCustomersList(data || []);
+    } catch (error) {
+      console.error("Erro ao carregar clientes:", error);
+    }
+  }, [user?.id]);
+
+  const handlePrintReceipt = (saleData?: any) => {
+    const data = saleData || lastSaleData;
+    if (!data) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const itemsHtml = data.items.map((item: any) => `
+      <tr>
+        <td style="padding: 6px 0; border-bottom: 1px solid #f0f0f0;">
+          <div style="font-weight: bold;">${item.name}</div>
+          <div style="font-size: 10px; color: #666;">
+            ${item.model ? `Mod: ${item.model}` : ''} 
+            ${item.capacity ? `| Cap: ${item.capacity}` : ''}
+          </div>
+        </td>
+        <td style="text-align: right; padding: 6px 0; border-bottom: 1px solid #f0f0f0;">
+          ${item.quantity}x<br>
+          <strong>${(item.price * item.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
+        </td>
+      </tr>
+    `).join('');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Cupom de Venda - #${data.id?.slice(0, 8)}</title>
+          <style>
+            body { font-family: 'Inter', Arial, sans-serif; font-size: 11px; line-height: 1.4; width: 280px; margin: 0 auto; padding: 15px; color: #000; }
+            .header { text-align: center; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+            .store-name { font-size: 18px; font-weight: 900; margin: 0; text-transform: uppercase; letter-spacing: -1px; }
+            .divider { border-top: 1px dashed #000; margin: 10px 0; }
+            .section-title { font-weight: 800; text-transform: uppercase; font-size: 9px; color: #666; margin-bottom: 4px; }
+            table { width: 100%; border-collapse: collapse; }
+            .total-area { margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 4px; }
+            .total-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
+            .grand-total { font-size: 16px; font-weight: 900; border-top: 1px solid #000; padding-top: 5px; margin-top: 5px; }
+            .footer { text-align: center; margin-top: 20px; font-size: 9px; color: #666; font-style: italic; }
+            @media print { body { width: 100%; padding: 0; } .no-print { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1 class="store-name">${data.storeInfo?.name}</h1>
+            <p style="margin: 2px 0;">${data.storeInfo?.address}</p>
+            <p style="margin: 2px 0;">CNPJ: ${data.storeInfo?.cnpj}</p>
+            <p style="margin: 2px 0;">Fone: ${data.storeInfo?.phone}</p>
+          </div>
+          
+          <div class="section">
+            <div class="section-title">Comprovante de Venda</div>
+            <div style="display: flex; justify-content: space-between;">
+              <span>Nº Pedido: <strong>#${data.id?.slice(0, 8).toUpperCase()}</strong></span>
+              <span>Data: ${data.data?.split(',')[0]}</span>
+            </div>
+            <p style="margin: 2px 0;">Vendedor: ${data.vendedor}</p>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="section">
+            <div class="section-title">Cliente</div>
+            <p style="margin: 0; font-weight: bold;">${data.customer?.name || 'Consumidor Final'}</p>
+            ${data.customer?.phone ? `<p style="margin: 0;">Tel: ${data.customer.phone}</p>` : ''}
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="section">
+            <div class="section-title">Itens do Pedido</div>
+            <table>
+              ${itemsHtml}
+            </table>
+          </div>
+
+          <div class="total-area">
+            <div class="total-row">
+              <span>Subtotal:</span>
+              <span>${((data.total || 0) + (data.discount || 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+            </div>
+            ${data.discount > 0 ? `
+              <div class="total-row" style="color: #d00;">
+                <span>Desconto:</span>
+                <span>-${data.discount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+              </div>
+            ` : ''}
+            <div class="total-row grand-total">
+              <span>TOTAL:</span>
+              <span>${(data.total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+            </div>
+            <p style="margin: 8px 0 0 0; font-size: 9px; font-weight: bold;">
+              FORMA DE PAGTO: ${data.paymentMethod}
+            </p>
+          </div>
+
+          <div class="footer">
+            <p>Este documento não é nota fiscal.</p>
+            <p>Obrigado pela preferência!</p>
+            <p><strong>Acesse: www.applejau.com.br</strong></p>
+          </div>
+          <div class="no-print" style="margin-top: 20px; text-align: center;">
+            <button onclick="window.print()" style="padding: 10px; width: 100%; cursor: pointer;">Imprimir</button>
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const handlePrintWarranty = (type: 'seminovo' | 'lacrado' | 'android', saleData?: any) => {
+    const data = saleData || lastSaleData;
+    if (!data) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const warrantyTime = type === 'seminovo' ? '7 meses' : '1 ano';
+    const typeLabel = type === 'seminovo' ? 'iPhone Seminovo' : type === 'lacrado' ? 'iPhone Lacrado' : 'Aparelho Android';
+
+    const itemsHtml = data.items.map((item: any) => `
+      <div style="border: 1px solid #e0e0e0; padding: 12px; margin-bottom: 10px; border-radius: 8px; background: #fafafa;">
+        <div style="font-size: 14px; font-weight: bold; color: #000; margin-bottom: 5px;">${item.name}</div>
+        <div style="display: grid; grid-template-cols: 1fr 1fr; gap: 5px; font-size: 11px;">
+          ${item.model ? `<div><strong>Modelo:</strong> ${item.model}</div>` : ''}
+          ${item.capacity ? `<div><strong>Capacidade:</strong> ${item.capacity}</div>` : ''}
+          ${item.color ? `<div><strong>Cor:</strong> ${item.color}</div>` : ''}
+          ${item.battery_health ? `<div><strong>Saúde Bateria:</strong> ${item.battery_health}%</div>` : ''}
+          <div style="grid-column: span 2; margin-top: 4px; border-top: 1px solid #eee; pt: 4px;">
+            <strong>ID/IMEI/SÉRIE:</strong> <span style="font-family: monospace;">${item.id || 'N/A'}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Termo de Garantia - ${typeLabel}</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+            body { font-family: 'Inter', sans-serif; font-size: 12px; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 30px; color: #222; }
+            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
+            .store-info { text-align: right; font-size: 11px; }
+            .doc-title { font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; }
+            .section { margin-bottom: 25px; }
+            .section-header { background: #000; color: #fff; padding: 5px 12px; font-weight: 900; text-transform: uppercase; font-size: 11px; border-radius: 4px; margin-bottom: 12px; }
+            .customer-grid { display: grid; grid-template-cols: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+            .info-card { border: 1px solid #eee; padding: 15px; border-radius: 8px; }
+            .terms-list { padding-left: 20px; }
+            .terms-list li { margin-bottom: 8px; }
+            .signatures { display: grid; grid-template-cols: 1fr 1fr; gap: 60px; margin-top: 80px; text-align: center; }
+            .sig-box { border-top: 2px solid #000; padding-top: 10px; }
+            .footer-info { text-align: center; margin-top: 40px; font-size: 10px; color: #666; border-top: 1px solid #eee; padding-top: 20px; }
+            @media print { body { padding: 0; } .no-print { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="doc-title">TERMO DE<br>GARANTIA</div>
+              <div style="color: #666; font-weight: bold; margin-top: 5px;">${typeLabel.toUpperCase()}</div>
+            </div>
+            <div class="store-info">
+              <div style="font-size: 16px; font-weight: 900;">${data.storeInfo?.name}</div>
+              <div>CNPJ: ${data.storeInfo?.cnpj}</div>
+              <div>${data.storeInfo?.phone}</div>
+              <div>${data.storeInfo?.address}</div>
+            </div>
+          </div>
+
+          <div class="customer-grid">
+            <div class="info-card">
+              <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #888; margin-bottom: 5px;">Dados do Cliente</div>
+              <div style="font-size: 14px; font-weight: bold;">${data.customer?.name || 'Consumidor Final'}</div>
+              <div>CPF/CNPJ: ${data.customer?.document || 'N/A'}</div>
+              <div>Telefone: ${data.customer?.phone || 'N/A'}</div>
+              <div>Endereço: ${data.customer?.address || 'N/A'}</div>
+            </div>
+            <div class="info-card">
+              <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #888; margin-bottom: 5px;">Dados da Venda</div>
+              <div>Nº Pedido: <strong>#${data.id?.slice(0, 8).toUpperCase()}</strong></div>
+              <div>Data da Compra: ${data.data?.split(',')[0]}</div>
+              <div>Vendedor: ${data.vendedor}</div>
+              <div><strong>Prazo de Garantia: ${warrantyTime}</strong></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-header">1. Identificação do Produto</div>
+            ${itemsHtml}
+          </div>
+
+          <div class="section">
+            <div class="section-header">2. Condições Gerais e Cobertura</div>
+            <p>O aparelho acima descrito possui garantia legal e contratual totalizando o prazo de <strong>${warrantyTime}</strong>. Esta garantia cobre exclusivamente defeitos de fabricação ou vícios ocultos nos componentes internos do aparelho que impeçam seu funcionamento normal.</p>
+            <ul class="terms-list">
+              <li><strong>iPhones Seminovos:</strong> A bateria possui garantia de 3 meses se apresentar saúde inferior a 80%.</li>
+              <li><strong>Aparelhos Novos:</strong> A garantia é de 1 ano diretamente com o fabricante ou conforme CDC.</li>
+            </ul>
+          </div>
+
+          <div class="section">
+            <div class="section-header">3. Exclusões (Perda Total de Garantia)</div>
+            <p>A garantia será automaticamente <strong>INVALIDADA</strong> nos seguintes casos:</p>
+            <ul class="terms-list">
+              <li>Danos causados por queda, impacto, pressão ou mau uso (telas quebradas ou riscadas);</li>
+              <li>Contato com líquidos (oxidação), mesmo em aparelhos resistentes à água;</li>
+              <li>Uso de carregadores, cabos ou acessórios não originais/homologados;</li>
+              <li>Aparelho aberto ou reparado por assistência técnica não autorizada;</li>
+              <li>Modificações de software (Jailbreak, Root) ou bloqueios de iCloud/Google;</li>
+              <li>Remoção ou violação do selo de garantia da loja.</li>
+            </ul>
+          </div>
+
+          <div class="signatures">
+            <div class="sig-box">
+              <div style="font-weight: bold;">Assinatura do Cliente</div>
+              <div style="font-size: 10px;">Confirmo o recebimento em perfeito estado</div>
+            </div>
+            <div class="sig-box">
+              <div style="font-weight: bold;">${data.storeInfo?.name}</div>
+              <div style="font-size: 10px;">Carimbo e Assinatura do Responsável</div>
+            </div>
+          </div>
+
+          <div class="footer-info">
+            Jaú, ${new Date().toLocaleDateString('pt-BR')} - Este documento é indispensável para acionamento da garantia.
+          </div>
+
+          <div class="no-print" style="margin-top: 30px; text-align: center;">
+            <button onclick="window.print()" style="padding: 12px 24px; background: #000; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">IMPRIMIR TERMO DE GARANTIA</button>
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
  
     useEffect(() => {
       const loadData = async () => {
@@ -126,6 +354,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const saleId = urlParams.get('id') || urlParams.get('view');
         const action = urlParams.get('print');
+        const warrantyType = urlParams.get('type') as 'seminovo' | 'lacrado' | 'android' | null;
 
         if (saleId && user?.id) {
           try {
@@ -168,62 +397,12 @@
             if (action === 'receipt') {
               // Pequeno delay para garantir que o estado foi atualizado
               setTimeout(() => {
-                const printWindow = window.open('', '_blank');
-                if (printWindow) {
-                  const itemsHtml = saleSnapshot.items.map((item: any) => `
-                    <tr>
-                      <td style="padding: 5px 0;">${item.name} x${item.quantity}</td>
-                      <td style="text-align: right; padding: 5px 0;">${(item.price * item.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-                    </tr>
-                  `).join('');
-
-                  printWindow.document.write(`
-                    <html>
-                      <head>
-                        <title>Recibo de Venda - #${sale.id.slice(0, 8)}</title>
-                        <style>
-                          body { font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.2; width: 300px; margin: 0 auto; padding: 20px; }
-                          .header { text-align: center; margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
-                          .section { margin-bottom: 15px; }
-                          .section-title { font-weight: bold; text-transform: uppercase; margin-bottom: 5px; border-bottom: 1px solid #eee; }
-                          table { width: 100%; border-collapse: collapse; }
-                          .total-row { font-weight: bold; border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px; }
-                          .footer { text-align: center; margin-top: 30px; font-size: 10px; }
-                          @media print { body { width: 100%; } }
-                        </style>
-                      </head>
-                      <body>
-                        <div class="header">
-                           <h2 style="margin: 0;">${storeConfig.name}</h2>
-                           <p style="margin: 5px 0;">CNPJ: ${storeConfig.cnpj}</p>
-                           <p style="margin: 0;">Tel: ${storeConfig.phone}</p>
-                        </div>
-                        <div class="section">
-                           <div class="section-title">Dados da Venda</div>
-                           <p style="margin: 2px 0;">Pedido: #${sale.id.slice(0, 8)}</p>
-                           <p style="margin: 2px 0;">Data: ${saleSnapshot.data}</p>
-                        </div>
-                        <div class="section">
-                          <div class="section-title">Produtos</div>
-                          <table>${itemsHtml}</table>
-                        </div>
-                        <div class="total-row">
-                          <div style="display: flex; justify-content: space-between;">
-                            <span>TOTAL:</span>
-                            <span>${(sale.total_amount || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                          </div>
-                        </div>
-                        <div class="footer"><p>Obrigado pela preferência!</p></div>
-                      </body>
-                    </html>
-                  `);
-                  printWindow.document.close();
-                  printWindow.print();
-                }
+                handlePrintReceipt(saleSnapshot);
               }, 500);
             } else if (action === 'warranty') {
-               // Lógica similar para o termo de garantia se necessário via URL
-               toast.info("Abrindo Termo de Garantia...");
+              setTimeout(() => {
+                handlePrintWarranty(warrantyType || 'seminovo', saleSnapshot);
+              }, 500);
             }
           } catch (err) {
             console.error("Erro ao carregar venda via URL:", err);
@@ -518,216 +697,10 @@
      } catch (error) {
        console.error("Erro ao finalizar venda:", error);
        toast.error("Erro ao processar a venda. Tente novamente.");
-     } finally {
-       setIsFinishing(false);
-     }
-   };
- 
-    const handlePrintReceipt = () => {
-      if (!lastSaleData) return;
-      
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) return;
-
-      const itemsHtml = lastSaleData.items.map(item => `
-        <tr>
-          <td style="padding: 5px 0;">${item.name} x${item.quantity}</td>
-          <td style="text-align: right; padding: 5px 0;">${(item.price * item.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-        </tr>
-      `).join('');
-
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Recibo de Venda - #${lastSaleId?.slice(0, 8)}</title>
-            <style>
-              body { font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.2; width: 300px; margin: 0 auto; padding: 20px; }
-              .header { text-align: center; margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
-              .section { margin-bottom: 15px; }
-              .section-title { font-weight: bold; text-transform: uppercase; margin-bottom: 5px; border-bottom: 1px solid #eee; }
-              table { width: 100%; border-collapse: collapse; }
-              .total-row { font-weight: bold; border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px; }
-              .footer { text-align: center; margin-top: 30px; font-size: 10px; }
-              @media print { body { width: 100%; } }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-               <h2 style="margin: 0;">${lastSaleData.storeInfo?.name}</h2>
-               <p style="margin: 5px 0;">CNPJ: ${lastSaleData.storeInfo?.cnpj}</p>
-               <p style="margin: 0;">Tel: ${lastSaleData.storeInfo?.phone}</p>
-            </div>
-            
-             <div class="section">
-               <div class="section-title">Dados da Venda</div>
-               <p style="margin: 2px 0;">Pedido: #${lastSaleData.id?.slice(0, 8)}</p>
-               <p style="margin: 2px 0;">Data: ${lastSaleData.data}</p>
-               <p style="margin: 2px 0;">Vendedor: ${lastSaleData.vendedor}</p>
-             </div>
-
-            <div class="section">
-              <div class="section-title">Cliente</div>
-              <p style="margin: 2px 0;">Nome: ${lastSaleData.customer?.name || 'Consumidor Final'}</p>
-            </div>
-
-            <div class="section">
-              <div class="section-title">Produtos</div>
-              <table>
-                ${itemsHtml}
-              </table>
-            </div>
-
-            <div class="total-row">
-              <div style="display: flex; justify-content: space-between;">
-                <span>Subtotal:</span>
-                <span>${(lastSaleData.total + lastSaleData.discount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-              </div>
-              ${lastSaleData.discount > 0 ? `
-                <div style="display: flex; justify-content: space-between;">
-                  <span>Desconto:</span>
-                  <span>-${lastSaleData.discount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                </div>
-              ` : ''}
-              <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 5px;">
-                <span>TOTAL:</span>
-                <span>${lastSaleData.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-              </div>
-              <p style="margin: 10px 0 0 0; font-size: 10px;">Forma de Pagamento: ${lastSaleData.paymentMethod}</p>
-            </div>
-
-            <div class="footer">
-              <p>Obrigado pela preferência!</p>
-              <p>Volte sempre.</p>
-            </div>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
+      } finally {
+        setIsFinishing(false);
+      }
     };
-
-    const handlePrintWarranty = (type: 'seminovo' | 'lacrado' | 'android') => {
-      if (!lastSaleData) return;
-      
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) return;
-
-      const warrantyTime = type === 'seminovo' ? '7 meses' : '1 ano';
-      const typeLabel = type === 'seminovo' ? 'iPhone Seminovo' : type === 'lacrado' ? 'iPhone Lacrado' : 'Aparelho Android';
-
-       const itemsHtml = lastSaleData.items.map(item => `
-         <div style="border: 1px solid #eee; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-           <strong>${item.name}</strong><br>
-           ${item.model ? `<span>Modelo: ${item.model}</span><br>` : ''}
-           ${item.capacity ? `<span>Capacidade: ${item.capacity}</span><br>` : ''}
-           ${item.color ? `<span>Cor: ${item.color}</span><br>` : ''}
-           ${item.battery_health ? `<span>Saúde da Bateria: ${item.battery_health}%</span><br>` : ''}
-           ${item.id ? `<small style="color: #666;">ID/IMEI: ${item.id}</small>` : ''}
-         </div>
-       `).join('');
-
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Termo de Garantia - ${typeLabel}</title>
-            <style>
-              body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.5; max-width: 800px; margin: 0 auto; padding: 40px; color: #333; }
-              .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 20px; }
-              .title { font-size: 18px; font-weight: bold; text-transform: uppercase; margin: 10px 0; }
-              .section { margin-bottom: 20px; }
-              .section-title { font-weight: bold; text-decoration: underline; margin-bottom: 10px; display: block; }
-              .grid { display: grid; grid-template-cols: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-              .info-box { border: 1px solid #ccc; padding: 10px; border-radius: 4px; }
-              .footer { margin-top: 50px; }
-              .signatures { display: grid; grid-template-cols: 1fr 1fr; gap: 50px; margin-top: 60px; text-align: center; }
-              .sig-line { border-top: 1px solid #000; padding-top: 5px; }
-              @media print { body { padding: 20px; } .no-print { display: none; } }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <div class="title">TERMO DE GARANTIA E CONDIÇÕES DE USO</div>
-              <div style="font-size: 14px; font-weight: bold;">${typeLabel.toUpperCase()}</div>
-            </div>
-
-             <div class="grid">
-                <div class="info-box">
-                  <span class="section-title">DADOS DA LOJA</span>
-                  <strong>${lastSaleData.storeInfo?.name}</strong><br>
-                  CNPJ: ${lastSaleData.storeInfo?.cnpj}<br>
-                  Tel: ${lastSaleData.storeInfo?.phone}<br>
-                  End: ${lastSaleData.storeInfo?.address}
-                </div>
-                <div class="info-box">
-                  <span class="section-title">DADOS DO CLIENTE</span>
-                  <strong>Nome:</strong> ${lastSaleData.customer?.name || 'Consumidor Final'}<br>
-                  <strong>CPF/CNPJ:</strong> ${lastSaleData.customer?.document || 'N/A'}<br>
-                  <strong>Tel:</strong> ${lastSaleData.customer?.phone || 'N/A'}<br>
-                  <strong>End:</strong> ${lastSaleData.customer?.address || 'N/A'}
-                </div>
-             </div>
-
-             <div class="section">
-               <span class="section-title">DADOS DO(S) APARELHO(S)</span>
-               <div style="margin-top: 10px;">
-                 ${itemsHtml}
-               </div>
-             </div>
-
-            <div class="section">
-              <span class="section-title">1. PRAZO DE GARANTIA</span>
-              <p>O aparelho acima descrito possui garantia legal e contratual totalizando o prazo de <strong>${warrantyTime}</strong>, a contar da data de compra/entrega do produto. Esta garantia cobre exclusivamente defeitos de fabricação ou vícios ocultos nos componentes internos do aparelho.</p>
-            </div>
-
-            <div class="section">
-              <span class="section-title">2. COBERTURA DA GARANTIA</span>
-              <p>A garantia abrange o reparo ou substituição de peças que apresentarem defeitos funcionais de hardware. Para iPhones Seminovos, a bateria é garantida apenas se apresentar saúde inferior a 80% nos primeiros 3 meses.</p>
-            </div>
-
-            <div class="section">
-              <span class="section-title">3. EXCLUSÕES DE GARANTIA</span>
-              <p>A garantia será automaticamente <strong>CANCELADA</strong> nos seguintes casos:</p>
-              <ul>
-                <li>Danos causados por queda, impacto ou pressão excessiva (telas quebradas, trincadas ou com manchas);</li>
-                <li>Danos causados por líquidos (oxidação), mesmo em aparelhos com certificação IP67/IP68;</li>
-                <li>Aparelho aberto, reparado ou manuseado por assistência técnica não autorizada por nós;</li>
-                <li>Uso de carregadores e cabos não homologados ou de má qualidade;</li>
-                <li>Danos no software por tentativas de "jailbreak", "root" ou instalações indevidas;</li>
-                <li>Ausência ou violação do selo de garantia interno/externo.</li>
-              </ul>
-            </div>
-
-            <div class="section">
-              <span class="section-title">4. PROCEDIMENTO PARA ACIONAMENTO</span>
-              <p>Em caso de defeito, o cliente deverá entrar em contato imediatamente. O prazo para análise e reparo é de até 30 dias, conforme o Código de Defesa do Consumidor.</p>
-            </div>
-
-            <div class="footer">
-              <p style="text-align: center; margin-bottom: 40px;">
-                Local e Data: ________________________________, ${new Date().toLocaleDateString('pt-BR')}
-              </p>
-              
-              <div class="signatures">
-                <div>
-                  <div class="sig-line">ASSINATURA DO CLIENTE</div>
-                  <small>Declaro que recebi o aparelho em perfeitas condições e concordo com os termos acima.</small>
-                </div>
-                <div>
-                  <div class="sig-line">RESPONSÁVEL PELA LOJA</div>
-                  <small>Carimbo e Assinatura</small>
-                </div>
-              </div>
-            </div>
-
-            <div class="no-print" style="margin-top: 50px; text-align: center;">
-              <button onclick="window.print()" style="padding: 10px 20px; cursor: pointer; background: #000; color: #fff; border: none; border-radius: 4px; font-weight: bold;">IMPRIMIR AGORA</button>
-            </div>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-    };
-
     const handleCreateCustomer = async () => {
       if (!user?.id || !newCustomerName) return;
      try {
@@ -916,7 +889,7 @@
              <div className="grid grid-cols-1 gap-3">
                 <Button 
                   className="w-full gap-2 h-12 font-bold" 
-                  onClick={handlePrintReceipt}
+                  onClick={() => handlePrintReceipt()}
                 >
                  <Printer className="h-4 w-4" /> Imprimir Recibo
                </Button>
