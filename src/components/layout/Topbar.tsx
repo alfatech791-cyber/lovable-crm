@@ -1,23 +1,16 @@
-import { Bell, MessageCircle, Plus, Search, ChevronDown, ArrowLeft } from "lucide-react";
-import { useNavigate, useLocation } from "@tanstack/react-router";
+ import { Bell, MessageCircle, Plus, Search, ChevronDown, ArrowLeft } from "lucide-react";
+ import { useNavigate, useLocation } from "@tanstack/react-router";
+ import { useAuth } from "@/contexts/AuthContext";
 
 export function Topbar({ title, subtitle, toggleSidebar }: { title: string; subtitle?: string; toggleSidebar?: () => void }) {
   const navigate = useNavigate();
-  const location = useLocation();
-  const isHome = location.pathname === "/";
+   const location = useLocation();
+   const { user, profile } = useAuth();
+   const isHome = location.pathname === "/";
 
   return (
     <header className="h-[68px] shrink-0 bg-card border-b border-border flex items-center gap-2 sm:gap-3 lg:gap-4 px-3 sm:px-4 lg:px-6">
       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-        {!isHome && (
-          <button 
-            onClick={() => navigate({ to: ".." })}
-            className="p-2 rounded-xl hover:bg-muted text-muted-foreground transition-colors group"
-            title="Voltar"
-          >
-            <ArrowLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
-          </button>
-        )}
         <button 
           className="lg:hidden p-2 rounded-md hover:bg-muted"
           onClick={toggleSidebar}
@@ -66,17 +59,22 @@ export function Topbar({ title, subtitle, toggleSidebar }: { title: string; subt
           <MessageCircle className="h-[18px] w-[18px] text-foreground/70" />
           <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-primary text-[10px] font-semibold text-primary-foreground grid place-items-center">3</span>
         </button>
-        <div className="ml-1 sm:ml-2 flex items-center gap-2.5 pl-1 sm:pl-2 pr-1 py-1 rounded-xl hover:bg-muted cursor-pointer">
-          <div className="relative">
-            <div className="h-9 w-9 rounded-full bg-gradient-primary grid place-items-center text-white text-sm font-semibold">RS</div>
-            <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-success border-2 border-card" />
-          </div>
-          <div className="hidden xl:block leading-tight">
-            <div className="text-[13px] font-semibold">Renato Silva</div>
-            <div className="text-[11px] text-muted-foreground">Administrador</div>
-          </div>
-          <ChevronDown className="hidden xl:block h-4 w-4 text-muted-foreground" />
-        </div>
+         <div 
+           className="ml-1 sm:ml-2 flex items-center gap-2.5 pl-1 sm:pl-2 pr-1 py-1 rounded-xl hover:bg-muted cursor-pointer"
+           onClick={() => navigate({ to: "/configuracoes" })}
+         >
+           <div className="relative">
+             <div className="h-9 w-9 rounded-full bg-gradient-primary grid place-items-center text-white text-sm font-semibold">
+               {profile?.display_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
+             </div>
+             <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-success border-2 border-card" />
+           </div>
+           <div className="hidden xl:block leading-tight">
+             <div className="text-[13px] font-semibold">{profile?.display_name || user?.email?.split('@')[0] || "Usuário"}</div>
+             <div className="text-[11px] text-muted-foreground">{profile?.role || "Usuário"}</div>
+           </div>
+           <ChevronDown className="hidden xl:block h-4 w-4 text-muted-foreground" />
+         </div>
       </div>
     </header>
   );
