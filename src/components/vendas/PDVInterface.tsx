@@ -193,6 +193,14 @@
         : usedMethods[0] || (paymentMethod === 'money' ? 'Dinheiro' : paymentMethod === 'card' ? 'Cartão' : paymentMethod === 'pix' ? 'PIX' : 'Não informado');
 
       try {
+        const saleSnapshot = {
+          items: [...cart],
+          total: total,
+          discount: discountValue,
+          customer: selectedCustomer ? { name: selectedCustomer.name } : null,
+          paymentMethod: finalPaymentMethod
+        };
+
         // 1. Criar a ordem de venda
         const { data: sale, error: saleError } = await supabase
           .from("sales_orders")
