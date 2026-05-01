@@ -697,10 +697,10 @@
      } catch (error) {
        console.error("Erro ao finalizar venda:", error);
        toast.error("Erro ao processar a venda. Tente novamente.");
-     } finally {
-       setIsFinishing(false);
-     }
-
+      } finally {
+        setIsFinishing(false);
+      }
+    };
     const handleCreateCustomer = async () => {
       if (!user?.id || !newCustomerName) return;
      try {
