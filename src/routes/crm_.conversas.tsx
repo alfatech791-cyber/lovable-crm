@@ -349,9 +349,12 @@ function ConversasPage() {
 
   const resolveInstance = async () => {
     if (!user?.id) {
-      const remoteInstances = await evolution.getInstances();
-      const statusPriority = ["open", "connected", "active", "online", "connecting"];
-      const candidate = remoteInstances.find((instance) => statusPriority.includes(String(instance.status ?? "").toLowerCase())) || remoteInstances[0] || null;
+      let remoteInstances = await evolution.getInstances();
+      // Filter only open/active instances as per user requirement to eliminate inactive ones
+      const activeStatus = ["open", "connected", "active", "online"];
+      remoteInstances = remoteInstances.filter(instance => activeStatus.includes(String(instance.status ?? "").toLowerCase()));
+      
+      const candidate = remoteInstances[0] || null;
       const remoteCandidate = candidate?.instanceName ?? null;
 
       setResolvedInstance(remoteCandidate);
@@ -377,9 +380,9 @@ function ConversasPage() {
       return configured;
     }
 
-    const statusPriority = ["open", "connected", "active", "online", "connecting"];
+    const activeStatus = ["open", "connected", "active", "online"];
     const dbCandidateObj = (savedInstances ?? []).find((instance) =>
-      statusPriority.includes(String(instance.status ?? "").toLowerCase())
+      activeStatus.includes(String(instance.status ?? "").toLowerCase())
     );
     const dbCandidate = dbCandidateObj?.instance_name;
 
@@ -389,8 +392,10 @@ function ConversasPage() {
       return dbCandidate;
     }
 
-    const remoteInstances = await evolution.getInstances();
-    const remoteCandidateObj = remoteInstances.find((instance) => statusPriority.includes(String(instance.status ?? "").toLowerCase())) || remoteInstances[0] || null;
+    let remoteInstances = await evolution.getInstances();
+    remoteInstances = remoteInstances.filter(instance => activeStatus.includes(String(instance.status ?? "").toLowerCase()));
+    
+    const remoteCandidateObj = remoteInstances[0] || null;
     const remoteCandidate = remoteCandidateObj?.instanceName ?? null;
 
     if (remoteCandidate) {
