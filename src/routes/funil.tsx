@@ -244,7 +244,7 @@ type Deal = {
                ...(existing?.id ? { id: existing.id } : {}),
                user_id: user.id,
                contact_phone: phone,
-               contact_name: chat.name || chat.pushName || chat.verifiedName || existing?.contact_name || null,
+                contact_name: chat.name || chat.pushName || chat.verifiedName || chat.id?.split("@")[0] || existing?.contact_name || null,
                transcript: previewTranscript,
                status: existing?.status ?? "active",
                messages_count: previewTranscript.length,
@@ -265,16 +265,32 @@ type Deal = {
 
        if (upsertError) throw upsertError;
 
-        await Promise.all(
-          upsertRows.map((row: any) =>
-            supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
-              _user_id: user.id,
-              _phone: row.contact_phone,
-              _name: row.contact_name,
-              _instance_name: instance,
-            } as any)
-          )
-        );
+        const validUpsertRows = (upsertRows as any[]).filter(row => row !== null);
+        
+        const syncLeads = async () => {
+          for (const row of validUpsertRows) {
+            try {
+              let profilePic = null;
+              try {
+                profilePic = await evolution.fetchProfilePictureUrl(instance, row.contact_phone);
+              } catch (e) {
+                console.warn("Não foi possível buscar foto para:", row.contact_phone);
+              }
+
+              await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
+                _user_id: user.id,
+                _phone: row.contact_phone,
+                _name: row.contact_name,
+                _instance_name: instance,
+                _avatar_url: profilePic
+              } as any);
+            } catch (e) {
+              console.error("Erro ao processar lead individual:", row.contact_phone, e);
+            }
+          }
+        };
+
+        await syncLeads();
 
        await load(true);
        if (showToast) toast.success("Sincronização concluída");
