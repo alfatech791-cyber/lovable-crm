@@ -319,7 +319,10 @@ type Deal = {
      }
    };
 
-    const [activeInstance, setActiveInstance] = useState<string | null>(localStorage.getItem("last_active_instance"));
+     const [activeInstance, setActiveInstance] = useState<string | null>(() => {
+       const saved = localStorage.getItem("last_active_instance");
+       return (saved === 'undefined' || saved === 'null') ? null : saved;
+     });
     const [availableInstances, setAvailableInstances] = useState<any[]>([]);
 
     const fetchAvailableInstances = async () => {
@@ -687,10 +690,13 @@ type Deal = {
           .eq("user_id", user.id)
           .order("last_message_at", { ascending: false });
 
-        if (currentInstance) {
-          dlQuery = dlQuery.eq("instance_name", currentInstance);
-          convQuery = convQuery.eq("instance_name", currentInstance);
-        }
+         if (currentInstance) {
+           dlQuery = dlQuery.eq("instance_name", currentInstance);
+           convQuery = convQuery.eq("instance_name", currentInstance);
+         } else {
+           dlQuery = dlQuery.is("instance_name", null);
+           convQuery = convQuery.is("instance_name", null);
+         }
 
         const [stRes, dlRes, ldRes, convRes] = await Promise.all([
           stQuery,
