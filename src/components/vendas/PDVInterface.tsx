@@ -266,8 +266,91 @@
      }
    };
  
-   const handleCreateCustomer = async () => {
-     if (!user?.id || !newCustomerName) return;
+    const handlePrintReceipt = () => {
+      if (!lastSaleData) return;
+      
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) return;
+
+      const itemsHtml = lastSaleData.items.map(item => `
+        <tr>
+          <td style="padding: 5px 0;">${item.name} x${item.quantity}</td>
+          <td style="text-align: right; padding: 5px 0;">${(item.price * item.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+        </tr>
+      `).join('');
+
+      printWindow.document.write(\`
+        <html>
+          <head>
+            <title>Recibo de Venda - #\${lastSaleId?.slice(0, 8)}</title>
+            <style>
+              body { font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.2; width: 300px; margin: 0 auto; padding: 20px; }
+              .header { text-align: center; margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+              .section { margin-bottom: 15px; }
+              .section-title { font-weight: bold; text-transform: uppercase; margin-bottom: 5px; border-bottom: 1px solid #eee; }
+              table { width: 100%; border-collapse: collapse; }
+              .total-row { font-weight: bold; border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px; }
+              .footer { text-align: center; margin-top: 30px; font-size: 10px; }
+              @media print { body { width: 100%; } }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h2 style="margin: 0;">MINHA LOJA</h2>
+              <p style="margin: 5px 0;">CNPJ: 00.000.000/0001-00</p>
+              <p style="margin: 0;">Tel: (00) 0000-0000</p>
+            </div>
+            
+            <div class="section">
+              <div class="section-title">Dados da Venda</div>
+              <p style="margin: 2px 0;">Pedido: #\${lastSaleId?.slice(0, 8)}</p>
+              <p style="margin: 2px 0;">Data: \${new Date().toLocaleString('pt-BR')}</p>
+              <p style="margin: 2px 0;">Vendedor: \${user?.email?.split('@')[0] || 'Sistema'}</p>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Cliente</div>
+              <p style="margin: 2px 0;">Nome: \${lastSaleData.customer?.name || 'Consumidor Final'}</p>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Produtos</div>
+              <table>
+                \${itemsHtml}
+              </table>
+            </div>
+
+            <div class="total-row">
+              <div style="display: flex; justify-content: space-between;">
+                <span>Subtotal:</span>
+                <span>\${(lastSaleData.total + lastSaleData.discount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+              </div>
+              \${lastSaleData.discount > 0 ? \`
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Desconto:</span>
+                  <span>-\${lastSaleData.discount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                </div>
+              \` : ''}
+              <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 5px;">
+                <span>TOTAL:</span>
+                <span>\${lastSaleData.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+              </div>
+              <p style="margin: 10px 0 0 0; font-size: 10px;">Forma de Pagamento: \${lastSaleData.paymentMethod}</p>
+            </div>
+
+            <div class="footer">
+              <p>Obrigado pela preferência!</p>
+              <p>Volte sempre.</p>
+            </div>
+          </body>
+        </html>
+      \`);
+      printWindow.document.close();
+      printWindow.print();
+    };
+
+    const handleCreateCustomer = async () => {
+      if (!user?.id || !newCustomerName) return;
      try {
        const { data, error } = await supabase
          .from("customers")
