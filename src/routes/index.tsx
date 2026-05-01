@@ -12,10 +12,25 @@ import { RecentService, RecentLeads } from "@/components/dashboard/RecentPanels"
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { HeroHeader } from "@/components/dashboard/HeroHeader";
 import { GoalProgress } from "@/components/dashboard/GoalProgress";
-import { MonthComparison } from "@/components/dashboard/MonthComparison";
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+ import { MonthComparison } from "@/components/dashboard/MonthComparison";
+ import { useState, useEffect, useCallback, useMemo } from "react";
+ import { supabase } from "@/integrations/supabase/client";
+ import { useAuth } from "@/contexts/AuthContext";
+ import { 
+   startOfDay, 
+   endOfDay, 
+   startOfWeek, 
+   startOfMonth, 
+   subDays 
+ } from "date-fns";
+ import { 
+   DropdownMenu, 
+   DropdownMenuContent, 
+   DropdownMenuItem, 
+   DropdownMenuTrigger 
+ } from "@/components/ui/dropdown-menu";
+ import { Button } from "@/components/ui/button";
+ import { Calendar, ChevronDown } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,10 +42,13 @@ export const Route = createFileRoute("/")({
   component: Dashboard,
 });
 
-function Dashboard() {
+ type Period = 'today' | 'week' | 'month' | 'last30';
+
+ function Dashboard() {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+   const [period, setPeriod] = useState<Period>('today');
   const [stats, setStats] = useState({
     todaySales: 0,
     monthRevenue: 0,
@@ -40,16 +58,35 @@ function Dashboard() {
     avgTicket: 0
   });
 
-  const fetchStats = useCallback(async () => {
+   const fetchStats = useCallback(async (currentPeriod: Period) => {
     if (!user?.id) {
       setLoading(false);
       return;
     }
     setLoading(true);
     try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const firstDayMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+       const now = new Date();
+       let startDate: Date;
+       let endDate = endOfDay(now);
+
+       switch (currentPeriod) {
+         case 'today':
+           startDate = startOfDay(now);
+           break;
+         case 'week':
+           startDate = startOfWeek(now, { weekStartsOn: 0 });
+           break;
+         case 'month':
+           startDate = startOfMonth(now);
+           break;
+         case 'last30':
+           startDate = startOfDay(subDays(now, 30));
+           break;
+         default:
+           startDate = startOfDay(now);
+       }
+
+       const firstDayMonth = startOfMonth(now);
 
       // Run all queries in parallel; never throw — log errors and continue
       const [salesRes, productsRes, leadsRes, osRes] = await Promise.all([
@@ -68,9 +105,12 @@ function Dashboard() {
       const leads = leadsRes.data || [];
       const os = osRes.data || [];
 
-      const todaySales = sales
-        .filter(s => new Date(s.created_at!) >= today && s.status === 'concluded')
-        .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+       const todaySales = sales
+         .filter(s => {
+           const date = new Date(s.created_at!);
+           return date >= startDate && date <= endDate && s.status === 'concluded';
+         })
+         .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
 
       const monthRevenue = sales
         .filter(s => new Date(s.created_at!) >= firstDayMonth && s.status === 'concluded')
@@ -80,9 +120,12 @@ function Dashboard() {
         .filter(p => (p.stock_quantity || 0) <= (p.min_stock || 5))
         .length;
 
-      const newLeadsCount = leads
-        .filter(l => new Date(l.created_at) >= today)
-        .length;
+       const newLeadsCount = leads
+         .filter(l => {
+           const date = new Date(l.created_at);
+           return date >= startDate && date <= endDate;
+         })
+         .length;
 
       const activeOSCount = os
         .filter(o => o.status !== 'delivered' && o.status !== 'canceled')
@@ -106,9 +149,9 @@ function Dashboard() {
     }
   }, [user?.id]);
 
-  useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+   useEffect(() => {
+     fetchStats(period);
+   }, [fetchStats, period]);
 
    const kpis = [
      { label: "Vendas de hoje", value: stats.todaySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "", sub: "Total faturado no dia", icon: "ShoppingBag", tone: "success" },
