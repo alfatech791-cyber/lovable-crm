@@ -428,7 +428,7 @@ type Deal = {
        if (error) throw error;
        if (data) {
           const conv = data as any as Conversation;
-          const lead = leads.find(l => normalizePhone(l.phone) === normalizePhone(conv.contact_phone));
+           const lead = leads.find(l => normalizePhone(l.phone || null) === normalizePhone(conv.contact_phone));
           if (lead && lead.name && !lead.name.startsWith("Lead WhatsApp ")) {
             conv.contact_name = lead.name;
           }
