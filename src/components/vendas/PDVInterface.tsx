@@ -397,11 +397,11 @@
             if (action === 'receipt') {
               // Pequeno delay para garantir que o estado foi atualizado
               setTimeout(() => {
-                handlePrintReceipt();
+                handlePrintReceipt(saleSnapshot);
               }, 500);
             } else if (action === 'warranty') {
               setTimeout(() => {
-                handlePrintWarranty(warrantyType || 'seminovo');
+                handlePrintWarranty(warrantyType || 'seminovo', saleSnapshot);
               }, 500);
             }
           } catch (err) {
