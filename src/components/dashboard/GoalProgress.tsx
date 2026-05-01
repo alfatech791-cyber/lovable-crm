@@ -28,19 +28,18 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [goals, setGoals] = useState({
-    daily: 0,
-    weekly: 0,
-    monthly: initialGoal,
-    type: 'revenue' as 'revenue' | 'units' | 'profit'
-  });
-   const [editGoals, setEditGoals] = useState({
-     ...goals,
+   const initialGoalState = {
+     daily: 0,
+     weekly: 0,
+     monthly: initialGoal,
+     type: 'revenue' as 'revenue' | 'units' | 'profit',
      goal_name: "",
      start_date: new Date().toISOString().split('T')[0],
      end_date: "",
      notes: ""
-   });
+   };
+   const [goals, setGoals] = useState(initialGoalState);
+   const [editGoals, setEditGoals] = useState(initialGoalState);
 
   useEffect(() => {
     if (user?.id) {
@@ -49,10 +48,10 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
   }, [user?.id]);
 
   const fetchGoals = async () => {
-    const { data, error } = await supabase
-      .from('business_goals')
-      .select('daily_goal, weekly_goal, monthly_goal, goal_type')
-      .eq('user_id', user?.id || '')
+     const { data, error } = await (supabase
+       .from('business_goals')
+       .select('*') as any)
+       .eq('user_id', user?.id || '')
       .maybeSingle();
 
     if (data) {
@@ -75,20 +74,20 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
     if (!user?.id) return;
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('business_goals')
-        .upsert({
-          user_id: user.id,
-         daily_goal: editGoals.daily,
-         weekly_goal: editGoals.weekly,
-         monthly_goal: editGoals.monthly,
-         goal_type: editGoals.type,
-         goal_name: editGoals.goal_name,
-         start_date: editGoals.start_date,
-         end_date: editGoals.end_date,
-         notes: editGoals.notes,
-         updated_at: new Date().toISOString()
-        });
+       const { error } = await (supabase
+         .from('business_goals')
+         .upsert({
+           user_id: user.id,
+           daily_goal: editGoals.daily,
+           weekly_goal: editGoals.weekly,
+           monthly_goal: editGoals.monthly,
+           goal_type: editGoals.type,
+           goal_name: editGoals.goal_name,
+           start_date: editGoals.start_date,
+           end_date: editGoals.end_date,
+           notes: editGoals.notes,
+           updated_at: new Date().toISOString()
+         } as any));
 
       if (error) throw error;
 
