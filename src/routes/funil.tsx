@@ -626,21 +626,21 @@ type Deal = {
       
       fetchAvailableInstances();
 
-       const [stRes, dlRes, ldRes, convRes, allDealsRes] = await Promise.all([
-         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
-         supabase.from("pipeline_leads")
-           .select("*, lead:leads(name, phone, source)")
-           .eq("user_id", user.id)
-           .eq("instance_name", currentInstance)
-           .order("created_at", { ascending: false }),
-         supabase.from("leads").select("id, name, phone").eq("user_id", user.id).order("created_at", { ascending: false }),
-         supabase.from("bot_conversations")
-           .select("*")
-           .eq("user_id", user.id)
-           .eq("instance_name", currentInstance)
-           .order("last_message_at", { ascending: false }),
-         supabase.from("pipeline_leads").select("lead_id")
-       ]);
+        const [stRes, dlRes, ldRes, convRes, allDealsRes] = await Promise.all([
+          supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
+          supabase.from("pipeline_leads")
+            .select("*, lead:leads(name, phone, source)")
+            .eq("user_id", user.id)
+            .eq("instance_name", currentInstance || "")
+            .order("created_at", { ascending: false }),
+          supabase.from("leads").select("id, name, phone").eq("user_id", user.id).order("created_at", { ascending: false }),
+          supabase.from("bot_conversations")
+            .select("*")
+            .eq("user_id", user.id)
+            .eq("instance_name", currentInstance || "")
+            .order("last_message_at", { ascending: false }),
+          supabase.from("pipeline_leads").select("lead_id")
+        ]);
 
       // Reconcilia conversas órfãs (sem card no funil) — cobre casos de telefone divergente
       const convsRaw = (convRes.data as any[]) ?? [];
