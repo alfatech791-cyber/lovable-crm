@@ -42,10 +42,13 @@ export const Route = createFileRoute("/")({
   component: Dashboard,
 });
 
-function Dashboard() {
+ type Period = 'today' | 'week' | 'month' | 'last30';
+
+ function Dashboard() {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+   const [period, setPeriod] = useState<Period>('today');
   const [stats, setStats] = useState({
     todaySales: 0,
     monthRevenue: 0,
