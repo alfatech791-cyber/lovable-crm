@@ -639,11 +639,6 @@ type Deal = {
         const stQuery = supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index");
         const ldQuery = supabase.from("leads").select("id, name, phone").eq("user_id", user.id).order("created_at", { ascending: false });
         
-        let allDealsQuery = supabase.from("pipeline_leads").select("lead_id").eq("user_id", user.id);
-        if (currentInstance) {
-          allDealsQuery = allDealsQuery.eq("instance_name", currentInstance);
-        }
-
         let dlQuery = supabase.from("pipeline_leads")
           .select("*, lead:leads(name, phone, source)")
           .eq("user_id", user.id)
@@ -659,12 +654,11 @@ type Deal = {
           convQuery = convQuery.eq("instance_name", currentInstance);
         }
 
-        const [stRes, dlRes, ldRes, convRes, allDealsRes] = await Promise.all([
+        const [stRes, dlRes, ldRes, convRes] = await Promise.all([
           stQuery,
           dlQuery,
           ldQuery,
-          convQuery,
-          allDealsQuery
+          convQuery
         ]);
 
       // Reconcilia conversas órfãs (sem card no funil) — cobre casos de telefone divergente
@@ -708,8 +702,6 @@ type Deal = {
       setStages((stRes.data as Stage[]) ?? []);
       const convs = (convRes.data as any as Conversation[]) ?? [];
       setConversations(convs);
-      
-      const existingLeadIds = new Set((allDealsRes.data as any[])?.map(d => d.lead_id) || []);
       
       const leadIds = (dlRes.data as any[])?.map(d => d.lead_id) || [];
       let lastMessagesMap: Record<string, { content: string, created_at: string, role?: any }> = {};
