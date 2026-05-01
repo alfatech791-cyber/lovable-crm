@@ -684,7 +684,13 @@ function ConversasPage() {
                 return;
               }
 
-              const row = { ...(payload.new as any), transcript: (payload.new as any).transcript || [] } as any as Conversation;
+               const row = { ...(payload.new as any), transcript: (payload.new as any).transcript || [] } as any as Conversation & { instance_name?: string };
+               
+               // Ignore real-time updates for conversations not belonging to the resolved instance
+               if (resolvedInstance && row.instance_name && row.instance_name !== resolvedInstance) {
+                 return;
+               }
+ 
               setItems((prev) => {
                 const next = [row, ...prev.filter((c) => c.id !== row.id)].filter((c, i, a) => a.findIndex(t => t.contact_phone === c.contact_phone) === i);
                 next.sort((a, b) => +new Date(b.last_message_at) - +new Date(a.last_message_at));
