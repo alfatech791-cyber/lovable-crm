@@ -182,57 +182,70 @@ type Deal = {
          ((existingRows as any[]) ?? []).map((row) => [normalizePhone(row.contact_phone), row])
        );
 
-       const rawChats = await evolution.findChats(instance);
-       const chats = Array.isArray(rawChats) ? rawChats : (rawChats?.records || rawChats?.chats || []);
+        let chats: any[] = [];
+        try {
+          const rawChats = await evolution.findChats(instance);
+          chats = Array.isArray(rawChats) ? rawChats : (rawChats?.records || rawChats?.chats || []);
+        } catch (e) {
+          console.warn("Falha ao buscar chats via Evolution API:", e);
+        }
 
-       if (!Array.isArray(chats) || chats.length === 0) {
-         if (showToast) toast.info("Nenhuma conversa encontrada na instância");
-         return;
-       }
+        if (!Array.isArray(chats) || chats.length === 0) {
+          // Se não houver chats remotos, apenas tentamos carregar o que já temos no banco
+          await load(true);
+          if (showToast) toast.info("Sincronização concluída (apenas dados locais)");
+          return;
+        }
 
-       const upsertRows = chats
-         .slice(0, 50)
-         .map((chat: any) => {
-           const remoteJid = chat.remoteJid || chat.id || "";
-           if (!remoteJid || remoteJid.endsWith("@g.us")) return null;
+        const upsertRows = chats
+          .slice(0, 50)
+          .map((chat: any) => {
+            const remoteJid = chat.remoteJid || chat.id || "";
+            if (!remoteJid || remoteJid.endsWith("@g.us")) return null;
 
-           const phone = normalizePhone(remoteJid);
-           if (!phone) return null;
+            const phone = normalizePhone(remoteJid);
+            if (!phone) return null;
 
-           const existing = existingByPhone.get(phone);
-           const lastMsg = chat.lastMessage;
-           const fallbackContent =
-             lastMsg?.message?.conversation ||
-             lastMsg?.message?.extendedTextMessage?.text ||
-             existing?.transcript?.[existing.transcript.length - 1]?.content ||
-             "Nova conversa";
+            const existing = existingByPhone.get(phone);
+            
+            // Se já existe e é de outra instância, evitamos duplicar ou sobrescrever indevidamente
+            if (existing && (existing as any).instance_name && (existing as any).instance_name !== instance) {
+              return null;
+            }
 
-           const previewTranscript = Array.isArray(existing?.transcript) && existing.transcript.length > 0
-             ? existing.transcript
-             : [{
-                 role: lastMsg?.key?.fromMe ? "assistant" : "user",
-                 content: fallbackContent,
-                 at: new Date(lastMsg?.messageTimestamp ? lastMsg.messageTimestamp * 1000 : Date.now()).toISOString(),
-               }];
+            const lastMsg = chat.lastMessage;
+            const fallbackContent =
+              lastMsg?.message?.conversation ||
+              lastMsg?.message?.extendedTextMessage?.text ||
+              existing?.transcript?.[existing.transcript.length - 1]?.content ||
+              "Nova conversa";
 
-           const lastAt =
-             previewTranscript[previewTranscript.length - 1]?.at ||
-             existing?.last_message_at ||
-             new Date().toISOString();
+            const previewTranscript = Array.isArray(existing?.transcript) && existing.transcript.length > 0
+              ? existing.transcript
+              : [{
+                  role: lastMsg?.key?.fromMe ? "assistant" : "user",
+                  content: fallbackContent,
+                  at: new Date(lastMsg?.messageTimestamp ? lastMsg.messageTimestamp * 1000 : Date.now()).toISOString(),
+                }];
 
-            return {
-              ...(existing?.id ? { id: existing.id } : {}),
-              user_id: user.id,
-              contact_phone: phone,
-              contact_name: chat.name || chat.pushName || chat.verifiedName || existing?.contact_name || null,
-              transcript: previewTranscript,
-              status: existing?.status ?? "active",
-              messages_count: previewTranscript.length,
-              last_message_at: lastAt,
-              instance_name: instance,
-            };
-         })
-         .filter(Boolean);
+            const lastAt =
+              previewTranscript[previewTranscript.length - 1]?.at ||
+              existing?.last_message_at ||
+              new Date().toISOString();
+
+             return {
+               ...(existing?.id ? { id: existing.id } : {}),
+               user_id: user.id,
+               contact_phone: phone,
+               contact_name: chat.name || chat.pushName || chat.verifiedName || existing?.contact_name || null,
+               transcript: previewTranscript,
+               status: existing?.status ?? "active",
+               messages_count: previewTranscript.length,
+               last_message_at: lastAt,
+               instance_name: instance,
+             };
+          })
+          .filter(Boolean);
 
        if (upsertRows.length === 0) {
          if (showToast) toast.info("Nenhuma conversa válida encontrada");
