@@ -886,43 +886,43 @@ type Deal = {
             </div>
             {/* Stats Summary Panel */}
             <div className="px-6 py-4 bg-background border-b border-border/40 grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-primary/5 rounded-2xl p-3 border border-primary/10 flex items-center gap-3">
+               <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-4 border border-primary/10 flex items-center gap-3 shadow-sm hover:shadow-md transition-shadow">
                 <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <CreditCard className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Total em Pipeline</p>
-                  <p className="text-lg font-black text-primary leading-none">{fmt(totalPipeline)}</p>
+                   <p className="text-[10px] font-bold uppercase tracking-widest text-primary/70">Total em Pipeline</p>
+                   <p className="text-xl font-black text-primary leading-none mt-1">{fmt(totalPipeline)}</p>
                 </div>
               </div>
               
-              <div className="bg-muted/30 rounded-2xl p-3 border border-border/50 flex items-center gap-3">
+               <div className="bg-gradient-to-br from-muted/50 to-muted/30 rounded-2xl p-4 border border-border/50 flex items-center gap-3 shadow-sm hover:shadow-md transition-shadow">
                 <div className="h-10 w-10 rounded-xl bg-background flex items-center justify-center text-muted-foreground">
                   <Users className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Total de Leads</p>
-                  <p className="text-lg font-black text-foreground leading-none">{deals.length}</p>
+                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">Total de Leads</p>
+                   <p className="text-xl font-black text-foreground leading-none mt-1">{deals.length}</p>
                 </div>
               </div>
 
-              <div className="bg-amber-500/5 rounded-2xl p-3 border border-amber-500/10 flex items-center gap-3">
+               <div className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 rounded-2xl p-4 border border-amber-500/10 flex items-center gap-3 shadow-sm hover:shadow-md transition-shadow">
                 <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600">
                   <Clock className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Aguardando Resposta</p>
-                  <p className="text-lg font-black text-amber-600 leading-none">{deals.filter(d => d.last_message_at && (new Date().getTime() - new Date(d.last_message_at).getTime() > 24 * 60 * 60 * 1000)).length}</p>
+                   <p className="text-[10px] font-bold uppercase tracking-widest text-amber-700/70">Aguardando Resposta</p>
+                   <p className="text-xl font-black text-amber-600 leading-none mt-1">{deals.filter(d => d.last_message_at && (new Date().getTime() - new Date(d.last_message_at).getTime() > 24 * 60 * 60 * 1000)).length}</p>
                 </div>
               </div>
 
-              <div className="bg-green-500/5 rounded-2xl p-3 border border-green-500/10 flex items-center gap-3">
+               <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-2xl p-4 border border-green-500/10 flex items-center gap-3 shadow-sm hover:shadow-md transition-shadow">
                 <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600">
                   <TrendingUp className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">Taxa de Conversão</p>
-                  <p className="text-lg font-black text-green-600 leading-none">12.5%</p>
+                   <p className="text-[10px] font-bold uppercase tracking-widest text-green-700/70">Taxa de Conversão</p>
+                   <p className="text-xl font-black text-green-600 leading-none mt-1">12.5%</p>
                 </div>
               </div>
             </div>
@@ -940,22 +940,22 @@ type Deal = {
                   />
                 </div>
                 <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-xl border border-border/20">
-                    <div className="flex items-center gap-1 bg-primary/5 p-0.5 rounded-xl border border-primary/10">
+                    <div className="flex items-center gap-1 bg-primary/10 p-1 rounded-xl border border-primary/20 shadow-sm">
                       <Button 
                         variant="ghost" 
                         size="sm" 
                         disabled={syncing}
-                        className={cn("h-8 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all", syncing ? "bg-primary/20 text-primary animate-pulse" : "hover:bg-primary/10 hover:text-primary")}
+                        className={cn("h-8 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all", syncing ? "bg-primary/20 text-primary animate-pulse" : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm")}
                         onClick={() => syncFromWhatsApp(true, true)}
                       >
-                        {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wifi className="h-3 w-3" />}
+                        {syncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wifi className="h-3.5 w-3.5" />}
                         {syncing ? "Sincronizando..." : "Sincronizar WhatsApp"}
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         disabled={loading || syncing}
-                        className="h-8 w-8 rounded-lg hover:bg-primary/10 text-primary"
+                        className="h-8 w-8 rounded-lg hover:bg-primary/20 text-primary font-bold"
                         onClick={() => {
                           toast.info("Recarregando pipeline...");
                           load(false);
@@ -1007,10 +1007,10 @@ type Deal = {
                         value={activeInstance || ""}
                         onValueChange={handleInstanceChange}
                       >
-                        <SelectTrigger className="h-8 bg-primary/5 border-primary/10 text-primary hover:bg-primary/10 transition-all rounded-lg px-3">
+                        <SelectTrigger className="h-9 bg-background border-border hover:border-primary/50 hover:bg-muted/50 transition-all rounded-xl px-3 shadow-sm">
                           <div className="flex items-center gap-2 overflow-hidden mr-2">
-                            <div className="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0" />
-                            <SelectValue placeholder="Instância" />
+                            <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] shrink-0 animate-pulse" />
+                            <SelectValue placeholder="Selecionar Instância" className="text-xs font-bold" />
                           </div>
                         </SelectTrigger>
                         <SelectContent>
@@ -1203,59 +1203,63 @@ type Deal = {
                        </div>
                      </div>
                   </div>
-                  <div className="flex-1 overflow-y-auto">
+                  <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/10 hover:scrollbar-thumb-muted-foreground/20">
                     {conversations.length === 0 ? (
                       <div className="p-8 text-center">
                         <MessageSquare className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Nenhuma conversa</p>
                       </div>
                     ) : (
-       conversations
-         .filter(c => {
-           const matchSearch = !searchTerm || 
-             (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
-             c.contact_phone.includes(searchTerm);
-           
-           if (!matchSearch) return false;
-           
-           if (statusFilter === "bot") return c.status !== "handed_off";
-           if (statusFilter === "manual") return c.status === "handed_off";
-           if (statusFilter === "unread") {
-             // Simulação simples de contagem de não lidas similar à página de conversas
-             const incoming = (c.transcript ?? []).filter((m) => m.role === "user").length;
-             return incoming > 0; // Para simplificar no funil, apenas mostra se tem mensagens do usuário
-           }
-           return true;
-         })
-         .map((conv) => (
-                        <button
-                          key={conv.id}
-                          onClick={() => {
-                            setCurrentConversation(conv);
-                            setChatOpen(true);
-                          }}
-                          className={cn(
-                            "w-full p-4 flex items-start gap-3 border-b border-border/50 hover:bg-primary/5 transition-all text-left relative",
-                            currentConversation?.id === conv.id && "bg-primary/5"
-                          )}
-                        >
-                          {currentConversation?.id === conv.id && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />}
-                          <div className="h-10 w-10 rounded-xl bg-primary/10 grid place-items-center shrink-0">
-                            <User className="h-5 w-5 text-primary" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between mb-0.5">
-                              <p className="text-xs font-black truncate text-foreground">{conv.contact_name || conv.contact_phone}</p>
-                              <span className="text-[9px] font-bold text-muted-foreground shrink-0 uppercase">
-                                {formatDistanceToNow(new Date(conv.last_message_at), { addSuffix: false, locale: ptBR })}
-                              </span>
+                      conversations
+                        .filter(c => {
+                          const matchSearch = !searchTerm || 
+                            (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
+                            c.contact_phone.includes(searchTerm);
+                          
+                          if (!matchSearch) return false;
+                          
+                          if (statusFilter === "bot") return c.status !== "handed_off";
+                          if (statusFilter === "manual") return c.status === "handed_off";
+                          if (statusFilter === "unread") {
+                            const incoming = (c.transcript ?? []).filter((m) => m.role === "user").length;
+                            return incoming > 0;
+                          }
+                          return true;
+                        })
+                        .map((conv) => (
+                          <button
+                            key={conv.id}
+                            onClick={() => {
+                              setCurrentConversation(conv);
+                              setChatOpen(true);
+                            }}
+                            className={cn(
+                              "w-full p-4 flex items-start gap-3 border-b border-border/40 hover:bg-primary/5 transition-all text-left relative group",
+                              currentConversation?.id === conv.id ? "bg-primary/10 shadow-inner" : "bg-transparent"
+                            )}
+                          >
+                            {currentConversation?.id === conv.id && (
+                              <div className="absolute left-0 top-2 bottom-2 w-1.5 bg-primary rounded-r-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
+                            )}
+                            <div className="relative shrink-0">
+                              <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 grid place-items-center group-hover:scale-105 transition-transform">
+                                <User className="h-6 w-6 text-primary" />
+                              </div>
+                              <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 border-2 border-background shadow-sm" />
                             </div>
-                            <p className="text-[11px] text-muted-foreground truncate font-medium">
-                              {conv.transcript?.[conv.transcript.length - 1]?.content || "Inicie uma conversa"}
-                            </p>
-                          </div>
-                        </button>
-                      ))
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between mb-0.5">
+                                <p className="text-xs font-black truncate text-foreground">{conv.contact_name || conv.contact_phone}</p>
+                                <span className="text-[9px] font-bold text-muted-foreground shrink-0 uppercase">
+                                  {formatDistanceToNow(new Date(conv.last_message_at), { addSuffix: false, locale: ptBR })}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-muted-foreground truncate font-medium">
+                                {conv.transcript?.[conv.transcript.length - 1]?.content || "Inicie uma conversa"}
+                              </p>
+                            </div>
+                          </button>
+                        ))
                     )}
                   </div>
                 </div>
