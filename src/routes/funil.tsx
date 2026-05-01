@@ -268,6 +268,43 @@ type Deal = {
    };
 
     const [activeInstance, setActiveInstance] = useState<string | null>(null);
+    const [availableInstances, setAvailableInstances] = useState<any[]>([]);
+
+    const fetchAvailableInstances = async () => {
+      try {
+        const activeStatus = ["open", "connected", "active", "online"];
+        const instances = await evolution.getInstances();
+        const active = instances.filter(i => activeStatus.includes(String(i.status ?? "").toLowerCase()));
+        setAvailableInstances(active);
+        return active;
+      } catch (e) {
+        console.error("Erro ao buscar instâncias:", e);
+        return [];
+      }
+    };
+
+    const handleInstanceChange = async (newInstance: string) => {
+      if (!user?.id) return;
+      setActiveInstance(newInstance);
+      
+      setLoading(true);
+      setDeals([]);
+
+      try {
+        await supabase.from("bot_settings").upsert(
+          { user_id: user.id, whatsapp_instance: newInstance },
+          { onConflict: "user_id" }
+        );
+        
+        toast.success(`Instância alterada para ${newInstance}`);
+        await load(false);
+        await syncFromWhatsApp(false);
+      } catch (e) {
+        toast.error("Erro ao trocar de instância");
+      } finally {
+        setLoading(false);
+      }
+    };
 
     const [viewMode, setViewMode] = useState<"kanban" | "chat">("kanban");
    const [stages, setStages] = useState<Stage[]>([]);
@@ -542,8 +579,13 @@ type Deal = {
         console.warn("ensure_default_funnel_stages falhou:", e);
       }
 
-      const currentInstance = await resolveInstance();
-      setActiveInstance(currentInstance);
+      let currentInstance = activeInstance;
+      if (!currentInstance) {
+        currentInstance = await resolveInstance();
+        setActiveInstance(currentInstance);
+      }
+      
+      fetchAvailableInstances();
 
       const [stRes, dlRes, ldRes, convRes, allDealsRes] = await Promise.all([
         supabase.from("funnel_stages").select("*").or(`user_id.eq.${user.id},user_id.is.null`).order("order_index"),
@@ -790,12 +832,32 @@ type Deal = {
                       {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wifi className="h-3 w-3" />}
                       {syncing ? "Sincronizando..." : "Sincronizar WhatsApp"}
                     </Button>
-                    {activeInstance && (
-                      <div className="flex items-center gap-1.5 px-2 py-1 bg-green-500/10 rounded-lg border border-green-500/20">
-                        <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                        <span className="text-[9px] font-black text-green-600 uppercase tracking-tighter">{activeInstance}</span>
-                      </div>
-                    )}
+                    <div className="w-[180px]">
+                      <Select
+                        value={activeInstance || ""}
+                        onValueChange={handleInstanceChange}
+                      >
+                        <SelectTrigger className="h-8 bg-primary/5 border-primary/10 text-primary hover:bg-primary/10 transition-all rounded-lg px-3">
+                          <div className="flex items-center gap-2 overflow-hidden mr-2">
+                            <div className="h-1.5 w-1.5 rounded-full bg-green-500 shrink-0" />
+                            <SelectValue placeholder="Instância" />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableInstances.length === 0 ? (
+                            <SelectItem value="none" disabled className="text-[10px]">
+                              Nenhuma ativa
+                            </SelectItem>
+                          ) : (
+                            availableInstances.map((ins) => (
+                              <SelectItem key={ins.instanceName} value={ins.instanceName} className="text-[10px]">
+                                {ins.instanceName}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <div className="w-[1px] h-4 bg-border/40 mx-1" />
                    <Button 
                     variant={sortBy === "recent" ? "secondary" : "ghost"} 
