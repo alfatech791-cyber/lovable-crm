@@ -159,10 +159,10 @@ export function GoalProgress({ current, goal: initialGoal = 50000, onGoalUpdate 
           </svg>
           <div className="absolute inset-0 grid place-items-center text-center">
             <div>
-              <div className="text-[28px] font-bold font-display tracking-tight bg-gradient-primary bg-clip-text text-transparent">
+               <div className="text-[32px] font-black font-display tracking-tight bg-gradient-primary bg-clip-text text-transparent leading-none">
                 {pct}%
               </div>
-              <div className="text-[10px] text-muted-foreground">atingido</div>
+               <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mt-1">atingido</div>
             </div>
           </div>
         </div>
