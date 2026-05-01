@@ -45,7 +45,7 @@ export const sidebarItems = [
       { title: "Checklists", url: "/servicos/checklists" },
     ]
   },
-  { title: "Agendamentos", url: "/_app/agendamentos/", icon: "Calendar" as const },
+   { title: "Agendamentos", url: "/", icon: "Calendar" as const },
   { title: "Base de Clientes", url: "/clientes", icon: "Users" as const },
 
   { type: "header", title: "Logística & Estoque" },
@@ -70,8 +70,8 @@ export const sidebarItems = [
     icon: "DollarSign" as const,
     children: [
       { title: "Fluxo de Caixa", url: "/financeiro/caixa" },
-      { title: "Contas a Pagar", url: "/financeiro/contas-pagar" },
-      { title: "Contas a Receber", url: "/financeiro/contas-receber" },
+       { title: "Fluxo de Caixa", url: "/financeiro/caixa" },
+       { title: "DRE Gerencial", url: "/financeiro/dre" },
       { title: "Fornecedores", url: "/financeiro/fornecedores" },
       { title: "DRE Gerencial", url: "/financeiro/dre" },
     ]
