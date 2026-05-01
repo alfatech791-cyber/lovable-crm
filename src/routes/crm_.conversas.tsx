@@ -623,13 +623,14 @@ function ConversasPage() {
             profile_pic_url: picUrl,
             is_group: isGroup,
             remote_jid: chat.remoteJid || null,
-          } satisfies Conversation;
+            instance_name: instance,
+          } as any as Conversation;
         })
       );
       const valid = rows.filter((row): row is Conversation => !!row && (row as any).transcript.length > 0) as Conversation[];
       if (user?.id && valid.length > 0) {
         const upsertRows = valid.map((row) => ({
-          ...(row.id.includes(":") ? {} : { id: row.id }),
+          ...(String(row.id).includes(":") ? {} : { id: row.id }),
           user_id: user.id,
           contact_phone: row.contact_phone,
           contact_name: row.contact_name,
@@ -638,6 +639,7 @@ function ConversasPage() {
           status: row.status,
           messages_count: row.messages_count,
           last_message_at: row.last_message_at,
+          instance_name: (row as any).instance_name,
         }));
 
         const { error: upsertError } = await supabase
