@@ -17,6 +17,7 @@ import {
   Smile,
   RefreshCw,
   PauseCircle,
+  Settings2,
   PlayCircle,
   Image as ImageIcon,
    Trash2,
@@ -35,6 +36,13 @@ import {
   Plus,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow, format, isToday, isYesterday, isThisWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -189,6 +197,7 @@ function ConversasPage() {
   const [sending, setSending] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [resolvedInstance, setResolvedInstance] = useState<string | null>(null);
+  const [availableInstances, setAvailableInstances] = useState<any[]>([]);
   const [instanceDetails, setInstanceDetails] = useState<any>(null);
   const [recording, setRecording] = useState(false);
   const [recordSecs, setRecordSecs] = useState(0);
@@ -347,72 +356,93 @@ function ConversasPage() {
     });
   };
 
-  const resolveInstance = async () => {
-    if (!user?.id) {
-      let remoteInstances = await evolution.getInstances();
-      // Filter only open/active instances as per user requirement to eliminate inactive ones
+  const fetchAvailableInstances = async () => {
+    try {
       const activeStatus = ["open", "connected", "active", "online"];
-      remoteInstances = remoteInstances.filter(instance => activeStatus.includes(String(instance.status ?? "").toLowerCase()));
-      
-      const candidate = remoteInstances[0] || null;
-      const remoteCandidate = candidate?.instanceName ?? null;
+      const instances = await evolution.getInstances();
+      const active = instances.filter(i => activeStatus.includes(String(i.status ?? "").toLowerCase()));
+      setAvailableInstances(active);
+      return active;
+    } catch (e) {
+      console.error("Erro ao buscar instâncias:", e);
+      return [];
+    }
+  };
 
+  const resolveInstance = async (forceInstance?: string) => {
+    if (forceInstance) {
+      setResolvedInstance(forceInstance);
+      return forceInstance;
+    }
+
+    if (!user?.id) {
+      const active = await fetchAvailableInstances();
+      const candidate = active[0] || null;
+      const remoteCandidate = candidate?.instanceName ?? null;
       setResolvedInstance(remoteCandidate);
       setInstanceDetails(candidate);
       return remoteCandidate;
     }
 
-    const [{ data: settings, error: settingsError }, { data: savedInstances, error: instancesError }] = await Promise.all([
-      supabase.from("bot_settings").select("whatsapp_instance, webhook_secret").eq("user_id", user.id).maybeSingle(),
-      supabase
-        .from("whatsapp_instances")
-        .select("instance_name, status, created_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false }),
-    ]);
+    const { data: settings, error: settingsError } = await supabase
+      .from("bot_settings")
+      .select("whatsapp_instance, webhook_secret")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
     if (settingsError) throw settingsError;
-    if (instancesError) throw instancesError;
 
     const configured = settings?.whatsapp_instance?.trim();
     if (configured) {
       setResolvedInstance(configured);
+      const instances = await fetchAvailableInstances();
+      const details = instances.find(i => i.instanceName === configured);
+      if (details) setInstanceDetails(details);
       return configured;
     }
 
-    const activeStatus = ["open", "connected", "active", "online"];
-    const dbCandidateObj = (savedInstances ?? []).find((instance) =>
-      activeStatus.includes(String(instance.status ?? "").toLowerCase())
-    );
-    const dbCandidate = dbCandidateObj?.instance_name;
-
-    if (dbCandidate) {
-      setResolvedInstance(dbCandidate);
-      setInstanceDetails({ instanceName: dbCandidate, status: dbCandidateObj?.status });
-      return dbCandidate;
-    }
-
-    let remoteInstances = await evolution.getInstances();
-    remoteInstances = remoteInstances.filter(instance => activeStatus.includes(String(instance.status ?? "").toLowerCase()));
-    
-    const remoteCandidateObj = remoteInstances[0] || null;
+    const active = await fetchAvailableInstances();
+    const remoteCandidateObj = active[0] || null;
     const remoteCandidate = remoteCandidateObj?.instanceName ?? null;
 
     if (remoteCandidate) {
       setResolvedInstance(remoteCandidate);
       setInstanceDetails(remoteCandidateObj);
-      const { error: upsertError } = await supabase.from("bot_settings").upsert(
+      await supabase.from("bot_settings").upsert(
         { user_id: user.id, whatsapp_instance: remoteCandidate },
         { onConflict: "user_id" }
       );
-      if (upsertError) console.error("[conversas] erro ao salvar bot_settings:", upsertError);
     } else if (!settings) {
-      // Se não há instância mas também não há settings, cria ao menos o registro básico para gerar o webhook_secret
       await supabase.from("bot_settings").insert({ user_id: user.id });
     }
 
-    console.log("[conversas] instância resolvida:", remoteCandidate || "nenhuma");
     return remoteCandidate;
+  };
+
+  const handleInstanceChange = async (newInstance: string) => {
+    if (!user?.id) return;
+    setResolvedInstance(newInstance);
+    const details = availableInstances.find(i => i.instanceName === newInstance);
+    if (details) setInstanceDetails(details);
+    
+    setLoading(true);
+    setItems([]);
+    setSelectedId(null);
+
+    try {
+      await supabase.from("bot_settings").upsert(
+        { user_id: user.id, whatsapp_instance: newInstance },
+        { onConflict: "user_id" }
+      );
+      
+      toast.success(`Instância alterada para ${newInstance}`);
+      await load(false);
+      await syncFromWhatsApp(false);
+    } catch (e) {
+      toast.error("Erro ao trocar de instância");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Garante que o webhook da Evolution está apontando para o nosso bot-webhook
