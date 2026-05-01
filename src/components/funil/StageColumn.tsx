@@ -35,7 +35,7 @@
          <div className="flex items-center justify-between">
            <div className="flex items-center gap-2.5 min-w-0">
              <div className="h-3 w-3 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.1)] ring-2 ring-background" style={{ backgroundColor: stage.color ?? "#888" }} />
-             <h3 className="text-[11px] font-black uppercase tracking-[0.15em] text-foreground/70 truncate">{stage.name}</h3>
+              <h3 className="text-[11px] font-black uppercase tracking-[0.15em] text-foreground/70 truncate">{stage.name || "Sem Nome"}</h3>
            </div>
            <div className="flex items-center gap-1.5 shrink-0">
              <span className="text-[10px] font-black bg-background/80 px-2 py-0.5 rounded-full border border-border/50 text-primary shadow-sm">
