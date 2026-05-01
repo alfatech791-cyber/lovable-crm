@@ -104,10 +104,20 @@
    useEffect(() => {
      fetchProducts();
      fetchCustomers();
-  useEffect(() => { const handleClickOutside = (event: MouseEvent) => { if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) { setIsSearchFocused(false); } }; document.addEventListener("mousedown", handleClickOutside); return () => { document.removeEventListener("mousedown", handleClickOutside); }; }, []);
    }, [fetchProducts, fetchCustomers]);
  
    const [activeCategory, setActiveCategory] = useState<string>("all");
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
    const [customerSearch, setCustomerSearch] = useState("");
  
   // Atalhos de Teclado
