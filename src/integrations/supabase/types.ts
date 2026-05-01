@@ -1146,7 +1146,7 @@ export type Database = {
         | {
             Args: {
               _avatar_url?: string
-              _instance_name: string
+              _instance_name?: string
               _name: string
               _phone: string
               _user_id: string
