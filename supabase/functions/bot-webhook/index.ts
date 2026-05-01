@@ -60,8 +60,10 @@ serve(async (req) => {
       return false;
     };
 
-    const contactName = isBuggyName(contactNameRaw) ? null : contactNameRaw;
+     const contactName = isBuggyName(contactNameRaw) ? null : contactNameRaw;
      const avatarUrl = data?.profilePicUrl ?? payload?.profilePicUrl ?? data?.profilePic ?? null;
+     const labels = data?.labels ?? payload?.labels ?? [];
+     const whatsappTags = Array.isArray(labels) ? labels : [];
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -96,36 +98,36 @@ serve(async (req) => {
 
     const currentInstanceName = settings.whatsapp_instance || payload?.instance || null;
 
-    // Para grupos ou participantes de grupo, apenas grava a mensagem para o atendimento manual
-    if (isGroup || participant) {
-      await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active", remoteJid, currentInstanceName);
-      return json({ ok: true, stored: true, type: "group" });
-    }
+     // Para grupos ou participantes de grupo, apenas grava a mensagem para o atendimento manual
+     if (isGroup || participant) {
+       await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active", remoteJid, currentInstanceName, avatarUrl, whatsappTags);
+       return json({ ok: true, stored: true, type: "group" });
+     }
+ 
+     // Se o bot estiver inativo, apenas grava a mensagem para o atendimento manual
+     if (!settings.is_active) {
+       await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active", remoteJid, currentInstanceName, avatarUrl, whatsappTags);
+       return json({ ok: true, inactive: true, stored: true });
+     }
 
-    // Se o bot estiver inativo, apenas grava a mensagem para o atendimento manual
-    if (!settings.is_active) {
-      await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active", remoteJid, currentInstanceName);
-      return json({ ok: true, inactive: true, stored: true });
-    }
-
-    // Verifica horário comercial (se habilitado)
-    const bh = settings.business_hours ?? {};
-    if (bh.enabled) {
-      // Hora atual no fuso de São Paulo
-      const nowSP = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
-      const day = nowSP.getDay(); // 0=dom .. 6=sab
-      const hhmm = nowSP.toTimeString().slice(0, 5); // "HH:MM"
-      const days: number[] = bh.days ?? [1, 2, 3, 4, 5];
-      const start: string = bh.start ?? "08:00";
-      const end: string = bh.end ?? "18:00";
-      const inDay = days.includes(day);
-      const inHour = hhmm >= start && hhmm <= end;
-      if (!inDay || !inHour) {
-        // Fora do horário: envia away_message uma vez
-        const awayText = settings.away_message || "No momento estamos fora do horário de atendimento.";
-        transcript.push({ role: "assistant", content: awayText, at: new Date().toISOString() });
-        await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active", remoteJid);
-        const instance = settings.whatsapp_instance;
+     // Verifica horário comercial (se habilitado)
+     const bh = settings.business_hours ?? {};
+     if (bh.enabled) {
+       // Hora atual no fuso de São Paulo
+       const nowSP = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+       const day = nowSP.getDay(); // 0=dom .. 6=sab
+       const hhmm = nowSP.toTimeString().slice(0, 5); // "HH:MM"
+       const days: number[] = bh.days ?? [1, 2, 3, 4, 5];
+       const start: string = bh.start ?? "08:00";
+       const end: string = bh.end ?? "18:00";
+       const inDay = days.includes(day);
+       const inHour = hhmm >= start && hhmm <= end;
+       if (!inDay || !inHour) {
+         // Fora do horário: envia away_message uma vez
+         const awayText = settings.away_message || "No momento estamos fora do horário de atendimento.";
+         transcript.push({ role: "assistant", content: awayText, at: new Date().toISOString() });
+         await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active", remoteJid, currentInstanceName, avatarUrl, whatsappTags);
+         const instance = settings.whatsapp_instance;
         const evoUrl = Deno.env.get("EVOLUTION_API_URL");
         const evoKey = Deno.env.get("EVOLUTION_API_KEY");
         if (instance && evoUrl && evoKey) {
@@ -234,8 +236,8 @@ serve(async (req) => {
       }
     }
 
-    transcript.push({ role: "assistant", content: replyText, at: new Date().toISOString() });
-    await persist(supabase, userId, phone, contactName, transcript, status, remoteJid, currentInstanceName, avatarUrl);
+     transcript.push({ role: "assistant", content: replyText, at: new Date().toISOString() });
+     await persist(supabase, userId, phone, contactName, transcript, status, remoteJid, currentInstanceName, avatarUrl, whatsappTags);
 
     // Envia para Evolution
     const instance = settings.whatsapp_instance;
@@ -266,10 +268,11 @@ async function persist(
   name: string | null,
   transcript: any[],
   status: string,
-  remoteJid?: string,
-  instanceName?: string | null,
-  avatarUrl?: string | null
-) {
+   remoteJid?: string,
+   instanceName?: string | null,
+   avatarUrl?: string | null,
+   whatsappTags?: string[]
+ ) {
   await supabase.from("bot_conversations").upsert(
     {
       user_id: userId,
@@ -286,15 +289,16 @@ async function persist(
   );
 
      try {
-    // Garante lead + card no pipeline (pipeline_leads)
-    // Priorizamos o nome vindo da Evolution se ele for válido
-    const { error: rpcError } = await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
-      _user_id: userId,
-      _phone: phone,
-      _name: name,
-      _instance_name: instanceName,
-      _avatar_url: avatarUrl
-    });
+     // Garante lead + card no pipeline (pipeline_leads)
+     // Priorizamos o nome vindo da Evolution se ele for válido
+     const { error: rpcError } = await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
+       _user_id: userId,
+       _phone: phone,
+       _name: name,
+       _instance_name: instanceName,
+       _avatar_url: avatarUrl,
+       _whatsapp_tags: whatsappTags || []
+     });
     
     if (rpcError) console.error("RPC Error ensure_lead:", rpcError);
      } catch (err) {
@@ -317,6 +321,7 @@ async function persist(
        if (lastMsg) {
          const direction = lastMsg.role === "user" ? "inbound" : "outbound";
          const externalId = `${userId}:${phone}:${lastMsg.at}:${lastMsg.role}`;
+         const event = lastMsg.role === "assistant" ? "ai_reply" : "chat_message";
          
          await supabase
            .from("messages")
@@ -328,8 +333,22 @@ async function persist(
                direction,
                status: "delivered",
                external_id: externalId,
+               event: event,
                created_at: lastMsg.at ?? new Date().toISOString(),
              },
+             { onConflict: "external_id", ignoreDuplicates: true }
+           );
+
+         // Se a mensagem foi outbound (IA), atualiza o lead
+         if (direction === "outbound") {
+           await supabase
+             .from("leads")
+             .update({ last_message_direction: 'outbound', updated_at: new Date().toISOString() })
+             .eq("id", leadAfterRpc.id);
+         }
+       }
+     }
+ }
              { onConflict: "external_id", ignoreDuplicates: true }
            );
        }
