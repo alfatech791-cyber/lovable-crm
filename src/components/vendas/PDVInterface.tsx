@@ -31,6 +31,9 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
    const [newCustomerName, setNewCustomerName] = useState("");
    const [newCustomerPhone, setNewCustomerPhone] = useState("");
    const [receivedAmount, setReceivedAmount] = useState<string>("");
+   const [barcode, setBarcode] = useState("");
+   const [vendedorId, setVendedorId] = useState<string>("");
+   const [obs, setObs] = useState("");
    const [discountValue, setDiscountValue] = useState<number>(0);
    const [isFinishing, setIsFinishing] = useState(false);
  
@@ -114,6 +117,14 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
      const s = customerSearch.toLowerCase();
      return customersList.filter(c => c.full_name.toLowerCase().includes(s));
    }, [customerSearch, customersList]);
+ 
+   const handleBarcodeSearch = (code: string) => {
+     const product = allProducts.find(p => p.id === code || p.name.includes(code));
+     if (product) {
+       addToCart(product);
+       setBarcode("");
+     }
+   };
  
    const addToCart = (product: Product) => {
      setCart(current => {
@@ -424,66 +435,89 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
           </DialogContent>
         </Dialog>
  
-        {/* Lado Esquerdo: Seleção de Produtos */}
-        <div className="flex flex-col gap-6 overflow-hidden animate-in slide-in-from-left duration-500">
-          <div className="bg-card border border-border rounded-2xl p-4 shadow-sm relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-focus-within:opacity-100 transition-opacity" />
-           <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
-             <input
-               type="text"
-                placeholder="Pressione F2 ou digite para buscar produtos..."
-                className="w-full h-14 pl-12 pr-4 rounded-xl bg-muted/30 border border-transparent focus:border-primary/20 focus:bg-background focus:ring-4 focus:ring-primary/10 text-lg outline-none transition-all font-medium"
-               value={search}
-               onChange={(e) => setSearch(e.target.value)}
-               autoFocus
-             />
+         {/* Lado Esquerdo: Seleção de Produtos e Campos de Venda */}
+         <div className="flex flex-col gap-4 overflow-hidden animate-in slide-in-from-left duration-500">
+           {/* Barra Superior de Busca e Campos */}
+           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-card border border-border rounded-2xl p-4 shadow-sm">
+             <div className="md:col-span-3 space-y-1.5">
+               <Label className="text-[10px] font-bold uppercase text-muted-foreground">Código / EAN</Label>
+               <div className="relative">
+                 <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                 <Input 
+                   placeholder="Código de barras" 
+                   className="pl-9 h-11 bg-muted/20"
+                   value={barcode}
+                   onChange={(e) => setBarcode(e.target.value)}
+                   onKeyDown={(e) => e.key === 'Enter' && handleBarcodeSearch(barcode)}
+                 />
+               </div>
+             </div>
+ 
+             <div className="md:col-span-5 space-y-1.5">
+               <Label className="text-[10px] font-bold uppercase text-muted-foreground">Descrição do Produto (F2)</Label>
+               <div className="relative">
+                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                 <Input 
+                   placeholder="Digite o nome do produto..." 
+                   className="pl-9 h-11 bg-muted/20"
+                   value={search}
+                   onChange={(e) => setSearch(e.target.value)}
+                   autoFocus
+                 />
+                 {(search || loadingProducts) && (
+                   <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 border border-border rounded-xl shadow-2xl overflow-hidden max-h-[300px] overflow-y-auto bg-card">
+                     {loadingProducts ? (
+                       <div className="p-8 flex flex-col items-center justify-center gap-2">
+                         <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                       </div>
+                     ) : filteredProducts.map(product => (
+                       <button
+                         key={product.id}
+                         onClick={() => addToCart(product)}
+                         className="w-full flex items-center gap-3 p-3 hover:bg-primary/5 transition text-left border-b border-border last:border-none"
+                       >
+                         <div className="flex-1 min-w-0">
+                           <div className="font-bold text-sm truncate">{product.name}</div>
+                           <div className="text-[10px] text-muted-foreground">Estoque: {product.stock}</div>
+                         </div>
+                         <div className="font-black text-sm text-primary">
+                           {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                         </div>
+                       </button>
+                     ))}
+                   </div>
+                 )}
+               </div>
+             </div>
+ 
+             <div className="md:col-span-4 space-y-1.5">
+               <Label className="text-[10px] font-bold uppercase text-muted-foreground">Vendedor (F4)</Label>
+               <div className="relative">
+                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                 <select 
+                   className="w-full h-11 pl-9 pr-3 rounded-md bg-muted/20 border border-input text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none"
+                   value={vendedorId}
+                   onChange={(e) => setVendedorId(e.target.value)}
+                 >
+                   <option value="">Selecione um vendedor</option>
+                   <option value="1">Vendedor Padrão</option>
+                   <option value={user?.id}>Eu ({user?.email?.split('@')[0]})</option>
+                 </select>
+                 <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground rotate-90 pointer-events-none" />
+               </div>
+             </div>
            </div>
  
-            {(search || loadingProducts) && (
-              <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 border border-border rounded-xl shadow-2xl overflow-hidden max-h-[450px] overflow-y-auto bg-card animate-in zoom-in-95 duration-200">
-                {loadingProducts ? (
-                  <div className="p-12 flex flex-col items-center justify-center gap-3 text-muted-foreground">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <span className="text-sm font-medium">Sincronizando catálogo...</span>
-                  </div>
-                ) : filteredProducts.length > 0 ? (
-                  filteredProducts.map(product => (
-                    <button
-                      key={product.id}
-                      onClick={() => addToCart(product)}
-                      disabled={product.stock <= 0}
-                      className={`w-full flex items-center gap-4 p-4 hover:bg-primary/5 transition text-left border-b border-border/50 last:border-none group ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      <div className="h-14 w-14 rounded-xl bg-muted group-hover:bg-primary/10 grid place-items-center shrink-0 transition-colors">
-                        <Package className="h-6 w-6 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                         <div className="font-bold text-base truncate group-hover:text-primary transition-colors">{product.name}</div>
-                         <div className="flex items-center gap-2 mt-0.5">
-                            <Badge variant="secondary" className="text-[10px] h-5">{product.category}</Badge>
-                            <span className={`text-xs font-medium ${product.stock <= 5 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                              Estoque: {product.stock} un
-                            </span>
-                         </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="font-black text-lg text-primary">
-                          {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                        </div>
-                        <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">Clique para adicionar</div>
-                      </div>
-                    </button>
-                  ))
-                ) : (
-                  <div className="p-12 text-center text-muted-foreground space-y-2">
-                    <Info className="h-8 w-8 mx-auto opacity-20" />
-                    <p className="font-medium">Nenhum produto encontrado com "{search}"</p>
-                  </div>
-                )}
-              </div>
-            )}
-         </div>
+           {/* Observações da Venda */}
+           <div className="bg-card border border-border rounded-2xl p-4 shadow-sm">
+             <Label className="text-[10px] font-bold uppercase text-muted-foreground mb-1.5 block">Observações / Instruções</Label>
+             <textarea 
+               className="w-full h-20 bg-muted/10 border border-input rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none placeholder:text-muted-foreground/50"
+               placeholder="Ex: Entrega agendada, embalagem para presente..."
+               value={obs}
+               onChange={(e) => setObs(e.target.value)}
+             />
+           </div>
  
            <div className="flex-1 flex flex-col min-h-0">
              <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full h-full flex flex-col">
