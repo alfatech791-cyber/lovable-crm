@@ -45,8 +45,7 @@ export const sidebarItems = [
       { title: "Checklists", url: "/servicos/checklists" },
     ]
   },
-   { title: "Dashboard", url: "/", icon: "Calendar" as const },
-  { title: "Base de Clientes", url: "/clientes", icon: "Users" as const },
+   { title: "Base de Clientes", url: "/clientes", icon: "Users" as const },
 
   { type: "header", title: "Logística & Estoque" },
   {
@@ -64,18 +63,18 @@ export const sidebarItems = [
   { title: "Catálogo Produtos", url: "/produtos", icon: "Package" as const },
 
   { type: "header", title: "Controladoria" },
-  {
-    title: "Financeiro",
-    url: "/financeiro",
-    icon: "DollarSign" as const,
-    children: [
-      { title: "Fluxo de Caixa", url: "/financeiro/caixa" },
+   {
+     title: "Financeiro",
+     url: "/financeiro",
+     icon: "DollarSign" as const,
+     children: [
        { title: "Fluxo de Caixa", url: "/financeiro/caixa" },
        { title: "DRE Gerencial", url: "/financeiro/dre" },
-      { title: "Fornecedores", url: "/financeiro/fornecedores" },
-      { title: "DRE Gerencial", url: "/financeiro/dre" },
-    ]
-  },
+       { title: "Fornecedores", url: "/financeiro/fornecedores" },
+       { title: "Maquininhas POS", url: "/financeiro/maquininhas" },
+       { title: "Plano de Contas", url: "/financeiro/plano-contas" },
+     ]
+   },
   { title: "Fiscal (NF-e/NFC-e)", url: "/fiscal", icon: "FileText" as const },
 
   { type: "header", title: "Configurações" },
