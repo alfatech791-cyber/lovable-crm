@@ -949,8 +949,8 @@ function ConversasPage() {
                   <div className="flex flex-col">
                     <h3 className="text-base font-bold tracking-tight">Conversas</h3>
                     <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                      <span className={`h-1 w-1 rounded-full ${syncing ? "bg-amber-400 animate-pulse" : "bg-emerald-400"}`} />
-                      Sincronização automática ativa
+                      <span className={`h-1 w-1 rounded-full ${instanceDetails?.status === 'open' || instanceDetails?.status === 'connected' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+                      {instanceDetails?.status === 'open' || instanceDetails?.status === 'connected' ? 'Conectado' : 'Conectando...'}
                     </span>
                   </div>
                   {totalUnread > 0 && (
@@ -968,6 +968,22 @@ function ConversasPage() {
                 </button>
               </div>
               
+              {resolvedInstance && (
+                <div className="flex items-center justify-between px-3 py-1.5 bg-primary/5 rounded-lg border border-primary/10 mb-1">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <Phone className="h-3 w-3 text-primary/70" />
+                    <span className="text-[10px] font-bold text-primary/80 truncate">
+                      {resolvedInstance}
+                    </span>
+                  </div>
+                  {instanceDetails?.owner && (
+                    <span className="text-[9px] font-black text-primary/60 px-1.5 py-0.5 rounded bg-primary/10 uppercase tracking-tighter">
+                      {instanceDetails.owner.split('@')[0]}
+                    </span>
+                  )}
+                </div>
+              )}
+
               <div className="relative group">
                 <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
                 <Input
