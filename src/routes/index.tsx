@@ -197,7 +197,7 @@ export const Route = createFileRoute("/")({
                   <div className="lg:col-span-2">
                   <SalesChart />
                   </div>
-                  <GoalProgress current={stats.monthRevenue} goal={50000} />
+                  <GoalProgress current={stats.monthRevenue} goal={50000} onGoalUpdate={() => fetchStats(period)} />
                 </div>
 
                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
