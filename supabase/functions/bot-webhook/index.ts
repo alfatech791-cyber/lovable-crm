@@ -70,8 +70,13 @@ serve(async (req) => {
       .eq("contact_phone", phone)
       .maybeSingle();
 
-    const transcript: any[] = (conv?.transcript as any[]) ?? [];
-    transcript.push({ role: "user", content: messageText, at: new Date().toISOString(), sender: data?.pushName || null });
+    const transcript: any[] = Array.isArray(conv?.transcript) ? conv.transcript : [];
+    transcript.push({ 
+      role: "user", 
+      content: messageText, 
+      at: new Date().toISOString(), 
+      sender: contactName 
+    });
 
     const currentInstanceName = settings.whatsapp_instance || payload?.instance || null;
 
@@ -214,7 +219,7 @@ serve(async (req) => {
     }
 
     transcript.push({ role: "assistant", content: replyText, at: new Date().toISOString() });
-    await persist(supabase, userId, phone, contactName, transcript, status, remoteJid, currentInstanceName);
+    await persist(supabase, userId, phone, contactName, transcript, status, remoteJid, currentInstanceName, avatarUrl);
 
     // Envia para Evolution
     const instance = settings.whatsapp_instance;
@@ -246,7 +251,8 @@ async function persist(
   transcript: any[],
   status: string,
   remoteJid?: string,
-  instanceName?: string | null
+  instanceName?: string | null,
+  avatarUrl?: string | null
 ) {
   await supabase.from("bot_conversations").upsert(
     {
@@ -265,13 +271,13 @@ async function persist(
 
      try {
        // Garante lead + card no pipeline (pipeline_leads)
-       const { error: rpcError } = await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
-         _user_id: userId,
-         _phone: phone,
-         _name: name,
-         _instance_name: instanceName,
-         _avatar_url: avatarUrl
-       });
+        const { error: rpcError } = await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
+          _user_id: userId,
+          _phone: phone,
+          _name: name,
+          _instance_name: instanceName,
+          _avatar_url: avatarUrl
+        });
        if (rpcError) console.error("RPC Error ensure_lead:", rpcError);
      } catch (err) {
        console.error("Failed to call rpc ensure_lead:", err);
