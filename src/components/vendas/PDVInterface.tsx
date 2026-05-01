@@ -752,16 +752,27 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-card px-3 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
                   Total a Receber
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-black text-foreground/60 uppercase">Total</span>
-                  <span className="text-3xl font-black text-primary tracking-tight">
-                    {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                  </span>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="text-[10px] font-bold uppercase">Total da Venda</span>
+                    <span className="text-sm font-bold">
+                      {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-black text-foreground/60 uppercase">
+                      {totalReceived >= total ? 'Troco' : 'Restante'}
+                    </span>
+                    <span className={`text-3xl font-black tracking-tight ${totalReceived >= total ? 'text-success' : 'text-primary'}`}>
+                      {Math.abs(total - totalReceived).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
  
-           <div className="grid grid-cols-3 gap-2 py-2">
+           <div className="space-y-3 py-2">
+             <div className="grid grid-cols-3 gap-2">
              {[
                { id: 'money', icon: Banknote, label: 'Dinheiro' },
                { id: 'card', icon: CreditCard, label: 'Cartão' },
@@ -788,6 +799,68 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
                  {method.label}
                </button>
              ))}
+             </div>
+
+             {paymentMethod && (
+               <div className="animate-in slide-in-from-top-2 duration-300">
+                 <div className="relative group">
+                   <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                     {paymentMethod === 'money' && <Banknote className="h-4 w-4 text-primary" />}
+                     {paymentMethod === 'card' && <CreditCard className="h-4 w-4 text-primary" />}
+                     {paymentMethod === 'pix' && <QrCode className="h-4 w-4 text-primary" />}
+                     <span className="text-xs font-bold text-muted-foreground">R$</span>
+                   </div>
+                   <Input
+                     type="number"
+                     className="pl-16 h-12 text-lg font-black bg-primary/5 border-primary/20 focus-visible:ring-primary/30 rounded-xl"
+                     placeholder="0,00"
+                     autoFocus
+                     value={
+                       paymentMethod === 'money' ? moneyAmount :
+                       paymentMethod === 'card' ? cardAmount :
+                       paymentMethod === 'pix' ? pixAmount : ""
+                     }
+                     onChange={(e) => {
+                       const val = e.target.value;
+                       if (paymentMethod === 'money') setMoneyAmount(val);
+                       if (paymentMethod === 'card') setCardAmount(val);
+                       if (paymentMethod === 'pix') setPixAmount(val);
+                     }}
+                   />
+                   <button 
+                     onClick={() => {
+                       if (paymentMethod === 'money') setMoneyAmount("");
+                       if (paymentMethod === 'card') setCardAmount("");
+                       if (paymentMethod === 'pix') setPixAmount("");
+                     }}
+                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted text-muted-foreground"
+                   >
+                     <X className="h-4 w-4" />
+                   </button>
+                 </div>
+                 <div className="flex justify-between items-center px-1 mt-1.5">
+                   <p className="text-[10px] text-muted-foreground font-medium italic">
+                     Informe o valor recebido em {paymentMethod === 'money' ? 'dinheiro' : paymentMethod === 'card' ? 'cartão' : 'PIX'}
+                   </p>
+                   {totalReceived > 0 && totalReceived < total && (
+                     <Button 
+                       variant="ghost" 
+                       size="sm" 
+                       className="h-5 text-[9px] font-bold text-primary hover:bg-primary/5 p-0 px-2"
+                       onClick={() => {
+                         const currentVal = parseFloat(paymentMethod === 'money' ? moneyAmount : paymentMethod === 'card' ? cardAmount : pixAmount) || 0;
+                         const remaining = (total - (totalReceived - currentVal)).toFixed(2);
+                         if (paymentMethod === 'money') setMoneyAmount(remaining);
+                         if (paymentMethod === 'card') setCardAmount(remaining);
+                         if (paymentMethod === 'pix') setPixAmount(remaining);
+                       }}
+                     >
+                       Completar Restante
+                     </Button>
+                   )}
+                 </div>
+               </div>
+             )}
            </div>
  
             <Button 
