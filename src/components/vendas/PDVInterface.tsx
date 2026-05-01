@@ -164,21 +164,31 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
 
     const change = useMemo(() => Math.max(0, totalReceived - total), [totalReceived, total]);
  
-   const handleFinishSale = async () => {
-     if (!user?.id) return;
-     setIsFinishing(true);
-     try {
-       // 1. Criar a ordem de venda
-       const { data: sale, error: saleError } = await supabase
-         .from("sales_orders")
-         .insert({
-           user_id: user.id,
-           customer_id: selectedCustomer?.id || null,
-           total_amount: total,
-           discount_amount: discountValue,
-            payment_method: paymentMethod === 'multiple' ? 'Múltiplo' : paymentMethod,
-           status: "concluded"
-         })
+    const handleFinishSale = async () => {
+      if (!user?.id) return;
+      setIsFinishing(true);
+
+      const usedMethods = [];
+      if (parseFloat(moneyAmount) > 0) usedMethods.push('Dinheiro');
+      if (parseFloat(cardAmount) > 0) usedMethods.push('Cartão');
+      if (parseFloat(pixAmount) > 0) usedMethods.push('PIX');
+      
+      const finalPaymentMethod = usedMethods.length > 1 
+        ? 'Múltiplo (' + usedMethods.join(', ') + ')' 
+        : usedMethods[0] || (paymentMethod === 'money' ? 'Dinheiro' : paymentMethod === 'card' ? 'Cartão' : paymentMethod === 'pix' ? 'PIX' : 'Não informado');
+
+      try {
+        // 1. Criar a ordem de venda
+        const { data: sale, error: saleError } = await supabase
+          .from("sales_orders")
+          .insert({
+            user_id: user.id,
+            customer_id: selectedCustomer?.id || null,
+            total_amount: total,
+            discount_amount: discountValue,
+            payment_method: finalPaymentMethod,
+            status: "concluded"
+          })
          .select()
          .single();
  
