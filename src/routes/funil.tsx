@@ -744,20 +744,15 @@ type Deal = {
            .select("*, lead:leads(name, phone, source, avatar_url)")
            .eq("user_id", user.id);
  
-         // Busca conversas filtradas estritamente pela instância ativa
-         let convQuery = supabase.from("bot_conversations")
-           .select("*")
-           .eq("user_id", user.id);
- 
-         if (currentInstance) {
-           dlQuery = dlQuery.eq("instance_name", currentInstance);
-           convQuery = convQuery.eq("instance_name", currentInstance);
-         } else {
-           // Se não houver instância selecionada, não mostra nada para evitar confusão
-           // ou mostra apenas registros sem instância se o usuário preferir
-           dlQuery = dlQuery.is("instance_name", null);
-           convQuery = convQuery.is("instance_name", null);
-         }
+          // Busca conversas filtradas estritamente pela instância ativa
+          let convQuery = supabase.from("bot_conversations")
+            .select("*")
+            .eq("user_id", user.id);
+  
+          if (currentInstance) {
+            dlQuery = dlQuery.eq("instance_name", currentInstance);
+            convQuery = convQuery.eq("instance_name", currentInstance);
+          }
  
          dlQuery = dlQuery.order("created_at", { ascending: false });
          convQuery = convQuery.order("last_message_at", { ascending: false });
