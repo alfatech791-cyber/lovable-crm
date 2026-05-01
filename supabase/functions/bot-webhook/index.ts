@@ -45,7 +45,7 @@ serve(async (req) => {
     const phone = remoteJid.split("@")[0];
     // Pega o nome do contato ou o subject do grupo
      const contactName = data?.pushName ?? data?.subject ?? payload?.pushName ?? null;
-     const avatarUrl = data?.profilePicUrl ?? payload?.profilePicUrl ?? null;
+     const avatarUrl = data?.profilePicUrl ?? payload?.profilePicUrl ?? data?.profilePic ?? null;
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -277,37 +277,39 @@ async function persist(
        console.error("Failed to call rpc ensure_lead:", err);
      }
 
-  // Pega lead_id e insere as últimas mensagens em public.messages (para pipeline ver)
-  const { data: lead } = await supabase
-    .from("leads")
-    .select("id")
-    .eq("user_id", userId)
-    .ilike("phone", `%${phone}%`)
-    .maybeSingle();
-
-  if (lead?.id && transcript.length > 0) {
-    // Pega só as 2 últimas (a recém adicionada do user e/ou assistant)
-    const recent = transcript.slice(-2);
-    for (const m of recent) {
-      const direction = m.role === "user" ? "inbound" : "outbound";
-      // Evita duplicar: usa external_id baseado no timestamp
-      const externalId = `${userId}:${phone}:${m.at}:${m.role}`;
-      await supabase
-        .from("messages")
-        .upsert(
-          {
-            user_id: userId,
-            lead_id: lead.id,
-            content: m.content,
-            direction,
-            status: "delivered",
-            external_id: externalId,
-            created_at: m.at ?? new Date().toISOString(),
-          },
-          { onConflict: "external_id", ignoreDuplicates: true },
-        );
-    }
-  }
+     // 2. Garantir que as mensagens sejam refletidas na tabela messages para o pipeline
+     // Procuramos o lead novamente para garantir que temos o ID correto após o RPC
+     const { data: leadAfterRpc } = await supabase
+       .from("leads")
+       .select("id")
+       .eq("user_id", userId)
+       .eq("phone", phone)
+       .maybeSingle();
+ 
+     if (leadAfterRpc?.id) {
+       // Sincroniza todas as mensagens do transcript que ainda não estão na tabela messages
+       // Para simplicidade e tempo real, focamos na última mensagem recebida/enviada
+       const lastMsg = transcript[transcript.length - 1];
+       if (lastMsg) {
+         const direction = lastMsg.role === "user" ? "inbound" : "outbound";
+         const externalId = `${userId}:${phone}:${lastMsg.at}:${lastMsg.role}`;
+         
+         await supabase
+           .from("messages")
+           .upsert(
+             {
+               user_id: userId,
+               lead_id: leadAfterRpc.id,
+               content: lastMsg.content,
+               direction,
+               status: "delivered",
+               external_id: externalId,
+               created_at: lastMsg.at ?? new Date().toISOString(),
+             },
+             { onConflict: "external_id", ignoreDuplicates: true }
+           );
+       }
+     }
 }
 
 function json(body: unknown, status = 200) {
