@@ -244,7 +244,7 @@ type Deal = {
                ...(existing?.id ? { id: existing.id } : {}),
                user_id: user.id,
                contact_phone: phone,
-                contact_name: chat.name || chat.pushName || chat.verifiedName || chat.id?.split("@")[0] || existing?.contact_name || null,
+                contact_name: chat.pushName || chat.name || chat.verifiedName || chat.id?.split("@")[0] || existing?.contact_name || null,
                transcript: previewTranscript,
                status: existing?.status ?? "active",
                messages_count: previewTranscript.length,
@@ -277,10 +277,19 @@ type Deal = {
                 console.warn("Não foi possível buscar foto para:", row.contact_phone);
               }
 
+              const finalName = row.contact_name || "Lead WhatsApp " + row.contact_phone;
+              await supabase.from('leads').upsert({
+                user_id: user.id,
+                phone: row.contact_phone,
+                name: finalName,
+                avatar_url: profilePic,
+                source: 'whatsapp'
+              }, { onConflict: 'user_id,phone' });
+              
               await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
                 _user_id: user.id,
                 _phone: row.contact_phone,
-                _name: row.contact_name,
+                _name: finalName,
                 _instance_name: instance,
                 _avatar_url: profilePic
               } as any);
@@ -697,10 +706,19 @@ type Deal = {
               } catch (e) {
                 console.warn("Não foi possível buscar foto para órfão:", c.contact_phone);
               }
+              const finalName = c.contact_name || "Lead WhatsApp " + c.contact_phone;
+              await supabase.from('leads').upsert({
+                user_id: user.id,
+                phone: c.contact_phone,
+                name: finalName,
+                avatar_url: profilePic,
+                source: 'whatsapp'
+              }, { onConflict: 'user_id,phone' });
+              
               return supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
                 _user_id: user.id,
                 _phone: c.contact_phone,
-                _name: c.contact_name,
+                _name: finalName,
                 _instance_name: currentInstance,
                 _avatar_url: profilePic
               } as any);
