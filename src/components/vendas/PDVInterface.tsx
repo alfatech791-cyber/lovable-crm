@@ -158,7 +158,7 @@
               } : null,
               paymentMethod: sale.payment_method || 'Não informado',
               vendedor: 'Sistema',
-              data: new Date(sale.created_at).toLocaleString('pt-BR'),
+               data: new Date(sale.created_at || new Date()).toLocaleString('pt-BR'),
               storeInfo: storeConfig
             };
 
