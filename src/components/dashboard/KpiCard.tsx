@@ -130,7 +130,7 @@ export function KpiCard({
           <div className="min-w-0 flex-1">
             <div className="text-[11.5px] text-muted-foreground font-medium group-hover:text-foreground transition-colors pr-5">{label}</div>
             <div className="mt-0.5 flex items-baseline gap-1.5 flex-wrap">
-              <span className="text-[17px] sm:text-[20px] lg:text-[22px] font-bold tracking-tight font-display truncate max-w-full">{value}</span>
+              <span className="text-[17px] sm:text-[20px] lg:text-[22px] font-bold tracking-tight font-display truncate max-w-full">{initialValue}</span>
               {trend && <span className="text-[10px] font-semibold text-success whitespace-nowrap">↑ {trend.replace("+","")}</span>}
             </div>
             <div className="text-[11px] text-muted-foreground mt-0.5">{sub}</div>
