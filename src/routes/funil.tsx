@@ -260,7 +260,7 @@ type Deal = {
             ...(existing?.id ? { id: existing.id } : {}),
             user_id: user.id,
             contact_phone: phone,
-            contact_name: chat.pushName || chat.name || chat.verifiedName || chat.id?.split("@")[0] || existing?.contact_name || null,
+            contact_name: (chat.pushName || chat.name || chat.verifiedName) && (chat.pushName || chat.name || chat.verifiedName) !== phone ? (chat.pushName || chat.name || chat.verifiedName) : existing?.contact_name || null,
             transcript: previewTranscript,
             status: existing?.status ?? "active",
             messages_count: previewTranscript.length,
@@ -292,7 +292,7 @@ type Deal = {
                 console.warn("Não foi possível buscar foto para:", row.contact_phone);
               }
 
-              const finalName = row.contact_name || "Lead WhatsApp " + row.contact_phone;
+              const finalName = (row.contact_name && row.contact_name !== row.contact_phone) ? row.contact_name : ("Lead WhatsApp " + row.contact_phone);
               await supabase.from('leads').upsert({
                 user_id: user.id,
                 phone: row.contact_phone,
@@ -382,7 +382,7 @@ type Deal = {
     const [viewMode, setViewMode] = useState<"kanban" | "chat">("kanban");
    const [stages, setStages] = useState<Stage[]>([]);
    const [deals, setDeals] = useState<Deal[]>([]);
-   const [leads, setLeads] = useState<{ id: string; name: string }[]>([]);
+   const [leads, setLeads] = useState<{ id: string; name: string; phone?: string | null }[]>([]);
    const [conversations, setConversations] = useState<Conversation[]>([]);
    const [statusFilter, setStatusFilter] = useState<"all" | "bot" | "manual" | "unread">("all");
    const [loading, setLoading] = useState(true);
@@ -427,7 +427,12 @@ type Deal = {
 
        if (error) throw error;
        if (data) {
-         setCurrentConversation(data as any as Conversation);
+          const conv = data as any as Conversation;
+           const lead = leads.find(l => normalizePhone(l.phone || null) === normalizePhone(conv.contact_phone));
+          if (lead && lead.name && !lead.name.startsWith("Lead WhatsApp ")) {
+            conv.contact_name = lead.name;
+          }
+          setCurrentConversation(conv);
        } else {
          // Cria uma conversa vazia local pra permitir enviar a primeira mensagem
          setCurrentConversation({
@@ -729,7 +734,7 @@ type Deal = {
               } catch (e) {
                 console.warn("Não foi possível buscar foto para órfão:", c.contact_phone);
               }
-              const finalName = c.contact_name || "Lead WhatsApp " + c.contact_phone;
+              const finalName = (c.contact_name && c.contact_name !== c.contact_phone) ? c.contact_name : ("Lead WhatsApp " + c.contact_phone);
               await supabase.from('leads').upsert({
                 user_id: user.id,
                 phone: c.contact_phone,
@@ -1453,7 +1458,7 @@ type Deal = {
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-black truncate text-foreground tracking-tight">
-                      {currentConversation?.contact_name || currentConversation?.contact_phone || "Lead Sem Nome"}
+                      {(currentConversation?.contact_name && currentConversation?.contact_name !== currentConversation?.contact_phone) ? currentConversation.contact_name : (currentConversation?.contact_phone || "Lead Sem Nome")}
                     </p>
                     <div className="flex items-center gap-1.5">
                       <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
