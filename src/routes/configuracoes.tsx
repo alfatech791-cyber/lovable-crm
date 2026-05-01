@@ -17,10 +17,44 @@ export const Route = createFileRoute("/configuracoes")({
  import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
  import { toast } from "sonner";
  
- function SettingsPage() {
-   const [activeTab, setActiveTab] = useState("perfil");
- 
-   return (
+  function SettingsPage() {
+    const { user, profile } = useAuth();
+    const [activeTab, setActiveTab] = useState("perfil");
+    const [formData, setFormData] = useState({
+      display_name: "",
+      role: "",
+      phone: ""
+    });
+
+    useEffect(() => {
+      if (profile) {
+        setFormData({
+          display_name: profile.display_name || "",
+          role: profile.role || "",
+          phone: profile.phone || ""
+        });
+      }
+    }, [profile]);
+
+    const handleSaveProfile = async () => {
+      if (!user?.id) return;
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          display_name: formData.display_name,
+          role: formData.role,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        toast.error("Erro ao salvar perfil");
+      } else {
+        toast.success("Perfil atualizado!");
+      }
+    };
+
+    return (
      <div className="min-h-screen flex w-full bg-background">
        <AppSidebar />
        <div className="flex-1 flex flex-col min-w-0">
@@ -36,9 +70,15 @@ export const Route = createFileRoute("/configuracoes")({
                    <TabsTrigger value="integracoes" className="rounded-lg gap-2"><Database className="h-4 w-4" /> Integrações</TabsTrigger>
                    <TabsTrigger value="seguranca" className="rounded-lg gap-2"><Shield className="h-4 w-4" /> Segurança</TabsTrigger>
                  </TabsList>
-                 <Button onClick={() => toast.success("Configurações salvas!")} className="bg-gradient-primary shadow-glow">
-                   Salvar Alterações
-                 </Button>
+                 {activeTab === "perfil" ? (
+                   <Button onClick={handleSaveProfile} className="bg-gradient-primary shadow-glow">
+                     Salvar Perfil
+                   </Button>
+                 ) : (
+                   <Button onClick={() => toast.success("Configurações salvas!")} className="bg-gradient-primary shadow-glow">
+                     Salvar Alterações
+                   </Button>
+                 )}
                </div>
  
                <TabsContent value="perfil">
@@ -49,31 +89,42 @@ export const Route = createFileRoute("/configuracoes")({
                        <CardDescription>Atualize seu nome e como você é visto no sistema.</CardDescription>
                      </CardHeader>
                      <CardContent className="space-y-4">
-                       <div className="flex items-center gap-6 pb-6 border-b border-border mb-6">
-                         <div className="h-20 w-20 rounded-full bg-gradient-primary grid place-items-center text-2xl font-bold text-white shadow-elegant">RS</div>
-                         <div className="space-y-2">
-                           <Button variant="outline" size="sm">Alterar Foto</Button>
-                           <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">JPG, PNG ou GIF. Máx 2MB.</p>
-                         </div>
-                       </div>
-                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div className="space-y-2">
-                           <Label>Nome Completo</Label>
-                           <Input defaultValue="Renato Silva" />
-                         </div>
-                         <div className="space-y-2">
-                           <Label>E-mail Profissional</Label>
-                           <Input defaultValue="renato@conectacrm.com.br" disabled />
-                         </div>
-                         <div className="space-y-2">
-                           <Label>Cargo / Função</Label>
-                           <Input defaultValue="Administrador" />
-                         </div>
-                         <div className="space-y-2">
-                           <Label>Telefone WhatsApp</Label>
-                           <Input defaultValue="+55 11 99999-9999" />
-                         </div>
-                       </div>
+                        <div className="flex items-center gap-6 pb-6 border-b border-border mb-6">
+                          <div className="h-20 w-20 rounded-full bg-gradient-primary grid place-items-center text-2xl font-bold text-white shadow-elegant">
+                            {formData.display_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
+                          </div>
+                          <div className="space-y-2">
+                            <Button variant="outline" size="sm">Alterar Foto</Button>
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">JPG, PNG ou GIF. Máx 2MB.</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Nome Completo</Label>
+                            <Input 
+                              value={formData.display_name} 
+                              onChange={(e) => setFormData({...formData, display_name: e.target.value})} 
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>E-mail Profissional</Label>
+                            <Input value={user?.email || ""} disabled />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Cargo / Função</Label>
+                            <Input 
+                              value={formData.role} 
+                              onChange={(e) => setFormData({...formData, role: e.target.value})} 
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Telefone WhatsApp</Label>
+                            <Input 
+                              value={formData.phone} 
+                              onChange={(e) => setFormData({...formData, phone: e.target.value})} 
+                            />
+                          </div>
+                        </div>
                      </CardContent>
                    </Card>
  
