@@ -1,5 +1,5 @@
  import { useState, useEffect, useCallback } from "react";
- import { Search, Filter, Download, MoreHorizontal, ShoppingBag, Eye, Printer, Calendar, ArrowUpRight, ArrowDownRight, CheckCircle2, XCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Search, Filter, Download, MoreHorizontal, ShoppingBag, Eye, Printer, Calendar, ArrowUpRight, ArrowDownRight, CheckCircle2, XCircle, AlertCircle, Loader2, FileText } from "lucide-react";
  import { Card, CardContent } from "@/components/ui/card";
  import { Badge } from "@/components/ui/badge";
  import { Button } from "@/components/ui/button";
@@ -222,12 +222,21 @@
                            <MoreHorizontal className="h-4 w-4" />
                          </Button>
                        </DropdownMenuTrigger>
-                       <DropdownMenuContent align="end">
-                         <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4" /> Ver Detalhes</DropdownMenuItem>
-                         <DropdownMenuItem className="gap-2"><Printer className="h-4 w-4" /> Imprimir Comprovante</DropdownMenuItem>
-                         <DropdownMenuSeparator />
-                         <DropdownMenuItem className="gap-2 text-destructive"><XCircle className="h-4 w-4" /> Cancelar Venda</DropdownMenuItem>
-                       </DropdownMenuContent>
+                        <DropdownMenuContent align="end" className="w-56">
+                          <DropdownMenuItem className="gap-2 cursor-pointer">
+                            <Eye className="h-4 w-4" /> Ver Detalhes
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="gap-2 cursor-pointer">
+                            <Printer className="h-4 w-4" /> Imprimir Comprovante
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="gap-2 cursor-pointer">
+                            <FileText className="h-4 w-4" /> Imprimir Termo de Garantia
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="gap-2 text-destructive cursor-pointer">
+                            <XCircle className="h-4 w-4" /> Cancelar Venda
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
                      </DropdownMenu>
                    </td>
                  </tr>
