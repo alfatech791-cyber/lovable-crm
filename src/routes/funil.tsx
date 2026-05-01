@@ -490,22 +490,39 @@ type Deal = {
       if (!user?.id) return;
 
       const ch = supabase
-        .channel(`funil_realtime_sync:${user.id}`)
+        .channel(`funil_realtime_sync:${user.id}:${activeInstance || 'no-instance'}`)
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "bot_conversations", filter: `user_id=eq.${user.id}` },
           (payload: any) => {
-            // Atualiza chat aberto se for o mesmo
-            if (payload.eventType !== "DELETE" && currentConversation?.id === (payload.new as any)?.id) {
-              setCurrentConversation(payload.new as any);
+            if (payload.eventType === "DELETE") {
+               load(true);
+               return;
             }
-            load(true);
+            
+            const conv = payload.new as any;
+            // Apenas reage se for da instância ativa (ou se não houver filtro de instância)
+            if (!activeInstance || conv.instance_name === activeInstance) {
+              if (currentConversation?.id === conv.id) {
+                setCurrentConversation(conv);
+              }
+              load(true);
+            }
           }
         )
         .on(
           "postgres_changes",
-          { event: "*", schema: "public", table: "pipeline_deals", filter: `user_id=eq.${user.id}` },
-          () => load(true)
+          { event: "*", schema: "public", table: "pipeline_leads", filter: `user_id=eq.${user.id}` },
+          (payload: any) => {
+            if (payload.eventType === "DELETE") {
+               load(true);
+               return;
+            }
+            const deal = payload.new as any;
+            if (!activeInstance || deal.instance_name === activeInstance) {
+              load(true);
+            }
+          }
         )
         .on(
           "postgres_changes",
@@ -522,7 +539,7 @@ type Deal = {
       return () => {
         supabase.removeChannel(ch);
       };
-    }, [user?.id, currentConversation?.id]);
+    }, [user?.id, currentConversation?.id, activeInstance]);
 
     // Dedupe defensivo: nunca renderiza dois cards com mesmo id ou mesmo lead_id
     const dedupedDeals = (() => {
