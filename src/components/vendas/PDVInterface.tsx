@@ -723,23 +723,19 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
               </div>
               
               <div className="flex items-center justify-between text-xs px-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground font-semibold flex items-center gap-1.5">
-                    <Tag className="h-3 w-3" /> Desconto Aplicado
-                  </span>
-                  <button 
-                    onClick={() => {
-                      const val = prompt("Valor do desconto (R$):", "0");
-                      if (val !== null) setDiscountValue(Math.max(0, parseFloat(val) || 0));
-                    }}
-                    className="text-[10px] bg-success/10 text-success px-2 py-0.5 rounded-full font-black hover:bg-success/20 transition-colors"
-                  >
-                    EDITAR
-                  </button>
-                </div>
-                <span className={`font-black ${discountValue > 0 ? 'text-success' : 'text-muted-foreground/50'}`}>
-                  - {discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                <span className="text-muted-foreground font-semibold flex items-center gap-1.5">
+                  <Tag className="h-3 w-3" /> Desconto (R$)
                 </span>
+                <div className="relative w-28">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground font-bold">R$</span>
+                  <Input 
+                    type="number" 
+                    className="h-7 pl-7 pr-1 text-[11px] font-bold bg-muted/30 border-none text-right"
+                    placeholder="0,00"
+                    value={discountValue || ""}
+                    onChange={(e) => setDiscountValue(Math.max(0, parseFloat(e.target.value) || 0))}
+                  />
+                </div>
               </div>
 
               <div className="relative pt-4 mt-2 border-t border-dashed border-border">
@@ -761,15 +757,23 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
                { id: 'card', icon: CreditCard, label: 'Cartão' },
                { id: 'pix', icon: QrCode, label: 'PIX' },
              ].map(method => (
-               <button
-                 key={method.id}
-                 onClick={() => setPaymentMethod(method.id)}
-                 className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition text-[11px] font-bold uppercase
-                   ${paymentMethod === method.id 
-                     ? 'border-primary bg-primary/5 text-primary' 
-                     : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
-                   }`}
-               >
+                 <button
+                   key={method.id}
+                   onClick={() => {
+                     setPaymentMethod(method.id);
+                     // Auto-preencher se nada foi digitado
+                     if (totalReceived === 0) {
+                       if (method.id === 'money') setMoneyAmount(total.toFixed(2));
+                       if (method.id === 'card') setCardAmount(total.toFixed(2));
+                       if (method.id === 'pix') setPixAmount(total.toFixed(2));
+                     }
+                   }}
+                   className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition text-[11px] font-bold uppercase
+                     ${paymentMethod === method.id 
+                       ? 'border-primary bg-primary/5 text-primary' 
+                       : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
+                     }`}
+                 >
                  <method.icon className="h-5 w-5" />
                  {method.label}
                </button>
