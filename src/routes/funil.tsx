@@ -1210,56 +1210,56 @@ type Deal = {
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Nenhuma conversa</p>
                       </div>
                     ) : (
-                    {conversations
-                      .filter(c => {
-                        const matchSearch = !searchTerm || 
-                          (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
-                          c.contact_phone.includes(searchTerm);
-                        
-                        if (!matchSearch) return false;
-                        
-                        if (statusFilter === "bot") return c.status !== "handed_off";
-                        if (statusFilter === "manual") return c.status === "handed_off";
-                        if (statusFilter === "unread") {
-                          const incoming = (c.transcript ?? []).filter((m) => m.role === "user").length;
-                          return incoming > 0;
-                        }
-                        return true;
-                      })
-                      .map((conv) => (
-                        <button
-                          key={conv.id}
-                          onClick={() => {
-                            setCurrentConversation(conv);
-                            setChatOpen(true);
-                          }}
-                          className={cn(
-                            "w-full p-4 flex items-start gap-3 border-b border-border/40 hover:bg-primary/5 transition-all text-left relative group",
-                            currentConversation?.id === conv.id ? "bg-primary/10 shadow-inner" : "bg-transparent"
-                          )}
-                        >
-                          {currentConversation?.id === conv.id && (
-                            <div className="absolute left-0 top-2 bottom-2 w-1.5 bg-primary rounded-r-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
-                          )}
-                          <div className="relative shrink-0">
-                            <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 grid place-items-center group-hover:scale-105 transition-transform">
-                              <User className="h-6 w-6 text-primary" />
+                      conversations
+                        .filter(c => {
+                          const matchSearch = !searchTerm || 
+                            (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
+                            c.contact_phone.includes(searchTerm);
+                          
+                          if (!matchSearch) return false;
+                          
+                          if (statusFilter === "bot") return c.status !== "handed_off";
+                          if (statusFilter === "manual") return c.status === "handed_off";
+                          if (statusFilter === "unread") {
+                            const incoming = (c.transcript ?? []).filter((m) => m.role === "user").length;
+                            return incoming > 0;
+                          }
+                          return true;
+                        })
+                        .map((conv) => (
+                          <button
+                            key={conv.id}
+                            onClick={() => {
+                              setCurrentConversation(conv);
+                              setChatOpen(true);
+                            }}
+                            className={cn(
+                              "w-full p-4 flex items-start gap-3 border-b border-border/40 hover:bg-primary/5 transition-all text-left relative group",
+                              currentConversation?.id === conv.id ? "bg-primary/10 shadow-inner" : "bg-transparent"
+                            )}
+                          >
+                            {currentConversation?.id === conv.id && (
+                              <div className="absolute left-0 top-2 bottom-2 w-1.5 bg-primary rounded-r-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
+                            )}
+                            <div className="relative shrink-0">
+                              <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 grid place-items-center group-hover:scale-105 transition-transform">
+                                <User className="h-6 w-6 text-primary" />
+                              </div>
+                              <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 border-2 border-background shadow-sm" />
                             </div>
-                            <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 border-2 border-background shadow-sm" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between mb-0.5">
-                              <p className="text-xs font-black truncate text-foreground">{conv.contact_name || conv.contact_phone}</p>
-                              <span className="text-[9px] font-bold text-muted-foreground shrink-0 uppercase">
-                                {formatDistanceToNow(new Date(conv.last_message_at), { addSuffix: false, locale: ptBR })}
-                              </span>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between mb-0.5">
+                                <p className="text-xs font-black truncate text-foreground">{conv.contact_name || conv.contact_phone}</p>
+                                <span className="text-[9px] font-bold text-muted-foreground shrink-0 uppercase">
+                                  {formatDistanceToNow(new Date(conv.last_message_at), { addSuffix: false, locale: ptBR })}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-muted-foreground truncate font-medium">
+                                {conv.transcript?.[conv.transcript.length - 1]?.content || "Inicie uma conversa"}
+                              </p>
                             </div>
-                            <p className="text-[11px] text-muted-foreground truncate font-medium">
-                              {conv.transcript?.[conv.transcript.length - 1]?.content || "Inicie uma conversa"}
-                            </p>
-                          </div>
-                        </button>
-                      ))
+                          </button>
+                        ))
                     )}
                   </div>
                 </div>
