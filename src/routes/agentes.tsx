@@ -14,11 +14,7 @@ export const Route = createFileRoute("/agentes")({
   component: AgentsPage,
 });
 
-interface Agent {
-  id: number;
-  name: string;
-  role: string;
-  status: string;
+ interface Agent {
    id: string;
    display_name: string | null;
    role: string | null;
