@@ -285,13 +285,22 @@ type Deal = {
                 source: 'whatsapp'
               }, { onConflict: 'user_id,phone' });
               
-              await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
-                _user_id: user.id,
-                _phone: row.contact_phone,
-                _name: finalName,
-                _instance_name: instance,
-                _avatar_url: profilePic
-              } as any);
+              const { data: leadData } = await supabase.from('leads').upsert({
+                user_id: user.id,
+                phone: row.contact_phone,
+                name: finalName,
+                avatar_url: profilePic,
+                source: 'whatsapp'
+              }, { onConflict: 'user_id,phone' }).select('id').single();
+
+              if (leadData?.id) {
+                await supabase.from('pipeline_leads').upsert({
+                  user_id: user.id,
+                  lead_id: leadData.id,
+                  instance_name: instance,
+                  stage_id: stages[0]?.id || (await supabase.from('funnel_stages').select('id').eq('user_id', user.id).order('order_index').limit(1).single()).data?.id
+                }, { onConflict: 'user_id,lead_id' });
+              }
             } catch (e) {
               console.error("Erro ao processar lead individual:", row.contact_phone, e);
             }
