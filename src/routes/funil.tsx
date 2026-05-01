@@ -850,21 +850,13 @@ type Deal = {
     useEffect(() => {
       if (authLoading) return;
       load();
-      const initialTimer = window.setTimeout(() => syncFromWhatsApp(false), 300);
-      const poller = window.setInterval(() => syncFromWhatsApp(false), 15000);
-      const handleVisibility = () => {
-        if (document.visibilityState === "visible") {
-          syncFromWhatsApp(false);
-        }
-      };
-      document.addEventListener("visibilitychange", handleVisibility);
+      // Removemos o poller automático e o sync on visibility para evitar loop de sincronização infinito
+      // A sincronização manual via botão "Sincronizar WhatsApp" é preferida para controle do usuário.
+      
       // Timeout de segurança: garante que o loading termine mesmo se algo travar
       const safety = setTimeout(() => setLoading(false), 8000);
       return () => {
         clearTimeout(safety);
-        clearTimeout(initialTimer);
-        clearInterval(poller);
-        document.removeEventListener("visibilitychange", handleVisibility);
       };
     }, [user?.id, authLoading]);
 
