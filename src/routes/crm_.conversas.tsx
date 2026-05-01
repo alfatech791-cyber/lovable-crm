@@ -351,12 +351,11 @@ function ConversasPage() {
     if (!user?.id) {
       const remoteInstances = await evolution.getInstances();
       const statusPriority = ["open", "connected", "active", "online", "connecting"];
-      const remoteCandidate =
-        remoteInstances.find((instance) => statusPriority.includes(String(instance.status ?? "").toLowerCase()))?.instanceName ??
-        remoteInstances[0]?.instanceName ??
-        null;
+      const candidate = remoteInstances.find((instance) => statusPriority.includes(String(instance.status ?? "").toLowerCase())) || remoteInstances[0] || null;
+      const remoteCandidate = candidate?.instanceName ?? null;
 
       setResolvedInstance(remoteCandidate);
+      setInstanceDetails(candidate);
       return remoteCandidate;
     }
 
@@ -379,23 +378,24 @@ function ConversasPage() {
     }
 
     const statusPriority = ["open", "connected", "active", "online", "connecting"];
-    const dbCandidate = (savedInstances ?? []).find((instance) =>
+    const dbCandidateObj = (savedInstances ?? []).find((instance) =>
       statusPriority.includes(String(instance.status ?? "").toLowerCase())
-    )?.instance_name;
+    );
+    const dbCandidate = dbCandidateObj?.instance_name;
 
     if (dbCandidate) {
       setResolvedInstance(dbCandidate);
+      setInstanceDetails({ instanceName: dbCandidate, status: dbCandidateObj?.status });
       return dbCandidate;
     }
 
     const remoteInstances = await evolution.getInstances();
-    const remoteCandidate =
-      remoteInstances.find((instance) => statusPriority.includes(String(instance.status ?? "").toLowerCase()))?.instanceName ??
-      remoteInstances[0]?.instanceName ??
-      null;
+    const remoteCandidateObj = remoteInstances.find((instance) => statusPriority.includes(String(instance.status ?? "").toLowerCase())) || remoteInstances[0] || null;
+    const remoteCandidate = remoteCandidateObj?.instanceName ?? null;
 
     if (remoteCandidate) {
       setResolvedInstance(remoteCandidate);
+      setInstanceDetails(remoteCandidateObj);
       const { error: upsertError } = await supabase.from("bot_settings").upsert(
         { user_id: user.id, whatsapp_instance: remoteCandidate },
         { onConflict: "user_id" }
