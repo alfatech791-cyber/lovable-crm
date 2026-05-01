@@ -1,5 +1,5 @@
  import { useState, useMemo, useEffect, useCallback } from "react";
-import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2, ArrowLeft, History, Calculator, Percent } from "lucide-react";
+import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2, ArrowLeft, History, Calculator, Percent, Tag, ReceiptText } from "lucide-react";
  import { Product } from "@/lib/mock";
  import { toast } from "sonner";
  import { supabase } from "@/integrations/supabase/client";
@@ -548,74 +548,131 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
            </span>
          </div>
  
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/5">
-           {cart.length > 0 ? (
-             cart.map(item => (
-                <div key={item.id} className="flex gap-3 p-3 bg-card border border-border/50 rounded-xl hover:border-primary/30 transition-all group">
-                 <div className="flex-1 min-w-0">
-                    <div className="text-sm font-bold truncate group-hover:text-primary transition-colors">{item.name}</div>
-                    <div className="text-xs font-medium text-muted-foreground mt-1">
-                     {item.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                   </div>
-                 </div>
-                 <div className="flex items-center gap-2">
-                    <div className="flex items-center bg-muted/50 rounded-lg border border-border/50 p-1">
-                      <button onClick={() => updateQuantity(item.id, -1)} className="p-1.5 hover:bg-background rounded-md hover:text-primary transition-all"><Minus className="h-3 w-3" /></button>
-                     <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
-                      <button onClick={() => updateQuantity(item.id, 1)} className="p-1.5 hover:bg-background rounded-md hover:text-primary transition-all"><Plus className="h-3 w-3" /></button>
-                   </div>
-                    <button onClick={() => removeFromCart(item.id)} className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-lg transition-all">
-                     <Trash2 className="h-4 w-4" />
-                   </button>
-                 </div>
-               </div>
-             ))
-           ) : (
-             <div className="h-full flex flex-col items-center justify-center text-muted-foreground text-center p-8">
-               <ShoppingCart className="h-12 w-12 mb-4 opacity-20" />
-               <p>Seu carrinho está vazio</p>
-               <p className="text-xs">Busque produtos acima para começar</p>
-             </div>
-           )}
-         </div>
- 
-          <div className="p-6 bg-card border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.05)] space-y-4">
-           <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground font-medium">Subtotal</span>
-              <span className="font-bold">{subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-           </div>
-           <div className="flex items-center justify-between text-sm">
-               <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-success/10 rounded-md">
-                    <Percent className="h-3 w-3 text-success" />
+          <ScrollArea className="flex-1 px-4">
+            <div className="py-4 space-y-3">
+              {cart.length > 0 ? (
+                cart.map(item => (
+                  <div key={item.id} className="group relative bg-card border border-border/40 rounded-2xl p-3 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300">
+                    <div className="flex gap-4">
+                      {/* Avatar do Produto ou Ícone */}
+                      <div className="h-12 w-12 rounded-xl bg-muted/50 flex items-center justify-center shrink-0 group-hover:bg-primary/5 transition-colors">
+                        <Package className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </div>
+
+                      <div className="flex-1 min-w-0 flex flex-col justify-center">
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                            {item.name}
+                          </span>
+                          <button 
+                            onClick={() => removeFromCart(item.id)}
+                            className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                        
+                        <div className="flex items-center justify-between mt-1">
+                          <div className="flex flex-col">
+                            <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Unitário</span>
+                            <span className="text-sm font-semibold text-primary">
+                              {item.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            {/* Seletor de Quantidade Moderno */}
+                            <div className="flex items-center bg-muted/40 rounded-full border border-border/30 p-1 ring-1 ring-transparent group-hover:ring-primary/10 transition-all">
+                              <button 
+                                onClick={() => updateQuantity(item.id, -1)}
+                                className="h-7 w-7 flex items-center justify-center rounded-full hover:bg-background hover:text-primary hover:shadow-sm transition-all active:scale-90"
+                              >
+                                <Minus className="h-3 w-3" />
+                              </button>
+                              <span className="w-8 text-center text-xs font-black">{item.quantity}</span>
+                              <button 
+                                onClick={() => updateQuantity(item.id, 1)}
+                                className="h-7 w-7 flex items-center justify-center rounded-full hover:bg-background hover:text-primary hover:shadow-sm transition-all active:scale-90"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </button>
+                            </div>
+
+                            {/* Total do Item */}
+                            <div className="flex flex-col items-end min-w-[70px]">
+                              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight text-right">Subtotal</span>
+                              <span className="text-sm font-black text-foreground">
+                                {(item.price * item.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="h-64 flex flex-col items-center justify-center text-muted-foreground text-center animate-in fade-in zoom-in duration-500">
+                  <div className="relative mb-4">
+                    <ShoppingCart className="h-16 w-16 opacity-10" />
+                    <div className="absolute -top-1 -right-1 h-4 w-4 bg-primary/20 rounded-full animate-ping" />
+                  </div>
+                  <p className="font-bold text-base text-foreground/70">Carrinho Vazio</p>
+                  <p className="text-xs max-w-[180px] mt-1 leading-relaxed">Selecione produtos ao lado para iniciar uma nova venda</p>
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    className="mt-4 text-primary font-bold"
+                    onClick={() => document.querySelector('input')?.focus()}
+                  >
+                    Pesquisar agora (F2)
+                  </Button>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+ 
+          <div className="p-5 bg-card border-t border-border shadow-[0_-10px_40px_rgba(0,0,0,0.04)] space-y-4 relative z-10">
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between text-xs px-1">
+                <span className="text-muted-foreground font-semibold flex items-center gap-1.5">
+                  <ReceiptText className="h-3 w-3" /> Subtotal Bruto
+                </span>
+                <span className="font-bold text-foreground/80">{subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+              </div>
+              
+              <div className="flex items-center justify-between text-xs px-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground font-semibold flex items-center gap-1.5">
+                    <Tag className="h-3 w-3" /> Desconto Aplicado
+                  </span>
                   <button 
                     onClick={() => {
                       const val = prompt("Valor do desconto (R$):", "0");
                       if (val !== null) setDiscountValue(Math.max(0, parseFloat(val) || 0));
                     }}
-                    className="text-muted-foreground hover:text-primary font-medium transition"
+                    className="text-[10px] bg-success/10 text-success px-2 py-0.5 rounded-full font-black hover:bg-success/20 transition-colors"
                   >
-                    Desconto
+                    EDITAR
                   </button>
-                 {discountValue > 0 && (
-                   <button 
-                     onClick={() => setDiscountValue(0)}
-                      className="text-destructive hover:bg-destructive/10 p-1 rounded-full transition"
-                     title="Remover desconto"
-                   >
-                     <X className="h-3 w-3" />
-                   </button>
-                 )}
-               </div>
-               <span className="text-success font-black">
-                - {discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-              </span>
-           </div>
-            <div className="flex items-center justify-between text-2xl font-black pt-2 border-t border-dashed border-border mt-2">
-              <span className="text-foreground">Total</span>
-             <span className="text-primary">{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-           </div>
+                </div>
+                <span className={`font-black ${discountValue > 0 ? 'text-success' : 'text-muted-foreground/50'}`}>
+                  - {discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                </span>
+              </div>
+
+              <div className="relative pt-4 mt-2 border-t border-dashed border-border">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-card px-3 text-[9px] font-black text-muted-foreground uppercase tracking-widest">
+                  Total a Receber
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-black text-foreground/60 uppercase">Total</span>
+                  <span className="text-3xl font-black text-primary tracking-tight">
+                    {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </span>
+                </div>
+              </div>
+            </div>
  
            <div className="grid grid-cols-3 gap-2 py-2">
              {[
