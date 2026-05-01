@@ -100,7 +100,7 @@ serve(async (req) => {
         // Fora do horário: envia away_message uma vez
         const awayText = settings.away_message || "No momento estamos fora do horário de atendimento.";
         transcript.push({ role: "assistant", content: awayText, at: new Date().toISOString() });
-        await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active");
+        await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active", remoteJid);
         const instance = settings.whatsapp_instance;
         const evoUrl = Deno.env.get("EVOLUTION_API_URL");
         const evoKey = Deno.env.get("EVOLUTION_API_KEY");
@@ -125,7 +125,7 @@ serve(async (req) => {
 
     if (status === "handed_off") {
       // Já foi para humano, não responde
-      await persist(supabase, userId, phone, contactName, transcript, status);
+      await persist(supabase, userId, phone, contactName, transcript, status, remoteJid);
       return json({ ok: true, handed: true });
     }
 
@@ -211,7 +211,7 @@ serve(async (req) => {
     }
 
     transcript.push({ role: "assistant", content: replyText, at: new Date().toISOString() });
-    await persist(supabase, userId, phone, contactName, transcript, status);
+    await persist(supabase, userId, phone, contactName, transcript, status, remoteJid);
 
     // Envia para Evolution
     const instance = settings.whatsapp_instance;
