@@ -661,5 +661,6 @@ import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode
          </div>
        </div>
      </div>
+      </div>
    );
  }
