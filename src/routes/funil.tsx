@@ -690,14 +690,21 @@ type Deal = {
       if (orphanConvs.length > 0) {
         try {
           await Promise.all(
-            orphanConvs.slice(0, 50).map((c: any) =>
-              supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
+            orphanConvs.slice(0, 50).map(async (c: any) => {
+              let profilePic = null;
+              try {
+                profilePic = await evolution.fetchProfilePictureUrl(currentInstance || "", c.contact_phone);
+              } catch (e) {
+                console.warn("Não foi possível buscar foto para órfão:", c.contact_phone);
+              }
+              return supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
                 _user_id: user.id,
                 _phone: c.contact_phone,
                 _name: c.contact_name,
                 _instance_name: currentInstance,
-              } as any)
-            )
+                _avatar_url: profilePic
+              } as any);
+            })
           );
           // Recarrega após reconciliação
            const { data: newDeals } = await supabase
