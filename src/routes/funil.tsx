@@ -245,15 +245,16 @@ type Deal = {
 
        if (upsertError) throw upsertError;
 
-       await Promise.all(
-         upsertRows.map((row: any) =>
-           supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
-             _user_id: user.id,
-             _phone: row.contact_phone,
-             _name: row.contact_name,
-           } as any)
-         )
-       );
+        await Promise.all(
+          upsertRows.map((row: any) =>
+            supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
+              _user_id: user.id,
+              _phone: row.contact_phone,
+              _name: row.contact_name,
+              _instance_name: instance,
+            } as any)
+          )
+        );
 
        await load(true);
        if (showToast) toast.success("Sincronização concluída");
@@ -574,6 +575,7 @@ type Deal = {
                 _user_id: user.id,
                 _phone: c.contact_phone,
                 _name: c.contact_name,
+                _instance_name: activeInstance,
               } as any)
             )
           );
