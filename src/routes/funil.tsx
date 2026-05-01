@@ -940,22 +940,22 @@ type Deal = {
                   />
                 </div>
                 <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-xl border border-border/20">
-                    <div className="flex items-center gap-1 bg-primary/5 p-0.5 rounded-xl border border-primary/10">
+                    <div className="flex items-center gap-1 bg-primary/10 p-1 rounded-xl border border-primary/20 shadow-sm">
                       <Button 
                         variant="ghost" 
                         size="sm" 
                         disabled={syncing}
-                        className={cn("h-8 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all", syncing ? "bg-primary/20 text-primary animate-pulse" : "hover:bg-primary/10 hover:text-primary")}
+                        className={cn("h-8 px-3 gap-2 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all", syncing ? "bg-primary/20 text-primary animate-pulse" : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm")}
                         onClick={() => syncFromWhatsApp(true, true)}
                       >
-                        {syncing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wifi className="h-3 w-3" />}
+                        {syncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wifi className="h-3.5 w-3.5" />}
                         {syncing ? "Sincronizando..." : "Sincronizar WhatsApp"}
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         disabled={loading || syncing}
-                        className="h-8 w-8 rounded-lg hover:bg-primary/10 text-primary"
+                        className="h-8 w-8 rounded-lg hover:bg-primary/20 text-primary font-bold"
                         onClick={() => {
                           toast.info("Recarregando pipeline...");
                           load(false);
