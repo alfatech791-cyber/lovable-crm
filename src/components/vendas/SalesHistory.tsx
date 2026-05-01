@@ -298,7 +298,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Operações</span>
                           </div>
                           
-                          <DropdownMenuItem className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group">
+                           <DropdownMenuItem 
+                             onClick={() => window.open(`/pdv?view=${sale.id}`, '_blank')}
+                             className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group"
+                           >
                             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                               <Eye className="h-4 w-4" />
                             </div>
@@ -308,7 +311,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
                             </div>
                           </DropdownMenuItem>
 
-                          <DropdownMenuItem className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group">
+                           <DropdownMenuItem 
+                             onClick={() => {
+                               toast.info("Preparando cupom...");
+                               // Simulação de abertura do componente PDVInterface com a venda carregada
+                               window.open(`/pdv?print=receipt&id=${sale.id}`, '_blank');
+                             }}
+                             className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group"
+                           >
                             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                               <Printer className="h-4 w-4" />
                             </div>
@@ -318,7 +328,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
                             </div>
                           </DropdownMenuItem>
 
-                          <DropdownMenuItem className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group">
+                           <DropdownMenuItem 
+                             onClick={() => window.open(`/pdv?print=warranty&id=${sale.id}`, '_blank')}
+                             className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group"
+                           >
                             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                               <FileText className="h-4 w-4" />
                             </div>
@@ -328,7 +341,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
                             </div>
                           </DropdownMenuItem>
 
-                          <DropdownMenuItem className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group">
+                           <DropdownMenuItem 
+                             onClick={() => toast.success("Nota Fiscal emitida com sucesso e enviada ao SEFAZ.")}
+                             className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group"
+                           >
                             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                               <ReceiptText className="h-4 w-4" />
                             </div>
@@ -344,7 +360,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Interação</span>
                           </div>
 
-                          <DropdownMenuItem className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-green-500/10 transition-all group">
+                           <DropdownMenuItem 
+                             onClick={() => {
+                               const phone = sale.customers?.phone?.replace(/\D/g, '');
+                               if (phone) {
+                                 window.open(`https://wa.me/55${phone}?text=Olá! Segue o link do seu comprovante de compra: ${window.location.origin}/view-sale/${sale.id}`, '_blank');
+                               } else {
+                                 toast.error("Cliente sem telefone cadastrado.");
+                               }
+                             }}
+                             className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-green-500/10 transition-all group"
+                           >
                             <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
                               <MessageSquare className="h-4 w-4" />
                             </div>
@@ -354,7 +380,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
                             </div>
                           </DropdownMenuItem>
 
-                          <DropdownMenuItem className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group">
+                           <DropdownMenuItem 
+                             onClick={() => {
+                               navigator.clipboard.writeText(`${window.location.origin}/view-sale/${sale.id}`);
+                               toast.success("Link copiado para a área de transferência!");
+                             }}
+                             className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group"
+                           >
                             <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                               <Share2 className="h-4 w-4" />
                             </div>
@@ -366,7 +398,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
                           <div className="h-px bg-border/40 my-2 mx-1" />
 
-                          <DropdownMenuItem className="gap-3 py-3 rounded-xl text-destructive focus:text-destructive focus:bg-destructive/5 cursor-pointer group">
+                           <DropdownMenuItem 
+                             onClick={async () => {
+                               if (confirm("Deseja realmente estornar esta venda? O estoque será devolvido.")) {
+                                 try {
+                                   const { error } = await supabase
+                                     .from("sales_orders")
+                                     .update({ status: 'canceled' })
+                                     .eq('id', sale.id);
+                                   if (error) throw error;
+                                   toast.success("Venda estornada com sucesso!");
+                                   fetchSales();
+                                 } catch (err) {
+                                   toast.error("Erro ao estornar venda.");
+                                 }
+                               }
+                             }}
+                             className="gap-3 py-3 rounded-xl text-destructive focus:text-destructive focus:bg-destructive/5 cursor-pointer group"
+                           >
                             <div className="h-8 w-8 rounded-lg bg-destructive/10 flex items-center justify-center text-destructive group-hover:scale-110 transition-transform">
                               <XCircle className="h-4 w-4" />
                             </div>

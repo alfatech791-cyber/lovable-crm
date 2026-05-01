@@ -117,10 +117,121 @@
      }
    }, [user?.id]);
  
-   useEffect(() => {
-     fetchProducts();
-     fetchCustomers();
-   }, [fetchProducts, fetchCustomers]);
+    useEffect(() => {
+      const loadData = async () => {
+        await fetchProducts();
+        await fetchCustomers();
+
+        // Lógica para lidar com parâmetros de URL (Impressão e Visualização)
+        const urlParams = new URLSearchParams(window.location.search);
+        const saleId = urlParams.get('id') || urlParams.get('view');
+        const action = urlParams.get('print');
+
+        if (saleId && user?.id) {
+          try {
+            const { data: sale, error } = await supabase
+              .from("sales_orders")
+              .select("*, customers(*)")
+              .eq("id", saleId)
+              .single();
+
+            if (error) throw error;
+
+            const storeConfig = {
+              name: "APPLE JAU",
+              cnpj: "54.123.456/0001-89",
+              phone: "(14) 99876-5432",
+              address: "Rua Major Prado, 123 - Centro, Jaú - SP"
+            };
+
+            const saleSnapshot: any = {
+              id: sale.id,
+              items: (sale.items as any[]) || [],
+              total: sale.total_amount || 0,
+              discount: sale.discount_amount || 0,
+              customer: sale.customers ? {
+                id: sale.customers.id,
+                name: sale.customers.full_name,
+                phone: sale.customers.phone,
+                document: sale.customers.document,
+                address: `${sale.customers.address_street || ''}, ${sale.customers.address_number || ''}`.trim()
+              } : null,
+              paymentMethod: sale.payment_method || 'Não informado',
+              vendedor: 'Sistema',
+               data: new Date(sale.created_at || new Date()).toLocaleString('pt-BR'),
+              storeInfo: storeConfig
+            };
+
+            setLastSaleId(sale.id);
+            setLastSaleData(saleSnapshot);
+
+            if (action === 'receipt') {
+              // Pequeno delay para garantir que o estado foi atualizado
+              setTimeout(() => {
+                const printWindow = window.open('', '_blank');
+                if (printWindow) {
+                  const itemsHtml = saleSnapshot.items.map((item: any) => `
+                    <tr>
+                      <td style="padding: 5px 0;">${item.name} x${item.quantity}</td>
+                      <td style="text-align: right; padding: 5px 0;">${(item.price * item.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+                    </tr>
+                  `).join('');
+
+                  printWindow.document.write(`
+                    <html>
+                      <head>
+                        <title>Recibo de Venda - #${sale.id.slice(0, 8)}</title>
+                        <style>
+                          body { font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.2; width: 300px; margin: 0 auto; padding: 20px; }
+                          .header { text-align: center; margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+                          .section { margin-bottom: 15px; }
+                          .section-title { font-weight: bold; text-transform: uppercase; margin-bottom: 5px; border-bottom: 1px solid #eee; }
+                          table { width: 100%; border-collapse: collapse; }
+                          .total-row { font-weight: bold; border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px; }
+                          .footer { text-align: center; margin-top: 30px; font-size: 10px; }
+                          @media print { body { width: 100%; } }
+                        </style>
+                      </head>
+                      <body>
+                        <div class="header">
+                           <h2 style="margin: 0;">${storeConfig.name}</h2>
+                           <p style="margin: 5px 0;">CNPJ: ${storeConfig.cnpj}</p>
+                           <p style="margin: 0;">Tel: ${storeConfig.phone}</p>
+                        </div>
+                        <div class="section">
+                           <div class="section-title">Dados da Venda</div>
+                           <p style="margin: 2px 0;">Pedido: #${sale.id.slice(0, 8)}</p>
+                           <p style="margin: 2px 0;">Data: ${saleSnapshot.data}</p>
+                        </div>
+                        <div class="section">
+                          <div class="section-title">Produtos</div>
+                          <table>${itemsHtml}</table>
+                        </div>
+                        <div class="total-row">
+                          <div style="display: flex; justify-content: space-between;">
+                            <span>TOTAL:</span>
+                            <span>${(sale.total_amount || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                          </div>
+                        </div>
+                        <div class="footer"><p>Obrigado pela preferência!</p></div>
+                      </body>
+                    </html>
+                  `);
+                  printWindow.document.close();
+                  printWindow.print();
+                }
+              }, 500);
+            } else if (action === 'warranty') {
+               // Lógica similar para o termo de garantia se necessário via URL
+               toast.info("Abrindo Termo de Garantia...");
+            }
+          } catch (err) {
+            console.error("Erro ao carregar venda via URL:", err);
+          }
+        }
+      };
+      loadData();
+    }, [fetchProducts, fetchCustomers, user?.id]);
  
    const [activeCategory, setActiveCategory] = useState<string>("all");
   useEffect(() => {
