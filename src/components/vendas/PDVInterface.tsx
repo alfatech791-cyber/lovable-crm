@@ -92,28 +92,27 @@
      fetchCustomers();
    }, [fetchProducts, fetchCustomers]);
  
-   const [activeCategory, setActiveCategory] = useState("all");
+   const [activeCategory, setActiveCategory] = useState<string>("all");
    const [customerSearch, setCustomerSearch] = useState("");
  
    const filteredProducts = useMemo(() => {
-     let filtered = allProducts;
-     
-     if (activeCategory !== "all") {
+     return allProducts.filter(p => {
+       const matchesSearch = !search || 
+         p.name.toLowerCase().includes(search.toLowerCase()) || 
+         p.category.toLowerCase().includes(search.toLowerCase()) ||
+         (p.id && p.id.toLowerCase().includes(search.toLowerCase()));
+       
+       if (!matchesSearch) return false;
+       if (activeCategory === "all") return true;
+       
        const catMap: Record<string, string[]> = {
          "phones": ["Smartphones", "Celulares", "Aparelhos"],
          "acc": ["Acessórios", "Películas", "Cabos", "Fones", "Carregadores"],
          "services": ["Serviços", "Mão de Obra"]
        };
        const allowedCats = catMap[activeCategory] || [];
-       filtered = filtered.filter(p => allowedCats.some(c => p.category.includes(c)));
-     }
- 
-     if (!search) return filtered;
-     const s = search.toLowerCase();
-     return filtered.filter(p => 
-       p.name.toLowerCase().includes(s) || 
-       p.category.toLowerCase().includes(s)
-     );
+       return allowedCats.some(c => p.category.toLowerCase().includes(c.toLowerCase()));
+     });
    }, [search, allProducts, activeCategory]);
  
    const filteredCustomers = useMemo(() => {
@@ -123,10 +122,14 @@
    }, [customerSearch, customersList]);
  
    const handleBarcodeSearch = (code: string) => {
-     const product = allProducts.find(p => p.id === code || p.name.includes(code));
+     if (!code) return;
+     const product = allProducts.find(p => p.id === code || (p.name && p.name.includes(code)));
      if (product) {
        addToCart(product);
        setBarcode("");
+       toast.success(`Produto adicionado: ${product.name}`);
+     } else {
+       toast.error("Produto não encontrado com este código.");
      }
    };
  
@@ -586,7 +589,7 @@
                        <div className="p-8 flex flex-col items-center justify-center gap-2">
                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
                        </div>
-                     ) : filteredProducts.map(product => (
+                      ) : filteredProducts.slice(0, 50).map(product => (
                        <button
                          key={product.id}
                          onClick={() => addToCart(product)}
