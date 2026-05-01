@@ -181,7 +181,7 @@ type Deal = {
           existingQuery = existingQuery.eq("instance_name", instance);
         }
 
-        const { data: existingRows, error: existingError } = await existingQuery;
+        const { data: existingRows, error: existingError } = await existingQuery.order("last_message_at", { ascending: false });
 
        if (existingError) throw existingError;
 
@@ -204,55 +204,54 @@ type Deal = {
           return;
         }
 
-        const upsertRows = chats
-          .slice(0, 50)
-          .map((chat: any) => {
+        const validChats = chats
+          .filter((chat: any) => {
             const remoteJid = chat.remoteJid || chat.id || "";
-            if (!remoteJid || remoteJid.endsWith("@g.us")) return null;
-
-            const phone = normalizePhone(remoteJid);
-            if (!phone) return null;
-
-            const existing = existingByPhone.get(phone);
-            
-            // Se já existe e é de outra instância, evitamos duplicar ou sobrescrever indevidamente
-            if (existing && (existing as any).instance_name && (existing as any).instance_name !== instance) {
-              return null;
-            }
-
-            const lastMsg = chat.lastMessage;
-            const fallbackContent =
-              lastMsg?.message?.conversation ||
-              lastMsg?.message?.extendedTextMessage?.text ||
-              existing?.transcript?.[existing.transcript.length - 1]?.content ||
-              "Nova conversa";
-
-            const previewTranscript = Array.isArray(existing?.transcript) && existing.transcript.length > 0
-              ? existing.transcript
-              : [{
-                  role: lastMsg?.key?.fromMe ? "assistant" : "user",
-                  content: fallbackContent,
-                  at: new Date(lastMsg?.messageTimestamp ? lastMsg.messageTimestamp * 1000 : Date.now()).toISOString(),
-                }];
-
-            const lastAt =
-              previewTranscript[previewTranscript.length - 1]?.at ||
-              existing?.last_message_at ||
-              new Date().toISOString();
-
-             return {
-               ...(existing?.id ? { id: existing.id } : {}),
-               user_id: user.id,
-               contact_phone: phone,
-                contact_name: chat.pushName || chat.name || chat.verifiedName || chat.id?.split("@")[0] || existing?.contact_name || null,
-               transcript: previewTranscript,
-               status: existing?.status ?? "active",
-               messages_count: previewTranscript.length,
-               last_message_at: lastAt,
-               instance_name: instance,
-             };
+            return remoteJid && !remoteJid.endsWith("@g.us");
           })
-          .filter(Boolean);
+          .slice(0, 50);
+
+        const upsertRows = validChats.map((chat: any) => {
+          const remoteJid = chat.remoteJid || chat.id || "";
+          const phone = normalizePhone(remoteJid);
+          const existing = existingByPhone.get(phone);
+
+          if (existing && (existing as any).instance_name && (existing as any).instance_name !== instance) {
+            return null;
+          }
+
+          const lastMsg = chat.lastMessage;
+          const fallbackContent =
+            lastMsg?.message?.conversation ||
+            lastMsg?.message?.extendedTextMessage?.text ||
+            existing?.transcript?.[existing.transcript.length - 1]?.content ||
+            "Nova conversa";
+
+          const previewTranscript = Array.isArray(existing?.transcript) && existing.transcript.length > 0
+            ? existing.transcript
+            : [{
+                role: lastMsg?.key?.fromMe ? "assistant" : "user",
+                content: fallbackContent,
+                at: new Date(lastMsg?.messageTimestamp ? lastMsg.messageTimestamp * 1000 : Date.now()).toISOString(),
+              }];
+
+          const lastAt =
+            previewTranscript[previewTranscript.length - 1]?.at ||
+            existing?.last_message_at ||
+            new Date().toISOString();
+
+          return {
+            ...(existing?.id ? { id: existing.id } : {}),
+            user_id: user.id,
+            contact_phone: phone,
+            contact_name: chat.pushName || chat.name || chat.verifiedName || chat.id?.split("@")[0] || existing?.contact_name || null,
+            transcript: previewTranscript,
+            status: existing?.status ?? "active",
+            messages_count: previewTranscript.length,
+            last_message_at: lastAt,
+            instance_name: instance,
+          };
+        }).filter(Boolean);
 
        if (upsertRows.length === 0) {
          if (showToast) toast.info("Nenhuma conversa válida encontrada");
@@ -286,13 +285,21 @@ type Deal = {
                 source: 'whatsapp'
               }, { onConflict: 'user_id,phone' });
               
-              await supabase.rpc("ensure_lead_and_pipeline_from_conversation", {
-                _user_id: user.id,
-                _phone: row.contact_phone,
-                _name: finalName,
-                _instance_name: instance,
-                _avatar_url: profilePic
-              } as any);
+              const { data: leadData } = await supabase.from('leads').upsert({
+                user_id: user.id,
+                phone: row.contact_phone,
+                name: finalName,
+                avatar_url: profilePic,
+                source: 'whatsapp'
+              }, { onConflict: 'user_id,phone' }).select('id').single();
+
+              if (leadData?.id) {
+                await supabase.from('pipeline_leads').upsert({
+                  lead_id: leadData.id,
+                  instance_name: instance,
+                  stage_id: stages[0]?.id || (await supabase.from('funnel_stages').select('id').or(`user_id.eq.${user.id},user_id.is.null`).order('order_index').limit(1).single()).data?.id
+                } as any, { onConflict: 'user_id,lead_id' });
+              }
             } catch (e) {
               console.error("Erro ao processar lead individual:", row.contact_phone, e);
             }
