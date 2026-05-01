@@ -1,6 +1,6 @@
  import { formatDistanceToNow } from "date-fns";
  import { ptBR } from "date-fns/locale";
- import { Trash2, Phone, Calendar, DollarSign, GripVertical, Instagram, MessageCircle, MessageSquare, Clock, AlertCircle, ExternalLink } from "lucide-react";
+   import { Trash2, Phone, Calendar, DollarSign, GripVertical, Instagram, MessageCircle, MessageSquare, Clock, AlertCircle, ExternalLink, User } from "lucide-react";
  import { cn } from "@/lib/utils";
  import { motion } from "framer-motion";
  
@@ -30,47 +30,56 @@
         onDragStart={() => onDragStart(deal.id)}
         onDragEnd={onDragEnd}
         onClick={onClick}
-        className={cn(
-          "bg-card border border-border rounded-xl p-3 shadow-sm hover:shadow-lg hover:border-primary/40 transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden active:scale-[0.98]",
-          isStale && "border-l-4 border-l-amber-400",
-          isNewFromUser && "ring-2 ring-green-500/20 bg-green-500/[0.02]"
-        )}
-      >
-       {/* Indicador de prioridade opcional */}
-       {deal.priority === 'high' && <div className="absolute top-0 right-0 w-20 h-20 bg-destructive/5 rounded-bl-full -mr-10 -mt-10" />}
-       
-       <div className="flex items-start justify-between mb-2">
-         <div className="flex items-center gap-2 flex-1 min-w-0">
-           <div className="bg-muted p-1 rounded-md group-hover:bg-primary/10 transition-colors">
-             <GripVertical className="h-3 w-3 text-muted-foreground/30 group-hover:text-primary/50 shrink-0" />
-           </div>
-           <div className="flex flex-col min-w-0">
-             <div className="text-sm font-black truncate text-foreground/90 leading-none mb-0.5">{deal.lead?.name ?? "Lead sem nome"}</div>
-             <div className="flex items-center gap-1">
-               {deal.lead?.phone && <span className="text-[10px] text-muted-foreground font-medium">{deal.lead.phone}</span>}
-             </div>
-           </div>
-         </div>
-         
-         <div className="flex items-center gap-1 shrink-0">
-           {deal.lead?.source === 'whatsapp' && (
-             <div className="h-6 w-6 rounded-full bg-green-500/10 flex items-center justify-center" title="WhatsApp">
-               <MessageCircle className="h-3.5 w-3.5 text-green-500" />
-             </div>
-           )}
-           {deal.lead?.source === 'instagram' && (
-             <div className="h-6 w-6 rounded-full bg-pink-500/10 flex items-center justify-center" title="Instagram">
-               <Instagram className="h-3.5 w-3.5 text-pink-500" />
-             </div>
-           )}
-           <button 
-             onClick={(e) => { e.stopPropagation(); onRemove(deal.id); }} 
-             className="opacity-0 group-hover:opacity-100 h-6 w-6 flex items-center justify-center rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition"
-           >
-             <Trash2 className="h-3.5 w-3.5" />
-           </button>
-         </div>
-       </div>
+         className={cn(
+           "bg-card border border-border/60 rounded-2xl p-4 shadow-sm hover:shadow-xl hover:border-primary/50 hover:bg-accent/5 transition-all cursor-grab active:cursor-grabbing group relative overflow-hidden active:scale-[0.99] flex flex-col gap-3",
+           isStale && "border-l-4 border-l-amber-500",
+           isNewFromUser && "ring-2 ring-green-500/30 bg-green-500/[0.03]"
+         )}
+       >
+        {/* Background decorative element */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/10 transition-colors" />
+        
+        <div className="flex items-start justify-between relative z-10">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Lead Avatar */}
+            <div className="relative shrink-0">
+              <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 flex items-center justify-center overflow-hidden shadow-inner group-hover:scale-105 transition-transform duration-300">
+                {deal.lead?.avatar_url ? (
+                  <img src={deal.lead.avatar_url} alt={deal.lead.name} className="h-full w-full object-cover" />
+                ) : (
+                  <User className="h-6 w-6 text-primary/40" />
+                )}
+              </div>
+              {deal.lead?.source === 'whatsapp' && (
+                <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-green-500 border-2 border-background flex items-center justify-center shadow-sm">
+                  <MessageCircle className="h-2.5 w-2.5 text-white" />
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col min-w-0">
+              <div className="text-[15px] font-black truncate text-foreground group-hover:text-primary transition-colors duration-300">
+                {deal.lead?.name ?? "Lead sem nome"}
+              </div>
+              <div className="flex items-center gap-1.5">
+                {deal.lead?.phone && (
+                  <span className="text-[11px] text-muted-foreground/80 font-bold bg-muted/50 px-1.5 py-0.5 rounded-md">
+                    {deal.lead.phone}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-1 shrink-0">
+            <button 
+              onClick={(e) => { e.stopPropagation(); onRemove(deal.id); }} 
+              className="opacity-0 group-hover:opacity-100 h-8 w-8 flex items-center justify-center rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-300"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
  
         {/* Preview da última mensagem - agora mais proeminente */}
          <div 
