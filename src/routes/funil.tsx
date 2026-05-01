@@ -902,12 +902,22 @@ type Deal = {
                          setLoading(true);
                          try {
                            let dealQuery = supabase.from("pipeline_leads").delete().eq("user_id", user.id);
+                           let convQuery = supabase.from("bot_conversations").delete().eq("user_id", user.id);
+                           
                            if (activeInstance) {
                              dealQuery = dealQuery.eq("instance_name", activeInstance);
+                             convQuery = convQuery.eq("instance_name", activeInstance);
                            }
-                           const { error } = await dealQuery;
-                           if (error) throw error;
-                           toast.success("Cards removidos com sucesso");
+                           
+                           const [{ error: dealError }, { error: convError }] = await Promise.all([
+                             dealQuery,
+                             convQuery
+                           ]);
+                           
+                           if (dealError) throw dealError;
+                           if (convError) throw convError;
+                           
+                           toast.success("Pipeline da instância limpo com sucesso");
                            await load(true);
                          } catch (err: any) {
                            console.error("Erro ao excluir cards:", err);
