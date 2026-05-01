@@ -442,17 +442,17 @@
           </head>
           <body>
             <div class="header">
-               <h2 style="margin: 0;">${lastSaleData.storeInfo?.name || 'APPLE JAU'}</h2>
-               <p style="margin: 5px 0;">CNPJ: ${lastSaleData.storeInfo?.cnpj || '54.123.456/0001-89'}</p>
-               <p style="margin: 0;">Tel: ${lastSaleData.storeInfo?.phone || '(14) 99876-5432'}</p>
+               <h2 style="margin: 0;">${lastSaleData.storeInfo?.name}</h2>
+               <p style="margin: 5px 0;">CNPJ: ${lastSaleData.storeInfo?.cnpj}</p>
+               <p style="margin: 0;">Tel: ${lastSaleData.storeInfo?.phone}</p>
             </div>
             
-            <div class="section">
-              <div class="section-title">Dados da Venda</div>
-              <p style="margin: 2px 0;">Pedido: #${lastSaleId?.slice(0, 8)}</p>
-              <p style="margin: 2px 0;">Data: ${new Date().toLocaleString('pt-BR')}</p>
-              <p style="margin: 2px 0;">Vendedor: ${user?.email?.split('@')[0] || 'Sistema'}</p>
-            </div>
+             <div class="section">
+               <div class="section-title">Dados da Venda</div>
+               <p style="margin: 2px 0;">Pedido: #${lastSaleData.id?.slice(0, 8)}</p>
+               <p style="margin: 2px 0;">Data: ${lastSaleData.data}</p>
+               <p style="margin: 2px 0;">Vendedor: ${lastSaleData.vendedor}</p>
+             </div>
 
             <div class="section">
               <div class="section-title">Cliente</div>
@@ -540,20 +540,20 @@
             </div>
 
              <div class="grid">
-               <div class="info-box">
-                 <span class="section-title">DADOS DA LOJA</span>
-                 <strong>${lastSaleData.storeInfo?.name || 'LOJA EXEMPLO'}</strong><br>
-                 CNPJ: ${lastSaleData.storeInfo?.cnpj || '00.000.000/0001-00'}<br>
-                 Tel: ${lastSaleData.storeInfo?.phone || '(00) 0000-0000'}<br>
-                 End: ${lastSaleData.storeInfo?.address || 'Endereço da Loja'}
-               </div>
-               <div class="info-box">
-                 <span class="section-title">DADOS DO CLIENTE</span>
-                 <strong>Nome:</strong> ${lastSaleData.customer?.name || '________________________________'}<br>
-                 <strong>CPF/CNPJ:</strong> ${lastSaleData.customer?.document || '________________________________'}<br>
-                 <strong>Tel:</strong> ${lastSaleData.customer?.phone || '________________________________'}<br>
-                 <strong>End:</strong> ${lastSaleData.customer?.address || '________________________________'}
-               </div>
+                <div class="info-box">
+                  <span class="section-title">DADOS DA LOJA</span>
+                  <strong>${lastSaleData.storeInfo?.name}</strong><br>
+                  CNPJ: ${lastSaleData.storeInfo?.cnpj}<br>
+                  Tel: ${lastSaleData.storeInfo?.phone}<br>
+                  End: ${lastSaleData.storeInfo?.address}
+                </div>
+                <div class="info-box">
+                  <span class="section-title">DADOS DO CLIENTE</span>
+                  <strong>Nome:</strong> ${lastSaleData.customer?.name || 'Consumidor Final'}<br>
+                  <strong>CPF/CNPJ:</strong> ${lastSaleData.customer?.document || 'N/A'}<br>
+                  <strong>Tel:</strong> ${lastSaleData.customer?.phone || 'N/A'}<br>
+                  <strong>End:</strong> ${lastSaleData.customer?.address || 'N/A'}
+                </div>
              </div>
 
              <div class="section">
