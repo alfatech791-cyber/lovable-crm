@@ -801,7 +801,15 @@
             <div className="py-4 space-y-3">
               {cart.length > 0 ? (
                 cart.map(item => (
-                  <div key={item.id} className="group relative bg-card border border-border/40 rounded-2xl p-3 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300">
+                  <div 
+                    key={item.id} 
+                    onClick={() => setSelectedCartItemId(selectedCartItemId === item.id ? null : item.id)}
+                    className={`group relative bg-card border rounded-2xl p-3 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer ${
+                      selectedCartItemId === item.id 
+                        ? 'border-primary ring-1 ring-primary/20 bg-primary/5' 
+                        : 'border-border/40 hover:border-primary/30'
+                    }`}
+                  >
                     <div className="flex gap-4">
                       {/* Avatar do Produto ou Ícone */}
                       <div className="h-12 w-12 rounded-xl bg-muted/50 flex items-center justify-center shrink-0 group-hover:bg-primary/5 transition-colors">
