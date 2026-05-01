@@ -280,7 +280,7 @@ type Deal = {
      }
    };
 
-    const [activeInstance, setActiveInstance] = useState<string | null>(null);
+    const [activeInstance, setActiveInstance] = useState<string | null>(localStorage.getItem("last_active_instance"));
     const [availableInstances, setAvailableInstances] = useState<any[]>([]);
 
     const fetchAvailableInstances = async () => {
@@ -299,6 +299,7 @@ type Deal = {
      const handleInstanceChange = async (newInstance: string) => {
        if (!user?.id) return;
        setActiveInstance(newInstance);
+       localStorage.setItem("last_active_instance", newInstance);
        
        setLoading(true);
        // Clear current deals to avoid showing data from the old instance
@@ -621,7 +622,10 @@ type Deal = {
       let currentInstance = activeInstance;
       if (!currentInstance) {
         currentInstance = await resolveInstance();
-        setActiveInstance(currentInstance);
+        if (currentInstance) {
+          setActiveInstance(currentInstance);
+          localStorage.setItem("last_active_instance", currentInstance);
+        }
       }
       
       fetchAvailableInstances();
