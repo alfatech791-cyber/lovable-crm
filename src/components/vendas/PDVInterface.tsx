@@ -51,13 +51,16 @@
    const [isFinishing, setIsFinishing] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [lastSaleId, setLastSaleId] = useState<string | null>(null);
-   const [lastSaleData, setLastSaleData] = useState<{ 
-     items: CartItem[], 
-     total: number, 
-     discount: number, 
-     customer: { id?: string; name: string; phone?: string; document?: string; address?: string } | null, 
-     paymentMethod: string,
-     storeInfo?: { name: string; cnpj: string; phone: string; address: string }
+   const [lastSaleData, setLastSaleData] = useState<{
+     id?: string;
+     items: CartItem[];
+     total: number;
+     discount: number;
+     customer: { id?: string; name: string; phone?: string; document?: string; address?: string } | null;
+     paymentMethod: string;
+     storeInfo?: { name: string; cnpj: string; phone: string; address: string };
+     vendedor?: string;
+     data?: string;
    } | null>(null);
   const [selectedCartItemId, setSelectedCartItemId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -315,21 +318,7 @@
            }
          }
 
-         const saleSnapshot = {
-           items: [...cart],
-           total: total,
-           discount: discountValue,
-           customer: customerDetails,
-           paymentMethod: finalPaymentMethod,
-           storeInfo: {
-             name: "MINHA LOJA",
-             cnpj: "00.000.000/0001-00",
-             phone: "(00) 0000-0000",
-             address: "Rua Exemplo, 123 - Centro, Cidade - UF"
-           }
-         };
-
-        // 1. Criar a ordem de venda
+        // 1. Criar a ordem de venda primeiro para ter o ID
         const { data: sale, error: saleError } = await supabase
           .from("sales_orders")
           .insert({
@@ -353,7 +342,26 @@
          .select()
          .single();
  
-       if (saleError) throw saleError;
+        if (saleError) throw saleError;
+
+        const storeConfig = {
+          name: "APPLE JAU",
+          cnpj: "54.123.456/0001-89",
+          phone: "(14) 99876-5432",
+          address: "Rua Major Prado, 123 - Centro, Jaú - SP"
+        };
+
+        const saleSnapshot = {
+          id: sale.id,
+          items: [...cart],
+          total: total,
+          discount: discountValue,
+          customer: customerDetails,
+          paymentMethod: finalPaymentMethod,
+          vendedor: user?.email?.split('@')[0] || 'Sistema',
+          data: new Date().toLocaleString('pt-BR'),
+          storeInfo: storeConfig
+        };
  
        // 2. Atualizar estoque dos produtos
        for (const item of cart) {
@@ -434,17 +442,17 @@
           </head>
           <body>
             <div class="header">
-              <h2 style="margin: 0;">MINHA LOJA</h2>
-              <p style="margin: 5px 0;">CNPJ: 00.000.000/0001-00</p>
-              <p style="margin: 0;">Tel: (00) 0000-0000</p>
+               <h2 style="margin: 0;">${lastSaleData.storeInfo?.name}</h2>
+               <p style="margin: 5px 0;">CNPJ: ${lastSaleData.storeInfo?.cnpj}</p>
+               <p style="margin: 0;">Tel: ${lastSaleData.storeInfo?.phone}</p>
             </div>
             
-            <div class="section">
-              <div class="section-title">Dados da Venda</div>
-              <p style="margin: 2px 0;">Pedido: #${lastSaleId?.slice(0, 8)}</p>
-              <p style="margin: 2px 0;">Data: ${new Date().toLocaleString('pt-BR')}</p>
-              <p style="margin: 2px 0;">Vendedor: ${user?.email?.split('@')[0] || 'Sistema'}</p>
-            </div>
+             <div class="section">
+               <div class="section-title">Dados da Venda</div>
+               <p style="margin: 2px 0;">Pedido: #${lastSaleData.id?.slice(0, 8)}</p>
+               <p style="margin: 2px 0;">Data: ${lastSaleData.data}</p>
+               <p style="margin: 2px 0;">Vendedor: ${lastSaleData.vendedor}</p>
+             </div>
 
             <div class="section">
               <div class="section-title">Cliente</div>
@@ -532,20 +540,20 @@
             </div>
 
              <div class="grid">
-               <div class="info-box">
-                 <span class="section-title">DADOS DA LOJA</span>
-                 <strong>${lastSaleData.storeInfo?.name || 'LOJA EXEMPLO'}</strong><br>
-                 CNPJ: ${lastSaleData.storeInfo?.cnpj || '00.000.000/0001-00'}<br>
-                 Tel: ${lastSaleData.storeInfo?.phone || '(00) 0000-0000'}<br>
-                 End: ${lastSaleData.storeInfo?.address || 'Endereço da Loja'}
-               </div>
-               <div class="info-box">
-                 <span class="section-title">DADOS DO CLIENTE</span>
-                 <strong>Nome:</strong> ${lastSaleData.customer?.name || '________________________________'}<br>
-                 <strong>CPF/CNPJ:</strong> ${lastSaleData.customer?.document || '________________________________'}<br>
-                 <strong>Tel:</strong> ${lastSaleData.customer?.phone || '________________________________'}<br>
-                 <strong>End:</strong> ${lastSaleData.customer?.address || '________________________________'}
-               </div>
+                <div class="info-box">
+                  <span class="section-title">DADOS DA LOJA</span>
+                  <strong>${lastSaleData.storeInfo?.name}</strong><br>
+                  CNPJ: ${lastSaleData.storeInfo?.cnpj}<br>
+                  Tel: ${lastSaleData.storeInfo?.phone}<br>
+                  End: ${lastSaleData.storeInfo?.address}
+                </div>
+                <div class="info-box">
+                  <span class="section-title">DADOS DO CLIENTE</span>
+                  <strong>Nome:</strong> ${lastSaleData.customer?.name || 'Consumidor Final'}<br>
+                  <strong>CPF/CNPJ:</strong> ${lastSaleData.customer?.document || 'N/A'}<br>
+                  <strong>Tel:</strong> ${lastSaleData.customer?.phone || 'N/A'}<br>
+                  <strong>End:</strong> ${lastSaleData.customer?.address || 'N/A'}
+                </div>
              </div>
 
              <div class="section">
