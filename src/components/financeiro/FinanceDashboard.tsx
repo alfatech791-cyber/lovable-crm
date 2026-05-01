@@ -354,7 +354,7 @@ export function FinanceDashboard() {
                  </div>
                </div>
                <div className="text-right">
-                 <div className="text-sm font-black text-slate-900">R$ {stats.totalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                    <div className="text-sm font-black text-slate-900">R$ {(stats.totalBalance || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                </div>
              </div>
            </CardContent>
