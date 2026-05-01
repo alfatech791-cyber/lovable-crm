@@ -809,7 +809,7 @@
  
              <div className="md:col-span-4 space-y-1.5">
                <Label className="text-[10px] font-bold uppercase text-muted-foreground">Vendedor (F4)</Label>
-               <div className="relative" ref={searchContainerRef}>
+               <div className="relative">
                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                  <select 
                    className="w-full h-11 pl-9 pr-3 rounded-md bg-muted/20 border border-input text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none"
