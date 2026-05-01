@@ -1,6 +1,6 @@
  import { formatDistanceToNow } from "date-fns";
  import { ptBR } from "date-fns/locale";
-   import { Trash2, Phone, Calendar, DollarSign, GripVertical, Instagram, MessageCircle, MessageSquare, Clock, AlertCircle, ExternalLink, User } from "lucide-react";
+   import { Trash2, Phone, Calendar, DollarSign, GripVertical, Instagram, MessageCircle, MessageSquare, Clock, AlertCircle, ExternalLink, User, Tag, FileText } from "lucide-react";
  import { cn } from "@/lib/utils";
  import { motion } from "framer-motion";
  
@@ -57,18 +57,28 @@
               )}
             </div>
 
-            <div className="flex flex-col min-w-0">
-              <div className="text-[15px] font-black truncate text-foreground group-hover:text-primary transition-colors duration-300">
-                {deal.lead?.name ?? "Lead sem nome"}
-              </div>
-              <div className="flex items-center gap-1.5">
-                {deal.lead?.phone && (
-                  <span className="text-[11px] text-muted-foreground/80 font-bold bg-muted/50 px-1.5 py-0.5 rounded-md">
-                    {deal.lead.phone}
-                  </span>
-                )}
-              </div>
-            </div>
+           <div className="flex flex-col min-w-0 flex-1">
+             <div className="text-[15px] font-black truncate text-foreground group-hover:text-primary transition-colors duration-300">
+               {deal.lead?.name ?? "Lead sem nome"}
+             </div>
+             <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+               {deal.lead?.phone && (
+                 <span className="text-[10px] text-muted-foreground/80 font-bold bg-muted/50 px-1.5 py-0.5 rounded-md">
+                   {deal.lead.phone}
+                 </span>
+               )}
+               {deal.tags && deal.tags.length > 0 && (
+                 <div className="flex flex-wrap gap-1">
+                   {deal.tags.map((tag: string, i: number) => (
+                     <span key={i} className="text-[9px] font-black uppercase bg-primary/10 text-primary px-1.5 py-0.5 rounded-md flex items-center gap-1">
+                       <Tag className="h-2 w-2" />
+                       {tag}
+                     </span>
+                   ))}
+                 </div>
+               )}
+             </div>
+           </div>
           </div>
           
           <div className="flex items-center gap-1 shrink-0">
@@ -136,16 +146,23 @@
           </div>
           
           <div className="flex flex-col items-end gap-1.5">
-            {deal.priority === 'high' ? (
-              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-destructive/10 text-destructive text-[9px] font-black uppercase tracking-wider border border-destructive/20 animate-pulse">
-                <AlertCircle className="h-3 w-3" />
-                URGENTE
-              </div>
-            ) : (
-              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-muted-foreground/70 text-[9px] font-black uppercase tracking-widest border border-border/50">
-                {deal.lead?.source || 'Lead'}
-              </div>
-            )}
+            <div className="flex items-center gap-1.5">
+              {deal.notes && (
+                <div className="h-5 w-5 rounded-md bg-amber-100 flex items-center justify-center text-amber-600" title="Possui notas">
+                  <FileText className="h-3 w-3" />
+                </div>
+              )}
+              {deal.priority === 'high' ? (
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-destructive/10 text-destructive text-[9px] font-black uppercase tracking-wider border border-destructive/20 animate-pulse">
+                  <AlertCircle className="h-3 w-3" />
+                  URGENTE
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-muted-foreground/70 text-[9px] font-black uppercase tracking-widest border border-border/50">
+                  {deal.lead?.source || 'Lead'}
+                </div>
+              )}
+            </div>
             
             {isNewFromUser && (
               <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-[9px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
