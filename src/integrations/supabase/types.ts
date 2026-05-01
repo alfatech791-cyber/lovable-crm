@@ -709,6 +709,7 @@ export type Database = {
           notes: string | null
           priority: string | null
           stage_id: string
+          tags: string[] | null
           updated_at: string
           user_id: string
         }
@@ -721,6 +722,7 @@ export type Database = {
           notes?: string | null
           priority?: string | null
           stage_id: string
+          tags?: string[] | null
           updated_at?: string
           user_id: string
         }
@@ -733,6 +735,7 @@ export type Database = {
           notes?: string | null
           priority?: string | null
           stage_id?: string
+          tags?: string[] | null
           updated_at?: string
           user_id?: string
         }
