@@ -464,10 +464,12 @@ function ConversasPage() {
     if (!silent) setLoading(true);
     setLoadError(null);
     try {
+      const activeInstance = await resolveInstance();
       const { data, error } = await supabase
         .from("bot_conversations")
         .select("*")
         .eq("user_id", user.id)
+        .or(`instance_name.eq.${activeInstance},instance_name.is.null`)
         .order("last_message_at", { ascending: false });
 
       if (error) throw error;
