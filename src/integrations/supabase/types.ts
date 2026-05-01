@@ -111,6 +111,7 @@ export type Database = {
           contact_phone: string
           created_at: string
           id: string
+          instance_name: string | null
           last_message_at: string
           messages_count: number
           notes: string | null
@@ -126,6 +127,7 @@ export type Database = {
           contact_phone: string
           created_at?: string
           id?: string
+          instance_name?: string | null
           last_message_at?: string
           messages_count?: number
           notes?: string | null
@@ -141,6 +143,7 @@ export type Database = {
           contact_phone?: string
           created_at?: string
           id?: string
+          instance_name?: string | null
           last_message_at?: string
           messages_count?: number
           notes?: string | null
@@ -698,6 +701,7 @@ export type Database = {
           created_at: string
           deal_value: number | null
           id: string
+          instance_name: string | null
           lead_id: string
           notes: string | null
           priority: string | null
@@ -709,6 +713,7 @@ export type Database = {
           created_at?: string
           deal_value?: number | null
           id?: string
+          instance_name?: string | null
           lead_id: string
           notes?: string | null
           priority?: string | null
@@ -720,6 +725,7 @@ export type Database = {
           created_at?: string
           deal_value?: number | null
           id?: string
+          instance_name?: string | null
           lead_id?: string
           notes?: string | null
           priority?: string | null
@@ -1129,10 +1135,20 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
-      ensure_lead_and_pipeline_from_conversation: {
-        Args: { _name?: string; _phone: string; _user_id: string }
-        Returns: undefined
-      }
+      ensure_lead_and_pipeline_from_conversation:
+        | {
+            Args: { _name?: string; _phone: string; _user_id: string }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              _instance_name?: string
+              _name: string
+              _phone: string
+              _user_id: string
+            }
+            Returns: undefined
+          }
       handle_new_bot_conversation_direct: {
         Args: { p_name: string; p_phone: string; p_user_id: string }
         Returns: undefined

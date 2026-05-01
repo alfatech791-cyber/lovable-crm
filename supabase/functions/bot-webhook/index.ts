@@ -72,15 +72,17 @@ serve(async (req) => {
     const transcript: any[] = (conv?.transcript as any[]) ?? [];
     transcript.push({ role: "user", content: messageText, at: new Date().toISOString(), sender: data?.pushName || null });
 
+    const currentInstanceName = settings.whatsapp_instance || payload?.instance || null;
+
     // Para grupos ou participantes de grupo, apenas grava a mensagem para o atendimento manual
     if (isGroup || participant) {
-      await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active", remoteJid);
+      await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active", remoteJid, currentInstanceName);
       return json({ ok: true, stored: true, type: "group" });
     }
 
     // Se o bot estiver inativo, apenas grava a mensagem para o atendimento manual
     if (!settings.is_active) {
-      await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active", remoteJid);
+      await persist(supabase, userId, phone, contactName, transcript, conv?.status ?? "active", remoteJid, currentInstanceName);
       return json({ ok: true, inactive: true, stored: true });
     }
 
@@ -211,7 +213,7 @@ serve(async (req) => {
     }
 
     transcript.push({ role: "assistant", content: replyText, at: new Date().toISOString() });
-    await persist(supabase, userId, phone, contactName, transcript, status, remoteJid);
+    await persist(supabase, userId, phone, contactName, transcript, status, remoteJid, currentInstanceName);
 
     // Envia para Evolution
     const instance = settings.whatsapp_instance;
@@ -242,7 +244,8 @@ async function persist(
   name: string | null,
   transcript: any[],
   status: string,
-  remoteJid?: string
+  remoteJid?: string,
+  instanceName?: string | null
 ) {
   await supabase.from("bot_conversations").upsert(
     {
@@ -254,6 +257,7 @@ async function persist(
       status,
       messages_count: transcript.length,
       last_message_at: new Date().toISOString(),
+      instance_name: instanceName,
     },
     { onConflict: "user_id,contact_phone" }
   );
@@ -263,6 +267,7 @@ async function persist(
     _user_id: userId,
     _phone: phone,
     _name: name,
+    _instance_name: instanceName
   });
 
   // Pega lead_id e insere as últimas mensagens em public.messages (para pipeline ver)
