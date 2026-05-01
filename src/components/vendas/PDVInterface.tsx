@@ -822,14 +822,19 @@
                               <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
                                {item.name}
                              </span>
-                             {item.description && (
-                               <p className="text-[10px] text-muted-foreground line-clamp-2 leading-tight mt-0.5 italic">
-                                 {item.description}
-                               </p>
-                             )}
+                              {item.description && (
+                                <p className={`text-[10px] text-muted-foreground leading-tight mt-0.5 italic ${
+                                  selectedCartItemId === item.id ? '' : 'line-clamp-2'
+                                }`}>
+                                  {item.description}
+                                </p>
+                              )}
                            </div>
                           <button 
-                            onClick={() => removeFromCart(item.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeFromCart(item.id);
+                            }}
                             className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all"
                           >
                             <X className="h-4 w-4" />
