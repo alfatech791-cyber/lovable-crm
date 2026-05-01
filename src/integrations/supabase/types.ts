@@ -483,37 +483,58 @@ export type Database = {
       finance_transactions: {
         Row: {
           amount: number
+          attachment_url: string | null
           category: string | null
           created_at: string | null
           description: string
           due_date: string | null
           id: string
+          notes: string | null
+          payment_account: string | null
           payment_date: string | null
+          payment_method: string | null
+          recurrence_period: string | null
+          recurring: boolean | null
           status: string | null
+          tags: string[] | null
           type: string
           user_id: string
         }
         Insert: {
           amount: number
+          attachment_url?: string | null
           category?: string | null
           created_at?: string | null
           description: string
           due_date?: string | null
           id?: string
+          notes?: string | null
+          payment_account?: string | null
           payment_date?: string | null
+          payment_method?: string | null
+          recurrence_period?: string | null
+          recurring?: boolean | null
           status?: string | null
+          tags?: string[] | null
           type: string
           user_id: string
         }
         Update: {
           amount?: number
+          attachment_url?: string | null
           category?: string | null
           created_at?: string | null
           description?: string
           due_date?: string | null
           id?: string
+          notes?: string | null
+          payment_account?: string | null
           payment_date?: string | null
+          payment_method?: string | null
+          recurrence_period?: string | null
+          recurring?: boolean | null
           status?: string | null
+          tags?: string[] | null
           type?: string
           user_id?: string
         }
