@@ -328,30 +328,26 @@ import { toast } from "sonner";
           </div>
         </div>
 
-      {/* Summary Cards */}
-       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {[
-             { label: "Total de Itens", value: totalStats.totalItems, icon: Layers, color: "primary" },
-             { label: "Valor de Venda", value: totalStats.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), icon: TrendingUp, color: "emerald-500" },
-             { label: "Custo de Estoque", value: totalStats.totalCost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), icon: Tags, color: "blue-500" },
-             { label: "Estoque Baixo", value: totalStats.lowStock, icon: Clock, color: "orange-500" },
-             { label: "Esgotados", value: totalStats.outOfStock, icon: AlertTriangle, color: "destructive" },
-          ].map((stat, i) => (
-            <Card key={i} className="border-border/40 bg-card/40 backdrop-blur-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300 group overflow-hidden">
-              <CardContent className="p-4 flex flex-col gap-3 relative">
-                <div className={`h-10 w-10 rounded-xl bg-${stat.color === 'primary' ? 'primary' : stat.color}/10 flex items-center justify-center text-${stat.color === 'primary' ? 'primary' : stat.color} group-hover:scale-110 transition-transform`}>
-                  <stat.icon className="h-5 w-5" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">{stat.label}</p>
-                  <h3 className="text-lg md:text-xl font-black tracking-tight truncate">{stat.value || 0}</h3>
-                </div>
-                <div className={`absolute -right-2 -bottom-2 h-12 w-12 bg-${stat.color === 'primary' ? 'primary' : stat.color}/5 rounded-full blur-2xl group-hover:blur-xl transition-all`} />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+         {[
+            { label: "Total de Itens", value: totalStats.totalItems, icon: Layers, color: "indigo" },
+            { label: "Venda Estimada", value: totalStats.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), icon: TrendingUp, color: "emerald" },
+            { label: "Custo Total", value: totalStats.totalCost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), icon: Tags, color: "violet" },
+            { label: "Estoque Baixo", value: totalStats.lowStock, icon: Clock, color: "amber" },
+            { label: "Esgotados", value: totalStats.outOfStock, icon: AlertTriangle, color: "red" },
+         ].map((stat, i) => (
+           <Card key={i} className="bg-white border border-slate-100 rounded-[2rem] hover:shadow-xl hover:shadow-slate-200/50 transition-all group relative overflow-hidden">
+             <CardContent className="p-6">
+               <div className={`h-12 w-12 rounded-2xl bg-${stat.color}-500 text-white grid place-items-center shadow-lg shadow-${stat.color}-500/20 group-hover:scale-110 transition-transform mb-4`}>
+                 <stat.icon className="h-6 w-6" />
+               </div>
+               <div className="space-y-1">
+                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
+                 <h3 className="text-xl font-black text-slate-900 tracking-tight truncate">{stat.value || 0}</h3>
+               </div>
+             </CardContent>
+           </Card>
+         ))}
        </div>
 
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-card p-4 rounded-2xl border border-border">
