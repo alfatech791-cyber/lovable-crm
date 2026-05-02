@@ -3,7 +3,7 @@ import {
    Search, Filter, Download, MoreHorizontal, ShoppingBag, Eye, Printer, 
    Calendar, ArrowUpRight, ArrowDownRight, CheckCircle2, XCircle, 
    AlertCircle, Loader2, FileText, TrendingUp, TrendingDown, Clock, User,
-   MessageSquare, Share2, ReceiptText
+    MessageSquare, Share2, ReceiptText, Info
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
  import { Badge } from "@/components/ui/badge";
@@ -18,8 +18,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
     DropdownMenuSub,
     DropdownMenuSubContent,
     DropdownMenuSubTrigger,
-    DropdownMenuPortal
+    DropdownMenuPortal,
+    DropdownMenuLabel
  } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
  
  const mockSales = [
    { id: "V1001", customer: "João Silva", date: "2024-03-27 14:30", total: 7899.00, method: "Cartão de Crédito", status: "Concluída", items: 1 },
@@ -39,6 +47,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
    const [sales, setSales] = useState<any[]>([]);
    const [loading, setLoading] = useState(true);
    const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSale, setSelectedSale] = useState<any | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
  
    const fetchSales = useCallback(async () => {
      if (!user?.id) return;
@@ -265,7 +275,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
                     </td>
                   </tr>
                 ) : filteredSales.map((sale) => (
-                  <tr key={sale.id} className="hover:bg-primary/[0.02] transition-colors group">
+                  <tr 
+                    key={sale.id} 
+                    className="hover:bg-primary/[0.02] transition-colors group cursor-pointer"
+                    onClick={() => {
+                      setSelectedSale(sale);
+                      setIsDetailsOpen(true);
+                    }}
+                  >
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-lg bg-primary/5 flex items-center justify-center">
@@ -314,7 +331,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
                     </td>
                     <td className="px-6 py-5 text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                           <Button variant="ghost" size="sm" className="h-9 px-3 rounded-xl hover:bg-primary/10 transition-colors border border-border/40 flex items-center gap-2">
                             <span className="font-bold text-[10px] uppercase tracking-widest text-primary">Ação</span>
                             <MoreHorizontal className="h-4 w-4 text-primary" />
@@ -484,6 +501,101 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
            </table>
          </div>
        </div>
+
+      {/* Modal de Detalhes da Venda */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="sm:max-w-[500px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
+          {selectedSale && (
+            <div className="flex flex-col">
+              <div className="bg-primary/5 p-6 border-b border-primary/10">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <ShoppingBag className="h-5 w-5" />
+                  </div>
+                  <Badge className={
+                    selectedSale.status === 'concluded' ? 'bg-success/10 text-success border-success/20' :
+                    selectedSale.status === 'pending' ? 'bg-warning/10 text-warning border-warning/20' :
+                    'bg-destructive/10 text-destructive border-destructive/20'
+                  }>
+                    {selectedSale.status === 'concluded' ? 'CONCLUÍDA' : selectedSale.status === 'pending' ? 'PENDENTE' : 'CANCELADA'}
+                  </Badge>
+                </div>
+                <DialogHeader className="text-left">
+                  <DialogTitle className="text-xl font-black tracking-tight">Venda #{selectedSale.id.slice(0, 8).toUpperCase()}</DialogTitle>
+                  <DialogDescription className="text-sm font-medium">
+                    Realizada em {format(new Date(selectedSale.created_at), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
+                  </DialogDescription>
+                </DialogHeader>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* Cliente */}
+                <div className="flex items-start gap-4 p-4 rounded-2xl bg-muted/30 border border-border/50">
+                  <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center border border-border/50">
+                    <User className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Cliente</span>
+                    <span className="font-bold text-base">{selectedSale.customers?.full_name || 'Consumidor Final'}</span>
+                  </div>
+                </div>
+
+                {/* Info da Venda */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl bg-muted/30 border border-border/50">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1">Pagamento</span>
+                      <div className="flex items-center gap-2">
+                        <ReceiptText className="h-4 w-4 text-primary" />
+                        <span className="font-bold text-sm">{selectedSale.payment_method || 'Não informado'}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-muted/30 border border-border/50">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1">Itens</span>
+                      <div className="flex items-center gap-2">
+                        <Info className="h-4 w-4 text-primary" />
+                        <span className="font-bold text-sm">1 item(s)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Total */}
+                <div className="p-5 rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-[0.2em] opacity-80">Total da Venda</span>
+                    <span className="text-2xl font-black">
+                      {(selectedSale.total_amount || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Ações Rápidas */}
+                <div className="pt-2 flex flex-col gap-2">
+                  <Button 
+                    className="w-full h-12 rounded-xl font-bold flex items-center gap-2"
+                    onClick={() => window.open(`/pdv?view=${selectedSale.id}`, '_blank')}
+                  >
+                    <Eye className="h-4 w-4" /> Ver Detalhes Completos
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="w-full h-12 rounded-xl font-bold flex items-center gap-2"
+                    onClick={() => {
+                      toast.info("Preparando cupom...");
+                      window.open(`/pdv?print=receipt&id=${selectedSale.id}`, '_blank');
+                    }}
+                  >
+                    <Printer className="h-4 w-4" /> Imprimir Cupom
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
      </div>
    );
  }
