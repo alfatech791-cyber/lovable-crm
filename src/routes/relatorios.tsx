@@ -20,29 +20,33 @@ export const Route = createFileRoute("/relatorios")({
 
  function ReportsPage() {
    const { user, profile } = useAuth();
-   const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState<any>({
-     revenue: 0,
-     leads: 0,
-     conversion: 0,
-     avgTicket: 0,
-     revenueTrend: "+0%",
-     leadsTrend: "+0%",
-     conversionTrend: "+0%",
-     avgTicketTrend: "+0%",
-   });
+      revenue: 0,
+      leads: 0,
+      conversion: 0,
+      avgTicket: 0,
+      revenueTrend: { value: "0%", isUp: true },
+      leadsTrend: { value: "0%", isUp: true },
+      conversionTrend: { value: "0%", isUp: true },
+      avgTicketTrend: { value: "0%", isUp: true },
+    });
+    const [aiInsight, setAiInsight] = useState<string>("Carregando análise da ConectaAI...");
  
     const [funnelData, setFunnelData] = useState<any[]>([]);
     const [originData, setOriginData] = useState<any[]>([]);
     const [topAgents, setTopAgents] = useState<any[]>([]);
+    const [funnelPercentages, setFunnelPercentages] = useState<string[]>([]);
 
     const fetchReportsData = useCallback(async () => {
       if (!user?.id) return;
       setLoading(true);
       try {
         const now = new Date();
-        const firstDayMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
         // Sales and Revenue
         const { data: sales } = await supabase
           .from("sales_orders")
@@ -50,12 +54,22 @@ export const Route = createFileRoute("/relatorios")({
           .eq("user_id", user.id);
 
         const concludedSales = (sales || []).filter(s => s.status === 'concluded');
-        const monthRevenue = concludedSales
-          .filter(s => new Date(s.created_at!) >= firstDayMonth)
+        const currentMonthSales = concludedSales.filter(s => new Date(s.created_at!) >= startOfMonth);
+        const prevMonthSales = concludedSales.filter(s => {
+          const date = new Date(s.created_at!);
+          return date >= startOfPrevMonth && date <= endOfPrevMonth;
+        });
+
+        const monthRevenue = currentMonthSales
+          .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+        const prevMonthRevenue = prevMonthSales
           .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
 
-        const avgTicket = concludedSales.length > 0 
-          ? monthRevenue / concludedSales.filter(s => new Date(s.created_at!) >= firstDayMonth).length || 0
+        const avgTicket = currentMonthSales.length > 0 
+          ? monthRevenue / currentMonthSales.length 
+          : 0;
+        const prevAvgTicket = prevMonthSales.length > 0
+          ? prevMonthRevenue / prevMonthSales.length
           : 0;
 
         // Leads
@@ -64,20 +78,51 @@ export const Route = createFileRoute("/relatorios")({
           .select("source, status, created_at")
           .eq("user_id", user.id);
 
-        const totalLeads = leads?.length || 0;
-        const wonLeads = leads?.filter(l => l.status === 'won' || l.status === 'concluded').length || 0;
+        const currentLeads = (leads || []).filter(l => l.created_at && new Date(l.created_at) >= startOfMonth);
+        const prevLeads = (leads || []).filter(l => {
+          if (!l.created_at) return false;
+          const date = new Date(l.created_at);
+          return date >= startOfPrevMonth && date <= endOfPrevMonth;
+        });
+
+        const totalLeads = currentLeads.length;
+        const wonLeads = currentLeads.filter(l => l.status && ['won', 'concluded'].includes(l.status)).length;
         const conversionRate = totalLeads > 0 ? (wonLeads / totalLeads) * 100 : 0;
+
+        const prevTotalLeads = prevLeads.length;
+        const prevWonLeads = prevLeads.filter(l => l.status && ['won', 'concluded'].includes(l.status)).length;
+        const prevConversionRate = prevTotalLeads > 0 ? (prevWonLeads / prevTotalLeads) * 100 : 0;
+
+        const calculateTrend = (current: number, previous: number) => {
+          if (previous === 0) return { value: current > 0 ? "+100%" : "0%", isUp: true };
+          const diff = ((current - previous) / previous) * 100;
+          return {
+            value: `${diff > 0 ? "+" : ""}${diff.toFixed(1)}%`,
+            isUp: diff >= 0
+          };
+        };
+
+        const revTrend = calculateTrend(monthRevenue, prevMonthRevenue);
+        const ldsTrend = calculateTrend(totalLeads, prevTotalLeads);
+        const cnvTrend = calculateTrend(conversionRate, prevConversionRate);
+        const tktTrend = calculateTrend(avgTicket, prevAvgTicket);
 
         setStats({
           revenue: monthRevenue,
           leads: totalLeads,
           conversion: conversionRate,
           avgTicket: avgTicket,
-          revenueTrend: "+0%",
-          leadsTrend: "+0%",
-          conversionTrend: "+0%",
-          avgTicketTrend: "+0%",
+          revenueTrend: revTrend,
+          leadsTrend: ldsTrend,
+          conversionTrend: cnvTrend,
+          avgTicketTrend: tktTrend,
         });
+
+        // Generate real insight
+        const insightText = totalLeads > 0 
+          ? `Seu faturamento ${revTrend.isUp ? 'cresceu' : 'variou'} ${revTrend.value} este mês. Com ${totalLeads} novos leads e ${conversionRate.toFixed(1)}% de conversão, seu desempenho está ${revTrend.isUp ? 'acima' : 'em linha'} com a média anterior.`
+          : "Aguardando volume de dados para gerar insights precisos sobre o funil.";
+        setAiInsight(insightText);
 
         // Funnel Data
         const { data: stages } = await supabase
@@ -97,6 +142,14 @@ export const Route = createFileRoute("/relatorios")({
           color: s.color || "#64748b"
         }));
         setFunnelData(fData);
+
+        // Calculate real conversion percentages between stages
+        const percentages = fData.map((stage, index) => {
+          if (index === 0) return "100%";
+          const prevValue = fData[index - 1].value;
+          return prevValue > 0 ? `${((stage.value / prevValue) * 100).toFixed(0)}%` : "0%";
+        });
+        setFunnelPercentages(percentages);
 
         // Origin Data
         const counts: Record<string, number> = {};
@@ -184,8 +237,25 @@ export const Route = createFileRoute("/relatorios")({
               <button className="h-10 px-4 rounded-xl bg-white border border-border text-foreground text-[13px] font-bold shadow-sm hover:bg-muted transition-colors flex items-center gap-2">
                 <Download className="h-4 w-4" /> Exportar CSV
               </button>
-              <button className="h-10 px-4 rounded-xl bg-primary text-white text-[13px] font-bold shadow-elegant hover:opacity-90 transition flex items-center gap-2">
-                <Zap className="h-4 w-4 fill-white" /> Relatório IA
+              <button 
+                onClick={() => {
+                  const report = `RELATÓRIO DE DESEMPENHO - CONECTACRM\n\n` +
+                    `Período: 30 dias\n` +
+                    `Faturamento: ${stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (${stats.revenueTrend.value})\n` +
+                    `Leads: ${stats.leads} (${stats.leadsTrend.value})\n` +
+                    `Conversão: ${stats.conversion.toFixed(1)}%\n` +
+                    `Ticket Médio: ${stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n\n` +
+                    `Insight ConectaAI: ${aiInsight}`;
+                  const blob = new Blob([report], { type: 'text/plain' });
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `relatorio-crm-${new Date().toISOString().split('T')[0]}.txt`;
+                  a.click();
+                }}
+                className="h-10 px-4 rounded-xl bg-primary text-white text-[13px] font-bold shadow-elegant hover:opacity-90 transition flex items-center gap-2"
+              >
+                <Zap className="h-4 w-4 fill-white" /> Exportar Relatório IA
               </button>
             </div>
           </div>
@@ -201,7 +271,7 @@ export const Route = createFileRoute("/relatorios")({
                 <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Novo</span>
               </div>
               <p className="text-[15px] text-muted-foreground font-medium max-w-2xl leading-relaxed">
-              Bem-vindo ao módulo de inteligência. <span className="text-foreground font-bold">Cadastre seus primeiros dados</span> para que a ConectaAI possa gerar insights estratégicos sobre seu funil de vendas e faturamento.
+                {aiInsight}
               </p>
             </div>
             <div className="flex flex-col gap-2 min-w-[180px]">
@@ -217,19 +287,19 @@ export const Route = createFileRoute("/relatorios")({
            {/* Main Stats Cards */}
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
              {[
-               { label: "Faturamento", value: stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.revenueTrend, isUp: true, icon: DollarSign, bg: "bg-primary/10", text: "text-primary" },
-               { label: "Leads Totais", value: stats.leads.toString(), trend: stats.leadsTrend, isUp: true, icon: Users, bg: "bg-info/10", text: "text-info" },
-               { label: "Conversão", value: stats.conversion.toFixed(1) + "%", trend: stats.conversionTrend, isUp: true, icon: Target, bg: "bg-success/10", text: "text-success" },
-               { label: "Ticket Médio", value: stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.avgTicketTrend, isUp: true, icon: TrendingUp, bg: "bg-warning/10", text: "text-warning" },
+               { label: "Faturamento", value: stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.revenueTrend, icon: DollarSign, bg: "bg-primary/10", text: "text-primary" },
+               { label: "Leads Totais", value: stats.leads.toString(), trend: stats.leadsTrend, icon: Users, bg: "bg-info/10", text: "text-info" },
+               { label: "Conversão", value: stats.conversion.toFixed(1) + "%", trend: stats.conversionTrend, icon: Target, bg: "bg-success/10", text: "text-success" },
+               { label: "Ticket Médio", value: stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.avgTicketTrend, icon: TrendingUp, bg: "bg-warning/10", text: "text-warning" },
              ].map((stat, i) => (
                <div key={i} className="bg-white border border-border rounded-2xl p-5 shadow-card hover:border-primary/20 transition-colors group">
                  <div className="flex items-start justify-between mb-4">
                    <div className={`h-11 w-11 rounded-xl ${stat.bg} ${stat.text} flex items-center justify-center`}>
                      <stat.icon className="h-5 w-5" />
                    </div>
-                   <div className={`flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-lg ${stat.isUp ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                     {stat.isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                     {stat.trend}
+                    <div className={`flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-lg ${stat.trend.isUp ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+                      {stat.trend.isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                      {stat.trend.value}
                    </div>
                  </div>
                  <p className="text-[13px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{stat.label}</p>
@@ -305,18 +375,18 @@ export const Route = createFileRoute("/relatorios")({
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="grid grid-cols-4 gap-4 mt-8 pt-8 border-t border-slate-50">
-                  {[
-                    { label: "Qualificação", value: "65%", status: "emerald" },
-                    { label: "Proposta", value: "64%", status: "indigo" },
-                    { label: "Negociação", value: "66%", status: "violet" },
-                    { label: "Fechamento", value: "15%", status: "slate" },
-                  ].map((m, i) => (
-                    <div key={i} className="text-center group cursor-default">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 group-hover:text-slate-600 transition-colors">{m.label}</p>
-                      <p className={`text-xl font-black text-${m.status}-500 group-hover:scale-110 transition-transform`}>{m.value}</p>
+                <div className="flex flex-wrap gap-4 mt-8 pt-8 border-t border-slate-50 justify-between">
+                  {funnelData.length > 0 ? funnelData.map((stage, i) => (
+                    <div key={i} className="text-center group cursor-default min-w-[80px]">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 group-hover:text-slate-600 transition-colors">{stage.name}</p>
+                      <p className="text-xl font-black text-primary group-hover:scale-110 transition-transform">
+                        {funnelPercentages[i] || "0%"}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">Conv. Etapa</p>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="w-full text-center py-4 text-xs text-muted-foreground">Crie estágios no funil para ver a conversão</div>
+                  )}
                 </div>
               </div>
             </div>
