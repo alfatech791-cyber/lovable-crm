@@ -157,13 +157,24 @@ import { Wallet, Calendar, Tag, Plus, FileText, Repeat, Upload, X, PlusCircle, T
        }
      }
  
-     onSave({
-       ...formData,
-       amount: parseFloat(formData.amount.toString()),
-       tags: formData.tags ? formData.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [],
-       payment_method: formData.payment_methods[0].method,
-       attachments: attachments.map(f => f.name),
-     });
+      const submissionData = {
+        description: formData.description,
+        amount: parseFloat(formData.amount.toString()),
+        type: formData.type,
+        category: formData.category,
+        status: formData.status,
+        payment_date: formData.payment_date,
+        payment_method: formData.payment_methods[0]?.method || "Pix",
+        payment_methods: formData.payment_methods,
+        payment_account: formData.payment_account,
+        notes: formData.notes,
+        tags: formData.tags ? formData.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : [],
+        recurring: formData.recurring,
+        recurrence_period: formData.recurrence_period,
+        attachment_url: attachments.length > 0 ? attachments[0].name : null, // Simplificado para exemplo
+      };
+
+      onSave(submissionData);
      onOpenChange(false);
    };
  
