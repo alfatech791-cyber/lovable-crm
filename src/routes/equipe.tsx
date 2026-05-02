@@ -155,8 +155,7 @@ function EquipePage() {
                      </button>
                    </div>
                  </div>
-                  ))
-                 }
+                  ))}
                </div>
              </div>
            )}
