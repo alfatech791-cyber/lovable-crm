@@ -350,14 +350,17 @@ export const Route = createFileRoute("/relatorios")({
             </div>
           </div>
 
-           {/* Main Stats Cards */}
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-             {[
-               { label: "Faturamento", value: stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.revenueTrend, icon: DollarSign, bg: "bg-primary/10", text: "text-primary" },
-               { label: "Leads Totais", value: stats.leads.toString(), trend: stats.leadsTrend, icon: Users, bg: "bg-info/10", text: "text-info" },
-               { label: "Conversão", value: stats.conversion.toFixed(1) + "%", trend: stats.conversionTrend, icon: Target, bg: "bg-success/10", text: "text-success" },
-               { label: "Ticket Médio", value: stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.avgTicketTrend, icon: TrendingUp, bg: "bg-warning/10", text: "text-warning" },
-             ].map((stat, i) => (
+           {/* Content based on Active Category */}
+           <div className="space-y-8">
+             {/* Summary Cards */}
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+               {[
+                 { label: "Faturamento", value: stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.revenueTrend, icon: DollarSign, bg: "bg-primary/10", text: "text-primary", category: 'financeiro' },
+                 { label: "Leads Totais", value: stats.leads.toString(), trend: stats.leadsTrend, icon: Users, bg: "bg-info/10", text: "text-info", category: 'clientes' },
+                 { label: "Conversão", value: stats.conversion.toFixed(1) + "%", trend: stats.conversionTrend, icon: Target, bg: "bg-success/10", text: "text-success", category: 'vendas' },
+                 { label: "Ticket Médio", value: stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.avgTicketTrend, icon: TrendingUp, bg: "bg-warning/10", text: "text-warning", category: 'vendas' },
+               ].filter(s => activeCategory === 'visao-geral' || s.category === activeCategory || (activeCategory === 'financeiro' && s.label === "Faturamento") || (activeCategory === 'vendas' && s.label === "Conversão")).map((stat, i) => (
+                 <div key={i} className="bg-white border border-border rounded-2xl p-5 shadow-card hover:border-primary/20 transition-colors group">
                <div key={i} className="bg-white border border-border rounded-2xl p-5 shadow-card hover:border-primary/20 transition-colors group">
                  <div className="flex items-start justify-between mb-4">
                    <div className={`h-11 w-11 rounded-xl ${stat.bg} ${stat.text} flex items-center justify-center`}>
