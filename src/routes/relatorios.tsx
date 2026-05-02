@@ -36,19 +36,16 @@ export const Route = createFileRoute("/relatorios")({
     const [activeCategory, setActiveCategory] = useState("visao-geral");
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-    // Collapse main sidebar when reports page is active
-    useLayoutEffect(() => {
-      // Try to find if we can control it via context or state if available in future,
-      // for now we'll simulate the "encurtar" behavior by notifying the sidebar if possible
-      // or handling it via a custom event that Sidebar.tsx can listen to.
-      const event = new CustomEvent('force-sidebar-collapse', { detail: true });
-      window.dispatchEvent(event);
-      
-      return () => {
-        const event = new CustomEvent('force-sidebar-collapse', { detail: false });
-        window.dispatchEvent(event);
-      };
-    }, []);
+     // This was causing the sidebar to collapse immediately on page load.
+     // The user now wants it to collapse only when the second menu (reports menu) is open.
+     // Since the reports menu is currently always open on this page in the UI,
+     // let's ensure the sidebar is collapsed while on this route.
+     useLayoutEffect(() => {
+       window.dispatchEvent(new CustomEvent('force-sidebar-collapse', { detail: true }));
+       return () => {
+         window.dispatchEvent(new CustomEvent('force-sidebar-collapse', { detail: false }));
+       };
+     }, []);
  
     const [funnelData, setFunnelData] = useState<any[]>([]);
     const [originData, setOriginData] = useState<any[]>([]);
