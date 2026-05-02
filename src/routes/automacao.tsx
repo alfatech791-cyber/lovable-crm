@@ -37,6 +37,7 @@ const TRIGGERS = [
 
 const ACTIONS = [
   { value: "send_message", label: "Enviar mensagem WhatsApp" },
+  { value: "send_email", label: "Enviar E-mail (Resend)" },
   { value: "create_task", label: "Criar tarefa" },
   { value: "move_pipeline", label: "Mover no funil" },
   { value: "notify_team", label: "Notificar equipe" },
@@ -52,6 +53,8 @@ function AutomationPage() {
     trigger_type: "new_lead",
     action_type: "send_message",
     message: "",
+    subject: "",
+    email_body: "",
   });
 
   const load = async () => {
@@ -74,13 +77,24 @@ function AutomationPage() {
       name: form.name,
       trigger_type: form.trigger_type,
       action_type: form.action_type,
-      config: { message: form.message },
+      config: { 
+        message: form.message,
+        subject: form.subject,
+        email_body: form.email_body 
+      },
       is_active: true,
     });
     if (error) return toast.error(error.message);
     toast.success("Automação criada!");
     setOpen(false);
-    setForm({ name: "", trigger_type: "new_lead", action_type: "send_message", message: "" });
+    setForm({ 
+      name: "", 
+      trigger_type: "new_lead", 
+      action_type: "send_message", 
+      message: "", 
+      subject: "", 
+      email_body: "" 
+    });
     load();
   };
 
@@ -213,6 +227,18 @@ function AutomationPage() {
                 <Label>Mensagem</Label>
                 <Textarea rows={3} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="Olá {{nome}}, obrigado pelo contato!" />
               </div>
+            )}
+            {form.action_type === "send_email" && (
+              <>
+                <div>
+                  <Label>Assunto do E-mail</Label>
+                  <Input value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} placeholder="Ex: Bem-vindo à nossa empresa!" />
+                </div>
+                <div>
+                  <Label>Conteúdo (HTML aceito)</Label>
+                  <Textarea rows={5} value={form.email_body} onChange={(e) => setForm({ ...form, email_body: e.target.value })} placeholder="Olá {{nome}}, estamos felizes em ter você conosco." />
+                </div>
+              </>
             )}
           </div>
           <DialogFooter>

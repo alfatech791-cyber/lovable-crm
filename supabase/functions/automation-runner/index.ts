@@ -72,6 +72,19 @@ async function sendWhatsApp(user_id: string, phone: string, text: string, contac
   if (!res.ok) throw new Error(`send-whatsapp ${res.status}`);
 }
 
+async function sendEmail(user_id: string, to: string, subject: string, html: string) {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${SERVICE_ROLE}`,
+      apikey: SERVICE_ROLE,
+    },
+    body: JSON.stringify({ to, subject, html }),
+  });
+  if (!res.ok) throw new Error(`send-email ${res.status}`);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -202,6 +215,16 @@ Deno.serve(async (req) => {
           const stageId = await resolveStageId(admin, user_id, cfg);
           if (!stageId) throw new Error("stage_id/stage_name não configurado");
           await admin.from("pipeline_leads").update({ stage_id: stageId }).eq("user_id", user_id).eq("lead_id", lead.id);
+          break;
+        }
+
+        case "send_email": {
+          const email = lead?.email || payload.email;
+          if (!email) throw new Error("lead sem e-mail");
+          const subject = interpolate(cfg.subject ?? "Notificação ConectaCRM", vars);
+          const html = interpolate(cfg.email_body ?? cfg.message ?? "", vars);
+          if (!html.trim()) throw new Error("corpo do e-mail vazio");
+          await sendEmail(user_id, email, subject, html);
           break;
         }
 
