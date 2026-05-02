@@ -469,12 +469,79 @@ export function FinanceDashboard() {
          </Card>
        </div>
  
-         <TransactionForm 
-           open={isFormOpen} 
-           onOpenChange={(open) => { setIsFormOpen(open); if (!open) setEditingTransaction(null); }} 
-           onSave={handleSave} 
-           transaction={editingTransaction}
-         />
-     </div>
+          <TransactionForm 
+            open={isFormOpen} 
+            onOpenChange={(open) => { setIsFormOpen(open); if (!open) setEditingTransaction(null); }} 
+            onSave={handleSave} 
+            transaction={editingTransaction}
+          />
+
+          <Dialog open={!!selectedCard} onOpenChange={(open) => !open && setSelectedCard(null)}>
+            <DialogContent className="sm:max-w-[500px] rounded-3xl">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-black text-slate-900 flex items-center gap-2">
+                  {selectedCard === 'entradas' && <><TrendingUp className="h-5 w-5 text-green-600" /> Detalhes de Entradas</>}
+                  {selectedCard === 'saidas' && <><TrendingDown className="h-5 w-5 text-red-600" /> Detalhes de Saídas</>}
+                  {selectedCard === 'saldo' && <><Wallet className="h-5 w-5 text-blue-600" /> Detalhes do Saldo</>}
+                </DialogTitle>
+                <DialogDescription className="font-medium">
+                  Análise detalhada do período atual
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="py-4 space-y-6">
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                  <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Valor Total</div>
+                  <div className={`text-3xl font-black ${
+                    selectedCard === 'entradas' ? 'text-green-600' : 
+                    selectedCard === 'saidas' ? 'text-red-600' : 'text-blue-600'
+                  }`}>
+                    R$ {
+                      selectedCard === 'entradas' ? stats.monthIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) :
+                      selectedCard === 'saidas' ? stats.monthExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) :
+                      stats.totalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                    }
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-500">Resumo por Categoria</h4>
+                  <div className="space-y-2">
+                    {transactions
+                      .filter(t => {
+                        if (selectedCard === 'entradas') return t.type === 'income';
+                        if (selectedCard === 'saidas') return t.type === 'expense';
+                        return true;
+                      })
+                      .reduce((acc: any[], t) => {
+                        const existing = acc.find(a => a.name === (t.category || 'Geral'));
+                        if (existing) existing.value += t.amount;
+                        else acc.push({ name: t.category || 'Geral', value: t.amount });
+                        return acc;
+                      }, [])
+                      .sort((a, b) => b.value - a.value)
+                      .slice(0, 4)
+                      .map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl">
+                          <span className="text-xs font-bold text-slate-700">{item.name}</span>
+                          <span className="text-xs font-black text-slate-900">R$ {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={() => {
+                    setSelectedCard(null);
+                    navigate({ to: "/financeiro/caixa" });
+                  }}
+                  className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl"
+                >
+                  Ver Fluxo de Caixa Completo
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+      </div>
    );
  }
