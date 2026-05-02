@@ -7,7 +7,8 @@ import { Topbar } from "@/components/layout/Topbar";
      ArrowDownRight, ChevronRight, MoreHorizontal, UserCheck, Sparkles,
      Lightbulb, AlertCircle, Loader2, Home, User, Package, ShoppingCart,
      Hammer, Archive, FileText, List, ChevronDown, UserPlus, UserRound,
-    Trophy, Cake, Scale, CreditCard, LayoutDashboard
+    Trophy, Cake, Scale, CreditCard, LayoutDashboard, History, ClipboardList,
+    Box, FileSpreadsheet
  } from "lucide-react";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart as RePieChart, Pie } from "recharts";
@@ -256,9 +257,38 @@ export const Route = createFileRoute("/relatorios")({
       ]
     },
     { id: "produto", label: "Produto", icon: Package, isNew: true, hasArrow: true },
-    { id: "vendas", label: "Vendas", icon: ShoppingCart, isNew: true, hasArrow: true },
-    { id: "ordem-servico", label: "Ordem de serviço", icon: Hammer, hasArrow: true },
-    { id: "fiscal", label: "Fiscal", icon: DollarSign, hasArrow: true },
+    { 
+      id: "vendas", 
+      label: "Vendas", 
+      icon: ShoppingCart, 
+      isNew: true, 
+      hasArrow: true,
+      children: [
+        { id: "vendas-relatorio", label: "Relatório de vendas", icon: ShoppingCart, isNew: true },
+        { id: "vendas-historico", label: "Relatório Histórico de Venda", icon: History },
+        { id: "vendas-projecoes", label: "Dashboard Analítico de Projeções", icon: LayoutDashboard },
+        { id: "vendas-produtos", label: "Produtos Vendidos", icon: Box },
+      ]
+    },
+    { 
+      id: "ordem-servico", 
+      label: "Ordem de serviço", 
+      icon: Hammer, 
+      hasArrow: true,
+      children: [
+        { id: "os-dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { id: "os-detalhes", label: "Detalhes de OS", icon: ClipboardList },
+      ]
+    },
+    { 
+      id: "fiscal", 
+      label: "Fiscal", 
+      icon: DollarSign, 
+      hasArrow: true,
+      children: [
+        { id: "fiscal-nfe", label: "Relatório de NFe", icon: FileSpreadsheet },
+      ]
+    },
     { id: "vendedores", label: "Vendedores", icon: UserCheck, isNew: true, hasArrow: true },
     { id: "tecnicos", label: "Técnicos", icon: Users, isNew: true, hasArrow: true },
     { id: "outros", label: "Outros", icon: List, hasArrow: true },
