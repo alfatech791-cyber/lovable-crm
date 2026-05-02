@@ -91,9 +91,9 @@ export const Route = createFileRoute("/login")({
              </button>
            </form>
  
-           <div className="mt-6 text-center text-[12.5px] text-muted-foreground">
-             Não tem uma conta? <a className="text-primary font-semibold hover:text-primary-glow cursor-pointer">Criar conta grátis</a>
-           </div>
+            <div className="mt-6 text-center text-[12.5px] text-muted-foreground">
+              Não tem uma conta? <Link to="/registro" className="text-primary font-semibold hover:text-primary-glow cursor-pointer">Criar conta grátis</Link>
+            </div>
  
             <p className="mt-8 text-[11px] text-muted-foreground text-center">
               Entre com sua conta Supabase para liberar os dados protegidos do CRM.
