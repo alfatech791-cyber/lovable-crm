@@ -140,8 +140,18 @@ function FinancePlanoContasPage() {
                   </div>
                 </div>
                 <div className="opacity-0 group-hover:opacity-100 flex items-center gap-2 transition-all">
-                  <Button variant="ghost" size="sm" className="h-7 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600">Editar</Button>
-                  <Button variant="ghost" size="sm" className="h-7 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-600">Excluir</Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-600"
+                    onClick={() => {
+                      if (confirm("Excluir subcategoria?")) {
+                        deleteMutation.mutate(child.id);
+                      }
+                    }}
+                  >
+                    Excluir
+                  </Button>
                   <MoreVertical className="h-3.5 w-3.5 text-slate-300" />
                 </div>
               </div>
