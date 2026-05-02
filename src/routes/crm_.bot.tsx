@@ -524,9 +524,11 @@ function BotPage() {
             </div>
           )}
 
-          {/* Save bar */}
-          <div className="sticky bottom-0 -mx-6 px-6 py-4 bg-background/80 backdrop-blur border-t border-border flex items-center justify-end gap-3">
-            <Button onClick={save} disabled={saving || loading} className="gap-2">
+          <div className="sticky bottom-4 z-40 max-w-7xl mx-auto px-6 py-4 bg-white/80 backdrop-blur-xl border border-slate-200 shadow-2xl shadow-indigo-500/10 rounded-[2rem] flex items-center justify-between gap-3">
+            <div className="hidden sm:block">
+              <p className="text-xs font-bold text-slate-400">Última alteração: <span className="text-slate-900">Hoje</span></p>
+            </div>
+            <Button onClick={save} disabled={saving || loading} className="h-12 px-8 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-bold shadow-lg shadow-indigo-500/30 hover:opacity-95 transition-all gap-2">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               Salvar configurações
             </Button>
@@ -539,14 +541,14 @@ function BotPage() {
 
 function Section({ icon: Icon, title, desc, children }: { icon: any; title: string; desc?: string; children: React.ReactNode }) {
   return (
-    <div className="bg-card border border-border rounded-2xl shadow-card overflow-hidden">
-      <div className="px-6 py-4 border-b border-border flex items-center gap-3">
-        <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary grid place-items-center">
-          <Icon className="h-4 w-4" />
+    <div className="bg-white border border-slate-100 rounded-[2rem] shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all overflow-hidden group">
+      <div className="px-6 py-5 border-b border-slate-50 flex items-center gap-4">
+        <div className="h-10 w-10 rounded-2xl bg-indigo-50 text-indigo-600 grid place-items-center group-hover:scale-110 transition-transform">
+          <Icon className="h-5 w-5" />
         </div>
         <div>
-          <h3 className="font-bold font-display">{title}</h3>
-          {desc && <p className="text-xs text-muted-foreground">{desc}</p>}
+          <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">{title}</h3>
+          {desc && <p className="text-[11px] font-bold text-slate-400 mt-0.5">{desc}</p>}
         </div>
       </div>
       <div className="p-6">{children}</div>
