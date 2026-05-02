@@ -68,18 +68,32 @@ function FinancePlanoContasPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No user");
 
-      const defaultAccounts = [
-        { user_id: user.id, name: "RECEITAS", code: "1", type: "revenue" },
-        { user_id: user.id, name: "Vendas de Produtos", code: "1.1", type: "revenue", parent_id: null },
-        { user_id: user.id, name: "Vendas de Serviços", code: "1.2", type: "revenue", parent_id: null },
-        { user_id: user.id, name: "DESPESAS", code: "2", type: "expense" },
-        { user_id: user.id, name: "Custos Variáveis", code: "2.1", type: "expense", parent_id: null },
-        { user_id: user.id, name: "Despesas Fixas", code: "2.2", type: "expense", parent_id: null },
+      const roots = [
+        { user_id: user.id, name: "RECEITAS OPERACIONAIS", code: "1", type: "revenue", description: "Entradas da atividade principal" },
+        { user_id: user.id, name: "CUSTOS OPERACIONAIS (CPV/CSP)", code: "2", type: "expense", description: "Custos diretos de vendas/serviços" },
+        { user_id: user.id, name: "DESPESAS ADMINISTRATIVAS", code: "3", type: "expense", description: "Gastos fixos de operação" },
+        { user_id: user.id, name: "DESPESAS COM VENDAS", code: "4", type: "expense", description: "Marketing, comissões e fretes" },
       ];
 
-      const { data, error } = await supabase.from("chart_of_accounts").insert(defaultAccounts).select();
-      if (error) throw error;
-      return data;
+      const { data: insertedRoots, error: rootError } = await supabase.from("chart_of_accounts").insert(roots).select();
+      if (rootError) throw rootError;
+
+      const rId = (code: string) => insertedRoots.find(r => r.code === code)?.id;
+
+      const subs = [
+        { user_id: user.id, name: "Venda de Produtos", code: "1.1", type: "revenue", parent_id: rId("1") },
+        { user_id: user.id, name: "Prestação de Serviços", code: "1.2", type: "revenue", parent_id: rId("1") },
+        { user_id: user.id, name: "Aquisição de Mercadorias", code: "2.1", type: "expense", parent_id: rId("2") },
+        { user_id: user.id, name: "Aluguel e Condomínio", code: "3.1", type: "expense", parent_id: rId("3") },
+        { user_id: user.id, name: "Energia e Água", code: "3.2", type: "expense", parent_id: rId("3") },
+        { user_id: user.id, name: "Salários e Encargos", code: "3.3", type: "expense", parent_id: rId("3") },
+        { user_id: user.id, name: "Marketing e Anúncios", code: "4.1", type: "expense", parent_id: rId("4") },
+      ];
+
+      const { error: subError } = await supabase.from("chart_of_accounts").insert(subs);
+      if (subError) throw subError;
+
+      return insertedRoots;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["chart_of_accounts"] });
