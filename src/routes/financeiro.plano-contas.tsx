@@ -151,32 +151,11 @@ function FinancePlanoContasPage() {
         </div>
         {isExpanded && (
           <div className="p-1.5 bg-card space-y-1">
-            {children.map(child => (
-              <div key={child.id} className="flex items-center justify-between px-6 py-3 hover:bg-slate-50 rounded-xl group transition-all ml-4 border-l-2 border-slate-100">
-                <div className="flex items-center gap-3">
-                  <div className={`h-2 w-2 rounded-full ${account.type === 'revenue' ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition-colors">{child.code} - {child.name}</span>
-                    {child.description && <span className="text-[10px] text-slate-400">{child.description}</span>}
-                  </div>
-                </div>
-                <div className="opacity-0 group-hover:opacity-100 flex items-center gap-2 transition-all">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-7 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-600"
-                    onClick={() => {
-                      if (confirm("Excluir subcategoria?")) {
-                        deleteMutation.mutate(child.id);
-                      }
-                    }}
-                  >
-                    Excluir
-                  </Button>
-                  <MoreVertical className="h-3.5 w-3.5 text-slate-300" />
-                </div>
-              </div>
-            ))}
+            <div className="ml-4 border-l-2 border-slate-100 pl-4 space-y-1">
+              {children.map(child => (
+                <AccountItem key={child.id} account={child} allAccounts={allAccounts} />
+              ))}
+            </div>
             <div className="px-6 py-2">
               <button 
                 onClick={() => {
