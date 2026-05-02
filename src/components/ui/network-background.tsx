@@ -12,8 +12,8 @@ export const NetworkBackground = () => {
 
     let animationFrameId: number;
     let particles: Particle[] = [];
-    const particleCount = 100;
-    const connectionDistance = 150;
+    const particleCount = 120;
+    const connectionDistance = 180;
     const mouse = { x: 0, y: 0, active: false };
 
     class Particle {
@@ -42,7 +42,10 @@ export const NetworkBackground = () => {
       draw(ctx: CanvasRenderingContext2D) {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(110, 89, 255, 0.5)";
+        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+        gradient.addColorStop(0, "rgba(110, 89, 255, 0.8)");
+        gradient.addColorStop(1, "rgba(110, 89, 255, 0)");
+        ctx.fillStyle = gradient;
         ctx.fill();
       }
     }
@@ -77,8 +80,9 @@ export const NetworkBackground = () => {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(110, 89, 255, ${1 - dist / connectionDistance})`;
-            ctx.lineWidth = 0.5;
+            const opacity = (1 - dist / connectionDistance) * 0.4;
+            ctx.strokeStyle = `rgba(110, 89, 255, ${opacity})`;
+            ctx.lineWidth = 0.8;
             ctx.stroke();
           }
         }
@@ -91,7 +95,7 @@ export const NetworkBackground = () => {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(mouse.x, mouse.y);
-            ctx.strokeStyle = `rgba(110, 89, 255, ${(1 - dist / 200) * 0.3})`;
+            ctx.strokeStyle = `rgba(110, 89, 255, ${(1 - dist / 200) * 0.5})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }

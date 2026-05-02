@@ -1,5 +1,5 @@
- import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
- import { Sparkles, Mail, Lock, ArrowRight } from "lucide-react";
+  import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+  import { Sparkles, Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
  import { useState } from "react";
  import { supabase } from "@/integrations/supabase/client";
 import { NetworkBackground } from "@/components/ui/network-background";
@@ -18,7 +18,8 @@ export const Route = createFileRoute("/login")({
    const navigate = useNavigate();
    const [loading, setLoading] = useState(false);
    const [email, setEmail] = useState("renato@conectacrm.com");
-   const [password, setPassword] = useState("demo1234");
+    const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
    const [error, setError] = useState("");
  
    const handle = async (e: React.FormEvent) => {
@@ -58,12 +59,19 @@ export const Route = createFileRoute("/login")({
              Entre na sua conta para continuar gerenciando seus leads.
            </p>
  
-           <form onSubmit={handle} className="mt-8 space-y-4">
+            <form onSubmit={handle} className="mt-8 space-y-5">
              <div>
                <label className="text-[12.5px] font-medium text-foreground/80">E-mail</label>
-               <div className="relative mt-1.5">
-                 <Mail className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-11 pl-10 pr-3 rounded-xl bg-muted/50 border border-border focus:bg-card focus:border-ring outline-none text-sm transition" />
+                <div className="relative mt-1.5 group">
+                  <Mail className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                   <input 
+                    type="email" 
+                    placeholder="exemplo@email.com"
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    className="w-full h-11 pl-10 pr-3 rounded-xl bg-muted/30 border border-border/50 focus:bg-card focus:border-primary/50 focus:ring-4 focus:ring-primary/10 outline-none text-sm transition-all placeholder:text-muted-foreground/50" 
+                    required
+                   />
                </div>
              </div>
              <div>
@@ -71,9 +79,23 @@ export const Route = createFileRoute("/login")({
                  <label className="text-[12.5px] font-medium text-foreground/80">Senha</label>
                  <a className="text-[11.5px] text-primary hover:text-primary-glow font-medium cursor-pointer">Esqueci a senha</a>
                </div>
-               <div className="relative mt-1.5">
-                 <Lock className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-11 pl-10 pr-3 rounded-xl bg-muted/50 border border-border focus:bg-card focus:border-ring outline-none text-sm transition" />
+                <div className="relative mt-1.5 group">
+                  <Lock className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                   <input 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="••••••••"
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                    className="w-full h-11 pl-10 pr-10 rounded-xl bg-muted/30 border border-border/50 focus:bg-card focus:border-primary/50 focus:ring-4 focus:ring-primary/10 outline-none text-sm transition-all placeholder:text-muted-foreground/50" 
+                    required
+                   />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                </div>
              </div>
 
@@ -88,7 +110,11 @@ export const Route = createFileRoute("/login")({
                Manter-me conectado
              </label>
  
-             <button type="submit" disabled={loading} className="w-full h-11 rounded-xl bg-gradient-primary text-primary-foreground font-medium text-sm shadow-elegant hover:opacity-95 inline-flex items-center justify-center gap-2 transition disabled:opacity-70">
+              <button 
+                type="submit" 
+                disabled={loading} 
+                className="w-full h-11 rounded-xl bg-gradient-primary text-primary-foreground font-semibold text-sm shadow-glow hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] inline-flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:hover:scale-100"
+              >
                {loading ? "Entrando..." : <>Entrar <ArrowRight className="h-4 w-4" /></>}
              </button>
            </form>
@@ -97,9 +123,6 @@ export const Route = createFileRoute("/login")({
               Não tem uma conta? <Link to="/registro" className="text-primary font-semibold hover:text-primary-glow cursor-pointer">Criar conta grátis</Link>
             </div>
  
-            <p className="mt-8 text-[11px] text-muted-foreground text-center">
-              Entre com sua conta Supabase para liberar os dados protegidos do CRM.
-            </p>
          </div>
        </div>
  
