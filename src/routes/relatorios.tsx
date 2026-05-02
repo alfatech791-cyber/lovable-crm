@@ -630,11 +630,11 @@ export const Route = createFileRoute("/relatorios")({
             </div>
             <div className="p-4 bg-slate-50 border-t border-border flex items-center justify-center">
               <button className="text-xs font-bold text-primary hover:underline">Ver todo o histórico de relatórios</button>
-            </div>
           </div>
-        </main>
         </div>
-      </div>
+      </main>
     </div>
+  </div>
+</div>
   );
 }
