@@ -539,14 +539,17 @@ export type Database = {
           description: string
           due_date: string | null
           id: string
+          invoice_number: string | null
           notes: string | null
           payment_account: string | null
           payment_date: string | null
           payment_method: string | null
           payment_methods: Json | null
+          products_list: Json | null
           recurrence_period: string | null
           recurring: boolean | null
           status: string | null
+          supplier_name: string | null
           tags: string[] | null
           type: string
           user_id: string
@@ -559,14 +562,17 @@ export type Database = {
           description: string
           due_date?: string | null
           id?: string
+          invoice_number?: string | null
           notes?: string | null
           payment_account?: string | null
           payment_date?: string | null
           payment_method?: string | null
           payment_methods?: Json | null
+          products_list?: Json | null
           recurrence_period?: string | null
           recurring?: boolean | null
           status?: string | null
+          supplier_name?: string | null
           tags?: string[] | null
           type: string
           user_id: string
@@ -579,14 +585,17 @@ export type Database = {
           description?: string
           due_date?: string | null
           id?: string
+          invoice_number?: string | null
           notes?: string | null
           payment_account?: string | null
           payment_date?: string | null
           payment_method?: string | null
           payment_methods?: Json | null
+          products_list?: Json | null
           recurrence_period?: string | null
           recurring?: boolean | null
           status?: string | null
+          supplier_name?: string | null
           tags?: string[] | null
           type?: string
           user_id?: string
