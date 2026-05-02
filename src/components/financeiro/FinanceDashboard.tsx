@@ -164,9 +164,12 @@ export function FinanceDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-border shadow-sm overflow-hidden rounded-2xl">
-          <CardContent className="p-6">
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+         <Card 
+           className="border-border shadow-sm overflow-hidden rounded-2xl cursor-pointer hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]"
+           onClick={() => navigate({ to: "/financeiro/caixa" })}
+         >
+           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="h-10 w-10 rounded-xl bg-green-100/50 text-green-600 grid place-items-center">
                 <TrendingUp className="h-5 w-5" />
@@ -183,8 +186,11 @@ export function FinanceDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border shadow-sm overflow-hidden rounded-2xl">
-          <CardContent className="p-6">
+         <Card 
+           className="border-border shadow-sm overflow-hidden rounded-2xl cursor-pointer hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]"
+           onClick={() => navigate({ to: "/financeiro/caixa" })}
+         >
+           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="h-10 w-10 rounded-xl bg-red-100/50 text-red-600 grid place-items-center">
                 <TrendingDown className="h-5 w-5" />
@@ -201,8 +207,11 @@ export function FinanceDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border shadow-sm overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50/50 to-transparent">
-          <CardContent className="p-6">
+         <Card 
+           className="border-border shadow-sm overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50/50 to-transparent cursor-pointer hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]"
+           onClick={() => navigate({ to: "/financeiro/caixa" })}
+         >
+           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="h-10 w-10 rounded-xl bg-blue-100/50 text-blue-600 grid place-items-center">
                 <Wallet className="h-5 w-5" />
@@ -330,7 +339,10 @@ export function FinanceDashboard() {
 
  
        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-         <Card className="border-border shadow-sm flex flex-col rounded-2xl">
+         <Card 
+           className="border-border shadow-sm flex flex-col rounded-2xl cursor-pointer hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]"
+           onClick={() => navigate({ to: "/financeiro/caixa" })}
+         >
            <CardHeader className="flex flex-row items-center justify-between pb-4">
              <CardTitle className="text-base font-black flex items-center gap-2 text-slate-900">
                <Building2 className="h-4 w-4 text-blue-600" /> Contas e Bancos
@@ -360,7 +372,10 @@ export function FinanceDashboard() {
            </CardContent>
          </Card>
  
-         <Card className="border-border shadow-sm flex flex-col rounded-2xl">
+         <Card 
+           className="border-border shadow-sm flex flex-col rounded-2xl cursor-pointer hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]"
+           onClick={() => navigate({ to: "/financeiro/caixa" })}
+         >
            <CardHeader className="pb-4">
              <CardTitle className="text-base font-black flex items-center gap-2 text-slate-900">
                <Receipt className="h-4 w-4 text-blue-600" /> Lançamentos Recentes
