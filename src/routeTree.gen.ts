@@ -13,6 +13,7 @@ import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as VendasRouteImport } from './routes/vendas'
 import { Route as ServicosRouteImport } from './routes/servicos'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
+import { Route as RegistroRouteImport } from './routes/registro'
 import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as PipelineRouteImport } from './routes/pipeline'
 import { Route as PdvRouteImport } from './routes/pdv'
@@ -77,6 +78,11 @@ const ServicosRoute = ServicosRouteImport.update({
 const RelatoriosRoute = RelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegistroRoute = RegistroRouteImport.update({
+  id: '/registro',
+  path: '/registro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProdutosRoute = ProdutosRouteImport.update({
@@ -324,6 +330,7 @@ export interface FileRoutesByFullPath {
   '/pdv': typeof PdvRoute
   '/pipeline': typeof PipelineRoute
   '/produtos': typeof ProdutosRoute
+  '/registro': typeof RegistroRoute
   '/relatorios': typeof RelatoriosRoute
   '/servicos': typeof ServicosRouteWithChildren
   '/vendas': typeof VendasRouteWithChildren
@@ -375,6 +382,7 @@ export interface FileRoutesByTo {
   '/pdv': typeof PdvRoute
   '/pipeline': typeof PipelineRoute
   '/produtos': typeof ProdutosRoute
+  '/registro': typeof RegistroRoute
   '/relatorios': typeof RelatoriosRoute
   '/servicos': typeof ServicosRouteWithChildren
   '/vendas': typeof VendasRouteWithChildren
@@ -427,6 +435,7 @@ export interface FileRoutesById {
   '/pdv': typeof PdvRoute
   '/pipeline': typeof PipelineRoute
   '/produtos': typeof ProdutosRoute
+  '/registro': typeof RegistroRoute
   '/relatorios': typeof RelatoriosRoute
   '/servicos': typeof ServicosRouteWithChildren
   '/vendas': typeof VendasRouteWithChildren
@@ -480,6 +489,7 @@ export interface FileRouteTypes {
     | '/pdv'
     | '/pipeline'
     | '/produtos'
+    | '/registro'
     | '/relatorios'
     | '/servicos'
     | '/vendas'
@@ -531,6 +541,7 @@ export interface FileRouteTypes {
     | '/pdv'
     | '/pipeline'
     | '/produtos'
+    | '/registro'
     | '/relatorios'
     | '/servicos'
     | '/vendas'
@@ -582,6 +593,7 @@ export interface FileRouteTypes {
     | '/pdv'
     | '/pipeline'
     | '/produtos'
+    | '/registro'
     | '/relatorios'
     | '/servicos'
     | '/vendas'
@@ -634,6 +646,7 @@ export interface RootRouteChildren {
   PdvRoute: typeof PdvRoute
   PipelineRoute: typeof PipelineRoute
   ProdutosRoute: typeof ProdutosRoute
+  RegistroRoute: typeof RegistroRoute
   RelatoriosRoute: typeof RelatoriosRoute
   ServicosRoute: typeof ServicosRouteWithChildren
   VendasRoute: typeof VendasRouteWithChildren
@@ -672,6 +685,13 @@ declare module '@tanstack/react-router' {
       path: '/relatorios'
       fullPath: '/relatorios'
       preLoaderRoute: typeof RelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/registro': {
+      id: '/registro'
+      path: '/registro'
+      fullPath: '/registro'
+      preLoaderRoute: typeof RegistroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/produtos': {
@@ -1095,6 +1115,7 @@ const rootRouteChildren: RootRouteChildren = {
   PdvRoute: PdvRoute,
   PipelineRoute: PipelineRoute,
   ProdutosRoute: ProdutosRoute,
+  RegistroRoute: RegistroRoute,
   RelatoriosRoute: RelatoriosRoute,
   ServicosRoute: ServicosRouteWithChildren,
   VendasRoute: VendasRouteWithChildren,
