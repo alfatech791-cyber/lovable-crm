@@ -219,7 +219,21 @@ function NotasAbertoPage() {
                             <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${t.type === 'income' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
                               {t.type === 'income' ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />}
                             </div>
-                            <span className="font-bold text-sm text-slate-900">{t.description}</span>
+                             <div className="flex flex-col">
+                               <span className="font-bold text-sm text-slate-900">{t.description}</span>
+                               {t.supplier_name && (
+                                 <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-medium mt-0.5">
+                                   <Truck className="h-3 w-3" />
+                                   Fornecedor: {t.supplier_name}
+                                 </div>
+                               )}
+                               {t.invoice_number && (
+                                 <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-medium">
+                                   <Receipt className="h-3 w-3" />
+                                   NF: {t.invoice_number}
+                                 </div>
+                               )}
+                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -235,7 +249,23 @@ function NotasAbertoPage() {
                             Pendente
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-right">
+                         <td className="px-6 py-4 text-center">
+                           {t.products_list && t.products_list.length > 0 ? (
+                             <Button 
+                               variant="ghost" 
+                               size="sm" 
+                               className="h-7 text-[10px] font-bold gap-1"
+                               onClick={() => setExpandedRow(isExpanded ? null : t.id)}
+                             >
+                               <Package className="h-3 w-3" />
+                               {t.products_list.length} {t.products_list.length === 1 ? 'item' : 'itens'}
+                               {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                             </Button>
+                           ) : (
+                             <span className="text-[10px] text-muted-foreground italic">—</span>
+                           )}
+                         </td>
+                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end">
                             <Button 
                               variant="ghost" 
@@ -248,10 +278,33 @@ function NotasAbertoPage() {
                           </div>
                         </td>
                       </tr>
+                      {isExpanded && t.products_list && (
+                         <tr className="bg-slate-50/80">
+                           <td colSpan={7} className="px-6 py-3">
+                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                               {t.products_list.map((item: any, idx: number) => (
+                                 <div key={idx} className="flex items-center gap-3 bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+                                   <div className="h-8 w-8 rounded bg-slate-100 flex items-center justify-center text-slate-500">
+                                     <Package className="h-4 w-4" />
+                                   </div>
+                                   <div className="flex-1">
+                                     <div className="text-[11px] font-bold text-slate-900 leading-tight">{item.name || item.description || 'Produto'}</div>
+                                     <div className="text-[10px] text-muted-foreground font-medium">
+                                       {item.quantity && `${item.quantity} un`}
+                                       {item.price && ` • R$ ${item.price.toLocaleString('pt-BR')}`}
+                                     </div>
+                                   </div>
+                                 </div>
+                               ))}
+                             </div>
+                           </td>
+                         </tr>
+                       )}
+                      </Fragment>
                     );
                   }) : (
                     <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center text-sm text-muted-foreground italic">
+                      <td colSpan={7} className="px-6 py-12 text-center text-sm text-muted-foreground italic">
                         Nenhuma nota em aberto encontrada
                       </td>
                     </tr>
