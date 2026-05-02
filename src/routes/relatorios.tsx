@@ -11,7 +11,7 @@ import { Topbar } from "@/components/layout/Topbar";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart as RePieChart, Pie } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
- import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useLayoutEffect } from "react";
  import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/relatorios")({
@@ -34,6 +34,21 @@ export const Route = createFileRoute("/relatorios")({
     });
     const [aiInsight, setAiInsight] = useState<string>("Carregando análise da ConectaAI...");
     const [activeCategory, setActiveCategory] = useState("visao-geral");
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+    // Collapse main sidebar when reports page is active
+    useLayoutEffect(() => {
+      // Try to find if we can control it via context or state if available in future,
+      // for now we'll simulate the "encurtar" behavior by notifying the sidebar if possible
+      // or handling it via a custom event that Sidebar.tsx can listen to.
+      const event = new CustomEvent('force-sidebar-collapse', { detail: true });
+      window.dispatchEvent(event);
+      
+      return () => {
+        const event = new CustomEvent('force-sidebar-collapse', { detail: false });
+        window.dispatchEvent(event);
+      };
+    }, []);
  
     const [funnelData, setFunnelData] = useState<any[]>([]);
     const [originData, setOriginData] = useState<any[]>([]);

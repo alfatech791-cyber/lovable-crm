@@ -18,6 +18,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
    const { user, profile, permissions, logout } = useAuth();
   const [flyout, setFlyout] = useState<any | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isForcedCollapsed, setIsForcedCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Fecha flyout ao trocar de rota
@@ -27,6 +28,15 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
   useEffect(() => {
     if (flyout) setIsCollapsed(true);
   }, [flyout]);
+
+  // Listener para colapso forçado (ex: na página de relatórios)
+  useEffect(() => {
+    const handleForceCollapse = (e: any) => {
+      setIsForcedCollapsed(e.detail);
+    };
+    window.addEventListener('force-sidebar-collapse', handleForceCollapse);
+    return () => window.removeEventListener('force-sidebar-collapse', handleForceCollapse);
+  }, []);
 
    const filteredItems = useMemo(() => {
      const items = sidebarItems.filter((item: any) => {
@@ -70,7 +80,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
      });
    }, [searchQuery, permissions, profile]);
 
-  const isSmall = isCollapsed || !!flyout;
+   const isSmall = isCollapsed || !!flyout || isForcedCollapsed;
 
   return (
     <TooltipProvider delayDuration={0}>
