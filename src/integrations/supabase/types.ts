@@ -948,6 +948,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          email: string | null
           id: string
           owner_id: string | null
           plan_type: string | null
@@ -960,6 +961,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id: string
           owner_id?: string | null
           plan_type?: string | null
@@ -972,6 +974,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
           owner_id?: string | null
           plan_type?: string | null
