@@ -4,9 +4,10 @@ import { Topbar } from "@/components/layout/Topbar";
  import { 
    BarChart3, TrendingUp, Users, DollarSign, Calendar, Download, 
    Filter, ArrowUpRight, Shield, PieChart, Target, Zap, 
-    ArrowDownRight, ChevronRight, MoreHorizontal, UserCheck, Sparkles,
-    Lightbulb, AlertCircle, Loader2, Home, User, Package, ShoppingCart,
-    Hammer, Archive, FileText, List, ChevronDown
+     ArrowDownRight, ChevronRight, MoreHorizontal, UserCheck, Sparkles,
+     Lightbulb, AlertCircle, Loader2, Home, User, Package, ShoppingCart,
+     Hammer, Archive, FileText, List, ChevronDown, UserPlus, UserRound,
+     Trophy, Cake
  } from "lucide-react";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart as RePieChart, Pie } from "recharts";
@@ -223,9 +224,20 @@ export const Route = createFileRoute("/relatorios")({
     );
   }
 
-  const reportCategories = [
+  const reportCategories: any[] = [
     { id: "visao-geral", label: "Visão geral - Atalhos", icon: Home },
-    { id: "clientes", label: "Clientes", icon: Users, hasArrow: true },
+    { 
+      id: "clientes", 
+      label: "Clientes", 
+      icon: Users, 
+      hasArrow: true,
+      children: [
+        { id: "clientes-indicacao", label: "Programa de indicações", icon: UserPlus },
+        { id: "clientes-perfil", label: "Perfil de Clientes", icon: UserRound },
+        { id: "clientes-ranking", label: "Ranking de Clientes", icon: Trophy },
+        { id: "clientes-aniversario", label: "Rel. de Aniversário", icon: Cake },
+      ]
+    },
     { id: "financeiro", label: "Financeiro", icon: DollarSign, hasArrow: true },
     { id: "produto", label: "Produto", icon: Package, isNew: true, hasArrow: true },
     { id: "vendas", label: "Vendas", icon: ShoppingCart, isNew: true, hasArrow: true },
@@ -258,24 +270,46 @@ export const Route = createFileRoute("/relatorios")({
 
               <nav className="space-y-1">
                 {reportCategories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setActiveCategory(cat.id)}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-[13px] font-medium transition-all ${
-                      activeCategory === cat.id 
-                        ? "bg-slate-50 text-slate-900 shadow-sm" 
-                        : "text-slate-500 hover:bg-slate-50/50 hover:text-slate-700"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3.5">
-                      <cat.icon className={`h-4.5 w-4.5 ${activeCategory === cat.id ? "text-blue-600" : "text-slate-400"}`} />
-                      <span className={activeCategory === cat.id ? "font-bold text-slate-900" : ""}>{cat.label}</span>
-                      {cat.isNew && (
-                        <span className="bg-[#22C55E] text-white text-[9px] px-2 py-0.5 rounded-full font-black uppercase ml-1">Novo</span>
+                  <div key={cat.id} className="space-y-1">
+                    <button
+                      onClick={() => setActiveCategory(cat.id)}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-[13px] font-medium transition-all ${
+                        activeCategory === cat.id || (cat.children?.some((c: any) => c.id === activeCategory))
+                          ? "bg-[#E8F0FE] text-primary shadow-sm" 
+                          : "text-slate-500 hover:bg-slate-50/50 hover:text-slate-700"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3.5">
+                        <cat.icon className={`h-4.5 w-4.5 ${(activeCategory === cat.id || cat.children?.some((c: any) => c.id === activeCategory)) ? "text-primary" : "text-slate-400"}`} />
+                        <span className={(activeCategory === cat.id || cat.children?.some((c: any) => c.id === activeCategory)) ? "font-bold" : ""}>{cat.label}</span>
+                        {cat.isNew && (
+                          <span className="bg-[#22C55E] text-white text-[9px] px-2 py-0.5 rounded-full font-black uppercase ml-1">Novo</span>
+                        )}
+                      </div>
+                      {cat.hasArrow && (
+                        <ChevronDown className={`h-3.5 w-3.5 opacity-50 transition-transform ${(activeCategory === cat.id || cat.children?.some((c: any) => c.id === activeCategory)) ? "rotate-0" : "-rotate-90"}`} />
                       )}
-                    </div>
-                    {cat.hasArrow && <ChevronRight className="h-3.5 w-3.5 opacity-50" />}
-                  </button>
+                    </button>
+                    
+                    {cat.children && (activeCategory === cat.id || cat.children.some((c: any) => c.id === activeCategory)) && (
+                      <div className="ml-4 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                        {cat.children.map((child: any) => (
+                          <button
+                            key={child.id}
+                            onClick={() => setActiveCategory(child.id)}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-[12.5px] transition-all ${
+                              activeCategory === child.id
+                                ? "bg-[#537FF1] text-white font-bold shadow-md"
+                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                            }`}
+                          >
+                            <child.icon className={`h-4 w-4 ${activeCategory === child.id ? "text-white" : "text-slate-400"}`} />
+                            <span>{child.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </nav>
             </div>
