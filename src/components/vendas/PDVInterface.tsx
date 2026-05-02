@@ -52,6 +52,7 @@
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [lastSaleId, setLastSaleId] = useState<string | null>(null);
   const [lastSaleData, setLastSaleData] = useState<any | null>(null);
+  const [editingSaleId, setEditingSaleId] = useState<string | null>(null);
   const [selectedCartItemId, setSelectedCartItemId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -352,7 +353,8 @@
 
         // Lógica para lidar com parâmetros de URL (Impressão e Visualização)
         const urlParams = new URLSearchParams(window.location.search);
-        const saleId = urlParams.get('id') || urlParams.get('view');
+        const saleId = urlParams.get('id') || urlParams.get('view') || urlParams.get('edit');
+        const isEditing = urlParams.has('edit');
         const action = urlParams.get('print');
         const warrantyType = urlParams.get('type') as 'seminovo' | 'lacrado' | 'android' | null;
 
@@ -403,6 +405,12 @@
               setTimeout(() => {
                 handlePrintWarranty(warrantyType || 'seminovo', saleSnapshot);
               }, 500);
+            } else if (isEditing) {
+              setEditingSaleId(sale.id);
+              setSelectedCustomer(sale.customers ? { id: sale.customers.id, name: sale.customers.full_name } : null);
+              setCart((sale.items as any[]) || []);
+              setDiscountValue(sale.discount_amount || 0);
+              toast.success("Venda carregada para edição");
             }
           } catch (err) {
             console.error("Erro ao carregar venda via URL:", err);
@@ -608,31 +616,49 @@
            }
          }
 
-        // 1. Criar a ordem de venda primeiro para ter o ID
-        const { data: sale, error: saleError } = await supabase
-          .from("sales_orders")
-          .insert({
-            user_id: user.id,
-            customer_id: selectedCustomer?.id || null,
-            total_amount: total,
-            discount_amount: discountValue,
-            payment_method: finalPaymentMethod,
-            status: "concluded",
-            items: cart.map(item => ({
-              id: item.id,
-              name: item.name,
-              price: item.price,
-              quantity: item.quantity,
-              model: item.model,
-              capacity: item.capacity,
-              color: item.color,
-              battery_health: item.battery_health
-            }))
-          })
-         .select()
-         .single();
- 
-        if (saleError) throw saleError;
+        // 1. Criar ou atualizar a ordem de venda
+        let sale;
+        let saleError;
+
+        const salePayload = {
+          user_id: user.id,
+          customer_id: selectedCustomer?.id || null,
+          total_amount: total,
+          discount_amount: discountValue,
+          payment_method: finalPaymentMethod,
+          status: "concluded",
+          items: cart.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            model: item.model,
+            capacity: item.capacity,
+            color: item.color,
+            battery_health: item.battery_health
+          }))
+        };
+
+        if (editingSaleId) {
+          const { data, error } = await supabase
+            .from("sales_orders")
+            .update(salePayload)
+            .eq("id", editingSaleId)
+            .select()
+            .single();
+          sale = data;
+          saleError = error;
+        } else {
+          const { data, error } = await supabase
+            .from("sales_orders")
+            .insert(salePayload)
+            .select()
+            .single();
+          sale = data;
+          saleError = error;
+        }
+
+        if (saleError || !sale) throw saleError || new Error("Falha ao processar venda");
 
         const storeConfig = {
           name: "APPLE JAU",
@@ -666,6 +692,7 @@
        }
  
        // 3. Registrar no financeiro (Fluxo de Caixa)
+       if (!editingSaleId) {
        await supabase
          .from("finance_transactions")
          .insert({
@@ -677,9 +704,10 @@
            status: "paid",
            payment_date: new Date().toISOString()
          });
+       }
  
-       toast.success("Venda finalizada com sucesso!", {
-         description: `Total de ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} em ${paymentMethod?.toUpperCase()}`,
+        toast.success(editingSaleId ? "Venda atualizada com sucesso!" : "Venda finalizada com sucesso!", {
+          description: editingSaleId ? "As alterações foram salvas." : `Total de ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} em ${paymentMethod?.toUpperCase()}`,
        });
  
          setCart([]);
@@ -690,6 +718,7 @@
           setCardAmount("");
           setPixAmount("");
          setDiscountValue(0);
+         setEditingSaleId(null);
          setLastSaleId(sale.id);
          setLastSaleData(saleSnapshot);
          setIsSuccessModalOpen(true);
