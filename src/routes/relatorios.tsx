@@ -73,7 +73,7 @@ function ReportsPage() {
 
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
-    if (active.id !== over.id) {
+    if (active && over && active.id !== over.id) {
       setCategories((items) => {
         const oldIndex = items.findIndex((i) => i.id === active.id);
         const newIndex = items.findIndex((i) => i.id === over.id);
@@ -87,17 +87,23 @@ function ReportsPage() {
   useEffect(() => {
     const savedOrder = localStorage.getItem('reports-menu-order');
     if (savedOrder) {
-      const orderIds = JSON.parse(savedOrder);
-      setCategories(prev => {
-        const sorted = [...prev].sort((a, b) => {
-          const aIndex = orderIds.indexOf(a.id);
-          const bIndex = orderIds.indexOf(b.id);
-          if (aIndex === -1) return 1;
-          if (bIndex === -1) return -1;
-          return aIndex - bIndex;
+      try {
+        const orderIds = JSON.parse(savedOrder);
+        setCategories(prev => {
+          const currentIds = prev.map(c => c.id);
+          const sorted = [...prev].sort((a, b) => {
+            const aIndex = orderIds.indexOf(a.id);
+            const bIndex = orderIds.indexOf(b.id);
+            if (aIndex === -1 && bIndex === -1) return 0;
+            if (aIndex === -1) return 1;
+            if (bIndex === -1) return -1;
+            return aIndex - bIndex;
+          });
+          return sorted;
         });
-        return sorted;
-      });
+      } catch (e) {
+        console.error("Error parsing saved order", e);
+      }
     }
   }, []);
 
