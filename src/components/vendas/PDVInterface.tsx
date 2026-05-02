@@ -658,7 +658,7 @@
           saleError = error;
         }
 
-        if (saleError) throw saleError;
+        if (saleError || !sale) throw saleError || new Error("Falha ao processar venda");
 
         const storeConfig = {
           name: "APPLE JAU",
