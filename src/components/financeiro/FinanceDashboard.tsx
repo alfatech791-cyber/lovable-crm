@@ -173,7 +173,7 @@ export function FinanceDashboard() {
               </div>
               <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-full uppercase tracking-tighter">+15.2% vs mês ant.</span>
             </div>
-            <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Receitas (Mês)</div>
+            <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Entradas (Mês)</div>
              {loading ? <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/20" /> : (
                <div className="text-3xl font-black mt-1 flex items-baseline gap-1 text-slate-900">
                  <span className="text-sm font-bold text-muted-foreground">R$</span>
@@ -191,7 +191,7 @@ export function FinanceDashboard() {
               </div>
               <span className="text-[10px] font-black text-red-600 bg-red-50 px-2 py-1 rounded-full uppercase tracking-tighter">-2.4% vs mês ant.</span>
             </div>
-            <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Despesas (Mês)</div>
+            <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Saídas (Mês)</div>
              {loading ? <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/20" /> : (
                <div className="text-3xl font-black mt-1 flex items-baseline gap-1 text-slate-900">
                  <span className="text-sm font-bold text-muted-foreground">R$</span>
@@ -232,11 +232,11 @@ export function FinanceDashboard() {
             <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest">
               <div className="flex items-center gap-1.5">
                 <div className="w-2.5 h-2.5 rounded-full bg-blue-600"></div>
-                <span>Receitas</span>
+                <span>Entradas</span>
               </div>
               <div className="flex items-center gap-1.5 text-muted-foreground">
                 <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
-                <span>Despesas</span>
+                <span>Saídas</span>
               </div>
             </div>
           </CardHeader>
