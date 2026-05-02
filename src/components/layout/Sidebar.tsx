@@ -32,6 +32,8 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
      const items = sidebarItems.filter((item: any) => {
        if (item.type === "header") return true; // Keep headers for now
        
+       if (item.roleRestriction === "super_admin" && profile?.role !== 'super_admin') return false;
+
        if (!permissions && profile?.role !== 'super_admin') return true; // Show all if no permissions loaded yet (or skip filtering)
        if (profile?.role === 'super_admin') return true; // Super admin sees everything
        
