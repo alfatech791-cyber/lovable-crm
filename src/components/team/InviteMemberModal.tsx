@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { X, Shield, Mail, User, Check, AlertCircle } from "lucide-react";
-import { UserPermissions } from "@/contexts/AuthContext";
+ import { UserPermissions, Role } from "@/contexts/AuthContext";
 import { DEFAULT_EMPLOYEE_PERMISSIONS } from "@/types/permissions";
 
 interface InviteMemberModalProps {
