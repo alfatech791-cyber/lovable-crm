@@ -189,7 +189,8 @@ function NotasAbertoPage() {
                     <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Categoria</th>
                     <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Valor</th>
                     <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Status</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Ações</th>
+                     <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Produtos</th>
+                     <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -200,11 +201,13 @@ function NotasAbertoPage() {
                         <p className="text-muted-foreground mt-2 text-xs">Carregando notas em aberto...</p>
                       </td>
                     </tr>
-                  ) : filteredTransactions.length > 0 ? filteredTransactions.map(t => {
-                    const isOverdue = t.due_date && isAfter(new Date(), parseISO(t.due_date));
-                    return (
-                      <tr key={t.id} className="hover:bg-slate-50/50 transition-colors group">
-                        <td className={`px-6 py-4 text-xs font-bold ${isOverdue ? 'text-red-600' : 'text-slate-500'}`}>
+                   ) : filteredTransactions.length > 0 ? filteredTransactions.map(t => {
+                     const isOverdue = t.due_date && isAfter(new Date(), parseISO(t.due_date));
+                     const isExpanded = expandedRow === t.id;
+                     return (
+                       <Fragment key={t.id}>
+                       <tr className="hover:bg-slate-50/50 transition-colors group">
+                         <td className={`px-6 py-4 text-xs font-bold ${isOverdue ? 'text-red-600' : 'text-slate-500'}`}>
                           <div className="flex items-center gap-2">
                             <Calendar className="h-3.5 w-3.5" />
                             {t.due_date ? format(parseISO(t.due_date), "dd/MM/yyyy", { locale: ptBR }) : '—'}
