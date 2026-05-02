@@ -158,6 +158,7 @@ function EquipePage() {
                   ))}
                </div>
              </div>
+            </div>
            )}
 
           <InviteMemberModal 
