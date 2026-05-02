@@ -23,7 +23,7 @@ function EquipePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user, profile } = useAuth();
 
-  const isAdmin = profile?.role === 'admin' || !profile; // Fallback to true if no profile yet for demo
+   const isAdmin = ['super_admin', 'owner', 'admin'].includes(profile?.role) || !profile;
 
   if (!isAdmin) {
     return (
