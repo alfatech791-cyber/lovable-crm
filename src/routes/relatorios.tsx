@@ -36,6 +36,7 @@ export const Route = createFileRoute("/relatorios")({
     const [funnelData, setFunnelData] = useState<any[]>([]);
     const [originData, setOriginData] = useState<any[]>([]);
     const [topAgents, setTopAgents] = useState<any[]>([]);
+    const [funnelPercentages, setFunnelPercentages] = useState<string[]>([]);
 
     const fetchReportsData = useCallback(async () => {
       if (!user?.id) return;
@@ -141,6 +142,14 @@ export const Route = createFileRoute("/relatorios")({
           color: s.color || "#64748b"
         }));
         setFunnelData(fData);
+
+        // Calculate real conversion percentages between stages
+        const percentages = fData.map((stage, index) => {
+          if (index === 0) return "100%";
+          const prevValue = fData[index - 1].value;
+          return prevValue > 0 ? `${((stage.value / prevValue) * 100).toFixed(0)}%` : "0%";
+        });
+        setFunnelPercentages(percentages);
 
         // Origin Data
         const counts: Record<string, number> = {};
@@ -366,18 +375,18 @@ export const Route = createFileRoute("/relatorios")({
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="grid grid-cols-4 gap-4 mt-8 pt-8 border-t border-slate-50">
-                  {[
-                    { label: "Qualificação", value: "65%", status: "emerald" },
-                    { label: "Proposta", value: "64%", status: "indigo" },
-                    { label: "Negociação", value: "66%", status: "violet" },
-                    { label: "Fechamento", value: "15%", status: "slate" },
-                  ].map((m, i) => (
-                    <div key={i} className="text-center group cursor-default">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 group-hover:text-slate-600 transition-colors">{m.label}</p>
-                      <p className={`text-xl font-black text-${m.status}-500 group-hover:scale-110 transition-transform`}>{m.value}</p>
+                <div className="flex flex-wrap gap-4 mt-8 pt-8 border-t border-slate-50 justify-between">
+                  {funnelData.length > 0 ? funnelData.map((stage, i) => (
+                    <div key={i} className="text-center group cursor-default min-w-[80px]">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 group-hover:text-slate-600 transition-colors">{stage.name}</p>
+                      <p className="text-xl font-black text-primary group-hover:scale-110 transition-transform">
+                        {funnelPercentages[i] || "0%"}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">Conv. Etapa</p>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="w-full text-center py-4 text-xs text-muted-foreground">Crie estágios no funil para ver a conversão</div>
+                  )}
                 </div>
               </div>
             </div>
