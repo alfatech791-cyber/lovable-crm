@@ -12,12 +12,49 @@
 
  function FinancePlanoContasPage() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-   const categories = [
-      { id: "1", name: "1. RECEITAS OPERACIONAIS", type: "revenue", children: ["1.1 Vendas de Produtos", "1.2 Serviços Realizados", "1.3 Vendas de Acessórios"] },
-      { id: "2", name: "2. CUSTOS OPERACIONAIS (CPV)", type: "expense", children: ["2.1 Aquisição de Mercadorias", "2.2 Peças de Reposição"] },
-      { id: "3", name: "3. DESPESAS FIXAS", type: "expense", children: ["3.1 Aluguel & IPTU", "3.2 Energia & Água", "3.3 Folha de Pagamento"] },
-      { id: "4", name: "4. DESPESAS VARIÁVEIS", type: "expense", children: ["4.1 Marketing & Anúncios", "4.2 Fretes & Entregas"] },
-   ];
+  import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+  import { supabase } from "@/integrations/supabase/client";
+  import { toast } from "sonner";
+
+  function FinancePlanoContasPage() {
+    const queryClient = useQueryClient();
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    const { data: accounts, isLoading } = useQuery({
+      queryKey: ["chart_of_accounts"],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("chart_of_accounts")
+          .select("*")
+          .order("code");
+        if (error) throw error;
+        return data;
+      },
+    });
+
+    const seedMutation = useMutation({
+      mutationFn: async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("No user");
+
+        const defaultAccounts = [
+          { user_id: user.id, name: "RECEITAS", code: "1", type: "revenue" },
+          { user_id: user.id, name: "DESPESAS", code: "2", type: "expense" },
+        ];
+
+        const { data, error } = await supabase.from("chart_of_accounts").insert(defaultAccounts).select();
+        if (error) throw error;
+        return data;
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["chart_of_accounts"] });
+        toast.success("Categorias padrão carregadas!");
+      },
+    });
+
+    const categories = accounts?.filter(a => !a.parent_id) || [];
+
+    if (isLoading) return <div>Carregando...</div>;
 
    return (
      <div className="min-h-screen flex w-full bg-background">
