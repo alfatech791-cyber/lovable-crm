@@ -1,4 +1,4 @@
-  import { DollarSign, ArrowUpRight, ArrowDownRight, Wallet, Building2, Receipt, ArrowRight, TrendingUp, TrendingDown, PieChart, Plus, Calendar, Loader2, Edit, Trash2 } from "lucide-react";
+  import { DollarSign, ArrowUpRight, ArrowDownRight, Wallet, Building2, Receipt, ArrowRight, TrendingUp, TrendingDown, PieChart, Plus, Calendar, Loader2, Edit, Trash2, Info } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { 
   AreaChart, 
@@ -13,7 +13,8 @@ import {
   Cell
 } from 'recharts';
 import { Button } from "@/components/ui/button";
- import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+  import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+  import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
  import { useState, useEffect, useMemo } from "react";
  import { supabase } from "@/integrations/supabase/client";
  import { useAuth } from "@/contexts/AuthContext";
@@ -27,7 +28,8 @@ export function FinanceDashboard() {
    const { user } = useAuth();
    const [transactions, setTransactions] = useState<any[]>([]);
    const [loading, setLoading] = useState(true);
-   const [isFormOpen, setIsFormOpen] = useState(false);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [selectedCard, setSelectedCard] = useState<string | null>(null);
  
    const fetchTransactions = async () => {
      if (!user?.id) return;
@@ -177,70 +179,79 @@ export function FinanceDashboard() {
         </div>
       </div>
 
-       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-         <Card 
-           className="border-border shadow-sm overflow-hidden rounded-2xl cursor-pointer hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]"
-           onClick={() => navigate({ to: "/financeiro/caixa" })}
-         >
-           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-10 w-10 rounded-xl bg-green-100/50 text-green-600 grid place-items-center">
-                <TrendingUp className="h-5 w-5" />
-              </div>
-              <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-full uppercase tracking-tighter">+15.2% vs mês ant.</span>
-            </div>
-            <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Entradas (Mês)</div>
-             {loading ? <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/20" /> : (
-               <div className="text-3xl font-black mt-1 flex items-baseline gap-1 text-slate-900">
-                 <span className="text-sm font-bold text-muted-foreground">R$</span>
-                 {stats.monthIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card 
+            className="border-border shadow-sm overflow-hidden rounded-2xl cursor-pointer hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]"
+            onClick={() => setSelectedCard('entradas')}
+          >
+            <CardContent className="p-6">
+             <div className="flex items-center justify-between mb-4">
+               <div className="h-10 w-10 rounded-xl bg-green-100/50 text-green-600 grid place-items-center">
+                 <TrendingUp className="h-5 w-5" />
                </div>
-             )}
-          </CardContent>
-        </Card>
+               <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-full uppercase tracking-tighter">+15.2% vs mês ant.</span>
+             </div>
+             <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest flex items-center gap-1.5">
+               Entradas (Mês)
+               <Info className="h-3 w-3 opacity-30" />
+             </div>
+              {loading ? <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/20" /> : (
+                <div className="text-3xl font-black mt-1 flex items-baseline gap-1 text-slate-900">
+                  <span className="text-sm font-bold text-muted-foreground">R$</span>
+                  {stats.monthIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              )}
+           </CardContent>
+         </Card>
 
-         <Card 
-           className="border-border shadow-sm overflow-hidden rounded-2xl cursor-pointer hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]"
-           onClick={() => navigate({ to: "/financeiro/caixa" })}
-         >
-           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-10 w-10 rounded-xl bg-red-100/50 text-red-600 grid place-items-center">
-                <TrendingDown className="h-5 w-5" />
-              </div>
-              <span className="text-[10px] font-black text-red-600 bg-red-50 px-2 py-1 rounded-full uppercase tracking-tighter">-2.4% vs mês ant.</span>
-            </div>
-            <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Saídas (Mês)</div>
-             {loading ? <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/20" /> : (
-               <div className="text-3xl font-black mt-1 flex items-baseline gap-1 text-slate-900">
-                 <span className="text-sm font-bold text-muted-foreground">R$</span>
-                 {stats.monthExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          <Card 
+            className="border-border shadow-sm overflow-hidden rounded-2xl cursor-pointer hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]"
+            onClick={() => setSelectedCard('saidas')}
+          >
+            <CardContent className="p-6">
+             <div className="flex items-center justify-between mb-4">
+               <div className="h-10 w-10 rounded-xl bg-red-100/50 text-red-600 grid place-items-center">
+                 <TrendingDown className="h-5 w-5" />
                </div>
-             )}
-          </CardContent>
-        </Card>
+               <span className="text-[10px] font-black text-red-600 bg-red-50 px-2 py-1 rounded-full uppercase tracking-tighter">-2.4% vs mês ant.</span>
+             </div>
+             <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest flex items-center gap-1.5">
+               Saídas (Mês)
+               <Info className="h-3 w-3 opacity-30" />
+             </div>
+              {loading ? <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/20" /> : (
+                <div className="text-3xl font-black mt-1 flex items-baseline gap-1 text-slate-900">
+                  <span className="text-sm font-bold text-muted-foreground">R$</span>
+                  {stats.monthExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              )}
+           </CardContent>
+         </Card>
 
-         <Card 
-           className="border-border shadow-sm overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50/50 to-transparent cursor-pointer hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]"
-           onClick={() => navigate({ to: "/financeiro/caixa" })}
-         >
-           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-10 w-10 rounded-xl bg-blue-100/50 text-blue-600 grid place-items-center">
-                <Wallet className="h-5 w-5" />
-              </div>
-              <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-full uppercase tracking-tighter">Meta: 92% atingida</span>
-            </div>
-            <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest">Saldo Projetado</div>
-             {loading ? <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/20" /> : (
-               <div className="text-3xl font-black mt-1 text-blue-600 flex items-baseline gap-1">
-                 <span className="text-sm font-bold">R$</span>
-                 {stats.totalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          <Card 
+            className="border-border shadow-sm overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50/50 to-transparent cursor-pointer hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]"
+            onClick={() => setSelectedCard('saldo')}
+          >
+            <CardContent className="p-6">
+             <div className="flex items-center justify-between mb-4">
+               <div className="h-10 w-10 rounded-xl bg-blue-100/50 text-blue-600 grid place-items-center">
+                 <Wallet className="h-5 w-5" />
                </div>
-             )}
-          </CardContent>
-        </Card>
-      </div>
+               <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-full uppercase tracking-tighter">Meta: 92% atingida</span>
+             </div>
+             <div className="text-[11px] text-muted-foreground font-black uppercase tracking-widest flex items-center gap-1.5">
+               Saldo Projetado
+               <Info className="h-3 w-3 opacity-30" />
+             </div>
+              {loading ? <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/20" /> : (
+                <div className="text-3xl font-black mt-1 text-blue-600 flex items-baseline gap-1">
+                  <span className="text-sm font-bold">R$</span>
+                  {stats.totalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              )}
+           </CardContent>
+         </Card>
+       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
          <Card 
@@ -458,12 +469,79 @@ export function FinanceDashboard() {
          </Card>
        </div>
  
-         <TransactionForm 
-           open={isFormOpen} 
-           onOpenChange={(open) => { setIsFormOpen(open); if (!open) setEditingTransaction(null); }} 
-           onSave={handleSave} 
-           transaction={editingTransaction}
-         />
-     </div>
+          <TransactionForm 
+            open={isFormOpen} 
+            onOpenChange={(open) => { setIsFormOpen(open); if (!open) setEditingTransaction(null); }} 
+            onSave={handleSave} 
+            transaction={editingTransaction}
+          />
+
+          <Dialog open={!!selectedCard} onOpenChange={(open) => !open && setSelectedCard(null)}>
+            <DialogContent className="sm:max-w-[500px] rounded-3xl">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-black text-slate-900 flex items-center gap-2">
+                  {selectedCard === 'entradas' && <><TrendingUp className="h-5 w-5 text-green-600" /> Detalhes de Entradas</>}
+                  {selectedCard === 'saidas' && <><TrendingDown className="h-5 w-5 text-red-600" /> Detalhes de Saídas</>}
+                  {selectedCard === 'saldo' && <><Wallet className="h-5 w-5 text-blue-600" /> Detalhes do Saldo</>}
+                </DialogTitle>
+                <DialogDescription className="font-medium">
+                  Análise detalhada do período atual
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="py-4 space-y-6">
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                  <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Valor Total</div>
+                  <div className={`text-3xl font-black ${
+                    selectedCard === 'entradas' ? 'text-green-600' : 
+                    selectedCard === 'saidas' ? 'text-red-600' : 'text-blue-600'
+                  }`}>
+                    R$ {
+                      selectedCard === 'entradas' ? stats.monthIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) :
+                      selectedCard === 'saidas' ? stats.monthExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) :
+                      stats.totalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                    }
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-500">Resumo por Categoria</h4>
+                  <div className="space-y-2">
+                    {transactions
+                      .filter(t => {
+                        if (selectedCard === 'entradas') return t.type === 'income';
+                        if (selectedCard === 'saidas') return t.type === 'expense';
+                        return true;
+                      })
+                      .reduce((acc: any[], t) => {
+                        const existing = acc.find(a => a.name === (t.category || 'Geral'));
+                        if (existing) existing.value += t.amount;
+                        else acc.push({ name: t.category || 'Geral', value: t.amount });
+                        return acc;
+                      }, [])
+                      .sort((a, b) => b.value - a.value)
+                      .slice(0, 4)
+                      .map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl">
+                          <span className="text-xs font-bold text-slate-700">{item.name}</span>
+                          <span className="text-xs font-black text-slate-900">R$ {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={() => {
+                    setSelectedCard(null);
+                    navigate({ to: "/financeiro/caixa" });
+                  }}
+                  className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl"
+                >
+                  Ver Fluxo de Caixa Completo
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+      </div>
    );
  }
