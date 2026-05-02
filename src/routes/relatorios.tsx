@@ -134,6 +134,17 @@ function ReportsPage() {
             </div>
           </aside>
           <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#F8FAFC]">
+            {activeCategory !== 'visao-geral' && (
+              <div className="mb-6 flex items-center gap-2">
+                <button onClick={() => setActiveCategory('visao-geral')} className="text-sm font-bold text-primary hover:underline flex items-center gap-1">
+                  <ChevronRight className="h-4 w-4 rotate-180" /> Visão Geral
+                </button>
+                <span className="text-slate-300">/</span>
+                <span className="text-sm font-black text-slate-900 uppercase tracking-widest">
+                  {activeCategory.replace(/-/g, ' ')}
+                </span>
+              </div>
+            )}
             <DashboardContent activeCategory={activeCategory} stats={stats} funnelData={funnelData} originData={originData} topAgents={topAgents} funnelPercentages={[]} loading={loading} />
           </main>
         </div>
