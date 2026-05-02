@@ -16,14 +16,16 @@ interface SortableSidebarItemProps {
   isSmall: boolean;
   flyout: any;
   setFlyout: (val: any) => void;
+  depth?: number;
 }
 
-export function SortableSidebarItem({
+export const SortableSidebarItem: React.FC<SortableSidebarItemProps> = ({
   item,
   isSmall,
   flyout,
-  setFlyout
-}) {
+  setFlyout,
+  depth = 0
+}) => {
   const location = useLocation();
   const {
     attributes,
@@ -32,13 +34,20 @@ export function SortableSidebarItem({
     transform,
     transition,
     isDragging
-  } = useSortable({ id: item.url || item.title });
+  } = useSortable({ 
+    id: item.url || item.title,
+    data: {
+      type: item.type || 'item',
+      item
+    }
+  });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 10 : 1,
+    zIndex: isDragging ? 100 : 1,
+    marginLeft: !isSmall ? `${depth * 12}px` : 0
   };
 
   if (item.type === "header") {
@@ -62,7 +71,7 @@ export function SortableSidebarItem({
   const active = location.pathname === item.url || (item.children?.some((child: any) => location.pathname === child.url));
 
   const NavItem = (
-    <div ref={setNodeRef} style={style} className="space-y-1 group/item relative">
+    <div ref={setNodeRef} style={style} className={cn("space-y-1 group/item relative", isDragging && "z-50")}>
       {!isSmall && (
         <div {...attributes} {...listeners} className="absolute -left-1 top-2.5 cursor-grab active:cursor-grabbing text-sidebar-foreground/20 hover:text-sidebar-foreground/40 opacity-0 group-hover/item:opacity-100 transition-opacity z-10">
           <GripVertical className="h-3.5 w-3.5" />
