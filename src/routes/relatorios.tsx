@@ -26,10 +26,10 @@ export const Route = createFileRoute("/relatorios")({
      leads: 0,
      conversion: 0,
      avgTicket: 0,
-     revenueTrend: "+0%",
-     leadsTrend: "+0%",
-     conversionTrend: "+0%",
-     avgTicketTrend: "+0%",
+      revenueTrend: { value: "0%", isUp: true },
+      leadsTrend: { value: "0%", isUp: true },
+      conversionTrend: { value: "0%", isUp: true },
+      avgTicketTrend: { value: "0%", isUp: true },
    });
  
     const [funnelData, setFunnelData] = useState<any[]>([]);
@@ -41,8 +41,10 @@ export const Route = createFileRoute("/relatorios")({
       setLoading(true);
       try {
         const now = new Date();
-        const firstDayMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+
         // Sales and Revenue
         const { data: sales } = await supabase
           .from("sales_orders")
@@ -50,12 +52,22 @@ export const Route = createFileRoute("/relatorios")({
           .eq("user_id", user.id);
 
         const concludedSales = (sales || []).filter(s => s.status === 'concluded');
-        const monthRevenue = concludedSales
-          .filter(s => new Date(s.created_at!) >= firstDayMonth)
+        const currentMonthSales = concludedSales.filter(s => new Date(s.created_at!) >= startOfMonth);
+        const prevMonthSales = concludedSales.filter(s => {
+          const date = new Date(s.created_at!);
+          return date >= startOfPrevMonth && date <= endOfPrevMonth;
+        });
+
+        const monthRevenue = currentMonthSales
+          .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+        const prevMonthRevenue = prevMonthSales
           .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
 
-        const avgTicket = concludedSales.length > 0 
-          ? monthRevenue / concludedSales.filter(s => new Date(s.created_at!) >= firstDayMonth).length || 0
+        const avgTicket = currentMonthSales.length > 0 
+          ? monthRevenue / currentMonthSales.length 
+          : 0;
+        const prevAvgTicket = prevMonthSales.length > 0
+          ? prevMonthRevenue / prevMonthSales.length
           : 0;
 
         // Leads
@@ -64,19 +76,38 @@ export const Route = createFileRoute("/relatorios")({
           .select("source, status, created_at")
           .eq("user_id", user.id);
 
-        const totalLeads = leads?.length || 0;
-        const wonLeads = leads?.filter(l => l.status === 'won' || l.status === 'concluded').length || 0;
+        const currentLeads = (leads || []).filter(l => new Date(l.created_at!) >= startOfMonth);
+        const prevLeads = (leads || []).filter(l => {
+          const date = new Date(l.created_at!);
+          return date >= startOfPrevMonth && date <= endOfPrevMonth;
+        });
+
+        const totalLeads = currentLeads.length;
+        const wonLeads = currentLeads.filter(l => ['won', 'concluded'].includes(l.status)).length;
         const conversionRate = totalLeads > 0 ? (wonLeads / totalLeads) * 100 : 0;
+
+        const prevTotalLeads = prevLeads.length;
+        const prevWonLeads = prevLeads.filter(l => ['won', 'concluded'].includes(l.status)).length;
+        const prevConversionRate = prevTotalLeads > 0 ? (prevWonLeads / prevTotalLeads) * 100 : 0;
+
+        const calculateTrend = (current: number, previous: number) => {
+          if (previous === 0) return { value: current > 0 ? "+100%" : "0%", isUp: true };
+          const diff = ((current - previous) / previous) * 100;
+          return {
+            value: `${diff > 0 ? "+" : ""}${diff.toFixed(1)}%`,
+            isUp: diff >= 0
+          };
+        };
 
         setStats({
           revenue: monthRevenue,
           leads: totalLeads,
           conversion: conversionRate,
           avgTicket: avgTicket,
-          revenueTrend: "+0%",
-          leadsTrend: "+0%",
-          conversionTrend: "+0%",
-          avgTicketTrend: "+0%",
+          revenueTrend: calculateTrend(monthRevenue, prevMonthRevenue),
+          leadsTrend: calculateTrend(totalLeads, prevTotalLeads),
+          conversionTrend: calculateTrend(conversionRate, prevConversionRate),
+          avgTicketTrend: calculateTrend(avgTicket, prevAvgTicket),
         });
 
         // Funnel Data
