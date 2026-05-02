@@ -182,8 +182,14 @@ function FinancePlanoContasPage() {
             <div className="max-w-5xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
               <div>
-                <h1 className="text-2xl font-black tracking-tight text-slate-900">Plano de Contas Detalhado</h1>
-                <p className="text-muted-foreground text-sm font-medium">Gestão completa da hierarquia de contas financeiras</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="bg-blue-600 h-6 w-1 rounded-full"></div>
+                  <h1 className="text-2xl font-black tracking-tight text-slate-900">Plano de Contas Detalhado</h1>
+                </div>
+                <p className="text-muted-foreground text-sm font-medium flex items-center gap-1.5">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  Estrutura hierárquica para controle de {accounts?.length || 0} contas
+                </p>
               </div>
               <div className="flex gap-2">
                 {rootAccounts.length === 0 && (
