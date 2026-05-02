@@ -8,13 +8,14 @@ import { AppPermissions, DEFAULT_ADMIN_PERMISSIONS, DEFAULT_EMPLOYEE_PERMISSIONS
 
 export type { AppPermissions as UserPermissions };
 
-interface AuthContextType {
-  session: any;
-  user: User | null;
-  profile: any;
-  loading: boolean;
-  logout: () => Promise<void>;
-}
+ interface AuthContextType {
+   session: any;
+   user: User | null;
+   profile: any;
+   permissions: AppPermissions | null;
+   loading: boolean;
+   logout: () => Promise<void>;
+ }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<any>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [permissions, setPermissions] = useState<AppPermissions | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -45,7 +47,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function fetchProfile(userId: string) {
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
-    if (data) setProfile(data);
+    if (data) {
+      setProfile(data);
+      // Atribuir permissões baseadas no cargo
+      if (data.role === 'super_admin' || data.role === 'owner' || data.role === 'admin') {
+        setPermissions(DEFAULT_ADMIN_PERMISSIONS);
+      } else if (data.role === 'financeiro') {
+        setPermissions({ ...DEFAULT_EMPLOYEE_PERMISSIONS, financeiro: true, relatorios: true });
+      } else if (data.role === 'vendedor') {
+        setPermissions({ ...DEFAULT_EMPLOYEE_PERMISSIONS, vendas: true, pdv: true, crm: true });
+      } else {
+        setPermissions(DEFAULT_EMPLOYEE_PERMISSIONS);
+      }
+    }
   }
 
   const logout = async () => {
@@ -53,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, logout }}>
+    <AuthContext.Provider value={{ session, user, profile, permissions, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );
