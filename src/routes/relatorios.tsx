@@ -7,7 +7,7 @@ import { Topbar } from "@/components/layout/Topbar";
      ArrowDownRight, ChevronRight, MoreHorizontal, UserCheck, Sparkles,
      Lightbulb, AlertCircle, Loader2, Home, User, Package, ShoppingCart,
      Hammer, Archive, FileText, List, ChevronDown, UserPlus, UserRound,
-     Trophy, Cake
+    Trophy, Cake, Scale, CreditCard, LayoutDashboard
  } from "lucide-react";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart as RePieChart, Pie } from "recharts";
@@ -238,7 +238,23 @@ export const Route = createFileRoute("/relatorios")({
         { id: "clientes-aniversario", label: "Rel. de Aniversário", icon: Cake },
       ]
     },
-    { id: "financeiro", label: "Financeiro", icon: DollarSign, hasArrow: true },
+    { 
+      id: "financeiro", 
+      label: "Financeiro", 
+      icon: DollarSign, 
+      hasArrow: true,
+      children: [
+        { id: "fin-dre-gerencial", label: "DRE gerencial", icon: Scale },
+        { id: "fin-relatorio", label: "Relatório Financeiro", icon: Scale },
+        { id: "fin-relatorio-vendas", label: "Relatório Financeiro - Vendas", icon: Scale },
+        { id: "fin-relatorio-vendas-os", label: "Relatório Financeiro - Vendas + OS", icon: Scale },
+        { id: "fin-multilojas", label: "Relatório Financeiro Multi Lojas", icon: Scale },
+        { id: "fin-dre-2", label: "DRE 2.0", icon: Scale },
+        { id: "fin-relatorio-vendas-os-2", label: "Relatório Financeiro Vendas + OS", icon: Scale },
+        { id: "fin-formas-pagamento", label: "Formas de pagamento", icon: CreditCard },
+        { id: "fin-formas-pagamento-dia", label: "Formas de pagamento por dia", icon: LayoutDashboard },
+      ]
+    },
     { id: "produto", label: "Produto", icon: Package, isNew: true, hasArrow: true },
     { id: "vendas", label: "Vendas", icon: ShoppingCart, isNew: true, hasArrow: true },
     { id: "ordem-servico", label: "Ordem de serviço", icon: Hammer, hasArrow: true },
