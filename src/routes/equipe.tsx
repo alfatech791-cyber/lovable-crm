@@ -147,8 +147,8 @@ function EquipePage() {
                   </div>
                 </div>
                 
-                <div className="mt-5 grid grid-cols-2 gap-2">
-                  <button className="h-9 rounded-lg border border-border text-xs font-bold hover:bg-muted transition">Editar</button>
+                 <div className="mt-5 grid grid-cols-2 gap-2">
+                   <button className="h-9 rounded-lg border border-border text-xs font-bold hover:bg-muted transition">Editar</button>
                    <button 
                      onClick={() => handleRemoveMember(member.id)}
                      disabled={member.id === user?.id}
@@ -156,11 +156,11 @@ function EquipePage() {
                    >
                      Remover
                    </button>
+                 </div>
+               </div>
+               ))}
              </div>
            )}
-              </div>
-            ))}
-          </div>
 
           <InviteMemberModal 
             isOpen={isModalOpen} 
