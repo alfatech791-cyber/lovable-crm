@@ -114,8 +114,18 @@ function FinancePlanoContasPage() {
             </div>
           </div>
           <div className="flex gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600 rounded-lg"><Edit2 className="h-3.5 w-3.5" /></Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 text-slate-400 hover:text-red-600 rounded-lg"
+              onClick={() => {
+                if (confirm("Deseja realmente excluir esta conta e todas as subcontas?")) {
+                  deleteMutation.mutate(account.id);
+                }
+              }}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
           </div>
         </div>
         {isExpanded && (
@@ -137,7 +147,13 @@ function FinancePlanoContasPage() {
               </div>
             ))}
             <div className="px-6 py-2">
-              <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline flex items-center gap-1">
+              <button 
+                onClick={() => {
+                  setNewAccount({ ...newAccount, parent_id: account.id, type: account.type, code: account.code + '.' });
+                  setIsModalOpen(true);
+                }}
+                className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline flex items-center gap-1"
+              >
                 <Plus className="h-3 w-3" /> Adicionar Subcategoria
               </button>
             </div>
