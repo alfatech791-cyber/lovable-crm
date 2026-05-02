@@ -153,6 +153,23 @@
     text-rendering: optimizeLegibility;
   }
   h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.01em; }
+
+  /* Fast feedback for all interactive elements */
+  .cursor-pointer {
+    @apply transition-transform active:scale-[0.98] duration-75;
+  }
+  
+  button:active, 
+  [role="button"]:active,
+  a:active {
+    transform: scale(0.97);
+    transition: transform 0.05s ease-out;
+  }
+
+  /* Remove mobile click delay */
+  a, button, [role="button"], input, label, select, textarea {
+    touch-action: manipulation;
+  }
 }
 
 @layer utilities {
