@@ -10,53 +10,56 @@
    component: FinancePlanoContasPage,
  });
 
- function FinancePlanoContasPage() {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-  import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-  import { supabase } from "@/integrations/supabase/client";
-  import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-  function FinancePlanoContasPage() {
-    const queryClient = useQueryClient();
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+function FinancePlanoContasPage() {
+  const queryClient = useQueryClient();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const { data: accounts, isLoading } = useQuery({
-      queryKey: ["chart_of_accounts"],
-      queryFn: async () => {
-        const { data, error } = await supabase
-          .from("chart_of_accounts")
-          .select("*")
-          .order("code");
-        if (error) throw error;
-        return data;
-      },
-    });
+  const { data: accounts, isLoading } = useQuery({
+    queryKey: ["chart_of_accounts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("chart_of_accounts")
+        .select("*")
+        .order("code");
+      if (error) throw error;
+      return data || [];
+    },
+  });
 
-    const seedMutation = useMutation({
-      mutationFn: async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error("No user");
+  const seedMutation = useMutation({
+    mutationFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No user");
 
-        const defaultAccounts = [
-          { user_id: user.id, name: "RECEITAS", code: "1", type: "revenue" },
-          { user_id: user.id, name: "DESPESAS", code: "2", type: "expense" },
-        ];
+      const defaultAccounts = [
+        { user_id: user.id, name: "RECEITAS", code: "1", type: "revenue" },
+        { user_id: user.id, name: "Vendas de Produtos", code: "1.1", type: "revenue", parent_id: null },
+        { user_id: user.id, name: "Vendas de Serviços", code: "1.2", type: "revenue", parent_id: null },
+        { user_id: user.id, name: "DESPESAS", code: "2", type: "expense" },
+        { user_id: user.id, name: "Custos Variáveis", code: "2.1", type: "expense", parent_id: null },
+        { user_id: user.id, name: "Despesas Fixas", code: "2.2", type: "expense", parent_id: null },
+      ];
 
-        const { data, error } = await supabase.from("chart_of_accounts").insert(defaultAccounts).select();
-        if (error) throw error;
-        return data;
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["chart_of_accounts"] });
-        toast.success("Categorias padrão carregadas!");
-      },
-    });
+      const { data, error } = await supabase.from("chart_of_accounts").insert(defaultAccounts).select();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chart_of_accounts"] });
+      toast.success("Plano de contas padrão carregado!");
+    },
+  });
 
-    const categories = accounts?.filter(a => !a.parent_id) || [];
+  const rootAccounts = accounts?.filter(a => !a.parent_id) || [];
 
-    if (isLoading) return <div>Carregando...</div>;
+  if (isLoading) return <div className="p-8">Carregando plano de contas...</div>;
 
-   return (
+  return (
      <div className="min-h-screen flex w-full bg-background">
         <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
        <div className="flex-1 flex flex-col min-w-0">
