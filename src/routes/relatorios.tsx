@@ -228,8 +228,25 @@ export const Route = createFileRoute("/relatorios")({
               <button className="h-10 px-4 rounded-xl bg-white border border-border text-foreground text-[13px] font-bold shadow-sm hover:bg-muted transition-colors flex items-center gap-2">
                 <Download className="h-4 w-4" /> Exportar CSV
               </button>
-              <button className="h-10 px-4 rounded-xl bg-primary text-white text-[13px] font-bold shadow-elegant hover:opacity-90 transition flex items-center gap-2">
-                <Zap className="h-4 w-4 fill-white" /> Relatório IA
+              <button 
+                onClick={() => {
+                  const report = `RELATÓRIO DE DESEMPENHO - CONECTACRM\n\n` +
+                    `Período: 30 dias\n` +
+                    `Faturamento: ${stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (${stats.revenueTrend.value})\n` +
+                    `Leads: ${stats.leads} (${stats.leadsTrend.value})\n` +
+                    `Conversão: ${stats.conversion.toFixed(1)}%\n` +
+                    `Ticket Médio: ${stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n\n` +
+                    `Insight ConectaAI: ${aiInsight}`;
+                  const blob = new Blob([report], { type: 'text/plain' });
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `relatorio-crm-${new Date().toISOString().split('T')[0]}.txt`;
+                  a.click();
+                }}
+                className="h-10 px-4 rounded-xl bg-primary text-white text-[13px] font-bold shadow-elegant hover:opacity-90 transition flex items-center gap-2"
+              >
+                <Zap className="h-4 w-4 fill-white" /> Exportar Relatório IA
               </button>
             </div>
           </div>
