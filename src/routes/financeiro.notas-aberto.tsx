@@ -9,19 +9,22 @@ import {
   Filter, 
   MoreHorizontal, 
   Download, 
-  Calendar, 
-  ArrowUpRight, 
-  ArrowDownLeft, 
-  Loader2, 
-  FileText, 
-  Clock, 
+  Calendar,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Loader2,
+  FileText,
+  Clock,
   AlertCircle,
-   CheckCircle2,
-   Truck,
-   Package,
-   Receipt,
-   ChevronDown,
-   ChevronUp
+  CheckCircle2,
+  Truck,
+  Package,
+  Receipt,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  X,
+  Trash2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -34,6 +37,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { 
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/financeiro/notas-aberto")({
   component: NotasAbertoPage,
@@ -46,6 +62,22 @@ function NotasAbertoPage() {
   const [loading, setLoading] = useState(true);
    const [searchTerm, setSearchTerm] = useState("");
    const [expandedRow, setExpandedRow] = useState<string | null>(null);
+   const [isDialogOpen, setIsDialogOpen] = useState(false);
+   const [submitting, setSubmitting] = useState(false);
+
+   // Form states
+   const [newNote, setNewNote] = useState({
+     description: "",
+     amount: "",
+     due_date: "",
+     supplier_name: "",
+     invoice_number: "",
+     category: "Compra de Mercadoria"
+   });
+
+   const [newProduct, setNewProduct] = useState({ name: "", quantity: "", price: "" });
+   const [productsList, setProductsList] = useState<any[]>([]);
+
 
   const fetchTransactions = useCallback(async () => {
     if (!user?.id) return;
@@ -90,6 +122,58 @@ function NotasAbertoPage() {
       toast.error("Erro ao marcar como paga.");
     }
   };
+
+   const handleAddProduct = () => {
+     if (!newProduct.name || !newProduct.quantity) {
+       toast.error("Preencha o nome e a quantidade do produto");
+       return;
+     }
+     setProductsList([...productsList, { ...newProduct, quantity: Number(newProduct.quantity), price: newProduct.price ? Number(newProduct.price) : 0 }]);
+     setNewProduct({ name: "", quantity: "", price: "" });
+   };
+
+   const removeProduct = (index: number) => {
+     setProductsList(productsList.filter((_, i) => i !== index));
+   };
+
+   const handleSubmit = async (e: React.FormEvent) => {
+     e.preventDefault();
+     if (!user?.id) return;
+     if (!newNote.description || !newNote.amount || !newNote.due_date) {
+       toast.error("Preencha os campos obrigatórios");
+       return;
+     }
+
+     setSubmitting(true);
+     try {
+       const { error } = await supabase
+         .from("finance_transactions")
+         .insert([{
+           user_id: user.id,
+           description: newNote.description,
+           amount: Number(newNote.amount),
+           due_date: newNote.due_date,
+           supplier_name: newNote.supplier_name,
+           invoice_number: newNote.invoice_number,
+           category: newNote.category,
+           type: 'expense',
+           status: 'pending',
+           products_list: productsList
+         }]);
+
+       if (error) throw error;
+       toast.success("Nota cadastrada com sucesso!");
+       setIsDialogOpen(false);
+       setNewNote({ description: "", amount: "", due_date: "", supplier_name: "", invoice_number: "", category: "Compra de Mercadoria" });
+       setProductsList([]);
+       fetchTransactions();
+     } catch (error) {
+       console.error("Erro ao cadastrar nota:", error);
+       toast.error("Erro ao cadastrar nota.");
+     } finally {
+       setSubmitting(false);
+     }
+   };
 
    const filteredTransactions = transactions.filter(t => 
      t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -173,6 +257,145 @@ function NotasAbertoPage() {
               </Button>
             </div>
             <div className="flex gap-2">
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="h-11 rounded-xl bg-blue-600 hover:bg-blue-700 font-bold px-6 shadow-lg shadow-blue-200">
+                    <Plus className="h-4 w-4 mr-2" /> Nova Nota
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-black text-slate-900">Cadastrar Nova Nota</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleSubmit} className="space-y-6 py-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="description" className="text-[10px] font-black uppercase text-slate-500">Descrição/Título *</Label>
+                        <Input 
+                          id="description" 
+                          placeholder="Ex: Compra de Telas iPhone 13" 
+                          value={newNote.description}
+                          onChange={(e) => setNewNote({...newNote, description: e.target.value})}
+                          className="h-11 rounded-xl"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="amount" className="text-[10px] font-black uppercase text-slate-500">Valor Total (R$) *</Label>
+                        <Input 
+                          id="amount" 
+                          type="number" 
+                          step="0.01"
+                          placeholder="0,00" 
+                          value={newNote.amount}
+                          onChange={(e) => setNewNote({...newNote, amount: e.target.value})}
+                          className="h-11 rounded-xl"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="supplier" className="text-[10px] font-black uppercase text-slate-500">Fornecedor</Label>
+                        <Input 
+                          id="supplier" 
+                          placeholder="Nome do Fornecedor" 
+                          value={newNote.supplier_name}
+                          onChange={(e) => setNewNote({...newNote, supplier_name: e.target.value})}
+                          className="h-11 rounded-xl"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="invoice" className="text-[10px] font-black uppercase text-slate-500">Número da NF</Label>
+                        <Input 
+                          id="invoice" 
+                          placeholder="000.000.000" 
+                          value={newNote.invoice_number}
+                          onChange={(e) => setNewNote({...newNote, invoice_number: e.target.value})}
+                          className="h-11 rounded-xl"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="due_date" className="text-[10px] font-black uppercase text-slate-500">Data de Vencimento *</Label>
+                        <Input 
+                          id="due_date" 
+                          type="date" 
+                          value={newNote.due_date}
+                          onChange={(e) => setNewNote({...newNote, due_date: e.target.value})}
+                          className="h-11 rounded-xl"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase text-slate-500">Categoria</Label>
+                        <Select 
+                          value={newNote.category} 
+                          onValueChange={(v) => setNewNote({...newNote, category: v})}
+                        >
+                          <SelectTrigger className="h-11 rounded-xl">
+                            <SelectValue placeholder="Selecione..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Compra de Mercadoria">Compra de Mercadoria</SelectItem>
+                            <SelectItem value="Ferramentas">Ferramentas</SelectItem>
+                            <SelectItem value="Insumos">Insumos</SelectItem>
+                            <SelectItem value="Outros">Outros</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 border-t pt-6">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
+                          <Package className="h-4 w-4" /> Produtos da Nota
+                        </h3>
+                        <span className="text-[10px] text-muted-foreground font-bold">{productsList.length} itens adicionados</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 items-end">
+                        <div className="md:col-span-2 space-y-1">
+                          <Label className="text-[9px] uppercase font-bold text-muted-foreground">Nome do Produto</Label>
+                          <Input 
+                            placeholder="Ex: Tela iPhone 11 Incell" 
+                            value={newProduct.name}
+                            onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                            className="h-9 rounded-lg text-xs"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[9px] uppercase font-bold text-muted-foreground">Qtd</Label>
+                          <Input 
+                            type="number" 
+                            placeholder="1" 
+                            value={newProduct.quantity}
+                            onChange={(e) => setNewProduct({...newProduct, quantity: e.target.value})}
+                            className="h-9 rounded-lg text-xs"
+                          />
+                        </div>
+                        <Button type="button" onClick={handleAddProduct} variant="outline" className="h-9 rounded-lg border-dashed">
+                          Adicionar
+                        </Button>
+                      </div>
+
+                      {productsList.length > 0 && (
+                        <div className="bg-slate-50 rounded-xl p-3 space-y-2 border border-slate-100 max-h-40 overflow-y-auto">
+                          {productsList.map((p, i) => (
+                            <div key={i} className="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200 text-xs">
+                              <span className="font-bold text-slate-700">{p.quantity}x {p.name}</span>
+                              <button type="button" onClick={() => removeProduct(i)} className="text-red-500 hover:text-red-700">
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <DialogFooter className="pt-4 border-t">
+                      <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} disabled={submitting}>Cancelar</Button>
+                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 font-bold px-8" disabled={submitting}>
+                        {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Nota"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
               <Button variant="outline" className="h-11 rounded-xl border-slate-200 font-bold px-6">
                 <Download className="h-4 w-4 mr-2" /> Exportar
               </Button>
