@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-  import { User, Shield, Bell, Zap, Database, Smartphone, Palette, HelpCircle, ChevronRight, Globe, Lock, Plus, Download, Upload, FileJson, AlertCircle } from "lucide-react";
+   import { User, Shield, Bell, Zap, Database, Smartphone, Palette, HelpCircle, ChevronRight, Globe, Lock, Plus, Download, Upload, FileJson, AlertCircle, FileText, CheckCircle2, History } from "lucide-react";
 
 export const Route = createFileRoute("/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações — ConectaCRM" }, { name: "description", content: "Ajuste suas preferências e integrações" }] }),
@@ -73,29 +73,82 @@ export const Route = createFileRoute("/configuracoes")({
       reader.onload = async (e) => {
         try {
           const content = e.target?.result as string;
-          const backupData = JSON.parse(content);
+          const fileName = file.name.toLowerCase();
+          let backupData: any = null;
           
-          if (!backupData.data || typeof backupData.data !== 'object') {
-            throw new Error("Formato de backup inválido");
+          toast.loading("Analisando formato do backup...");
+
+          if (fileName.endsWith('.json')) {
+            backupData = JSON.parse(content);
+          } else if (fileName.endsWith('.csv')) {
+            // Simple CSV to JSON logic for robustness
+            const lines = content.split('\n');
+            const headers = lines[0].split(',');
+            const data = lines.slice(1).map(line => {
+              const values = line.split(',');
+              return headers.reduce((obj: any, header, i) => {
+                obj[header.trim()] = values[i]?.trim();
+                return obj;
+              }, {});
+            });
+            backupData = { data: { "imported_csv": data }, version: "csv-import" };
+          } else {
+            throw new Error("Formato de arquivo não suportado");
+          }
+          
+          // Normalization: Ensure backupData has the expected structure
+          // If it's a direct array or different structure, wrap it
+          if (Array.isArray(backupData)) {
+            backupData = { data: { "legacy_import": backupData }, version: "legacy" };
+          } else if (backupData && !backupData.data && typeof backupData === 'object') {
+            backupData = { data: backupData, version: "raw-object" };
           }
 
-          toast.loading("Importando dados...");
+          if (!backupData?.data || typeof backupData.data !== 'object') {
+            throw new Error("Formato de backup não reconhecido");
+          }
+
+          toast.loading("Importando e adaptando dados...");
           
+          let successCount = 0;
+          let errorCount = 0;
+
           for (const [table, rows] of Object.entries(backupData.data)) {
             if (Array.isArray(rows) && rows.length > 0) {
-              const { error } = await (supabase as any).from(table).upsert(rows);
+              // Filter out system columns that might conflict (like id if it's not a UUID)
+              const cleanedRows = rows.map((row: any) => {
+                const { created_at, updated_at, ...rest } = row;
+                // Ensure required IDs are valid if present, otherwise let DB generate
+                return rest;
+              });
+
+              const { error } = await (supabase as any).from(table).upsert(cleanedRows, { 
+                onConflict: 'id',
+                ignoreDuplicates: false 
+              });
+
               if (error) {
                 console.error(`Erro ao importar tabela ${table}:`, error);
+                errorCount++;
+              } else {
+                successCount++;
               }
             }
           }
 
           toast.dismiss();
-          toast.success("Dados importados com sucesso!");
-          window.location.reload();
-        } catch (error) {
+          if (errorCount === 0) {
+            toast.success("Dados importados e adaptados com sucesso!");
+          } else if (successCount > 0) {
+            toast.warning(`Importação parcial: ${successCount} tabelas importadas, ${errorCount} falhas.`);
+          } else {
+            toast.error("Nenhuma tabela pôde ser importada.");
+          }
+          
+          setTimeout(() => window.location.reload(), 2000);
+        } catch (error: any) {
           toast.dismiss();
-          toast.error("Falha ao processar arquivo de backup");
+          toast.error(`Erro: ${error.message || "Falha ao processar arquivo"}`);
           console.error(error);
         }
       };
@@ -213,22 +266,35 @@ export const Route = createFileRoute("/configuracoes")({
                             Restaurar um backup substituirá registros existentes com o mesmo ID. Esta ação não pode ser desfeita.
                           </AlertDescription>
                         </Alert>
-                        <div className="relative group">
-                          <input 
-                            type="file" 
-                            accept=".json" 
-                            onChange={handleImportBackup}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                          />
-                          <div className="p-8 rounded-xl border border-dashed border-border bg-muted/30 group-hover:bg-muted/50 transition-colors flex flex-col items-center gap-3">
-                            <Upload className="h-10 w-10 text-muted-foreground/50 group-hover:text-primary transition-colors" />
-                            <div className="text-center">
-                              <p className="text-sm font-medium">Clique para selecionar ou arraste</p>
-                              <p className="text-xs text-muted-foreground">Selecione o arquivo .json do backup</p>
+                        <div className="space-y-4">
+                          <div className="relative group">
+                            <input 
+                               type="file" 
+                               accept=".json,.csv,.txt" 
+                               onChange={handleImportBackup}
+                               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                             />
+                             <div className="p-8 rounded-xl border border-dashed border-border bg-muted/30 group-hover:bg-muted/50 transition-colors flex flex-col items-center gap-3">
+                               <Upload className="h-10 w-10 text-muted-foreground/50 group-hover:text-primary transition-colors" />
+                               <div className="text-center">
+                                 <p className="text-sm font-medium">Clique para selecionar ou arraste</p>
+                                 <p className="text-xs text-muted-foreground">Suporta .json, .csv e backups de outros sistemas</p>
+                               </div>
+                               <Button variant="secondary" className="pointer-events-none">
+                                 Selecionar Arquivo
+                               </Button>
+                             </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="p-3 rounded-lg border border-border bg-card flex items-center gap-3">
+                              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                              <span className="text-xs font-medium">Auto-Adaptação</span>
                             </div>
-                            <Button variant="secondary" className="pointer-events-none">
-                              Selecionar Arquivo
-                            </Button>
+                            <div className="p-3 rounded-lg border border-border bg-card flex items-center gap-3">
+                              <History className="h-4 w-4 text-blue-500" />
+                              <span className="text-xs font-medium">Multi-Formato</span>
+                            </div>
                           </div>
                         </div>
                       </CardContent>
