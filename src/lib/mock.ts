@@ -72,8 +72,9 @@ export const sidebarItems = [
        { title: "Fluxo de Caixa", url: "/financeiro/caixa" },
        { title: "DRE Gerencial", url: "/financeiro/dre" },
        { title: "Fornecedores", url: "/financeiro/fornecedores" },
-       { title: "Maquininhas POS", url: "/financeiro/maquininhas" },
-       { title: "Plano de Contas", url: "/financeiro/plano-contas" },
+        { title: "Maquininhas POS", url: "/financeiro/maquininhas" },
+        { title: "Plano de Contas", url: "/financeiro/plano-contas" },
+        { title: "Notas em Aberto", url: "/financeiro/notas-aberto" },
      ]
    },
   { title: "Fiscal (NF-e/NFC-e)", url: "/fiscal", icon: "FileText" as const },
