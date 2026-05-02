@@ -11,13 +11,13 @@ interface SortableCategoryProps {
   toggleCategory: (id: string) => void;
 }
 
-export function SortableCategory({
+export const SortableCategory: React.FC<SortableCategoryProps> = ({
   cat,
   activeCategory,
   expandedCategories,
   setActiveCategory,
   toggleCategory
-}) {
+}) => {
   const {
     attributes,
     listeners,
