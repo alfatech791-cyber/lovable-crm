@@ -1,8 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Mail, Lock, ArrowRight, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { Mail, Lock, ArrowRight, Eye, EyeOff, Cloud, MessageCircle, Instagram, Users, TrendingUp, LayoutDashboard, GitBranch, Headphones, Zap, BarChart3, Settings, ShieldCheck, Sparkles, LockKeyhole, ChevronDown } from "lucide-react";
  import { useState } from "react";
  import { supabase } from "@/integrations/supabase/client";
-import { NetworkBackground } from "@/components/ui/network-background";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -20,6 +19,7 @@ export const Route = createFileRoute("/login")({
    const [email, setEmail] = useState("renato@conectacrm.com");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [remember, setRemember] = useState(true);
    const [error, setError] = useState("");
  
    const handle = async (e: React.FormEvent) => {
@@ -42,160 +42,348 @@ export const Route = createFileRoute("/login")({
    };
  
    return (
-    <div className="min-h-screen grid lg:grid-cols-[1fr_1.1fr] bg-background overflow-hidden relative font-sans">
-      <NetworkBackground />
-       {/* Left side */}
-      <div className="flex flex-col justify-center px-8 sm:px-16 lg:px-24 py-12 relative z-10 bg-background/60 backdrop-blur-md border-r border-border/50">
-        <Link to="/" className="flex items-center gap-2 mb-10">
-          <div className="h-8 w-8 rounded-lg bg-primary grid place-items-center">
-            <div className="h-4 w-4 bg-white rounded-sm" />
-          </div>
-          <span className="font-bold text-xl tracking-tight text-foreground">ConectaCRM</span>
-        </Link>
+     <div className="min-h-screen grid lg:grid-cols-2 bg-white font-sans">
+        {/* Left side — Login form */}
+       <div className="flex flex-col justify-between px-8 sm:px-16 lg:px-24 py-12 bg-white">
+         <div />
+         <div className="max-w-md w-full mx-auto">
+           {/* Logo */}
+           <Link to="/" className="flex items-center gap-3 mb-12">
+             <div className="relative h-10 w-10">
+               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 opacity-90" />
+               <Cloud className="absolute inset-0 m-auto h-6 w-6 text-white" strokeWidth={2.5} />
+             </div>
+             <span className="font-bold text-2xl tracking-tight text-slate-900">ConectaCRM</span>
+           </Link>
 
-        <div className="max-w-md w-full">
-          <h1 className="text-4xl font-bold text-foreground tracking-tight mb-3">Bem-vindo de volta!</h1>
-          <p className="text-muted-foreground text-base mb-10">
-            Faça login para acessar o painel administrativo.
-          </p>
+           <h1 className="text-4xl font-bold text-slate-900 tracking-tight mb-3">
+             Bem-vindo de volta! <span className="inline-block">👋</span>
+           </h1>
+           <p className="text-slate-500 text-base mb-10 leading-relaxed">
+             Entre na sua conta para continuar gerenciando seus leads.
+           </p>
 
-          <form onSubmit={handle} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground/80">Seu e-mail</label>
-              <div className="relative group">
-                <Mail className="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors" />
-                <input 
-                  type="email" 
-                  placeholder="email@exemplo.com"
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)} 
-                  className="w-full h-14 pl-12 pr-4 rounded-xl bg-white border border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none text-foreground transition-all placeholder:text-muted-foreground" 
-                  required
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-foreground/80">Sua senha</label>
-                <a className="text-sm text-primary hover:underline cursor-pointer">Esqueceu sua senha?</a>
-              </div>
-              <div className="relative group">
-                <Lock className="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors" />
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  placeholder="••••••••"
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  className="w-full h-14 pl-12 pr-12 rounded-xl bg-white border border-border focus:border-primary/50 focus:ring-1 focus:ring-primary/20 outline-none text-foreground transition-all placeholder:text-muted-foreground" 
-                  required
-                />
-                <button 
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-foreground transition-colors"
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-            </div>
+           <form onSubmit={handle} className="space-y-5">
+             <div className="space-y-2">
+               <label className="text-sm font-medium text-slate-700">E-mail</label>
+               <div className="relative">
+                 <Mail className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                 <input
+                   type="email"
+                   placeholder="renato@conectacrm.com"
+                   value={email}
+                   onChange={(e) => setEmail(e.target.value)}
+                   className="w-full h-12 pl-11 pr-4 rounded-xl bg-white border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none text-slate-900 transition-all placeholder:text-slate-400 text-sm"
+                   required
+                 />
+               </div>
+             </div>
 
-            {error && (
-              <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                {error}
-              </div>
-            )}
+             <div className="space-y-2">
+               <div className="flex items-center justify-between">
+                 <label className="text-sm font-medium text-slate-700">Senha</label>
+                 <a className="text-sm text-indigo-600 hover:text-indigo-700 font-medium cursor-pointer">Esqueci a senha</a>
+               </div>
+               <div className="relative">
+                 <Lock className="h-4 w-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                 <input
+                   type={showPassword ? "text" : "password"}
+                   placeholder="••••••••"
+                   value={password}
+                   onChange={(e) => setPassword(e.target.value)}
+                   className="w-full h-12 pl-11 pr-11 rounded-xl bg-white border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none text-slate-900 transition-all placeholder:text-slate-400 text-sm"
+                   required
+                 />
+                 <button
+                   type="button"
+                   onClick={() => setShowPassword(!showPassword)}
+                   className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                 >
+                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                 </button>
+               </div>
+             </div>
 
-            <button 
-              type="submit" 
-              disabled={loading} 
-              className="w-full h-14 rounded-xl bg-primary text-primary-foreground font-bold text-base hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 shadow-sm"
-            >
-              {loading ? "Entrando..." : "Entrar na conta"}
-            </button>
-          </form>
+             <label className="flex items-center gap-2 cursor-pointer select-none pt-1">
+               <input
+                 type="checkbox"
+                 checked={remember}
+                 onChange={(e) => setRemember(e.target.checked)}
+                 className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer accent-indigo-600"
+               />
+               <span className="text-sm text-slate-700">Manter-me conectado</span>
+             </label>
 
-          <div className="mt-8 text-center text-muted-foreground">
-            Ainda não tem conta? <Link to="/registro" className="text-primary font-semibold hover:underline cursor-pointer">Crie agora</Link>
-          </div>
-        </div>
-        
-        <div className="mt-auto pt-10 text-muted-foreground text-xs">
-          © 2026 ConectaCRM. Todos os direitos reservados.
-        </div>
-      </div>
+             {error && (
+               <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                 {error}
+               </div>
+             )}
 
-      {/* Right side — Clean aesthetic preview */}
-      <div className="hidden lg:flex relative overflow-hidden bg-muted/30 p-12 items-center justify-center">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-[120px]" />
-        </div>
+             <button
+               type="submit"
+               disabled={loading}
+               className="w-full h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold text-sm hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50 shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2"
+             >
+               {loading ? "Entrando..." : "Entrar"}
+               {!loading && <ArrowRight className="h-4 w-4" />}
+             </button>
 
-        <div className="relative z-10 w-full max-w-2xl">
-          <div className="bg-white/70 backdrop-blur-xl border border-border rounded-[2.5rem] p-8 shadow-2xl overflow-hidden relative group">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            
-            <div className="relative z-10 space-y-8">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h3 className="text-2xl font-bold text-foreground tracking-tight">Dashboard Executivo</h3>
-                  <p className="text-muted-foreground text-sm">Visão geral do seu desempenho comercial</p>
-                </div>
-                <div className="h-12 w-12 rounded-2xl bg-primary/20 border border-primary/20 flex items-center justify-center">
-                  <ArrowRight className="h-6 w-6 text-primary" />
-                </div>
-              </div>
+             <div className="relative py-2">
+               <div className="absolute inset-0 flex items-center">
+                 <div className="w-full border-t border-slate-200" />
+               </div>
+               <div className="relative flex justify-center">
+                 <span className="bg-white px-4 text-sm text-slate-400">ou</span>
+               </div>
+             </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { label: "Vendas Totais", value: "R$ 124.500", trend: "+12%" },
-                  { label: "Novos Leads", value: "842", trend: "+5%" },
-                ].map((stat, i) => (
-                  <div key={i} className="bg-muted/50 border border-border/50 rounded-2xl p-5">
-                    <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-2">{stat.label}</p>
-                    <div className="flex items-end justify-between">
-                      <span className="text-2xl font-bold text-foreground">{stat.value}</span>
-                      <span className="text-primary text-xs font-bold">{stat.trend}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+             <button
+               type="button"
+               className="w-full h-12 rounded-xl bg-white border border-slate-200 text-slate-700 font-medium text-sm hover:bg-slate-50 transition-all flex items-center justify-center gap-3"
+             >
+               <svg className="h-5 w-5" viewBox="0 0 24 24">
+                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+               </svg>
+               Entrar com Google
+             </button>
+           </form>
 
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-foreground font-semibold">Recursos Ativos</span>
-                  <span className="text-muted-foreground text-xs hover:text-primary transition-colors cursor-pointer underline">Ver todos</span>
-                </div>
-                <div className="space-y-3">
-                  {[
-                    "Automação de fluxos de cadência",
-                    "Integração nativa com WhatsApp",
-                    "Análise preditiva de churn",
-                  ].map((feature, i) => (
-                    <div key={i} className="flex items-center gap-3 text-foreground/80">
-                      <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="pt-4 flex items-center gap-4">
-                 <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-10 w-10 rounded-full border-2 border-white bg-muted overflow-hidden ring-1 ring-black/5">
-                      <img src={`https://i.pravatar.cc/100?img=${i+30}`} alt="User" className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                </div>
-                <p className="text-muted-foreground text-sm">
-                  <span className="text-foreground font-bold">+15.000</span> usuários confiam na ConectaCRM
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+           <p className="mt-8 text-center text-sm text-slate-500">
+             Não tem uma conta?{" "}
+             <Link to="/registro" className="text-indigo-600 font-semibold hover:underline">
+               Criar conta grátis
+             </Link>
+           </p>
+         </div>
+         <div />
+       </div>
+
+       {/* Right side — Marketing preview */}
+       <div className="hidden lg:flex relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-violet-50/40 p-12 flex-col justify-between">
+         {/* Decorative blobs */}
+         <div className="absolute top-1/3 right-0 w-[500px] h-[500px] bg-violet-200/20 rounded-full blur-[140px]" />
+         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-200/20 rounded-full blur-[140px]" />
+
+         {/* Top row */}
+         <div className="relative z-10 flex items-center justify-between">
+           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-slate-100">
+             <span className="relative flex h-2 w-2">
+               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+             </span>
+             <span className="text-xs font-bold tracking-widest text-slate-700">PLATAFORMA ATIVA</span>
+           </div>
+
+           <div className="flex items-center">
+             <div className="flex -space-x-2">
+               {[31, 32, 33, 34].map((i) => (
+                 <div key={i} className="h-9 w-9 rounded-full border-2 border-white bg-slate-200 overflow-hidden ring-1 ring-black/5">
+                   <img src={`https://i.pravatar.cc/80?img=${i}`} alt="" className="w-full h-full object-cover" />
+                 </div>
+               ))}
+               <div className="h-9 w-9 rounded-full border-2 border-white bg-gradient-to-br from-indigo-500 to-violet-600 grid place-items-center text-white text-[10px] font-bold">
+                 +12k
+               </div>
+             </div>
+           </div>
+         </div>
+
+         {/* Headline */}
+         <div className="relative z-10 max-w-xl">
+           <h2 className="text-5xl font-bold text-slate-900 tracking-tight leading-[1.05] mb-5">
+             Conecte seus leads,<br />
+             feche{" "}
+             <span className="bg-gradient-to-r from-indigo-500 to-violet-600 bg-clip-text text-transparent">
+               mais vendas.
+             </span>
+           </h2>
+           <p className="text-slate-500 text-base leading-relaxed">
+             Centralize conversas do WhatsApp, Instagram e muito mais, agilize
+             seus processos, gerencie seu funil de vendas e ofereça um
+             atendimento que encanta.
+           </p>
+         </div>
+
+         {/* Dashboard mockup */}
+         <div className="relative z-10">
+           <div className="bg-white rounded-3xl shadow-2xl shadow-slate-300/40 border border-slate-100 overflow-hidden">
+             <div className="grid grid-cols-[180px_1fr]">
+               {/* Sidebar */}
+               <div className="bg-slate-50/70 p-4 border-r border-slate-100 space-y-1">
+                 <div className="flex items-center gap-2 mb-4 px-2">
+                   <div className="h-6 w-6 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 grid place-items-center">
+                     <Cloud className="h-3.5 w-3.5 text-white" />
+                   </div>
+                   <span className="text-xs font-bold text-slate-900">ConectaCRM</span>
+                 </div>
+                 {[
+                   { icon: LayoutDashboard, label: "Painel", active: true },
+                   { icon: Users, label: "Leads" },
+                   { icon: GitBranch, label: "Funil de vendas" },
+                   { icon: Headphones, label: "Atendimentos" },
+                   { icon: MessageCircle, label: "WhatsApp" },
+                   { icon: Instagram, label: "Instagram" },
+                   { icon: Zap, label: "Automações" },
+                   { icon: BarChart3, label: "Relatórios" },
+                   { icon: Settings, label: "Configurações" },
+                 ].map((it, i) => {
+                   const Icon = it.icon;
+                   return (
+                     <div key={i} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[11px] ${it.active ? "bg-white shadow-sm text-slate-900 font-semibold" : "text-slate-500"}`}>
+                       <Icon className="h-3.5 w-3.5" />
+                       <span>{it.label}</span>
+                     </div>
+                   );
+                 })}
+                 <div className="pt-3 mt-3 border-t border-slate-200 flex items-center gap-2 px-1">
+                   <img src="https://i.pravatar.cc/40?img=12" alt="" className="h-6 w-6 rounded-full" />
+                   <div className="flex-1 min-w-0">
+                     <div className="text-[10px] font-semibold text-slate-900 truncate">Olá, Renato! 👋</div>
+                     <div className="text-[9px] text-slate-400">Administrador</div>
+                   </div>
+                   <ChevronDown className="h-3 w-3 text-slate-400" />
+                 </div>
+               </div>
+
+               {/* Main */}
+               <div className="p-4 space-y-3">
+                 {/* KPI cards */}
+                 <div className="grid grid-cols-4 gap-2">
+                   {[
+                     { icon: MessageCircle, color: "bg-emerald-100 text-emerald-600", label: "WhatsApp", sub: "Conversas ativas", val: "128", trend: "+28%" },
+                     { icon: Instagram, color: "bg-pink-100 text-pink-600", label: "Instagram", sub: "Mensagens", val: "32", trend: "+19%" },
+                     { icon: Users, color: "bg-indigo-100 text-indigo-600", label: "Leads", sub: "Novos leads", val: "256", trend: "+32%" },
+                     { icon: TrendingUp, color: "bg-violet-100 text-violet-600", label: "Conversões", sub: "Tx conversão", val: "9,2%", trend: "+7%" },
+                   ].map((k, i) => {
+                     const Icon = k.icon;
+                     return (
+                       <div key={i} className="rounded-xl border border-slate-100 p-2">
+                         <div className={`h-6 w-6 rounded-lg grid place-items-center mb-1.5 ${k.color}`}>
+                           <Icon className="h-3 w-3" />
+                         </div>
+                         <div className="text-[8px] font-semibold text-slate-500">{k.label}</div>
+                         <div className="text-[7px] text-slate-400">{k.sub}</div>
+                         <div className="flex items-baseline gap-1 mt-0.5">
+                           <span className="text-sm font-bold text-slate-900">{k.val}</span>
+                           <span className="text-[8px] text-emerald-600 font-semibold">{k.trend}</span>
+                         </div>
+                       </div>
+                     );
+                   })}
+                 </div>
+
+                 {/* Charts */}
+                 <div className="grid grid-cols-2 gap-2">
+                   <div className="rounded-xl border border-slate-100 p-3">
+                     <div className="flex items-center justify-between mb-2">
+                       <div>
+                         <div className="text-[9px] font-semibold text-slate-700">Desempenho de vendas</div>
+                         <div className="text-sm font-bold text-slate-900">R$ 78.540 <span className="text-[8px] text-emerald-600">+18%</span></div>
+                       </div>
+                       <div className="text-[8px] text-slate-400 border border-slate-200 rounded-md px-1.5 py-0.5">Este mês</div>
+                     </div>
+                     <svg viewBox="0 0 200 60" className="w-full h-14">
+                       <defs>
+                         <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                           <stop offset="0%" stopColor="#6366f1" stopOpacity="0.3" />
+                           <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+                         </linearGradient>
+                       </defs>
+                       <path d="M0,50 L20,45 L40,40 L60,42 L80,35 L100,30 L120,25 L140,20 L160,15 L180,12 L200,8 L200,60 L0,60 Z" fill="url(#g1)" />
+                       <path d="M0,50 L20,45 L40,40 L60,42 L80,35 L100,30 L120,25 L140,20 L160,15 L180,12 L200,8" fill="none" stroke="#6366f1" strokeWidth="1.5" />
+                     </svg>
+                   </div>
+
+                   <div className="rounded-xl border border-slate-100 p-3">
+                     <div className="text-[9px] font-semibold text-slate-700 mb-2">Origens dos leads</div>
+                     <div className="flex items-center gap-3">
+                       <svg viewBox="0 0 36 36" className="h-14 w-14 -rotate-90">
+                         <circle cx="18" cy="18" r="14" fill="none" stroke="#10b981" strokeWidth="6" strokeDasharray="40 100" />
+                         <circle cx="18" cy="18" r="14" fill="none" stroke="#ec4899" strokeWidth="6" strokeDasharray="22 100" strokeDashoffset="-40" />
+                         <circle cx="18" cy="18" r="14" fill="none" stroke="#6366f1" strokeWidth="6" strokeDasharray="14 100" strokeDashoffset="-62" />
+                         <circle cx="18" cy="18" r="14" fill="none" stroke="#f59e0b" strokeWidth="6" strokeDasharray="9 100" strokeDashoffset="-76" />
+                         <circle cx="18" cy="18" r="14" fill="none" stroke="#94a3b8" strokeWidth="6" strokeDasharray="5 100" strokeDashoffset="-85" />
+                       </svg>
+                       <div className="space-y-0.5 text-[8px]">
+                         <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />WhatsApp <span className="text-slate-400 ml-1">45%</span></div>
+                         <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-pink-500" />Instagram <span className="text-slate-400 ml-1">25%</span></div>
+                         <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />Site <span className="text-slate-400 ml-1">15%</span></div>
+                         <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-amber-500" />Indicação <span className="text-slate-400 ml-1">10%</span></div>
+                         <div className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-slate-400" />Outros <span className="text-slate-400 ml-1">5%</span></div>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+
+                 {/* Recent attendances */}
+                 <div className="rounded-xl border border-slate-100 p-3">
+                   <div className="text-[9px] font-semibold text-slate-700 mb-2">Atendimentos recentes</div>
+                   <div className="space-y-1.5">
+                     {[
+                       { name: "Juliana Martins", channel: "WhatsApp", time: "10:32", img: 47 },
+                       { name: "Bruno Silva", channel: "Instagram", time: "10:21", img: 12 },
+                       { name: "Carlos Eduardo", channel: "WhatsApp", time: "10:15", img: 33 },
+                     ].map((a, i) => (
+                       <div key={i} className="flex items-center gap-2">
+                         <img src={`https://i.pravatar.cc/40?img=${a.img}`} alt="" className="h-5 w-5 rounded-full" />
+                         <div className="flex-1 min-w-0">
+                           <div className="text-[9px] font-semibold text-slate-900 truncate">{a.name}</div>
+                           <div className="text-[8px] text-slate-400">{a.channel}</div>
+                         </div>
+                         <div className="text-[8px] text-slate-400">{a.time}</div>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+
+           {/* Floating "Leads" pill */}
+           <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-xl border border-slate-100 px-4 py-2.5 flex items-center gap-3">
+             <div className="h-8 w-8 rounded-xl bg-indigo-100 grid place-items-center">
+               <Users className="h-4 w-4 text-indigo-600" />
+             </div>
+             <div>
+               <div className="text-[10px] font-semibold text-slate-700">Leads</div>
+               <div className="text-[8px] text-slate-400">Novos leads</div>
+             </div>
+             <div className="text-base font-bold text-slate-900">128 <span className="text-[9px] text-emerald-600">+21%</span></div>
+             <div className="flex -space-x-1.5 ml-2">
+               {[20, 21, 22].map((i) => (
+                 <img key={i} src={`https://i.pravatar.cc/40?img=${i}`} className="h-6 w-6 rounded-full border-2 border-white" alt="" />
+               ))}
+               <div className="h-6 w-6 rounded-full border-2 border-white bg-gradient-to-br from-indigo-500 to-violet-600 grid place-items-center text-white text-[8px] font-bold">+41</div>
+             </div>
+           </div>
+         </div>
+
+         {/* Bottom badges */}
+         <div className="relative z-10 grid grid-cols-3 gap-4 pt-10">
+           {[
+             { icon: ShieldCheck, color: "text-emerald-600 bg-emerald-100", title: "Seus dados protegidos", sub: "com segurança de ponta." },
+             { icon: Sparkles, color: "text-violet-600 bg-violet-100", title: "Automações inteligentes", sub: "que economizam seu tempo." },
+             { icon: LockKeyhole, color: "text-indigo-600 bg-indigo-100", title: "Conformidade com", sub: "LGPD e criptografia." },
+           ].map((b, i) => {
+             const Icon = b.icon;
+             return (
+               <div key={i} className="flex items-center gap-3">
+                 <div className={`h-10 w-10 rounded-xl grid place-items-center ${b.color}`}>
+                   <Icon className="h-5 w-5" />
+                 </div>
+                 <div className="text-xs leading-tight">
+                   <div className="font-semibold text-slate-700">{b.title}</div>
+                   <div className="text-slate-500">{b.sub}</div>
+                 </div>
+               </div>
+             );
+           })}
+         </div>
+       </div>
      </div>
-   );
- }
+    );
+  }
