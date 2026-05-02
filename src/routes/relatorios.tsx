@@ -281,7 +281,7 @@ export const Route = createFileRoute("/relatorios")({
                         type="category" 
                         axisLine={false} 
                         tickLine={false} 
-                        tick={{ fontSize: 11, fontWeight: 800, fill: "#94a3b8", textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                        tick={{ fontSize: 11, fontWeight: 800, fill: "#94a3b8", letterSpacing: '0.05em' }}
                       />
                       <Tooltip 
                         cursor={{ fill: "transparent" }}
