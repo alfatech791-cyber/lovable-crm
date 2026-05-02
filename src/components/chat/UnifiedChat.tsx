@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
   MessageSquare,
   Search,
@@ -110,8 +110,9 @@ const normalizeTranscript = (messages: any[]): Msg[] =>
 
 export function UnifiedChat() {
   const { user } = useAuth();
+  const [activeInstance, setActiveInstance] = useState<string | null>(null);
   const [items, setItems] = useState<Conversation[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [text, setText] = useState("");
@@ -122,7 +123,7 @@ export function UnifiedChat() {
   const [syncing, setSyncing] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!user?.id) return;
     setLoading(true);
     try {
@@ -142,28 +143,37 @@ export function UnifiedChat() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
 
-  const syncFromWhatsApp = async (showToast = false) => {
+  const syncFromWhatsApp = useCallback(async (showToast = false, forcedInstance?: string) => {
     if (!user?.id || syncing) return;
 
-    setSyncing(true);
-    try {
-      const [{ data: settings, error: settingsError }, { data: existing, error: existingError }] = await Promise.all([
-        supabase.from("bot_settings").select("whatsapp_instance").eq("user_id", user.id).maybeSingle(),
-        supabase.from("bot_conversations").select("*").eq("user_id", user.id),
-      ]);
-
-      if (settingsError) throw settingsError;
-      if (existingError) throw existingError;
-
-      const instanceName = settings?.whatsapp_instance;
-      if (!instanceName) {
+    const instanceToUse = forcedInstance || activeInstance;
+    if (!instanceToUse && !forcedInstance) {
+      const { data: settings } = await supabase
+        .from("bot_settings")
+        .select("whatsapp_instance")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      
+      if (settings?.whatsapp_instance) {
+        setActiveInstance(settings.whatsapp_instance);
+      } else {
         if (showToast) toast.error("Selecione a instância do WhatsApp em CRM > Bot.");
         return;
       }
+    }
 
-      const rawChats = await evolution.findChats(instanceName);
+    setSyncing(true);
+    try {
+      const { data: existing, error: existingError } = await supabase
+        .from("bot_conversations")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (existingError) throw existingError;
+
+      const rawChats = await evolution.findChats(instanceToUse || forcedInstance!);
       const chats = asArray<EvolutionChat>(rawChats)
         .filter((chat) => !!chat?.remoteJid && !String(chat.remoteJid).endsWith("@g.us"));
 
@@ -177,11 +187,11 @@ export function UnifiedChat() {
       );
 
       const rows = await Promise.all(
-        chats.slice(0, 30).map(async (chat) => {
+        chats.slice(0, 50).map(async (chat) => {
           const phone = String(chat.remoteJid).split("@")[0];
           const remoteJid = chat.remoteJid!;
           const existingConversation = existingByPhone.get(phone);
-          const rawMessages = await evolution.findMessages(instanceName, remoteJid);
+          const rawMessages = await evolution.findMessages(instanceToUse || forcedInstance!, remoteJid);
           const transcript = normalizeTranscript(asArray<any>(rawMessages));
           const lastAt = transcript[transcript.length - 1]?.at
             ?? normalizeTimestamp(chat.lastMessageTime ?? chat.conversationTimestamp);
@@ -215,12 +225,16 @@ export function UnifiedChat() {
     } finally {
       setSyncing(false);
     }
-  };
+  }, [user?.id, activeInstance, load, syncing]);
 
   useEffect(() => {
     if (!user?.id) return;
     load();
-    const ch = supabase
+    
+    // Auto-sync on mount
+    syncFromWhatsApp(false);
+
+    const channel = supabase
       .channel("uc:bot_conversations:" + user.id)
       .on(
         "postgres_changes",
@@ -239,18 +253,38 @@ export function UnifiedChat() {
       )
       .subscribe();
     return () => {
-      supabase.removeChannel(ch);
+      supabase.removeChannel(channel);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [user?.id, load]);
 
+  // Monitor instance changes
   useEffect(() => {
     if (!user?.id) return;
-    const timer = setTimeout(() => {
-      syncFromWhatsApp(false);
-    }, 250);
-    return () => clearTimeout(timer);
-  }, [user?.id]);
+    
+    const channel = supabase
+      .channel("uc:bot_settings:" + user.id)
+      .on(
+        "postgres_changes",
+        { 
+          event: "UPDATE", 
+          schema: "public", 
+          table: "bot_settings", 
+          filter: `user_id=eq.${user.id}` 
+        },
+        (payload) => {
+          const newInstance = (payload.new as any).whatsapp_instance;
+          if (newInstance && newInstance !== activeInstance) {
+            setActiveInstance(newInstance);
+            syncFromWhatsApp(false, newInstance);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, activeInstance, syncFromWhatsApp]);
 
   const filtered = useMemo(
     () =>
@@ -356,12 +390,39 @@ export function UnifiedChat() {
 
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden">
-      <AppSidebar />
-      <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Atendimento" subtitle="Mensagens do WhatsApp em tempo real" />
+      <div className="hidden lg:block w-64 shrink-0 border-r border-border bg-card">
+        <AppSidebar />
+      </div>
+      <div className="flex-1 flex flex-col min-w-0 bg-[#f0f2f5]/30">
+        <div className="lg:hidden h-[68px]">
+          <Topbar title="Atendimento" />
+        </div>
+        
+        <div className="hidden lg:flex h-[68px] items-center px-6 border-b border-border bg-card justify-between">
+          <div>
+            <h1 className="text-xl font-bold font-display tracking-tight">Atendimento</h1>
+            <p className="text-xs text-muted-foreground">Gerencie suas conversas do WhatsApp</p>
+          </div>
+          <div className="flex items-center gap-3">
+            {activeInstance && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-[10px] font-bold border border-success/20">
+                <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                INSTÂNCIA: {activeInstance.toUpperCase()}
+              </div>
+            )}
+            <button
+              onClick={() => syncFromWhatsApp(true)}
+              disabled={syncing}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow-sm hover:opacity-90 transition disabled:opacity-50"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+              {syncing ? "Sincronizando..." : "Atualizar"}
+            </button>
+          </div>
+        </div>
+
         <div className="flex-1 flex overflow-hidden">
-          {/* Lista */}
-          <div className="w-[360px] border-r border-border flex flex-col bg-card/40">
+          <div className="w-full sm:w-[360px] border-r border-border flex flex-col bg-card">
             <div className="p-4 border-b border-border space-y-3">
               <div className="relative">
                 <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -369,7 +430,7 @@ export function UnifiedChat() {
                   placeholder="Buscar por nome ou número..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full h-10 pl-10 pr-4 rounded-xl bg-muted/50 border-none text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                  className="w-full h-10 pl-10 pr-4 rounded-xl bg-muted/40 border border-transparent focus:border-primary/20 text-sm outline-none transition"
                 />
               </div>
               <div className="flex gap-1">
@@ -387,12 +448,14 @@ export function UnifiedChat() {
                   </button>
                 ))}
               </div>
-              <button
-                onClick={() => syncFromWhatsApp(true)}
-                className="w-full py-1.5 text-[11px] font-bold rounded-lg bg-muted text-muted-foreground hover:bg-muted/80 transition flex items-center justify-center gap-1.5"
-              >
-                <RefreshCw className={`h-3 w-3 ${syncing ? "animate-spin" : ""}`} /> {syncing ? "Sincronizando..." : "Atualizar"}
-              </button>
+              <div className="lg:hidden">
+                <button
+                  onClick={() => syncFromWhatsApp(true)}
+                  className="w-full py-2 text-xs font-bold rounded-xl bg-primary text-primary-foreground shadow-sm flex items-center justify-center gap-2"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} /> {syncing ? "Sincronizando..." : "Atualizar"}
+                </button>
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto">
@@ -401,9 +464,11 @@ export function UnifiedChat() {
                   <Loader2 className="h-5 w-5 animate-spin text-primary" />
                 </div>
               ) : filtered.length === 0 ? (
-                <div className="p-6 text-center text-xs text-muted-foreground">
-                  <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  Nenhuma conversa ainda. Quando chegar mensagem no WhatsApp, ela aparece aqui.
+                <div className="p-10 text-center space-y-3">
+                  <div className="h-16 w-16 rounded-2xl bg-muted/50 mx-auto grid place-items-center text-muted-foreground/30">
+                    <MessageSquare className="h-8 w-8" />
+                  </div>
+                  <p className="text-xs text-muted-foreground px-4">Nenhuma conversa encontrada na instância selecionada.</p>
                 </div>
               ) : (
                 filtered.map((c) => {
@@ -419,7 +484,7 @@ export function UnifiedChat() {
                       key={c.id}
                       onClick={() => setSelectedId(c.id)}
                       className={`w-full flex items-start gap-3 p-3 border-b border-border/50 transition relative text-left ${
-                        selectedId === c.id ? "bg-primary/5" : "hover:bg-muted/30"
+                        selectedId === c.id ? "bg-primary/[0.03]" : "hover:bg-muted/20"
                       }`}
                     >
                       {selectedId === c.id && (
@@ -462,9 +527,8 @@ export function UnifiedChat() {
             </div>
           </div>
 
-          {/* Área de chat */}
           {selected ? (
-            <div className="flex-1 flex flex-col bg-card/20 min-w-0 relative">
+            <div className={`flex-1 flex flex-col bg-card min-w-0 relative ${!selectedId ? 'hidden sm:flex' : 'flex'}`}>
               {imagePreview && (
                 <div className="absolute inset-0 z-[60] bg-[#f0f2f5] flex flex-col animate-in fade-in duration-200">
                   {/* Header */}
@@ -546,7 +610,13 @@ export function UnifiedChat() {
                 </div>
               )}
 
-              <div className="h-[68px] px-6 border-b border-border flex items-center justify-between bg-card">
+              <div className="h-[68px] px-4 sm:px-6 border-b border-border flex items-center justify-between bg-card shadow-sm z-10">
+                <button 
+                  onClick={() => setSelectedId(null)}
+                  className="sm:hidden p-2 -ml-2 hover:bg-muted rounded-full transition"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary/60 grid place-items-center font-bold text-sm text-white shrink-0">
                     {(selected.contact_name ?? selected.contact_phone).slice(0, 2).toUpperCase()}
@@ -576,7 +646,7 @@ export function UnifiedChat() {
                 </button>
               </div>
 
-              <div ref={scrollRef} className="flex-1 p-6 overflow-y-auto space-y-3">
+              <div ref={scrollRef} className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 bg-[#e5ddd5]/30">
                 {(selected.transcript ?? []).length === 0 ? (
                   <div className="text-xs text-center text-muted-foreground py-10">
                     Sem mensagens registradas.
@@ -588,20 +658,20 @@ export function UnifiedChat() {
                     return (
                       <div
                         key={i}
-                        className={`flex gap-2 ${isUser ? "justify-start" : "justify-end"}`}
+                        className={`flex gap-3 ${isUser ? "justify-start" : "justify-end"}`}
                       >
                         {isUser && (
-                          <div className="h-7 w-7 rounded-full bg-muted grid place-items-center shrink-0">
+                          <div className="h-8 w-8 rounded-full bg-card shadow-sm border border-border grid place-items-center shrink-0 mt-1">
                             <User className="h-3.5 w-3.5" />
                           </div>
                         )}
                         <div
-                          className={`max-w-[70%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm whitespace-pre-wrap break-words ${
+                          className={`max-w-[85%] sm:max-w-[70%] px-4 py-2.5 rounded-2xl text-[13px] sm:text-sm leading-relaxed shadow-sm whitespace-pre-wrap break-words ${
                             isUser
-                              ? "bg-muted rounded-bl-sm"
+                              ? "bg-card border border-border rounded-tl-sm text-foreground"
                               : isBot
-                                ? "bg-primary text-primary-foreground rounded-br-sm"
-                                : "bg-success text-white rounded-br-sm"
+                                ? "bg-primary text-primary-foreground rounded-tr-sm"
+                                : "bg-success text-white rounded-tr-sm"
                           }`}
                         >
                           {m.content}
@@ -616,12 +686,12 @@ export function UnifiedChat() {
                           )}
                         </div>
                         {isBot && (
-                          <div className="h-7 w-7 rounded-full bg-primary/15 text-primary grid place-items-center shrink-0">
+                          <div className="h-8 w-8 rounded-full bg-primary/10 text-primary grid place-items-center shrink-0 mt-1">
                             <Bot className="h-3.5 w-3.5" />
                           </div>
                         )}
                         {m.role === "agent" && (
-                          <div className="h-7 w-7 rounded-full bg-success/15 text-success grid place-items-center shrink-0">
+                          <div className="h-8 w-8 rounded-full bg-success/10 text-success grid place-items-center shrink-0 mt-1">
                             <UserCog className="h-3.5 w-3.5" />
                           </div>
                         )}
@@ -631,7 +701,7 @@ export function UnifiedChat() {
                 )}
               </div>
 
-              <div className="p-4 bg-card border-t border-border">
+              <div className="p-3 sm:p-4 bg-card border-t border-border shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
                 <div className="relative">
                   <div className="flex items-end gap-3">
                    <div className="relative">
@@ -644,7 +714,7 @@ export function UnifiedChat() {
                      />
                      <label
                        htmlFor="image-upload"
-                       className="h-12 w-12 shrink-0 rounded-xl bg-muted/50 border border-border flex items-center justify-center hover:bg-muted transition cursor-pointer"
+                       className="h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-xl bg-muted/40 border border-border/50 flex items-center justify-center hover:bg-muted transition cursor-pointer"
                      >
                        <ImageIcon className="h-5 w-5 text-muted-foreground" />
                      </label>
@@ -662,14 +732,14 @@ export function UnifiedChat() {
                         }
                      }}
                      placeholder={selectedImage ? "Adicione uma legenda..." : "Digite sua mensagem..."}
-                     className="flex-1 bg-muted/50 rounded-2xl border border-border focus:border-primary/40 outline-none p-3 text-sm min-h-[48px] max-h-32 resize-none"
+                     className="flex-1 bg-muted/40 rounded-2xl border border-border/50 focus:border-primary/20 focus:bg-muted/60 outline-none p-3 text-sm min-h-[44px] sm:min-h-[48px] max-h-32 resize-none transition"
                      rows={1}
                    />
                     {!selectedImage && (
                       <button
                         onClick={send}
                         disabled={sending || (!text.trim() && !selectedImage)}
-                        className="h-12 w-12 shrink-0 rounded-xl bg-primary text-primary-foreground grid place-items-center hover:opacity-90 transition disabled:opacity-50"
+                        className="h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-xl bg-primary text-primary-foreground grid place-items-center hover:opacity-95 shadow-md active:scale-95 transition disabled:opacity-50 disabled:scale-100"
                       >
                         {sending ? (
                           <Loader2 className="h-5 w-5 animate-spin" />
@@ -683,15 +753,15 @@ export function UnifiedChat() {
                </div>
              </div>
           ) : (
-            <div className="flex-1 grid place-items-center bg-muted/10">
+            <div className="hidden sm:grid flex-1 place-items-center bg-muted/5">
               <div className="text-center space-y-3 max-w-sm px-6">
-                <div className="h-20 w-20 rounded-3xl bg-card border border-border shadow-card mx-auto grid place-items-center text-primary/40">
+                <div className="h-20 w-20 rounded-3xl bg-card border border-border shadow-elegant mx-auto grid place-items-center text-primary/20">
                   <MessageSquare className="h-10 w-10" />
                 </div>
-                <h3 className="text-xl font-bold font-display">Selecione uma conversa</h3>
+                <h3 className="text-xl font-bold font-display tracking-tight">Selecione uma conversa</h3>
                 <p className="text-sm text-muted-foreground">
                   As mensagens recebidas no WhatsApp aparecem aqui em tempo real.
-                </p>
+                 </p>
               </div>
             </div>
           )}
