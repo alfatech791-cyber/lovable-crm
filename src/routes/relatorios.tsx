@@ -8,7 +8,7 @@ import { Topbar } from "@/components/layout/Topbar";
      Lightbulb, AlertCircle, Loader2, Home, User, Package, ShoppingCart,
      Hammer, Archive, FileText, List, ChevronDown, UserPlus, UserRound,
     Trophy, Cake, Scale, CreditCard, LayoutDashboard, History, ClipboardList,
-    Box, FileSpreadsheet
+    Box, FileSpreadsheet, Calculator
  } from "lucide-react";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart as RePieChart, Pie } from "recharts";
@@ -256,7 +256,18 @@ export const Route = createFileRoute("/relatorios")({
         { id: "fin-formas-pagamento-dia", label: "Formas de pagamento por dia", icon: LayoutDashboard },
       ]
     },
-    { id: "produto", label: "Produto", icon: Package, isNew: true, hasArrow: true },
+    { 
+      id: "produto", 
+      label: "Produto", 
+      icon: Package, 
+      isNew: true, 
+      hasArrow: true,
+      children: [
+        { id: "prod-vendidos", label: "Produtos Vendidos", icon: ClipboardList },
+        { id: "prod-resumo-estoque", label: "Resumo de Estoque", icon: Box },
+        { id: "prod-detalhes-estoque", label: "Detalhes do Estoque", icon: Calculator, isNew: true },
+      ]
+    },
     { 
       id: "vendas", 
       label: "Vendas", 
