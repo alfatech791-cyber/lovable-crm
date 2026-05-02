@@ -127,49 +127,52 @@ function FinanceCaixaPage() {
         <Topbar title="Caixa e Bancos" subtitle="Controle detalhado de entradas e saídas" toggleSidebar={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <Card className="p-5 border-none bg-gradient-to-br from-green-500/10 to-transparent shadow-sm border border-green-100 rounded-2xl">
+            <Card className="p-5 border-none bg-white shadow-sm border border-slate-100 rounded-[2rem] hover:shadow-xl hover:shadow-emerald-500/5 transition-all group">
               <div className="flex justify-between items-start mb-2">
-                <div className="h-9 w-9 rounded-xl bg-green-500 text-white grid place-items-center shadow-lg shadow-green-200">
+                <div className="h-10 w-10 rounded-2xl bg-emerald-500 text-white grid place-items-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
                   <ArrowUpCircle className="h-5 w-5" />
                 </div>
-                <span className="text-[10px] font-black text-green-600 uppercase tracking-tighter bg-green-50 px-2 py-1 rounded-full">Hoje</span>
+                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-1 rounded-lg">Hoje</span>
               </div>
-              <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Entradas</div>
-              <div className="text-xl font-black text-slate-900 mt-1">
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-4">Entradas</div>
+              <div className="text-2xl font-black text-slate-900 mt-1">
                 {stats.todayIncome.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </div>
             </Card>
-            <Card className="p-5 border-none bg-gradient-to-br from-red-500/10 to-transparent shadow-sm border border-red-100 rounded-2xl">
+            <Card className="p-5 border-none bg-white shadow-sm border border-slate-100 rounded-[2rem] hover:shadow-xl hover:shadow-red-500/5 transition-all group">
               <div className="flex justify-between items-start mb-2">
-                <div className="h-9 w-9 rounded-xl bg-red-500 text-white grid place-items-center shadow-lg shadow-red-200">
+                <div className="h-10 w-10 rounded-2xl bg-red-500 text-white grid place-items-center shadow-lg shadow-red-500/20 group-hover:scale-110 transition-transform">
                   <ArrowDownCircle className="h-5 w-5" />
                 </div>
-                <span className="text-[10px] font-black text-red-600 uppercase tracking-tighter bg-red-50 px-2 py-1 rounded-full">Hoje</span>
+                <span className="text-[10px] font-black text-red-600 uppercase tracking-widest bg-red-50 px-2 py-1 rounded-lg">Hoje</span>
               </div>
-              <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Saídas</div>
-              <div className="text-xl font-black text-slate-900 mt-1">
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-4">Saídas</div>
+              <div className="text-2xl font-black text-slate-900 mt-1">
                 {stats.todayExpense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </div>
             </Card>
-            <Card className="p-5 border-border shadow-sm rounded-2xl">
+            <Card className="p-5 border-none bg-white shadow-sm border border-slate-100 rounded-[2rem] hover:shadow-xl hover:shadow-indigo-500/5 transition-all group">
               <div className="flex justify-between items-start mb-2">
-                <div className="h-9 w-9 rounded-xl bg-blue-100 text-blue-600 grid place-items-center">
+                <div className="h-10 w-10 rounded-2xl bg-indigo-500 text-white grid place-items-center shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
                   <Wallet className="h-5 w-5" />
                 </div>
               </div>
-              <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Saldo Atual</div>
-              <div className="text-xl font-black text-slate-900 mt-1">
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-4">Saldo Atual</div>
+              <div className="text-2xl font-black text-slate-900 mt-1">
                 {stats.balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </div>
             </Card>
-            <Card className="p-5 border-border shadow-sm bg-slate-900 text-white rounded-2xl">
+            <Card className="p-5 border-none bg-slate-900 text-white shadow-sm rounded-[2rem] hover:shadow-xl hover:shadow-slate-900/20 transition-all group overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+                <Calendar className="h-24 w-24" />
+              </div>
               <div className="flex justify-between items-start mb-2">
-                <div className="h-9 w-9 rounded-xl bg-white/10 grid place-items-center">
+                <div className="h-10 w-10 rounded-2xl bg-white/10 text-white grid place-items-center backdrop-blur-sm">
                   <Calendar className="h-5 w-5" />
                 </div>
               </div>
-              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Previsto (Pendente)</div>
-              <div className="text-xl font-black mt-1 text-white">
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-4">Previsto</div>
+              <div className="text-2xl font-black mt-1 text-white">
                 {stats.planned.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </div>
             </Card>
