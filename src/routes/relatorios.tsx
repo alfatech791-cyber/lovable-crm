@@ -1,208 +1,137 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
- import { 
-   BarChart3, TrendingUp, Users, DollarSign, Calendar, Download, 
-   Filter, ArrowUpRight, Shield, PieChart, Target, Zap, 
-     ArrowDownRight, ChevronRight, MoreHorizontal, UserCheck, Sparkles,
-     Lightbulb, AlertCircle, Loader2, Home, User, Package, ShoppingCart,
-     Hammer, Archive, FileText, List, ChevronDown, UserPlus, UserRound,
-    Trophy, Cake, Scale, CreditCard, LayoutDashboard, History, ClipboardList,
-    Box, FileSpreadsheet, Calculator, Contact2, Wallet, Users2, Building2, UserCircle, Briefcase, Facebook
- } from "lucide-react";
-import { SalesChart } from "@/components/dashboard/SalesChart";
-import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart as RePieChart, Pie } from "recharts";
+import { 
+  BarChart3, TrendingUp, Users, DollarSign, Calendar, Download, 
+  Filter, ArrowUpRight, Shield, PieChart, Target, Zap, 
+  ArrowDownRight, ChevronRight, MoreHorizontal, UserCheck, Sparkles,
+  Lightbulb, AlertCircle, Loader2, Home, User, Package, ShoppingCart,
+  Hammer, Archive, FileText, List, ChevronDown, UserPlus, UserRound,
+  Trophy, Cake, Scale, CreditCard, LayoutDashboard, History, ClipboardList,
+  Box, FileSpreadsheet, Calculator, Contact2, Wallet, Users2, Building2, UserCircle, Briefcase, Facebook
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect, useCallback, useLayoutEffect } from "react";
- import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
+import { DashboardContent } from "@/components/reports/DashboardContent";
 
 export const Route = createFileRoute("/relatorios")({
   head: () => ({ meta: [{ title: "Relatórios — ConectaCRM" }, { name: "description", content: "Métricas avançadas de vendas" }] }),
   component: ReportsPage,
 });
 
- function ReportsPage() {
-   const { user, profile } = useAuth();
-    const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState<any>({
-      revenue: 0,
-      leads: 0,
-      conversion: 0,
-      avgTicket: 0,
-      revenueTrend: { value: "0%", isUp: true },
-      leadsTrend: { value: "0%", isUp: true },
-      conversionTrend: { value: "0%", isUp: true },
-      avgTicketTrend: { value: "0%", isUp: true },
-    });
-    const [aiInsight, setAiInsight] = useState<string>("Carregando análise da ConectaAI...");
-    const [activeCategory, setActiveCategory] = useState("visao-geral");
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+function ReportsPage() {
+  const { user, profile } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any>({
+    revenue: 0,
+    leads: 0,
+    conversion: 0,
+    avgTicket: 0,
+    revenueTrend: { value: "0%", isUp: true },
+    leadsTrend: { value: "0%", isUp: true },
+    conversionTrend: { value: "0%", isUp: true },
+    avgTicketTrend: { value: "0%", isUp: true },
+  });
+  const [aiInsight, setAiInsight] = useState<string>("Carregando análise da ConectaAI...");
+  const [activeCategory, setActiveCategory] = useState("visao-geral");
 
-     // This was causing the sidebar to collapse immediately on page load.
-     // The user now wants it to collapse only when the second menu (reports menu) is open.
-     // Since the reports menu is currently always open on this page in the UI,
-     // let's ensure the sidebar is collapsed while on this route.
-     useLayoutEffect(() => {
-       window.dispatchEvent(new CustomEvent('force-sidebar-collapse', { detail: true }));
-       return () => {
-         window.dispatchEvent(new CustomEvent('force-sidebar-collapse', { detail: false }));
-       };
-     }, []);
- 
-    const [funnelData, setFunnelData] = useState<any[]>([]);
-    const [originData, setOriginData] = useState<any[]>([]);
-    const [topAgents, setTopAgents] = useState<any[]>([]);
-    const [funnelPercentages, setFunnelPercentages] = useState<string[]>([]);
+  useLayoutEffect(() => {
+    window.dispatchEvent(new CustomEvent('force-sidebar-collapse', { detail: true }));
+    return () => {
+      window.dispatchEvent(new CustomEvent('force-sidebar-collapse', { detail: false }));
+    };
+  }, []);
 
-    const fetchReportsData = useCallback(async () => {
-      if (!user?.id) return;
-      setLoading(true);
-      try {
-        const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+  const [funnelData, setFunnelData] = useState<any[]>([]);
+  const [originData, setOriginData] = useState<any[]>([]);
+  const [topAgents, setTopAgents] = useState<any[]>([]);
+  const [funnelPercentages, setFunnelPercentages] = useState<string[]>([]);
 
-        // Sales and Revenue
-        const { data: sales } = await supabase
-          .from("sales_orders")
-          .select("total_amount, status, created_at, user_id")
-          .eq("user_id", user.id);
+  const fetchReportsData = useCallback(async () => {
+    if (!user?.id) return;
+    setLoading(true);
+    try {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
-        const concludedSales = (sales || []).filter(s => s.status === 'concluded');
-        const currentMonthSales = concludedSales.filter(s => new Date(s.created_at!) >= startOfMonth);
-        const prevMonthSales = concludedSales.filter(s => {
-          const date = new Date(s.created_at!);
-          return date >= startOfPrevMonth && date <= endOfPrevMonth;
-        });
+      const { data: sales } = await supabase
+        .from("sales_orders")
+        .select("total_amount, status, created_at, user_id")
+        .eq("user_id", user.id);
 
-        const monthRevenue = currentMonthSales
-          .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
-        const prevMonthRevenue = prevMonthSales
-          .reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+      const concludedSales = (sales || []).filter(s => s.status === 'concluded');
+      const currentMonthSales = concludedSales.filter(s => new Date(s.created_at!) >= startOfMonth);
+      const prevMonthSales = concludedSales.filter(s => {
+        const date = new Date(s.created_at!);
+        return date >= startOfPrevMonth && date <= endOfPrevMonth;
+      });
 
-        const avgTicket = currentMonthSales.length > 0 
-          ? monthRevenue / currentMonthSales.length 
-          : 0;
-        const prevAvgTicket = prevMonthSales.length > 0
-          ? prevMonthRevenue / prevMonthSales.length
-          : 0;
+      const monthRevenue = currentMonthSales.reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+      const prevMonthRevenue = prevMonthSales.reduce((acc, curr) => acc + (curr.total_amount || 0), 0);
+      const avgTicket = currentMonthSales.length > 0 ? monthRevenue / currentMonthSales.length : 0;
+      const prevAvgTicket = prevMonthSales.length > 0 ? prevMonthRevenue / prevMonthSales.length : 0;
 
-        // Leads
-        const { data: leads } = await supabase
-          .from("leads")
-          .select("source, status, created_at")
-          .eq("user_id", user.id);
+      const { data: leads } = await supabase
+        .from("leads")
+        .select("source, status, created_at")
+        .eq("user_id", user.id);
 
-        const currentLeads = (leads || []).filter(l => l.created_at && new Date(l.created_at) >= startOfMonth);
-        const prevLeads = (leads || []).filter(l => {
-          if (!l.created_at) return false;
-          const date = new Date(l.created_at);
-          return date >= startOfPrevMonth && date <= endOfPrevMonth;
-        });
+      const currentLeads = (leads || []).filter(l => l.created_at && new Date(l.created_at) >= startOfMonth);
+      const prevLeads = (leads || []).filter(l => l.created_at && new Date(l.created_at) >= startOfPrevMonth && new Date(l.created_at) <= endOfPrevMonth);
 
-        const totalLeads = currentLeads.length;
-        const wonLeads = currentLeads.filter(l => l.status && ['won', 'concluded'].includes(l.status)).length;
-        const conversionRate = totalLeads > 0 ? (wonLeads / totalLeads) * 100 : 0;
+      const totalLeads = currentLeads.length;
+      const wonLeads = currentLeads.filter(l => l.status && ['won', 'concluded'].includes(l.status)).length;
+      const conversionRate = totalLeads > 0 ? (wonLeads / totalLeads) * 100 : 0;
 
-        const prevTotalLeads = prevLeads.length;
-        const prevWonLeads = prevLeads.filter(l => l.status && ['won', 'concluded'].includes(l.status)).length;
-        const prevConversionRate = prevTotalLeads > 0 ? (prevWonLeads / prevTotalLeads) * 100 : 0;
+      const prevTotalLeads = prevLeads.length;
+      const prevWonLeads = prevLeads.filter(l => l.status && ['won', 'concluded'].includes(l.status)).length;
+      const prevConversionRate = prevTotalLeads > 0 ? (prevWonLeads / prevTotalLeads) * 100 : 0;
 
-        const calculateTrend = (current: number, previous: number) => {
-          if (previous === 0) return { value: current > 0 ? "+100%" : "0%", isUp: true };
-          const diff = ((current - previous) / previous) * 100;
-          return {
-            value: `${diff > 0 ? "+" : ""}${diff.toFixed(1)}%`,
-            isUp: diff >= 0
-          };
-        };
+      const calculateTrend = (current: number, previous: number) => {
+        if (previous === 0) return { value: current > 0 ? "+100%" : "0%", isUp: true };
+        const diff = ((current - previous) / previous) * 100;
+        return { value: `${diff > 0 ? "+" : ""}${diff.toFixed(1)}%`, isUp: diff >= 0 };
+      };
 
-        const revTrend = calculateTrend(monthRevenue, prevMonthRevenue);
-        const ldsTrend = calculateTrend(totalLeads, prevTotalLeads);
-        const cnvTrend = calculateTrend(conversionRate, prevConversionRate);
-        const tktTrend = calculateTrend(avgTicket, prevAvgTicket);
+      setStats({
+        revenue: monthRevenue,
+        leads: totalLeads,
+        conversion: conversionRate,
+        avgTicket: avgTicket,
+        revenueTrend: calculateTrend(monthRevenue, prevMonthRevenue),
+        leadsTrend: calculateTrend(totalLeads, prevTotalLeads),
+        conversionTrend: calculateTrend(conversionRate, prevConversionRate),
+        avgTicketTrend: calculateTrend(avgTicket, prevAvgTicket),
+      });
 
-        setStats({
-          revenue: monthRevenue,
-          leads: totalLeads,
-          conversion: conversionRate,
-          avgTicket: avgTicket,
-          revenueTrend: revTrend,
-          leadsTrend: ldsTrend,
-          conversionTrend: cnvTrend,
-          avgTicketTrend: tktTrend,
-        });
+      const { data: stages } = await supabase.from("funnel_stages").select("name, color, id").eq("user_id", user.id).order("order_index");
+      const { data: pipeline } = await supabase.from("pipeline_leads").select("stage_id").eq("user_id", user.id);
+      const fData = (stages || []).map(s => ({ name: s.name, value: (pipeline || []).filter(p => p.stage_id === s.id).length, color: s.color || "#64748b" }));
+      setFunnelData(fData);
 
-        // Generate real insight
-        const insightText = totalLeads > 0 
-          ? `Seu faturamento ${revTrend.isUp ? 'cresceu' : 'variou'} ${revTrend.value} este mês. Com ${totalLeads} novos leads e ${conversionRate.toFixed(1)}% de conversão, seu desempenho está ${revTrend.isUp ? 'acima' : 'em linha'} com a média anterior.`
-          : "Aguardando volume de dados para gerar insights precisos sobre o funil.";
-        setAiInsight(insightText);
+      const counts: Record<string, number> = {};
+      (leads || []).forEach(l => { const src = l.source || "Direto"; counts[src] = (counts[src] || 0) + 1; });
+      setOriginData(Object.entries(counts).map(([name, value]) => ({ name, value, color: name === 'WhatsApp' ? '#25D366' : name === 'Instagram' ? '#E1306C' : '#64748b' })));
 
-        // Funnel Data
-        const { data: stages } = await supabase
-          .from("funnel_stages")
-          .select("name, color, id")
-          .eq("user_id", user.id)
-          .order("order_index");
-        
-        const { data: pipeline } = await supabase
-          .from("pipeline_leads")
-          .select("stage_id")
-          .eq("user_id", user.id);
-
-        const fData = (stages || []).map(s => ({
-          name: s.name,
-          value: (pipeline || []).filter(p => p.stage_id === s.id).length,
-          color: s.color || "#64748b"
-        }));
-        setFunnelData(fData);
-
-        // Calculate real conversion percentages between stages
-        const percentages = fData.map((stage, index) => {
-          if (index === 0) return "100%";
-          const prevValue = fData[index - 1].value;
-          return prevValue > 0 ? `${((stage.value / prevValue) * 100).toFixed(0)}%` : "0%";
-        });
-        setFunnelPercentages(percentages);
-
-        // Origin Data
-        const counts: Record<string, number> = {};
-        (leads || []).forEach(l => {
-          const src = l.source || "Direto";
-          counts[src] = (counts[src] || 0) + 1;
-        });
-        const oData = Object.entries(counts).map(([name, value]) => ({
-          name,
-          value,
-          color: name === 'WhatsApp' ? '#25D366' : name === 'Instagram' ? '#E1306C' : '#64748b'
-        }));
-        setOriginData(oData);
-
-        // Top Agents (using mock if only one user, or fetch other users if team module active)
-        // For now, let's just show the current user as top agent if they have sales
-        if (concludedSales.length > 0) {
-          setTopAgents([{
-            name: profile?.display_name || "Você",
-            avatar: (profile?.display_name || "V")[0],
-            sales: concludedSales.length,
-            revenue: monthRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-            trend: "+0%"
-          }]);
-        }
-
-      } catch (err) {
-        console.error("Error fetching reports:", err);
-      } finally {
-        setLoading(false);
+      if (concludedSales.length > 0) {
+        setTopAgents([{ name: profile?.display_name || "Você", avatar: (profile?.display_name || "V")[0], sales: concludedSales.length, revenue: monthRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: "+0%" }]);
       }
-    }, [user?.id, profile?.display_name]);
+    } catch (err) { console.error(err); } finally { setLoading(false); }
+  }, [user?.id, profile?.display_name]);
 
+  useEffect(() => { fetchReportsData(); }, [fetchReportsData]);
 
-  const isAdmin = profile?.role === 'admin' || !profile;
+  const reportCategories: any[] = [
+    { id: "visao-geral", label: "Visão geral - Atalhos", icon: Home },
+    { id: "clientes", label: "Clientes", icon: Users, hasArrow: true, children: [{ id: "clientes-indicacao", label: "Programa de indicações", icon: UserPlus }, { id: "clientes-perfil", label: "Perfil de Clientes", icon: UserRound }, { id: "clientes-ranking", label: "Ranking de Clientes", icon: Trophy }, { id: "clientes-aniversario", label: "Rel. de Aniversário", icon: Cake }] },
+    { id: "financeiro", label: "Financeiro", icon: DollarSign, hasArrow: true, children: [{ id: "fin-dre-gerencial", label: "DRE gerencial", icon: Scale }, { id: "fin-relatorio", label: "Relatório Financeiro", icon: Scale }, { id: "fin-formas-pagamento", label: "Formas de pagamento", icon: CreditCard }] },
+    { id: "vendedores", label: "Vendedores", icon: UserCheck, isNew: true, hasArrow: true, children: [{ id: "vend-dash", label: "Dashboard Vendedor", icon: Contact2 }, { id: "vend-comissao", label: "Rel. de Comissão", icon: Wallet, isNew: true }] },
+  ];
 
-  if (!isAdmin) {
+  if (profile?.role !== 'admin' && profile) {
     return (
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
@@ -210,14 +139,10 @@ export const Route = createFileRoute("/relatorios")({
           <Topbar title="Acesso Negado" subtitle="Você não tem permissão para ver esta página" />
           <main className="flex-1 flex items-center justify-center p-6 text-center">
             <div className="max-w-md">
-              <div className="h-20 w-20 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-6">
-                <Shield className="h-10 w-10" />
-              </div>
+              <div className="h-20 w-20 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-6"><Shield className="h-10 w-10" /></div>
               <h2 className="text-2xl font-bold mb-2">Página Restrita</h2>
               <p className="text-muted-foreground mb-8">O seu nível de acesso não permite visualizar relatórios avançados.</p>
-              <Link to="/" className="inline-flex h-11 px-6 items-center justify-center rounded-xl bg-primary text-white font-bold text-sm shadow-glow">
-                Voltar ao Início
-              </Link>
+              <Link to="/" className="inline-flex h-11 px-6 items-center justify-center rounded-xl bg-primary text-white font-bold text-sm shadow-glow">Voltar ao Início</Link>
             </div>
           </main>
         </div>
@@ -225,176 +150,30 @@ export const Route = createFileRoute("/relatorios")({
     );
   }
 
-  const reportCategories: any[] = [
-    { id: "visao-geral", label: "Visão geral - Atalhos", icon: Home },
-    { 
-      id: "clientes", 
-      label: "Clientes", 
-      icon: Users, 
-      hasArrow: true,
-      children: [
-        { id: "clientes-indicacao", label: "Programa de indicações", icon: UserPlus },
-        { id: "clientes-perfil", label: "Perfil de Clientes", icon: UserRound },
-        { id: "clientes-ranking", label: "Ranking de Clientes", icon: Trophy },
-        { id: "clientes-aniversario", label: "Rel. de Aniversário", icon: Cake },
-      ]
-    },
-    { 
-      id: "financeiro", 
-      label: "Financeiro", 
-      icon: DollarSign, 
-      hasArrow: true,
-      children: [
-        { id: "fin-dre-gerencial", label: "DRE gerencial", icon: Scale },
-        { id: "fin-relatorio", label: "Relatório Financeiro", icon: Scale },
-        { id: "fin-relatorio-vendas", label: "Relatório Financeiro - Vendas", icon: Scale },
-        { id: "fin-relatorio-vendas-os", label: "Relatório Financeiro - Vendas + OS", icon: Scale },
-        { id: "fin-multilojas", label: "Relatório Financeiro Multi Lojas", icon: Scale },
-        { id: "fin-dre-2", label: "DRE 2.0", icon: Scale },
-        { id: "fin-relatorio-vendas-os-2", label: "Relatório Financeiro Vendas + OS", icon: Scale },
-        { id: "fin-formas-pagamento", label: "Formas de pagamento", icon: CreditCard },
-        { id: "fin-formas-pagamento-dia", label: "Formas de pagamento por dia", icon: LayoutDashboard },
-      ]
-    },
-    { 
-      id: "produto", 
-      label: "Produto", 
-      icon: Package, 
-      isNew: true, 
-      hasArrow: true,
-      children: [
-        { id: "prod-vendidos", label: "Produtos Vendidos", icon: ClipboardList },
-        { id: "prod-resumo-estoque", label: "Resumo de Estoque", icon: Box },
-        { id: "prod-detalhes-estoque", label: "Detalhes do Estoque", icon: Calculator, isNew: true },
-      ]
-    },
-    { 
-      id: "vendas", 
-      label: "Vendas", 
-      icon: ShoppingCart, 
-      isNew: true, 
-      hasArrow: true,
-      children: [
-        { id: "vendas-relatorio", label: "Relatório de vendas", icon: ShoppingCart, isNew: true },
-        { id: "vendas-historico", label: "Relatório Histórico de Venda", icon: History },
-        { id: "vendas-projecoes", label: "Dashboard Analítico de Projeções", icon: LayoutDashboard },
-        { id: "vendas-produtos", label: "Produtos Vendidos", icon: Box },
-      ]
-    },
-    { 
-      id: "ordem-servico", 
-      label: "Ordem de serviço", 
-      icon: Hammer, 
-      hasArrow: true,
-      children: [
-        { id: "os-dashboard", label: "Dashboard", icon: LayoutDashboard },
-        { id: "os-detalhes", label: "Detalhes de OS", icon: ClipboardList },
-      ]
-    },
-    { 
-      id: "fiscal", 
-      label: "Fiscal", 
-      icon: DollarSign, 
-      hasArrow: true,
-      children: [
-        { id: "fiscal-nfe", label: "Relatório de NFe", icon: FileSpreadsheet },
-      ]
-    },
-    { 
-      id: "vendedores", 
-      label: "Vendedores", 
-      icon: UserCheck, 
-      isNew: true, 
-      hasArrow: true,
-      children: [
-        { id: "vend-dash", label: "Dashboard Vendedor", icon: Contact2 },
-        { id: "vend-comissao", label: "Rel. de Comissão", icon: Wallet, isNew: true },
-        { id: "vend-relatorio", label: "Rel. de Vendedores", icon: Users2 },
-        { id: "vend-multi", label: "Rel. de Vendedores Multi Empresa", icon: Building2 },
-        { id: "vend-por-dia", label: "Vendas por vendedor (Por dia)", icon: UserCircle },
-        { id: "vend-pagamento", label: "Total por vendedor e Forma de pagamento", icon: UserCircle },
-      ]
-    },
-    { 
-      id: "tecnicos", 
-      label: "Técnicos", 
-      icon: Users, 
-      isNew: true, 
-      hasArrow: true,
-      children: [
-        { id: "tec-comissao", label: "Rel. de Comissão Técnico", icon: Wallet, isNew: true },
-      ]
-    },
-    { 
-      id: "outros", 
-      label: "Outros", 
-      icon: List, 
-      hasArrow: true,
-      children: [
-        { id: "out-metas", label: "Dashboard Metas", icon: BarChart3 },
-        { id: "out-recap", label: "Relatório Recap Anual", icon: TrendingUp },
-        { id: "out-mkt", label: "Dashboard Marketing (Meta)", icon: Facebook },
-      ]
-    },
-    { id: "antigos", label: "Antigos", icon: Archive, hasArrow: true },
-  ];
-
   return (
     <div className="min-h-screen flex w-full bg-[#F8FAFC]">
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar title="Métricas & Relatórios" subtitle="Análise detalhada do seu desempenho comercial" />
-        
         <div className="flex flex-1 overflow-hidden">
-          {/* Side Menu from Image */}
           <aside className="w-72 border-r border-slate-100 bg-white overflow-y-auto hidden md:block shadow-sm">
             <div className="p-4">
               <button className="w-full flex items-center justify-between p-3 rounded-xl bg-[#E8F0FE] text-primary font-bold text-sm mb-6">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  <span>Relatórios</span>
-                  <span className="bg-success text-white text-[10px] px-1.5 py-0.5 rounded-full font-black">NOVO</span>
-                </div>
+                <div className="flex items-center gap-2"><FileText className="h-4 w-4" /><span>Relatórios</span><span className="bg-success text-white text-[10px] px-1.5 py-0.5 rounded-full font-black">NOVO</span></div>
                 <ChevronDown className="h-4 w-4" />
               </button>
-
               <nav className="space-y-1">
                 {reportCategories.map((cat) => (
                   <div key={cat.id} className="space-y-1">
-                    <button
-                      onClick={() => setActiveCategory(cat.id)}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-[13px] font-medium transition-all ${
-                        activeCategory === cat.id || (cat.children?.some((c: any) => c.id === activeCategory))
-                          ? "bg-[#E8F0FE] text-primary shadow-sm" 
-                          : "text-slate-500 hover:bg-slate-50/50 hover:text-slate-700"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3.5">
-                        <cat.icon className={`h-4.5 w-4.5 ${(activeCategory === cat.id || cat.children?.some((c: any) => c.id === activeCategory)) ? "text-primary" : "text-slate-400"}`} />
-                        <span className={(activeCategory === cat.id || cat.children?.some((c: any) => c.id === activeCategory)) ? "font-bold" : ""}>{cat.label}</span>
-                        {cat.isNew && (
-                          <span className="bg-[#22C55E] text-white text-[9px] px-2 py-0.5 rounded-full font-black uppercase ml-1">Novo</span>
-                        )}
-                      </div>
-                      {cat.hasArrow && (
-                        <ChevronDown className={`h-3.5 w-3.5 opacity-50 transition-transform ${(activeCategory === cat.id || cat.children?.some((c: any) => c.id === activeCategory)) ? "rotate-0" : "-rotate-90"}`} />
-                      )}
+                    <button onClick={() => setActiveCategory(cat.id)} className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-[13px] font-medium transition-all ${activeCategory === cat.id || (cat.children?.some((c: any) => c.id === activeCategory)) ? "bg-[#E8F0FE] text-primary shadow-sm" : "text-slate-500 hover:bg-slate-50/50 hover:text-slate-700"}`}>
+                      <div className="flex items-center gap-3.5"><cat.icon className={`h-4.5 w-4.5 ${(activeCategory === cat.id || cat.children?.some((c: any) => c.id === activeCategory)) ? "text-primary" : "text-slate-400"}`} /><span className={(activeCategory === cat.id || cat.children?.some((c: any) => c.id === activeCategory)) ? "font-bold" : ""}>{cat.label}</span></div>
+                      {cat.hasArrow && <ChevronDown className={`h-3.5 w-3.5 opacity-50 transition-transform ${(activeCategory === cat.id || cat.children?.some((c: any) => c.id === activeCategory)) ? "rotate-0" : "-rotate-90"}`} />}
                     </button>
-                    
                     {cat.children && (activeCategory === cat.id || cat.children.some((c: any) => c.id === activeCategory)) && (
-                      <div className="ml-4 space-y-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="ml-4 space-y-1 animate-in fade-in duration-200">
                         {cat.children.map((child: any) => (
-                          <button
-                            key={child.id}
-                            onClick={() => setActiveCategory(child.id)}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-[12.5px] transition-all ${
-                              activeCategory === child.id
-                                ? "bg-[#537FF1] text-white font-bold shadow-md"
-                                : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-                            }`}
-                          >
-                            <child.icon className={`h-4 w-4 ${activeCategory === child.id ? "text-white" : "text-slate-400"}`} />
-                            <span>{child.label}</span>
+                          <button key={child.id} onClick={() => setActiveCategory(child.id)} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-[12.5px] transition-all ${activeCategory === child.id ? "bg-[#537FF1] text-white font-bold shadow-md" : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"}`}>
+                            <child.icon className={`h-4 w-4 ${activeCategory === child.id ? "text-white" : "text-slate-400"}`} /><span>{child.label}</span>
                           </button>
                         ))}
                       </div>
@@ -404,374 +183,19 @@ export const Route = createFileRoute("/relatorios")({
               </nav>
             </div>
           </aside>
-
           <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#F8FAFC]">
-            {activeCategory !== 'visao-geral' && (
-              <div className="mb-6 flex items-center gap-2">
-                <button onClick={() => setActiveCategory('visao-geral')} className="text-sm font-bold text-primary hover:underline flex items-center gap-1">
-                  <ChevronRight className="h-4 w-4 rotate-180" /> Voltar para Visão Geral
-                </button>
-                <span className="text-slate-300">/</span>
-                <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-                  {reportCategories.find(c => c.id === activeCategory)?.label}
-                </span>
-              </div>
-            )}
-
-            {/* Toolbar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="flex p-1 bg-white border border-border rounded-xl shadow-sm">
-                  {["Hoje", "7D", "30D", "12M", "Tudo"].map((p) => (
-                    <button key={p} className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${p === "30D" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:bg-muted"}`}>
-                      {p}
-                    </button>
-                  ))}
-                </div>
-                <button className="h-10 px-4 rounded-xl border border-border bg-white text-[13px] font-bold shadow-sm flex items-center gap-2 hover:bg-muted transition-colors">
-                  <Calendar className="h-4 w-4 text-primary" /> 01/04/2024 - 30/04/2024
-                </button>
-                <button className="h-10 px-4 rounded-xl border border-border bg-white text-[13px] font-bold shadow-sm flex items-center gap-2 hover:bg-muted transition-colors">
-                  <Filter className="h-4 w-4 text-primary" /> Todos Agentes
-                </button>
-              </div>
+            <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-2">
-                <button className="h-10 px-4 rounded-xl bg-white border border-border text-foreground text-[13px] font-bold shadow-sm hover:bg-muted transition-colors flex items-center gap-2">
-                  <Download className="h-4 w-4" /> Exportar CSV
-                </button>
-                <button 
-                  onClick={() => {
-                    const report = `RELATÓRIO DE DESEMPENHO - CONECTACRM\n\n` +
-                      `Período: 30 dias\n` +
-                      `Faturamento: ${stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (${stats.revenueTrend.value})\n` +
-                      `Leads: ${stats.leads} (${stats.leadsTrend.value})\n` +
-                      `Conversão: ${stats.conversion.toFixed(1)}%\n` +
-                      `Ticket Médio: ${stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n\n` +
-                      `Insight ConectaAI: ${aiInsight}`;
-                    const blob = new Blob([report], { type: 'text/plain' });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `relatorio-crm-${new Date().toISOString().split('T')[0]}.txt`;
-                    a.click();
-                  }}
-                  className="h-10 px-4 rounded-xl bg-primary text-white text-[13px] font-bold shadow-elegant hover:opacity-90 transition flex items-center gap-2"
-                >
-                  <Zap className="h-4 w-4 fill-white" /> Exportar Relatório IA
-                </button>
-              </div>
-            </div>
-
-          {/* AI Insights Section */}
-          <div className="bg-gradient-to-r from-primary/5 via-primary/[0.02] to-transparent border border-primary/10 rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center gap-6">
-            <div className="h-16 w-16 rounded-2xl bg-primary shadow-glow flex items-center justify-center shrink-0">
-              <Sparkles className="h-8 w-8 text-white animate-pulse" />
-            </div>
-            <div className="flex-1 text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-                <h3 className="text-lg font-bold text-primary">ConectaAI: Insights Estratégicos</h3>
-                <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Novo</span>
-              </div>
-              <p className="text-[15px] text-muted-foreground font-medium max-w-2xl leading-relaxed">
-                {aiInsight}
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 min-w-[180px]">
-              <div className="flex items-center gap-2 text-xs font-bold text-success bg-success/10 px-3 py-2 rounded-xl border border-success/20">
-                <Lightbulb className="h-3.5 w-3.5" /> Oportunidade Identificada
-              </div>
-              <div className="flex items-center gap-2 text-xs font-bold text-warning bg-warning/10 px-3 py-2 rounded-xl border border-warning/20">
-                <AlertCircle className="h-3.5 w-3.5" /> Gargalo no Funil (Negoc.)
-              </div>
-            </div>
-          </div>
-
-           {/* Content based on Active Category */}
-           <div className="space-y-8">
-             {/* Summary Cards */}
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-               {[
-                 { label: "Faturamento", value: stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.revenueTrend, icon: DollarSign, bg: "bg-primary/10", text: "text-primary", category: 'financeiro' },
-                 { label: "Leads Totais", value: stats.leads.toString(), trend: stats.leadsTrend, icon: Users, bg: "bg-info/10", text: "text-info", category: 'clientes' },
-                 { label: "Conversão", value: stats.conversion.toFixed(1) + "%", trend: stats.conversionTrend, icon: Target, bg: "bg-success/10", text: "text-success", category: 'vendas' },
-                 { label: "Ticket Médio", value: stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.avgTicketTrend, icon: TrendingUp, bg: "bg-warning/10", text: "text-warning", category: 'vendas' },
-               ].filter(s => activeCategory === 'visao-geral' || s.category === activeCategory || (activeCategory === 'financeiro' && s.label === "Faturamento") || (activeCategory === 'vendas' && s.label === "Conversão")).map((stat, i) => (
-                 <div key={i} className="bg-white border border-border rounded-2xl p-5 shadow-card hover:border-primary/20 transition-colors group">
-                   <div className="flex items-start justify-between mb-4">
-                     <div className={`h-11 w-11 rounded-xl ${stat.bg} ${stat.text} flex items-center justify-center`}>
-                       <stat.icon className="h-5 w-5" />
-                     </div>
-                      <div className={`flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-lg ${stat.trend.isUp ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                        {stat.trend.isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                        {stat.trend.value}
-                     </div>
-                   </div>
-                   <p className="text-[13px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{stat.label}</p>
-                   {loading ? (
-                     <div className="h-8 w-24 bg-muted animate-pulse rounded-lg" />
-                   ) : (
-                     <h3 className="text-2xl font-bold font-display tracking-tight group-hover:text-primary transition-colors">{stat.value}</h3>
-                   )}
-                 </div>
-               ))}
-             </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all">
-                <div className="flex items-center justify-between mb-8">
-                  <div>
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Desempenho de Vendas</h3>
-                    <p className="text-sm font-bold text-slate-400">Análise de faturamento diário</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100">
-                      <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
-                      <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">+12.5%</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="h-[300px]">
-                  <SalesChart />
+                <div className="flex p-1 bg-white border border-border rounded-xl shadow-sm">
+                  {["Hoje", "7D", "30D", "12M", "Tudo"].map((p) => (<button key={p} className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${p === "30D" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:bg-muted"}`}>{p}</button>))}
                 </div>
               </div>
-
-              <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all">
-                <div className="flex items-center justify-between mb-8">
-                  <div>
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Funil de Conversão</h3>
-                    <p className="text-sm font-bold text-slate-400">Eficiência operacional por etapa</p>
-                  </div>
-                  <button className="h-9 px-4 rounded-xl bg-slate-50 border border-slate-100 text-[11px] font-black text-slate-500 uppercase tracking-widest hover:bg-slate-100 transition-colors">
-                    Ver Pipeline
-                  </button>
-                </div>
-                <div className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                     <BarChart layout="vertical" data={funnelData} margin={{ left: 40, right: 40 }}>
-                      <XAxis type="number" hide />
-                      <YAxis 
-                        dataKey="name" 
-                        type="category" 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{ fontSize: 11, fontWeight: 800, fill: "#94a3b8", letterSpacing: '0.05em' }}
-                      />
-                      <Tooltip 
-                        cursor={{ fill: "transparent" }}
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            return (
-                              <div className="bg-slate-900 text-white p-3 rounded-2xl shadow-2xl border border-white/10">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{payload[0].payload.name}</p>
-                                <p className="text-xl font-black">{payload[0].value} <span className="text-xs font-medium text-slate-400">leads</span></p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                        <Bar dataKey="value" radius={[0, 12, 12, 0]} barSize={40}>
-                          {funnelData.length > 0 && funnelData.map((entry: any, index: number) => (
-                           <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.9} />
-                         ))}
-                       </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex flex-wrap gap-4 mt-8 pt-8 border-t border-slate-50 justify-between">
-                  {funnelData.length > 0 ? funnelData.map((stage, i) => (
-                    <div key={i} className="text-center group cursor-default min-w-[80px]">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 group-hover:text-slate-600 transition-colors">{stage.name}</p>
-                      <p className="text-xl font-black text-primary group-hover:scale-110 transition-transform">
-                        {funnelPercentages[i] || "0%"}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">Conv. Etapa</p>
-                    </div>
-                  )) : (
-                    <div className="w-full text-center py-4 text-xs text-muted-foreground">Crie estágios no funil para ver a conversão</div>
-                  )}
-                </div>
-              </div>
+              <button className="h-10 px-4 rounded-xl bg-primary text-white text-[13px] font-bold shadow-elegant hover:opacity-90 transition flex items-center gap-2"><Zap className="h-4 w-4 fill-white" /> Exportar Relatório IA</button>
             </div>
-
-            {/* Sidebar Column */}
-            <div className="flex flex-col gap-8">
-              {/* Top Performers */}
-              <div className="bg-white border border-border rounded-2xl shadow-card">
-                <div className="p-6 border-b border-border flex items-center justify-between">
-                  <h3 className="text-lg font-bold">Top Agentes</h3>
-                  <button className="text-primary hover:underline text-xs font-bold">Ver tudo</button>
-                </div>
-                    <div className="p-4 space-y-2">
-                      {topAgents.length > 0 ? topAgents.map((agent: any, i: number) => (
-                       <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-border">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
-                            {agent.avatar}
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold leading-none mb-1">{agent.name}</p>
-                            <p className="text-xs text-muted-foreground font-medium">{agent.sales} vendas efetuadas</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold text-foreground mb-1">{agent.revenue}</p>
-                          <p className="text-[10px] font-bold text-success flex items-center justify-end gap-0.5">
-                            <ArrowUpRight className="h-2.5 w-2.5" /> {agent.trend}
-                          </p>
-                        </div>
-                      </div>
-                    )) : (
-                      <div className="p-8 text-center text-sm text-muted-foreground">Sem dados de agentes</div>
-                    )}
-                  </div>
-                <div className="p-4 pt-0">
-                  <button className="w-full py-3 rounded-xl bg-slate-50 text-muted-foreground text-xs font-bold hover:bg-slate-100 transition-colors flex items-center justify-center gap-2">
-                    <UserCheck className="h-4 w-4" /> Relatório Completo de Equipe
-                  </button>
-                </div>
-              </div>
-
-              {/* Lead Origin */}
-              <div className="bg-white border border-border rounded-2xl shadow-card overflow-hidden">
-                <div className="p-6 border-b border-border">
-                  <h3 className="text-lg font-bold">Origem dos Leads</h3>
-                  <p className="text-sm text-muted-foreground font-medium">Distribuição por canal</p>
-                </div>
-                <div className="p-6">
-                  <div className="h-[220px] w-full relative">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <RePieChart>
-                          <Pie
-                            data={originData.length > 0 ? originData : [{ name: 'Sem dados', value: 100, color: '#e2e8f0' }]}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={85}
-                            paddingAngle={8}
-                            dataKey="value"
-                          >
-                            {originData.length > 0 ? originData.map((entry: any, index: number) => (
-                             <Cell key={`cell-${index}`} fill={entry.color} />
-                           )) : (
-                             <Cell fill="#e2e8f0" />
-                           )}
-                         </Pie>
-                        <Tooltip 
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              return (
-                                <div className="bg-white border border-border p-2 rounded-lg shadow-elegant">
-                                  <p className="text-[11px] font-bold">{payload[0].name}: {payload[0].value}%</p>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                      </RePieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <PieChart className="h-6 w-6 text-muted-foreground/30 mb-1" />
-                      <span className="text-xs font-bold text-muted-foreground uppercase">Mix</span>
-                    </div>
-                  </div>
-                    <div className="space-y-3 mt-4">
-                      {originData.length > 0 ? originData.map((item: any, i: number) => (
-                       <div key={i} className="flex items-center justify-between group cursor-default">
-                        <div className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
-                          <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{item.name}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-bold">{item.value}%</span>
-                          <div className="w-16 h-1 bg-muted rounded-full overflow-hidden">
-                            <div className="h-full rounded-full" style={{ backgroundColor: item.color, width: `${item.value}%` }} />
-                          </div>
-                        </div>
-                      </div>
-                    )) : (
-                      <div className="text-center text-xs text-muted-foreground py-4 italic">Sem origens detectadas</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Detailed Reports Table */}
-          <div className="bg-white border border-border rounded-2xl shadow-card overflow-hidden">
-            <div className="p-6 border-b border-border flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold">Relatórios Detalhados</h3>
-                <p className="text-sm text-muted-foreground font-medium">Histórico de exportações e métricas consolidadas</p>
-              </div>
-              <button className="h-9 px-4 rounded-xl border border-border text-xs font-bold hover:bg-muted transition-colors">
-                Configurar Colunas
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 border-b border-border">
-                  <tr>
-                    <th className="px-6 py-4 text-xs font-black text-muted-foreground uppercase tracking-wider">Nome do Relatório</th>
-                    <th className="px-6 py-4 text-xs font-black text-muted-foreground uppercase tracking-wider">Período</th>
-                    <th className="px-6 py-4 text-xs font-black text-muted-foreground uppercase tracking-wider">Tipo</th>
-                    <th className="px-6 py-4 text-xs font-black text-muted-foreground uppercase tracking-wider">Gerado em</th>
-                    <th className="px-6 py-4 text-xs font-black text-muted-foreground uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-right pr-8"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {[
-                    { name: "Performance de Vendas Q1", period: "Jan - Mar 2024", type: "Vendas", date: "Ontem às 14:30", status: "Concluído" },
-                    { name: "Origem e Atribuição de Leads", period: "Últimos 30 dias", type: "Marketing", date: "15 Abr 2024", status: "Concluído" },
-                    { name: "DRE Simplificado Mensal", period: "Março 2024", type: "Financeiro", date: "02 Abr 2024", status: "Concluído" },
-                    { name: "Taxa de Churn e Retenção", period: "Últimos 12 meses", type: "Sucesso", date: "28 Mar 2024", status: "Pendente" },
-                  ].map((item, i) => (
-                    <tr key={i} className="hover:bg-slate-50 transition-colors group">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                            <Download className="h-4 w-4 text-primary" />
-                          </div>
-                          <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{item.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-muted-foreground font-medium">{item.period}</td>
-                      <td className="px-6 py-4">
-                        <span className="text-[11px] font-bold px-2 py-1 rounded-md bg-muted text-muted-foreground uppercase">
-                          {item.type}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-muted-foreground">{item.date}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-1.5">
-                          <div className={`h-1.5 w-1.5 rounded-full ${item.status === "Concluído" ? "bg-success" : "bg-warning"}`} />
-                          <span className={`text-[13px] font-bold ${item.status === "Concluído" ? "text-success" : "text-warning"}`}>
-                            {item.status}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right pr-8">
-                        <button className="h-8 w-8 rounded-lg hover:bg-muted grid place-items-center text-muted-foreground hover:text-foreground transition-colors">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="p-4 bg-slate-50 border-t border-border flex items-center justify-center">
-              <button className="text-xs font-bold text-primary hover:underline">Ver todo o histórico de relatórios</button>
-            </div>
-          </div>
+            <DashboardContent activeCategory={activeCategory} stats={stats} funnelData={funnelData} originData={originData} topAgents={topAgents} funnelPercentages={funnelPercentages} loading={loading} />
+          </main>
         </div>
-      </main>
+      </div>
     </div>
-  </div>
-</div>
   );
 }
