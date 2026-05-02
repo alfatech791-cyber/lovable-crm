@@ -232,6 +232,21 @@ function FinancePlanoContasPage() {
               </div>
             </div>
 
+            <div className="flex items-center gap-3 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Buscar conta por nome ou código..." 
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className="w-full h-11 pl-10 pr-4 rounded-xl border-slate-200" 
+                />
+              </div>
+              <Button variant="outline" className="h-11 w-11 p-0 rounded-xl border-slate-200">
+                <Filter className="h-4 w-4" />
+              </Button>
+            </div>
+
             <div className="space-y-4">
               {rootAccounts.map(account => (
                 <AccountItem key={account.id} account={account} allAccounts={accounts || []} />
