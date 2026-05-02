@@ -243,73 +243,80 @@ export const Route = createFileRoute("/relatorios")({
            </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            {/* Sales performance - Larger card */}
-            <div className="lg:col-span-2 flex flex-col gap-8">
-              <div className="bg-white border border-border rounded-2xl shadow-card overflow-hidden">
-                <div className="p-6 border-b border-border flex items-center justify-between">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all">
+                <div className="flex items-center justify-between mb-8">
                   <div>
-                    <h3 className="text-lg font-bold">Desempenho de Vendas</h3>
-                    <p className="text-sm text-muted-foreground font-medium">Faturamento diário nos últimos 30 dias</p>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Desempenho de Vendas</h3>
+                    <p className="text-sm font-bold text-slate-400">Análise de faturamento diário</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100">
+                      <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+                      <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">+12.5%</span>
+                    </div>
                   </div>
                 </div>
-                <div className="p-6">
+                <div className="h-[300px]">
                   <SalesChart />
                 </div>
               </div>
 
-              {/* Conversion Funnel */}
-              <div className="bg-white border border-border rounded-2xl shadow-card">
-                <div className="p-6 border-b border-border">
-                  <h3 className="text-lg font-bold">Funil de Conversão</h3>
-                  <p className="text-sm text-muted-foreground font-medium">Eficiência por etapa do processo</p>
+              <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Funil de Conversão</h3>
+                    <p className="text-sm font-bold text-slate-400">Eficiência operacional por etapa</p>
+                  </div>
+                  <button className="h-9 px-4 rounded-xl bg-slate-50 border border-slate-100 text-[11px] font-black text-slate-500 uppercase tracking-widest hover:bg-slate-100 transition-colors">
+                    Ver Pipeline
+                  </button>
                 </div>
-                <div className="p-6">
-                  <div className="h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                       <BarChart layout="vertical" data={funnelData} margin={{ left: 40, right: 40 }}>
-                        <XAxis type="number" hide />
-                        <YAxis 
-                          dataKey="name" 
-                          type="category" 
-                          axisLine={false} 
-                          tickLine={false} 
-                          tick={{ fontSize: 13, fontWeight: 700, fill: "var(--color-foreground)" }}
-                        />
-                        <Tooltip 
-                          cursor={{ fill: "transparent" }}
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              return (
-                                <div className="bg-white border border-border p-3 rounded-xl shadow-elegant">
-                                  <p className="text-[13px] font-bold text-foreground">{payload[0].payload.name}</p>
-                                  <p className="text-lg font-bold text-primary">{payload[0].value} <span className="text-xs text-muted-foreground">leads</span></p>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                          <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={32}>
-                            {funnelData.length > 0 && funnelData.map((entry: any, index: number) => (
-                             <Cell key={`cell-${index}`} fill={entry.color} />
-                           ))}
-                         </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="grid grid-cols-4 gap-4 mt-6 pt-6 border-t border-border">
-                    {[
-                      { label: "Lead p/ Qual.", value: "65%", status: "success" },
-                      { label: "Qual. p/ Prop.", value: "64%", status: "success" },
-                      { label: "Prop. p/ Negoc.", value: "66%", status: "warning" },
-                      { label: "Conversão Final", value: "15%", status: "primary" },
-                    ].map((m, i) => (
-                      <div key={i} className="text-center">
-                        <p className="text-[11px] font-bold text-muted-foreground uppercase mb-1">{m.label}</p>
-                        <p className={`text-lg font-bold text-${m.status}`}>{m.value}</p>
-                      </div>
-                    ))}
-                  </div>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                     <BarChart layout="vertical" data={funnelData} margin={{ left: 40, right: 40 }}>
+                      <XAxis type="number" hide />
+                      <YAxis 
+                        dataKey="name" 
+                        type="category" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 11, fontWeight: 800, fill: "#94a3b8", textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                      />
+                      <Tooltip 
+                        cursor={{ fill: "transparent" }}
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="bg-slate-900 text-white p-3 rounded-2xl shadow-2xl border border-white/10">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{payload[0].payload.name}</p>
+                                <p className="text-xl font-black">{payload[0].value} <span className="text-xs font-medium text-slate-400">leads</span></p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                        <Bar dataKey="value" radius={[0, 12, 12, 0]} barSize={40}>
+                          {funnelData.length > 0 && funnelData.map((entry: any, index: number) => (
+                           <Cell key={`cell-${index}`} fill={entry.color} fillOpacity={0.9} />
+                         ))}
+                       </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="grid grid-cols-4 gap-4 mt-8 pt-8 border-t border-slate-50">
+                  {[
+                    { label: "Qualificação", value: "65%", status: "emerald" },
+                    { label: "Proposta", value: "64%", status: "indigo" },
+                    { label: "Negociação", value: "66%", status: "violet" },
+                    { label: "Fechamento", value: "15%", status: "slate" },
+                  ].map((m, i) => (
+                    <div key={i} className="text-center group cursor-default">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 group-hover:text-slate-600 transition-colors">{m.label}</p>
+                      <p className={`text-xl font-black text-${m.status}-500 group-hover:scale-110 transition-transform`}>{m.value}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
