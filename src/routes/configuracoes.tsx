@@ -38,7 +38,7 @@ export const Route = createFileRoute("/configuracoes")({
         };
 
         for (const table of tables) {
-          const { data, error } = await supabase.from(table).select("*");
+          const { data, error } = await (supabase as any).from(table).select("*");
           if (error) {
             console.error(`Erro ao exportar tabela ${table}:`, error);
             continue;
@@ -83,7 +83,7 @@ export const Route = createFileRoute("/configuracoes")({
           
           for (const [table, rows] of Object.entries(backupData.data)) {
             if (Array.isArray(rows) && rows.length > 0) {
-              const { error } = await supabase.from(table).upsert(rows);
+              const { error } = await (supabase as any).from(table).upsert(rows);
               if (error) {
                 console.error(`Erro ao importar tabela ${table}:`, error);
               }
@@ -152,6 +152,18 @@ export const Route = createFileRoute("/configuracoes")({
                    <TabsTrigger value="integracoes" className="rounded-lg gap-2"><Database className="h-4 w-4" /> Integrações</TabsTrigger>
                     <TabsTrigger value="seguranca" className="rounded-lg gap-2"><Shield className="h-4 w-4" /> Segurança</TabsTrigger>
                     <TabsTrigger value="backup" className="rounded-lg gap-2"><Database className="h-4 w-4" /> Backup</TabsTrigger>
+                  </TabsList>
+                 {activeTab === "perfil" ? (
+                   <Button onClick={handleSaveProfile} className="bg-gradient-primary shadow-glow">
+                     Salvar Perfil
+                   </Button>
+                 ) : (
+                   <Button onClick={() => toast.success("Configurações salvas!")} className="bg-gradient-primary shadow-glow">
+                     Salvar Alterações
+                   </Button>
+                 )}
+               </div>
+ 
                 <TabsContent value="backup">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Card className="border-border shadow-card">
@@ -224,19 +236,7 @@ export const Route = createFileRoute("/configuracoes")({
                   </div>
                 </TabsContent>
 
-                 </TabsList>
-                 {activeTab === "perfil" ? (
-                   <Button onClick={handleSaveProfile} className="bg-gradient-primary shadow-glow">
-                     Salvar Perfil
-                   </Button>
-                 ) : (
-                   <Button onClick={() => toast.success("Configurações salvas!")} className="bg-gradient-primary shadow-glow">
-                     Salvar Alterações
-                   </Button>
-                 )}
-               </div>
- 
-               <TabsContent value="perfil">
+                <TabsContent value="perfil">
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                    <Card className="md:col-span-2 border-border shadow-card">
                      <CardHeader>
