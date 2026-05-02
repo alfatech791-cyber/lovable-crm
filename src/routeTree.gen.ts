@@ -44,6 +44,7 @@ import { Route as ServicosNovaRouteImport } from './routes/servicos.nova'
 import { Route as ServicosDashboardRouteImport } from './routes/servicos.dashboard'
 import { Route as ServicosChecklistsRouteImport } from './routes/servicos.checklists'
 import { Route as FinanceiroPlanoContasRouteImport } from './routes/financeiro.plano-contas'
+import { Route as FinanceiroNotasAbertoRouteImport } from './routes/financeiro.notas-aberto'
 import { Route as FinanceiroMaquininhasRouteImport } from './routes/financeiro.maquininhas'
 import { Route as FinanceiroFornecedoresRouteImport } from './routes/financeiro.fornecedores'
 import { Route as FinanceiroDreRouteImport } from './routes/financeiro.dre'
@@ -233,6 +234,11 @@ const FinanceiroPlanoContasRoute = FinanceiroPlanoContasRouteImport.update({
   path: '/plano-contas',
   getParentRoute: () => FinanceiroRoute,
 } as any)
+const FinanceiroNotasAbertoRoute = FinanceiroNotasAbertoRouteImport.update({
+  id: '/notas-aberto',
+  path: '/notas-aberto',
+  getParentRoute: () => FinanceiroRoute,
+} as any)
 const FinanceiroMaquininhasRoute = FinanceiroMaquininhasRouteImport.update({
   id: '/maquininhas',
   path: '/maquininhas',
@@ -334,6 +340,7 @@ export interface FileRoutesByFullPath {
   '/financeiro/dre': typeof FinanceiroDreRoute
   '/financeiro/fornecedores': typeof FinanceiroFornecedoresRoute
   '/financeiro/maquininhas': typeof FinanceiroMaquininhasRoute
+  '/financeiro/notas-aberto': typeof FinanceiroNotasAbertoRoute
   '/financeiro/plano-contas': typeof FinanceiroPlanoContasRoute
   '/servicos/checklists': typeof ServicosChecklistsRoute
   '/servicos/dashboard': typeof ServicosDashboardRoute
@@ -384,6 +391,7 @@ export interface FileRoutesByTo {
   '/financeiro/dre': typeof FinanceiroDreRoute
   '/financeiro/fornecedores': typeof FinanceiroFornecedoresRoute
   '/financeiro/maquininhas': typeof FinanceiroMaquininhasRoute
+  '/financeiro/notas-aberto': typeof FinanceiroNotasAbertoRoute
   '/financeiro/plano-contas': typeof FinanceiroPlanoContasRoute
   '/servicos/checklists': typeof ServicosChecklistsRoute
   '/servicos/dashboard': typeof ServicosDashboardRoute
@@ -435,6 +443,7 @@ export interface FileRoutesById {
   '/financeiro/dre': typeof FinanceiroDreRoute
   '/financeiro/fornecedores': typeof FinanceiroFornecedoresRoute
   '/financeiro/maquininhas': typeof FinanceiroMaquininhasRoute
+  '/financeiro/notas-aberto': typeof FinanceiroNotasAbertoRoute
   '/financeiro/plano-contas': typeof FinanceiroPlanoContasRoute
   '/servicos/checklists': typeof ServicosChecklistsRoute
   '/servicos/dashboard': typeof ServicosDashboardRoute
@@ -487,6 +496,7 @@ export interface FileRouteTypes {
     | '/financeiro/dre'
     | '/financeiro/fornecedores'
     | '/financeiro/maquininhas'
+    | '/financeiro/notas-aberto'
     | '/financeiro/plano-contas'
     | '/servicos/checklists'
     | '/servicos/dashboard'
@@ -537,6 +547,7 @@ export interface FileRouteTypes {
     | '/financeiro/dre'
     | '/financeiro/fornecedores'
     | '/financeiro/maquininhas'
+    | '/financeiro/notas-aberto'
     | '/financeiro/plano-contas'
     | '/servicos/checklists'
     | '/servicos/dashboard'
@@ -587,6 +598,7 @@ export interface FileRouteTypes {
     | '/financeiro/dre'
     | '/financeiro/fornecedores'
     | '/financeiro/maquininhas'
+    | '/financeiro/notas-aberto'
     | '/financeiro/plano-contas'
     | '/servicos/checklists'
     | '/servicos/dashboard'
@@ -879,6 +891,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FinanceiroPlanoContasRouteImport
       parentRoute: typeof FinanceiroRoute
     }
+    '/financeiro/notas-aberto': {
+      id: '/financeiro/notas-aberto'
+      path: '/notas-aberto'
+      fullPath: '/financeiro/notas-aberto'
+      preLoaderRoute: typeof FinanceiroNotasAbertoRouteImport
+      parentRoute: typeof FinanceiroRoute
+    }
     '/financeiro/maquininhas': {
       id: '/financeiro/maquininhas'
       path: '/maquininhas'
@@ -997,6 +1016,7 @@ interface FinanceiroRouteChildren {
   FinanceiroDreRoute: typeof FinanceiroDreRoute
   FinanceiroFornecedoresRoute: typeof FinanceiroFornecedoresRoute
   FinanceiroMaquininhasRoute: typeof FinanceiroMaquininhasRoute
+  FinanceiroNotasAbertoRoute: typeof FinanceiroNotasAbertoRoute
   FinanceiroPlanoContasRoute: typeof FinanceiroPlanoContasRoute
 }
 
@@ -1005,6 +1025,7 @@ const FinanceiroRouteChildren: FinanceiroRouteChildren = {
   FinanceiroDreRoute: FinanceiroDreRoute,
   FinanceiroFornecedoresRoute: FinanceiroFornecedoresRoute,
   FinanceiroMaquininhasRoute: FinanceiroMaquininhasRoute,
+  FinanceiroNotasAbertoRoute: FinanceiroNotasAbertoRoute,
   FinanceiroPlanoContasRoute: FinanceiroPlanoContasRoute,
 }
 
