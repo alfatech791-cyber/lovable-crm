@@ -52,6 +52,7 @@
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [lastSaleId, setLastSaleId] = useState<string | null>(null);
   const [lastSaleData, setLastSaleData] = useState<any | null>(null);
+  const [editingSaleId, setEditingSaleId] = useState<string | null>(null);
   const [selectedCartItemId, setSelectedCartItemId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -352,7 +353,8 @@
 
         // Lógica para lidar com parâmetros de URL (Impressão e Visualização)
         const urlParams = new URLSearchParams(window.location.search);
-        const saleId = urlParams.get('id') || urlParams.get('view');
+        const saleId = urlParams.get('id') || urlParams.get('view') || urlParams.get('edit');
+        const isEditing = urlParams.has('edit');
         const action = urlParams.get('print');
         const warrantyType = urlParams.get('type') as 'seminovo' | 'lacrado' | 'android' | null;
 
@@ -403,6 +405,12 @@
               setTimeout(() => {
                 handlePrintWarranty(warrantyType || 'seminovo', saleSnapshot);
               }, 500);
+            } else if (isEditing) {
+              setEditingSaleId(sale.id);
+              setSelectedCustomer(sale.customers ? { id: sale.customers.id, name: sale.customers.full_name } : null);
+              setCart((sale.items as any[]) || []);
+              setDiscountValue(sale.discount_amount || 0);
+              toast.success("Venda carregada para edição");
             }
           } catch (err) {
             console.error("Erro ao carregar venda via URL:", err);
