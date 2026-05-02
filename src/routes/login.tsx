@@ -2,6 +2,7 @@
  import { Sparkles, Mail, Lock, ArrowRight } from "lucide-react";
  import { useState } from "react";
  import { supabase } from "@/integrations/supabase/client";
+import { NetworkBackground } from "@/components/ui/network-background";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -40,9 +41,10 @@ export const Route = createFileRoute("/login")({
    };
  
    return (
-     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-black overflow-hidden relative">
+      <NetworkBackground />
        {/* Left side */}
-       <div className="flex flex-col justify-center px-6 sm:px-12 lg:px-20 py-12">
+      <div className="flex flex-col justify-center px-6 sm:px-12 lg:px-20 py-12 relative z-10 bg-black/40 backdrop-blur-sm">
          <Link to="/" className="flex items-center gap-2.5 mb-12">
            <div className="h-10 w-10 rounded-xl bg-gradient-primary grid place-items-center shadow-glow">
              <Sparkles className="h-5 w-5 text-white" strokeWidth={2.5} />
