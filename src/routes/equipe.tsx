@@ -42,28 +42,6 @@ function EquipePage() {
     }
   };
 
-   const isAdmin = ['super_admin', 'owner', 'admin'].includes(profile?.role);
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
-        <div className="flex-1 flex flex-col min-w-0">
-          <Topbar title="Acesso Negado" subtitle="Você não tem permissão para ver esta página" toggleSidebar={() => setSidebarOpen(true)} />
-          <main className="flex-1 flex items-center justify-center p-6 text-center">
-            <div className="max-w-md">
-              <div className="h-20 w-20 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-6">
-                <Shield className="h-10 w-10" />
-              </div>
-              <h2 className="text-2xl font-bold mb-2">Página Restrita</h2>
-              <p className="text-muted-foreground mb-8">O seu nível de acesso não permite gerenciar a equipe. Entre em contato com um administrador para solicitar acesso.</p>
-              <Link to="/" className="inline-flex h-11 px-6 items-center justify-center rounded-xl bg-primary text-white font-bold text-sm shadow-glow">Voltar ao Início</Link>
-            </div>
-          </main>
-        </div>
-      </div>
-    );
-  }
 
    const handleInvite = async (newMember: any) => {
      // Em um app real, aqui enviariamos um convite via Edge Function
