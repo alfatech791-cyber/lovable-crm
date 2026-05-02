@@ -90,23 +90,35 @@ export function FinanceDashboard() {
      return data;
    }, [transactions]);
  
-   const despesasPorCategoria = useMemo(() => {
-     const cats: Record<string, number> = {};
-     const colors = ["#2563eb", "#ef4444", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899"];
-     
-     transactions
-       .filter(t => t.type === 'expense')
-       .forEach(t => {
-         const cat = t.category || "Geral";
-         cats[cat] = (cats[cat] || 0) + (t.amount || 0);
-       });
-       
-     return Object.entries(cats).map(([name, value], i) => ({
-       name,
-       value,
-       color: colors[i % colors.length]
-     })).sort((a, b) => b.value - a.value).slice(0, 5);
-   }, [transactions]);
+    const despesasPorCategoria = useMemo(() => {
+      const now = new Date();
+      const currentMonthStart = startOfMonth(now);
+      const currentMonthEnd = endOfMonth(now);
+
+      const cats: Record<string, number> = {};
+      const colors = ["#2563eb", "#ef4444", "#f59e0b", "#10b981", "#8b5cf6", "#ec4899"];
+      
+      const currentMonthExpenses = transactions
+        .filter(t => 
+          t.type === 'expense' && 
+          t.payment_date && 
+          isWithinInterval(new Date(t.payment_date), { start: currentMonthStart, end: currentMonthEnd })
+        );
+
+      const totalMonthExpense = currentMonthExpenses.reduce((acc, t) => acc + (t.amount || 0), 0);
+        
+      currentMonthExpenses.forEach(t => {
+        const cat = t.category || "Geral";
+        cats[cat] = (cats[cat] || 0) + (t.amount || 0);
+      });
+        
+      return Object.entries(cats).map(([name, value], i) => ({
+        name,
+        value,
+        percentage: totalMonthExpense > 0 ? (value / totalMonthExpense) * 100 : 0,
+        color: colors[i % colors.length]
+      })).sort((a, b) => b.value - a.value).slice(0, 5);
+    }, [transactions]);
  
    const [editingTransaction, setEditingTransaction] = useState<any>(null);
  
@@ -302,43 +314,50 @@ export function FinanceDashboard() {
             <CardDescription className="font-medium text-xs">Distribuição de despesas no mês</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[200px] w-full mb-6">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={despesasPorCategoria} layout="vertical">
-                  <XAxis type="number" hide />
-                  <YAxis 
-                    dataKey="name" 
-                    type="category" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fontSize: 10, fill: '#64748b', fontWeight: 800 }}
-                    width={80}
-                  />
-                  <Tooltip 
-                    cursor={{ fill: 'transparent' }}
-                    contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontWeight: 'bold', fontSize: '12px' }}
-                  />
-                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={16}>
-                      {despesasPorCategoria.length > 0 && despesasPorCategoria.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-              <div className="space-y-3">
-                {despesasPorCategoria.length > 0 ? despesasPorCategoria.map((cat, i) => (
-                  <div key={i} className="flex items-center justify-between">
+            <div className="space-y-5">
+              {despesasPorCategoria.length > 0 ? despesasPorCategoria.map((cat, i) => (
+                <div key={i} className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }}></div>
-                      <span className="text-xs font-bold text-muted-foreground">{cat.name}</span>
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: cat.color }}></div>
+                      <span className="font-bold text-slate-700 truncate max-w-[120px] uppercase tracking-tighter">{cat.name}</span>
                     </div>
-                    <span className="text-xs font-black text-slate-900">R$ {cat.value.toLocaleString('pt-BR')}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground font-medium">{cat.percentage.toFixed(1)}%</span>
+                      <span className="font-black text-slate-900">R$ {cat.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    </div>
                   </div>
-                )) : (
-                  <div className="text-center text-xs text-muted-foreground py-4 italic">Sem categorias registradas</div>
-                )}
+                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full rounded-full transition-all duration-500 ease-out" 
+                      style={{ 
+                        width: `${cat.percentage}%`, 
+                        backgroundColor: cat.color,
+                        boxShadow: `0 0 8px ${cat.color}40`
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              )) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center space-y-2">
+                  <div className="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center">
+                    <PieChart className="h-6 w-6 text-slate-300" />
+                  </div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest italic">Nenhum gasto registrado este mês</p>
+                </div>
+              )}
+            </div>
+            
+            {despesasPorCategoria.length > 0 && (
+              <div className="mt-6 pt-6 border-t border-slate-50">
+                <div className="flex items-center justify-between">
+                  <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total do Mês</div>
+                  <div className="text-sm font-black text-red-600">
+                    R$ {despesasPorCategoria.reduce((acc, c) => acc + c.value, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
               </div>
+            )}
           </CardContent>
         </Card>
       </div>
