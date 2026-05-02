@@ -65,7 +65,7 @@ export function SalesImportModal({ isOpen, onClose, onImportSuccess }: SalesImpo
          user_id: user.id,
          total_amount: parseFloat(row.valor || row.total || row.Amount || 0),
          payment_method: row.metodo_pagamento || row.payment_method || "Pix",
-         status: row.status || "completed",
+          status: row.status || "concluded",
          notes: row.observacao || row.notes || "Importado via sistema",
          items: row.itens ? JSON.parse(row.itens) : [],
          created_at: row.data ? new Date(row.data).toISOString() : new Date().toISOString(),

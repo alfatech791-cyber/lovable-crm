@@ -10,11 +10,14 @@ export default function Vendas() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const navigate = useNavigate();
 
+   const [refreshKey, setRefreshKey] = useState(0);
+
    return (
      <div className="p-4 md:p-6 space-y-8 animate-in fade-in duration-500">
        <SalesImportModal 
          isOpen={isImportModalOpen} 
-         onClose={() => setIsImportModalOpen(false)} 
+         onClose={() => setIsImportModalOpen(false)}
+         onImportSuccess={() => setRefreshKey(prev => prev + 1)}
        />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -90,7 +93,7 @@ export default function Vendas() {
         </div>
         
         <div className="rounded-3xl border border-border/40 bg-card/30 p-2 backdrop-blur-sm shadow-xl shadow-black/5">
-          <SalesHistory />
+          <SalesHistory key={refreshKey} />
         </div>
       </div>
     </div>
