@@ -101,7 +101,14 @@ function FinancePlanoContasPage() {
     },
   });
 
-  const rootAccounts = accounts?.filter(a => !a.parent_id) || [];
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredAccounts = accounts?.filter(a => 
+    a.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    a.code?.includes(searchTerm)
+  ) || [];
+
+  const rootAccounts = filteredAccounts.filter(a => !a.parent_id) || [];
 
   if (isLoading) return <div className="p-8">Carregando plano de contas...</div>;
 
