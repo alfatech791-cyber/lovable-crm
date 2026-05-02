@@ -32,11 +32,12 @@ export function FinanceDashboard() {
    const fetchTransactions = async () => {
      if (!user?.id) return;
      setLoading(true);
-     try {
-       const { data, error } = await supabase
-         .from("finance_transactions")
-         .select("*")
-         .eq("user_id", user.id);
+      try {
+        const { data, error } = await supabase
+          .from("finance_transactions")
+          .select("*")
+          .eq("user_id", user.id)
+          .order('created_at', { ascending: false });
        if (error) throw error;
        setTransactions(data || []);
      } catch (error) {
@@ -424,14 +425,21 @@ export function FinanceDashboard() {
                         {t.type === 'income' ? '+' : '-'} R$ {t.amount.toLocaleString('pt-BR')}
                       </div>
                       <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
-                          onClick={() => { setEditingTransaction(t); setIsFormOpen(true); }}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingTransaction(t);
+                            setIsFormOpen(true);
+                          }}
                           className="p-1 hover:text-blue-600 transition-colors"
                         >
                           <Edit className="h-3 w-3" />
                         </button>
-                        <button 
-                          onClick={() => handleDelete(t.id)}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(t.id);
+                          }}
                           className="p-1 hover:text-red-600 transition-colors"
                         >
                           <Trash2 className="h-3 w-3" />
