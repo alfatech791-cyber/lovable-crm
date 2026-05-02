@@ -175,17 +175,17 @@ import { Wallet, Calendar, Tag, Plus, FileText, Repeat, Upload, X, PlusCircle, T
          <ShadcnDialogHeader className="px-6 pt-4 sm:pt-6 pb-2">
            <div className="flex items-center justify-between">
              <div>
-               <ShadcnDialogTitle className="text-xl font-black text-slate-900">
-                 {transaction ? "Editar Lançamento" : "Novo Lançamento"}
-               </ShadcnDialogTitle>
-               <p className="text-xs text-muted-foreground font-medium">Preencha os detalhes da transação financeira</p>
-             </div>
-             <div className={cn(
-               "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
-               formData.type === 'income' ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-             )}>
-               {formData.type === 'income' ? "Receita" : "Despesa"}
-             </div>
+                <ShadcnDialogTitle className="text-xl font-black text-slate-900">
+                  {transaction ? "Editar Lançamento" : "Novo Lançamento"}
+                </ShadcnDialogTitle>
+                <p className="text-xs text-muted-foreground font-medium">Preencha os detalhes da transação financeira</p>
+              </div>
+              <div className={cn(
+                "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
+                formData.type === 'income' ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+              )}>
+                {formData.type === 'income' ? "Entrada" : "Saída"}
+              </div>
            </div>
          </ShadcnDialogHeader>
  
@@ -240,26 +240,26 @@ import { Wallet, Calendar, Tag, Plus, FileText, Repeat, Upload, X, PlusCircle, T
                    <div className="space-y-2">
                      <Label htmlFor="type" className="text-xs font-black uppercase tracking-widest text-slate-500">Tipo</Label>
                      <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
-                       <button
-                         type="button"
-                         onClick={() => setFormData({ ...formData, type: "income" })}
-                         className={cn(
-                           "py-2 rounded-lg text-xs font-black uppercase transition-all",
-                           formData.type === "income" ? "bg-white text-green-600 shadow-sm" : "text-slate-500 hover:bg-white/50"
-                         )}
-                       >
-                         Receita
-                       </button>
-                       <button
-                         type="button"
-                         onClick={() => setFormData({ ...formData, type: "expense" })}
-                         className={cn(
-                           "py-2 rounded-lg text-xs font-black uppercase transition-all",
-                           formData.type === "expense" ? "bg-white text-red-600 shadow-sm" : "text-slate-500 hover:bg-white/50"
-                         )}
-                       >
-                         Despesa
-                       </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, type: "income" })}
+                          className={cn(
+                            "py-2 rounded-lg text-xs font-black uppercase transition-all",
+                            formData.type === "income" ? "bg-white text-green-600 shadow-sm" : "text-slate-500 hover:bg-white/50"
+                          )}
+                        >
+                          Entrada
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, type: "expense" })}
+                          className={cn(
+                            "py-2 rounded-lg text-xs font-black uppercase transition-all",
+                            formData.type === "expense" ? "bg-white text-red-600 shadow-sm" : "text-slate-500 hover:bg-white/50"
+                          )}
+                        >
+                          Saída
+                        </button>
                      </div>
                    </div>
  
