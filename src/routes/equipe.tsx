@@ -43,12 +43,46 @@ function EquipePage() {
   };
 
 
-   const handleInvite = async (newMember: any) => {
-     // Em um app real, aqui enviariamos um convite via Edge Function
-     // Por agora, vamos apenas recarregar a lista
-     toast.success("Convite enviado com sucesso!");
-     fetchTeam();
-   };
+    const handleInvite = async (newMember: any) => {
+      if (!user?.id) return;
+      
+      try {
+        // 1. Criar convite no banco (gera token automático)
+        const { data: invite, error: inviteErr } = await supabase
+          .from('team_invitations')
+          .insert({
+            user_id: user.id,
+            email: newMember.email,
+            role: newMember.role.toLowerCase() === 'administrador' ? 'admin' : 
+                  newMember.role.toLowerCase() === 'vendedor' ? 'vendedor' : 'vendedor'
+          })
+          .select()
+          .single();
+
+        if (inviteErr) throw inviteErr;
+
+        // 2. Chamar Edge Function para enviar e-mail com template
+        const { error: emailErr } = await supabase.functions.invoke('send-email', {
+          body: {
+            to: newMember.email,
+            subject: `Você foi convidado para o ConectaCRM por ${user.email}`,
+            template: 'invite',
+            templateData: {
+              token: invite.token,
+              inviterEmail: user.email
+            }
+          }
+        });
+
+        if (emailErr) throw emailErr;
+
+        toast.success(`Convite enviado para ${newMember.email}`);
+        fetchTeam();
+      } catch (error: any) {
+        console.error('Invite error:', error);
+        toast.error('Erro ao enviar convite: ' + (error.message || 'Erro interno'));
+      }
+    };
 
    const handleRemoveMember = async (id: string) => {
      if (!confirm("Tem certeza que deseja remover este membro?")) return;
