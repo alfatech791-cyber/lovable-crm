@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { X, Shield, Mail, User, Check, AlertCircle } from "lucide-react";
-import { UserPermissions } from "@/contexts/AuthContext";
+ import { UserPermissions, Role } from "@/contexts/AuthContext";
 import { DEFAULT_EMPLOYEE_PERMISSIONS } from "@/types/permissions";
 
 interface InviteMemberModalProps {
@@ -12,23 +12,30 @@ interface InviteMemberModalProps {
 export function InviteMemberModal({ isOpen, onClose, onInvite }: InviteMemberModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"admin" | "employee">("employee");
+   const [role, setRole] = useState<Role>("employee");
   const [permissions, setPermissions] = useState<UserPermissions>(DEFAULT_EMPLOYEE_PERMISSIONS);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onInvite({
-      name,
-      email,
-      role: role === "admin" ? "Administrador" : "Agente",
-      permissions,
-      status: "offline",
-      avatar: name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2)
-    });
-    onClose();
-  };
+   const handleSubmit = (e: React.FormEvent) => {
+     e.preventDefault();
+     const roleLabels: Record<string, string> = {
+       owner: "Proprietário",
+       admin: "Administrador",
+       financeiro: "Financeiro",
+       vendedor: "Vendedor",
+       employee: "Funcionário",
+     };
+     onInvite({
+       name,
+       email,
+       role: roleLabels[role] || "Membro",
+       permissions,
+       status: "offline",
+       avatar: name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2)
+     });
+     onClose();
+   };
 
   const togglePermission = (key: keyof UserPermissions) => {
     setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
@@ -95,34 +102,24 @@ export function InviteMemberModal({ isOpen, onClose, onInvite }: InviteMemberMod
 
           <div className="space-y-3">
             <label className="text-sm font-bold ml-1">Nível de Acesso</label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setRole("employee")}
-                className={`flex flex-col items-start p-4 rounded-2xl border-2 transition-all ${role === "employee" ? "border-primary bg-primary/5" : "border-border hover:border-border/80"}`}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <User className={`h-4 w-4 ${role === "employee" ? "text-primary" : "text-muted-foreground"}`} />
-                  <span className="font-bold text-sm">Funcionário / Agente</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground text-left leading-relaxed">
-                  Acesso restrito apenas aos módulos selecionados abaixo.
-                </p>
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole("admin")}
-                className={`flex flex-col items-start p-4 rounded-2xl border-2 transition-all ${role === "admin" ? "border-primary bg-primary/5" : "border-border hover:border-border/80"}`}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <Shield className={`h-4 w-4 ${role === "admin" ? "text-primary" : "text-muted-foreground"}`} />
-                  <span className="font-bold text-sm">Administrador Total</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground text-left leading-relaxed">
-                  Acesso completo a todas as funções e configurações do sistema.
-                </p>
-              </button>
-            </div>
+             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+               {[
+                 { id: "employee", label: "Funcionário", icon: User },
+                 { id: "vendedor", label: "Vendedor", icon: User },
+                 { id: "financeiro", label: "Financeiro", icon: Shield },
+                 { id: "admin", label: "Administrador", icon: Shield },
+               ].map((r) => (
+                 <button
+                   key={r.id}
+                   type="button"
+                   onClick={() => setRole(r.id as Role)}
+                   className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all ${role === r.id ? "border-primary bg-primary/5" : "border-border hover:border-border/80"}`}
+                 >
+                   <r.icon className={`h-4 w-4 mb-1 ${role === r.id ? "text-primary" : "text-muted-foreground"}`} />
+                   <span className="font-bold text-[10px] text-center">{r.label}</span>
+                 </button>
+               ))}
+             </div>
           </div>
 
           {role === "employee" && (

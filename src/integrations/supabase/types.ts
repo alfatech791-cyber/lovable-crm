@@ -541,6 +541,7 @@ export type Database = {
           id: string
           invoice_number: string | null
           notes: string | null
+          owner_id: string | null
           payment_account: string | null
           payment_date: string | null
           payment_method: string | null
@@ -564,6 +565,7 @@ export type Database = {
           id?: string
           invoice_number?: string | null
           notes?: string | null
+          owner_id?: string | null
           payment_account?: string | null
           payment_date?: string | null
           payment_method?: string | null
@@ -587,6 +589,7 @@ export type Database = {
           id?: string
           invoice_number?: string | null
           notes?: string | null
+          owner_id?: string | null
           payment_account?: string | null
           payment_date?: string | null
           payment_method?: string | null
@@ -841,6 +844,7 @@ export type Database = {
           name: string
           ncm: string | null
           observations: string | null
+          owner_id: string | null
           price: number | null
           processor: string | null
           ram: string | null
@@ -877,6 +881,7 @@ export type Database = {
           name: string
           ncm?: string | null
           observations?: string | null
+          owner_id?: string | null
           price?: number | null
           processor?: string | null
           ram?: string | null
@@ -913,6 +918,7 @@ export type Database = {
           name?: string
           ncm?: string | null
           observations?: string | null
+          owner_id?: string | null
           price?: number | null
           processor?: string | null
           ram?: string | null
@@ -943,6 +949,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          owner_id: string | null
           plan_type: string | null
           role: string | null
           updated_at: string
@@ -954,6 +961,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          owner_id?: string | null
           plan_type?: string | null
           role?: string | null
           updated_at?: string
@@ -965,6 +973,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          owner_id?: string | null
           plan_type?: string | null
           role?: string | null
           updated_at?: string
@@ -981,6 +990,7 @@ export type Database = {
           id: string
           items: Json | null
           notes: string | null
+          owner_id: string | null
           payment_method: string | null
           status: string | null
           total_amount: number | null
@@ -994,6 +1004,7 @@ export type Database = {
           id?: string
           items?: Json | null
           notes?: string | null
+          owner_id?: string | null
           payment_method?: string | null
           status?: string | null
           total_amount?: number | null
@@ -1007,6 +1018,7 @@ export type Database = {
           id?: string
           items?: Json | null
           notes?: string | null
+          owner_id?: string | null
           payment_method?: string | null
           status?: string | null
           total_amount?: number | null
@@ -1237,6 +1249,8 @@ export type Database = {
         Args: { conv_id: string }
         Returns: undefined
       }
+      is_account_manager: { Args: never; Returns: boolean }
+      is_super_admin: { Args: never; Returns: boolean }
       normalize_phone: { Args: { p_phone: string }; Returns: string }
       scan_no_reply_24h: { Args: never; Returns: undefined }
       seed_default_automations: {
