@@ -233,9 +233,9 @@ export const Route = createFileRoute("/relatorios")({
         
         <div className="flex flex-1 overflow-hidden">
           {/* Side Menu from Image */}
-          <aside className="w-64 border-r border-border bg-white overflow-y-auto hidden md:block">
+          <aside className="w-72 border-r border-slate-100 bg-white overflow-y-auto hidden md:block shadow-sm">
             <div className="p-4">
-              <button className="w-full flex items-center justify-between p-3 rounded-xl bg-primary/5 text-primary font-bold text-sm mb-4">
+              <button className="w-full flex items-center justify-between p-3 rounded-xl bg-[#E8F0FE] text-primary font-bold text-sm mb-6">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   <span>Relatórios</span>
@@ -249,17 +249,17 @@ export const Route = createFileRoute("/relatorios")({
                   <button
                     key={cat.id}
                     onClick={() => setActiveCategory(cat.id)}
-                    className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-[13px] font-medium transition-all ${
                       activeCategory === cat.id 
-                        ? "bg-muted text-foreground" 
-                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                        ? "bg-slate-50 text-slate-900 shadow-sm" 
+                        : "text-slate-500 hover:bg-slate-50/50 hover:text-slate-700"
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <cat.icon className={`h-4 w-4 ${activeCategory === cat.id ? "text-primary" : ""}`} />
-                      <span className={activeCategory === cat.id ? "font-bold text-slate-800" : ""}>{cat.label}</span>
+                    <div className="flex items-center gap-3.5">
+                      <cat.icon className={`h-4.5 w-4.5 ${activeCategory === cat.id ? "text-blue-600" : "text-slate-400"}`} />
+                      <span className={activeCategory === cat.id ? "font-bold text-slate-900" : ""}>{cat.label}</span>
                       {cat.isNew && (
-                        <span className="bg-success text-white text-[9px] px-1.5 py-0.5 rounded-full font-black uppercase">Novo</span>
+                        <span className="bg-[#22C55E] text-white text-[9px] px-2 py-0.5 rounded-full font-black uppercase ml-1">Novo</span>
                       )}
                     </div>
                     {cat.hasArrow && <ChevronRight className="h-3.5 w-3.5 opacity-50" />}
