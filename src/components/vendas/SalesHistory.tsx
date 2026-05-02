@@ -29,12 +29,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
  
- const mockSales = [
-   { id: "V1001", customer: "João Silva", date: "2024-03-27 14:30", total: 7899.00, method: "Cartão de Crédito", status: "Concluída", items: 1 },
-   { id: "V1002", customer: "Maria Oliveira", date: "2024-03-27 12:15", total: 149.90, method: "PIX", status: "Concluída", items: 2 },
-   { id: "V1003", customer: "Pedro Santos", date: "2024-03-26 16:45", total: 6599.00, method: "Dinheiro", status: "Cancelada", items: 1 },
-   { id: "V1004", customer: "Ana Souza", date: "2024-03-26 10:20", total: 259.80, method: "Cartão de Débito", status: "Concluída", items: 3 },
- ];
  
  import { supabase } from "@/integrations/supabase/client";
  import { useAuth } from "@/contexts/AuthContext";

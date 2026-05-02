@@ -14,12 +14,7 @@ export const Route = createFileRoute("/estoque/movimentacoes")({
   component: MovimentacoesPage,
 });
 
-const mockMovimentos = [
-  { id: 1, data: "2024-05-24 14:20", produto: "iPhone 15 Pro Max", tipo: "Entrada", qtd: 5, user: "Renato M.", motivo: "Compra via NF-123" },
-  { id: 2, data: "2024-05-24 10:15", produto: "Capa Silicone iPhone 15", tipo: "Saída", qtd: 2, user: "Ana K.", motivo: "Venda PDV" },
-  { id: 3, data: "2024-05-23 16:45", produto: "Samsung Galaxy S24", tipo: "Entrada", qtd: 2, user: "Renato M.", motivo: "Ajuste de Estoque" },
-  { id: 4, data: "2024-05-23 11:30", produto: "Película 3D", tipo: "Saída", qtd: 1, user: "Carlos P.", motivo: "Avaria/Perda" },
-];
+const mockMovimentos: any[] = [];
 
 function MovimentacoesPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
