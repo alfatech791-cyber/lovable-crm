@@ -32,10 +32,6 @@ export default function Vendas() {
             <Plus className="h-4 w-4" /> Nova Venda (PDV)
           </Button>
         </div>
-      <SalesImportModal 
-        isOpen={isImportModalOpen} 
-        onClose={() => setIsImportModalOpen(false)} 
-      />
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="cursor-pointer group hover:border-primary/50 transition-all border-border/40 bg-card/50 shadow-sm" onClick={() => navigate({ to: "/pdv" })}>
