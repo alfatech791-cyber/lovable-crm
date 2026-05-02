@@ -23,6 +23,33 @@ function FinancePlanoContasPage() {
   const queryClient = useQueryClient();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newAccount, setNewAccount] = useState({ name: '', code: '', type: 'revenue', parent_id: null as string | null, description: '' });
+
+  const createMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No user");
+      const { error } = await supabase.from("chart_of_accounts").insert({ ...data, user_id: user.id });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chart_of_accounts"] });
+      toast.success("Conta criada com sucesso!");
+      setIsModalOpen(false);
+      setNewAccount({ name: '', code: '', type: 'revenue', parent_id: null, description: '' });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("chart_of_accounts").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chart_of_accounts"] });
+      toast.success("Conta removida com sucesso!");
+    },
+  });
 
   const { data: accounts, isLoading } = useQuery({
     queryKey: ["chart_of_accounts"],
