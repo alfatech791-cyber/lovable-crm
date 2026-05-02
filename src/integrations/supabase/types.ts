@@ -155,6 +155,39 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_flows: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          nodes: Json | null
+          trigger_type: string | null
+          trigger_value: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          nodes?: Json | null
+          trigger_type?: string | null
+          trigger_value?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          nodes?: Json | null
+          trigger_type?: string | null
+          trigger_value?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       bot_settings: {
         Row: {
           ai_model: string
@@ -664,6 +697,80 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      inventory_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          min_quantity: number | null
+          name: string
+          quantity: number | null
+          sku: string | null
+          unit_price: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          min_quantity?: number | null
+          name: string
+          quantity?: number | null
+          sku?: string | null
+          unit_price?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          min_quantity?: number | null
+          name?: string
+          quantity?: number | null
+          sku?: string | null
+          unit_price?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      inventory_movements: {
+        Row: {
+          created_at: string | null
+          id: string
+          item_id: string
+          quantity: number
+          reason: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          item_id: string
+          quantity: number
+          reason?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          item_id?: string
+          quantity?: number
+          reason?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_movements_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       leads: {
         Row: {
@@ -1203,7 +1310,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      advanced_metrics: {
+        Row: {
+          arpu: number | null
+          ltv: number | null
+          total_revenue: number | null
+          total_sales: number | null
+          unique_customers: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       call_pipeline_qualifier: {
