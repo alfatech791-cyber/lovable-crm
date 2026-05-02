@@ -153,6 +153,32 @@
     text-rendering: optimizeLegibility;
   }
   h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.01em; }
+
+  /* Fast feedback for all interactive elements */
+  .cursor-pointer {
+    @apply transition-all active:scale-[0.98] duration-100;
+  }
+  
+  button, 
+  [role="button"],
+  a,
+  input[type="submit"],
+  input[type="button"] {
+    @apply transition-all duration-100 active:scale-95;
+  }
+
+  /* Speed up common transitions */
+  .transition-all, .transition-colors, .transition-transform, .transition-opacity,
+  .duration-200, .duration-300, .duration-500 {
+    transition-duration: 100ms !important;
+    animation-duration: 100ms !important;
+  }
+
+  /* Remove mobile click delay and ensure touch responsiveness */
+  a, button, [role="button"], input, label, select, textarea {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 @layer utilities {
