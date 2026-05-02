@@ -155,10 +155,10 @@ function EquipePage() {
                      </button>
                    </div>
                  </div>
-                 ))}
-             </div>
-            </div>
-          )}
+                  ))
+                 }
+              </div>
+            )}
 
           <InviteMemberModal 
             isOpen={isModalOpen} 
