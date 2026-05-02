@@ -85,11 +85,11 @@ export const Route = createFileRoute("/relatorios")({
         });
 
         const totalLeads = currentLeads.length;
-        const wonLeads = currentLeads.filter(l => ['won', 'concluded'].includes(l.status)).length;
+        const wonLeads = currentLeads.filter(l => l.status && ['won', 'concluded'].includes(l.status)).length;
         const conversionRate = totalLeads > 0 ? (wonLeads / totalLeads) * 100 : 0;
 
         const prevTotalLeads = prevLeads.length;
-        const prevWonLeads = prevLeads.filter(l => ['won', 'concluded'].includes(l.status)).length;
+        const prevWonLeads = prevLeads.filter(l => l.status && ['won', 'concluded'].includes(l.status)).length;
         const prevConversionRate = prevTotalLeads > 0 ? (prevWonLeads / prevTotalLeads) * 100 : 0;
 
         const calculateTrend = (current: number, previous: number) => {
