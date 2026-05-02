@@ -3,10 +3,12 @@ import {
   ArrowUpRight, ArrowDownRight, DollarSign, Users, Target, TrendingUp, 
   Sparkles, Calendar, Download, Filter, Zap, Lightbulb, AlertCircle, 
   MoreHorizontal, UserCheck, Home, User, Package, ShoppingCart, 
-  Hammer, Archive, FileText, List, ChevronDown, ChevronRight,
-  PieChart as RePieChart, Pie, Cell, ResponsiveContainer, Tooltip,
-  BarChart, Bar, XAxis, YAxis
+  Hammer, Archive, FileText, List, ChevronDown, ChevronRight, PieChart as PieChartIcon
 } from "lucide-react";
+import { 
+  PieChart as RePieChart, Pie, Cell, ResponsiveContainer, Tooltip,
+  BarChart, Bar, XAxis, YAxis 
+} from "recharts";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 
 interface DashboardContentProps {
