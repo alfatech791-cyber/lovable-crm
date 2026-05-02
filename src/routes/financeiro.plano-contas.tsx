@@ -3,7 +3,7 @@
  import { Topbar } from "@/components/layout/Topbar";
  import { Card } from "@/components/ui/card";
  import { Button } from "@/components/ui/button";
-  import { ListTree, Plus, ChevronRight, Search, Settings2, Download, Filter, MoreVertical, Edit2, Trash2, ArrowUpRight, ArrowDownRight, Info, HelpCircle } from "lucide-react";
+  import { ListTree, Plus, ChevronRight, Search, Settings2, Download, Filter, MoreVertical, Edit2, Trash2, ArrowUpRight, ArrowDownRight, Info, HelpCircle, BookOpen } from "lucide-react";
   import { useState } from "react";
   import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
   import { Input } from "@/components/ui/input";
