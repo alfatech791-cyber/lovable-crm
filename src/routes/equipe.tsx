@@ -157,7 +157,8 @@ function EquipePage() {
                  </div>
                  ))}
              </div>
-           )}
+            </div>
+          )}
 
           <InviteMemberModal 
             isOpen={isModalOpen} 
