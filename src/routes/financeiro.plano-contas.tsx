@@ -198,6 +198,53 @@ function FinancePlanoContasPage() {
             </div>
            </div>
          </main>
+
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Nova Conta / Grupo</DialogTitle>
+              <DialogDescription>
+                Adicione uma nova categoria ao seu plano de contas.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Nome da Conta</Label>
+                <Input id="name" value={newAccount.name} onChange={e => setNewAccount({...newAccount, name: e.target.value})} placeholder="Ex: Venda de Produtos" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="code">Código</Label>
+                  <Input id="code" value={newAccount.code} onChange={e => setNewAccount({...newAccount, code: e.target.value})} placeholder="Ex: 1.1" />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="type">Tipo</Label>
+                  <Select value={newAccount.type} onValueChange={val => setNewAccount({...newAccount, type: val})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="revenue">Receita</SelectItem>
+                      <SelectItem value="expense">Despesa</SelectItem>
+                      <SelectItem value="asset">Ativo</SelectItem>
+                      <SelectItem value="liability">Passivo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="desc">Descrição (Opcional)</Label>
+                <Textarea id="desc" value={newAccount.description} onChange={e => setNewAccount({...newAccount, description: e.target.value})} placeholder="Para que serve esta conta..." />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
+              <Button onClick={() => createMutation.mutate(newAccount)} disabled={!newAccount.name || createMutation.isPending}>
+                {createMutation.isPending ? "Criando..." : "Criar Conta"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
        </div>
      </div>
    );
