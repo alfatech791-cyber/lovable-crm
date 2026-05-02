@@ -310,23 +310,6 @@ async function persist(
     .eq("phone", phone)
     .maybeSingle();
 
-    // Dispara qualificação automática em background se houver lead
-    if (leadAfterRpc?.id && lastMsg?.role === "user") {
-      fetch(\`\${Deno.env.get("SUPABASE_URL")}/functions/v1/pipeline-qualifier\`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: \`Bearer \${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}\`,
-          apikey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          lead_id: leadAfterRpc.id,
-          message: lastMsg.content
-        }),
-      }).catch(e => console.error("Qualificação automática falhou:", e));
-    }
-
   if (leadAfterRpc?.id) {
     const lastMsg = transcript[transcript.length - 1];
     if (lastMsg) {
@@ -355,6 +338,26 @@ async function persist(
           .from("leads")
           .update({ last_message_direction: 'outbound', updated_at: new Date().toISOString() })
           .eq("id", leadAfterRpc.id);
+      }
+
+      // Dispara qualificação automática em background se houver lead e for mensagem do usuário
+      if (lastMsg.role === "user") {
+        const qualifierUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/pipeline-qualifier`;
+        const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+        
+        fetch(qualifierUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${serviceKey}`,
+            apikey: serviceKey!,
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            lead_id: leadAfterRpc.id,
+            message: lastMsg.content
+          }),
+        }).catch(e => console.error("Qualificação automática falhou:", e));
       }
     }
   }
