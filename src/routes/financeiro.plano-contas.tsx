@@ -170,7 +170,10 @@ function FinancePlanoContasPage() {
                     {seedMutation.isPending ? "Carregando..." : "Carregar Plano Padrão"}
                   </Button>
                 )}
-                <Button className="h-10 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-6 shadow-lg shadow-blue-200">
+                <Button 
+                  onClick={() => setIsModalOpen(true)}
+                  className="h-10 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-6 shadow-lg shadow-blue-200"
+                >
                   <Plus className="h-4 w-4 mr-2" /> Novo Grupo
                 </Button>
               </div>
