@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
- import { User, Shield, Bell, Zap, Database, Smartphone, Palette, HelpCircle, ChevronRight, Globe, Lock, Plus } from "lucide-react";
+  import { User, Shield, Bell, Zap, Database, Smartphone, Palette, HelpCircle, ChevronRight, Globe, Lock, Plus, Download, Upload, FileJson, AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações — ConectaCRM" }, { name: "description", content: "Ajuste suas preferências e integrações" }] }),
@@ -17,10 +17,90 @@ export const Route = createFileRoute("/configuracoes")({
  import { Switch } from "@/components/ui/switch";
  import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
  import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
- import { toast } from "sonner";
+  import { toast } from "sonner";
+  import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
  
-  function SettingsPage() {
-    const { user, profile } = useAuth();
+   function SettingsPage() {
+     const { user, profile } = useAuth();
+
+    const handleExportBackup = async () => {
+      try {
+        toast.loading("Preparando exportação...");
+        const tables = [
+          "customers", "products", "sales_orders", "finance_transactions", 
+          "services", "leads", "tasks", "app_settings"
+        ];
+        
+        const backupData: Record<string, any> = {
+          version: "1.0",
+          timestamp: new Date().toISOString(),
+          data: {}
+        };
+
+        for (const table of tables) {
+          const { data, error } = await supabase.from(table).select("*");
+          if (error) {
+            console.error(`Erro ao exportar tabela ${table}:`, error);
+            continue;
+          }
+          backupData.data[table] = data;
+        }
+
+        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `backup_conectacrm_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        toast.dismiss();
+        toast.success("Backup exportado com sucesso!");
+      } catch (error) {
+        toast.dismiss();
+        toast.error("Falha ao exportar backup");
+        console.error(error);
+      }
+    };
+
+    const handleImportBackup = async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const content = e.target?.result as string;
+          const backupData = JSON.parse(content);
+          
+          if (!backupData.data || typeof backupData.data !== 'object') {
+            throw new Error("Formato de backup inválido");
+          }
+
+          toast.loading("Importando dados...");
+          
+          for (const [table, rows] of Object.entries(backupData.data)) {
+            if (Array.isArray(rows) && rows.length > 0) {
+              const { error } = await supabase.from(table).upsert(rows);
+              if (error) {
+                console.error(`Erro ao importar tabela ${table}:`, error);
+              }
+            }
+          }
+
+          toast.dismiss();
+          toast.success("Dados importados com sucesso!");
+          window.location.reload();
+        } catch (error) {
+          toast.dismiss();
+          toast.error("Falha ao processar arquivo de backup");
+          console.error(error);
+        }
+      };
+      reader.readAsText(file);
+    };
     const [activeTab, setActiveTab] = useState("perfil");
     const [formData, setFormData] = useState({
       display_name: "",
@@ -70,7 +150,80 @@ export const Route = createFileRoute("/configuracoes")({
                    <TabsTrigger value="vendas" className="rounded-lg gap-2"><Smartphone className="h-4 w-4" /> Vendas</TabsTrigger>
                    <TabsTrigger value="ia" className="rounded-lg gap-2"><Zap className="h-4 w-4" /> IA DeepSeek</TabsTrigger>
                    <TabsTrigger value="integracoes" className="rounded-lg gap-2"><Database className="h-4 w-4" /> Integrações</TabsTrigger>
-                   <TabsTrigger value="seguranca" className="rounded-lg gap-2"><Shield className="h-4 w-4" /> Segurança</TabsTrigger>
+                    <TabsTrigger value="seguranca" className="rounded-lg gap-2"><Shield className="h-4 w-4" /> Segurança</TabsTrigger>
+                    <TabsTrigger value="backup" className="rounded-lg gap-2"><Database className="h-4 w-4" /> Backup</TabsTrigger>
+                <TabsContent value="backup">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card className="border-border shadow-card">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Download className="h-5 w-5 text-primary" /> Exportar Dados
+                        </CardTitle>
+                        <CardDescription>
+                          Baixe uma cópia completa de todos os seus dados em formato JSON.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <Alert variant="default" className="bg-primary/5 border-primary/20">
+                          <AlertCircle className="h-4 w-4 text-primary" />
+                          <AlertTitle className="text-primary font-bold">Importante</AlertTitle>
+                          <AlertDescription className="text-xs">
+                            O arquivo contém informações sensíveis de clientes, vendas e financeiro. Guarde-o em local seguro.
+                          </AlertDescription>
+                        </Alert>
+                        <div className="p-4 rounded-xl border border-dashed border-border bg-muted/30 flex flex-col items-center gap-3">
+                          <FileJson className="h-10 w-10 text-muted-foreground/50" />
+                          <div className="text-center">
+                            <p className="text-sm font-medium">Backup Completo do Sistema</p>
+                            <p className="text-xs text-muted-foreground">Clientes, Produtos, Vendas e Financeiro</p>
+                          </div>
+                          <Button onClick={handleExportBackup} className="w-full gap-2">
+                            <Download className="h-4 w-4" /> Gerar Backup agora
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-border shadow-card">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Upload className="h-5 w-5 text-orange-500" /> Restaurar Backup
+                        </CardTitle>
+                        <CardDescription>
+                          Importe dados de um arquivo de backup gerado anteriormente.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <Alert variant="destructive" className="bg-destructive/5 border-destructive/20">
+                          <AlertCircle className="h-4 w-4 text-destructive" />
+                          <AlertTitle className="text-destructive font-bold">Aviso Crítico</AlertTitle>
+                          <AlertDescription className="text-xs">
+                            Restaurar um backup substituirá registros existentes com o mesmo ID. Esta ação não pode ser desfeita.
+                          </AlertDescription>
+                        </Alert>
+                        <div className="relative group">
+                          <input 
+                            type="file" 
+                            accept=".json" 
+                            onChange={handleImportBackup}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                          />
+                          <div className="p-8 rounded-xl border border-dashed border-border bg-muted/30 group-hover:bg-muted/50 transition-colors flex flex-col items-center gap-3">
+                            <Upload className="h-10 w-10 text-muted-foreground/50 group-hover:text-primary transition-colors" />
+                            <div className="text-center">
+                              <p className="text-sm font-medium">Clique para selecionar ou arraste</p>
+                              <p className="text-xs text-muted-foreground">Selecione o arquivo .json do backup</p>
+                            </div>
+                            <Button variant="secondary" className="pointer-events-none">
+                              Selecionar Arquivo
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+
                  </TabsList>
                  {activeTab === "perfil" ? (
                    <Button onClick={handleSaveProfile} className="bg-gradient-primary shadow-glow">
