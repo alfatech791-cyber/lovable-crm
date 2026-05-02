@@ -156,10 +156,11 @@ function EquipePage() {
                    </div>
                  </div>
                   ))}
-             </div>
-           )}
+                </div>
+              )}
+            </div>
 
-          <InviteMemberModal 
+           <InviteMemberModal 
             isOpen={isModalOpen} 
             onClose={() => setIsModalOpen(false)} 
             onInvite={handleInvite} 
