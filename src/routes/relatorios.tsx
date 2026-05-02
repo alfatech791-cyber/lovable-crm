@@ -361,25 +361,24 @@ export const Route = createFileRoute("/relatorios")({
                  { label: "Ticket Médio", value: stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.avgTicketTrend, icon: TrendingUp, bg: "bg-warning/10", text: "text-warning", category: 'vendas' },
                ].filter(s => activeCategory === 'visao-geral' || s.category === activeCategory || (activeCategory === 'financeiro' && s.label === "Faturamento") || (activeCategory === 'vendas' && s.label === "Conversão")).map((stat, i) => (
                  <div key={i} className="bg-white border border-border rounded-2xl p-5 shadow-card hover:border-primary/20 transition-colors group">
-               <div key={i} className="bg-white border border-border rounded-2xl p-5 shadow-card hover:border-primary/20 transition-colors group">
-                 <div className="flex items-start justify-between mb-4">
-                   <div className={`h-11 w-11 rounded-xl ${stat.bg} ${stat.text} flex items-center justify-center`}>
-                     <stat.icon className="h-5 w-5" />
+                   <div className="flex items-start justify-between mb-4">
+                     <div className={`h-11 w-11 rounded-xl ${stat.bg} ${stat.text} flex items-center justify-center`}>
+                       <stat.icon className="h-5 w-5" />
+                     </div>
+                      <div className={`flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-lg ${stat.trend.isUp ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+                        {stat.trend.isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                        {stat.trend.value}
+                     </div>
                    </div>
-                    <div className={`flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-lg ${stat.trend.isUp ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                      {stat.trend.isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                      {stat.trend.value}
-                   </div>
+                   <p className="text-[13px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{stat.label}</p>
+                   {loading ? (
+                     <div className="h-8 w-24 bg-muted animate-pulse rounded-lg" />
+                   ) : (
+                     <h3 className="text-2xl font-bold font-display tracking-tight group-hover:text-primary transition-colors">{stat.value}</h3>
+                   )}
                  </div>
-                 <p className="text-[13px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{stat.label}</p>
-                 {loading ? (
-                   <div className="h-8 w-24 bg-muted animate-pulse rounded-lg" />
-                 ) : (
-                   <h3 className="text-2xl font-bold font-display tracking-tight group-hover:text-primary transition-colors">{stat.value}</h3>
-                 )}
-               </div>
-             ))}
-           </div>
+               ))}
+             </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             <div className="lg:col-span-2 space-y-6">
