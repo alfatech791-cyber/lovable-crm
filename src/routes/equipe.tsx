@@ -4,7 +4,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
  import { toast } from "sonner";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
-import { UsersRound, Plus, MoreHorizontal, Shield, Mail, Phone, Search, UserCircle } from "lucide-react";
+import { UsersRound, Plus, MoreHorizontal, Shield, Mail, Phone, Search, UserCircle, MessageCircle, Instagram, GitBranch, Headphones, Zap, BarChart3, Settings, ShieldCheck, Sparkles, LockKeyhole } from "lucide-react";
 import { InviteMemberModal } from "@/components/team/InviteMemberModal";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -42,28 +42,6 @@ function EquipePage() {
     }
   };
 
-   const isAdmin = ['super_admin', 'owner', 'admin'].includes(profile?.role);
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
-        <div className="flex-1 flex flex-col min-w-0">
-          <Topbar title="Acesso Negado" subtitle="Você não tem permissão para ver esta página" toggleSidebar={() => setSidebarOpen(true)} />
-          <main className="flex-1 flex items-center justify-center p-6 text-center">
-            <div className="max-w-md">
-              <div className="h-20 w-20 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-6">
-                <Shield className="h-10 w-10" />
-              </div>
-              <h2 className="text-2xl font-bold mb-2">Página Restrita</h2>
-              <p className="text-muted-foreground mb-8">O seu nível de acesso não permite gerenciar a equipe. Entre em contato com um administrador para solicitar acesso.</p>
-              <Link to="/" className="inline-flex h-11 px-6 items-center justify-center rounded-xl bg-primary text-white font-bold text-sm shadow-glow">Voltar ao Início</Link>
-            </div>
-          </main>
-        </div>
-      </div>
-    );
-  }
 
    const handleInvite = async (newMember: any) => {
      // Em um app real, aqui enviariamos um convite via Edge Function
@@ -89,80 +67,100 @@ function EquipePage() {
     <div className="min-h-screen flex w-full bg-background">
       <AppSidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar title="Equipe & Permissões" subtitle="Gerencie quem acessa o seu CRM" toggleSidebar={() => setSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 bg-card border border-border p-4 rounded-2xl">
-            <div className="flex items-center gap-4">
-            </div>
-          </div>
-
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div className="relative max-w-sm w-full">
-              <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input placeholder="Buscar membro..." className="w-full h-10 pl-10 pr-4 rounded-xl bg-card border border-border outline-none text-sm" />
-            </div>
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="h-10 px-4 rounded-xl bg-gradient-primary text-white text-sm font-bold shadow-elegant hover:opacity-95 transition flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" strokeWidth={3} /> Convidar Membro
-            </button>
-          </div>
+         <Topbar title="Equipe & Permissões" subtitle="Gerencie as permissões dos seus membros" toggleSidebar={() => setSidebarOpen(true)} />
+         <main className="flex-1 overflow-y-auto p-6 bg-slate-50/30">
+           <div className="max-w-7xl mx-auto space-y-6">
+             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+               <div className="relative max-w-sm w-full">
+                 <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                 <input 
+                   placeholder="Buscar membro por nome ou e-mail..." 
+                   className="w-full h-11 pl-11 pr-4 rounded-xl bg-slate-50 border border-slate-100 outline-none text-sm focus:ring-4 focus:ring-indigo-500/5 transition-all" 
+                 />
+               </div>
+               <div className="flex items-center gap-3">
+                 <button className="h-11 px-4 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition">
+                   Filtrar por cargo
+                 </button>
+                 <button 
+                   onClick={() => setIsModalOpen(true)}
+                   className="h-11 px-5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white text-sm font-bold shadow-lg shadow-indigo-500/20 hover:opacity-95 transition flex items-center gap-2"
+                 >
+                   <Plus className="h-4 w-4" strokeWidth={3} /> Convidar Membro
+                 </button>
+               </div>
+             </div>
 
            {loading ? (
              <div className="flex justify-center p-20">
                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
              </div>
-           ) : (
-             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-               {team.map((member) => (
-               <div key={member.id} className="bg-card border border-border rounded-2xl p-5 shadow-card hover:shadow-elegant transition-all group relative">
-                 {member.id === user?.id && (
-                   <span className="absolute top-4 right-12 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">VOCÊ</span>
-                 )}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="relative">
-                     <div className="h-14 w-14 rounded-2xl bg-gradient-primary text-white font-bold text-lg grid place-items-center shadow-glow">
-                       {member.display_name?.charAt(0) || "U"}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {team.map((member) => (
+                 <div key={member.id} className="bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all group relative overflow-hidden">
+                   {member.id === user?.id && (
+                     <div className="absolute top-0 right-0">
+                       <div className="bg-indigo-500 text-white text-[9px] font-black px-3 py-1 rounded-bl-xl tracking-widest uppercase">VOCÊ</div>
                      </div>
-                     <div className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-card ${member.id === user?.id ? "bg-success" : "bg-muted-foreground"}`} title={member.id === user?.id ? "Online" : "Status desconhecido"} />
+                   )}
+                  
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="relative">
+                       <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white font-bold text-xl grid place-items-center shadow-lg shadow-indigo-500/20">
+                         {member.display_name?.charAt(0) || "U"}
+                       </div>
+                       <div className={`absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-4 border-white ${member.id === user?.id ? "bg-emerald-500" : "bg-slate-300"}`} />
+                    </div>
+                    <button className="h-9 w-9 grid place-items-center rounded-xl hover:bg-slate-50 text-slate-400 transition-colors">
+                      <MoreHorizontal className="h-5 w-5" />
+                    </button>
                   </div>
-                  <button className="h-8 w-8 grid place-items-center rounded-lg hover:bg-muted text-muted-foreground transition"><MoreHorizontal className="h-4 w-4" /></button>
-                </div>
 
-                <div className="mb-4">
-                   <h3 className="font-bold text-base group-hover:text-primary transition">{member.display_name || "Sem nome"}</h3>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <Shield className="h-3 w-3 text-primary" />
-                     <span className="text-[11px] font-bold text-primary uppercase tracking-wider">{member.role || "Membro"}</span>
+                  <div className="mb-6">
+                     <h3 className="font-bold text-lg text-slate-900 group-hover:text-indigo-600 transition-colors">{member.display_name || "Membro sem nome"}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                        <Shield className="h-3 w-3" />
+                        {member.role || "Membro"}
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-2 border-t border-border pt-4">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Mail className="h-3.5 w-3.5" /> {member.email}
+                  <div className="space-y-3 mb-6 bg-slate-50/50 p-4 rounded-2xl border border-slate-100/50">
+                    <div className="flex items-center gap-3 text-sm text-slate-500">
+                      <div className="h-7 w-7 rounded-lg bg-white border border-slate-100 flex items-center justify-center">
+                        <Mail className="h-3.5 w-3.5 text-slate-400" />
+                      </div>
+                      <span className="truncate">{member.email}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-slate-500">
+                      <div className="h-7 w-7 rounded-lg bg-white border border-slate-100 flex items-center justify-center">
+                        <Phone className="h-3.5 w-3.5 text-slate-400" />
+                      </div>
+                      <span>(11) 9****-****</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Phone className="h-3.5 w-3.5" /> (11) 9****-****
-                  </div>
-                </div>
-                
-                 <div className="mt-5 grid grid-cols-2 gap-2">
-                   <button className="h-9 rounded-lg border border-border text-xs font-bold hover:bg-muted transition">Editar</button>
-                   <button 
-                     onClick={() => handleRemoveMember(member.id)}
-                     disabled={member.id === user?.id}
-                     className="h-9 rounded-lg border border-border text-xs font-bold text-destructive hover:bg-destructive/5 hover:border-destructive/20 transition disabled:opacity-30"
-                   >
-                     Remover
-                   </button>
+                  
+                   <div className="grid grid-cols-2 gap-3">
+                     <button className="h-10 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+                       Configurar
+                     </button>
+                     <button 
+                       onClick={() => handleRemoveMember(member.id)}
+                       disabled={member.id === user?.id}
+                       className="h-10 rounded-xl border border-slate-200 text-xs font-bold text-red-500 hover:bg-red-50 hover:border-red-200 transition-colors disabled:opacity-30"
+                     >
+                       Remover
+                     </button>
+                   </div>
                  </div>
-               </div>
-               ))}
-             </div>
-           )}
+                  ))}
+                </div>
+              )}
+            </div>
 
-          <InviteMemberModal 
+           <InviteMemberModal 
             isOpen={isModalOpen} 
             onClose={() => setIsModalOpen(false)} 
             onInvite={handleInvite} 
