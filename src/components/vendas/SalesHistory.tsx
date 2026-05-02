@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { 
-   Search, Filter, Download, MoreHorizontal, ShoppingBag, Eye, Printer, 
+    Search, Filter, Download, MoreHorizontal, ShoppingBag, Eye, Printer, Edit,
    Calendar, ArrowUpRight, ArrowDownRight, CheckCircle2, XCircle, 
    AlertCircle, Loader2, FileText, TrendingUp, TrendingDown, Clock, User,
     MessageSquare, Share2, ReceiptText, Info
@@ -343,6 +343,22 @@ import {
                           </div>
                           
                            <DropdownMenuItem 
+                             onClick={() => {
+                               toast.info("Carregando venda para edição...");
+                               window.open(`/pdv?edit=${sale.id}`, '_blank');
+                             }}
+                             className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group"
+                           >
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                              <Edit className="h-4 w-4" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-xs">Editar Venda</span>
+                              <span className="text-[9px] text-muted-foreground">Modificar itens ou valores</span>
+                            </div>
+                          </DropdownMenuItem>
+
+                           <DropdownMenuItem 
                              onClick={() => window.open(`/pdv?view=${sale.id}`, '_blank')}
                              className="gap-3 py-3 rounded-xl cursor-pointer focus:bg-primary/10 transition-all group"
                            >
@@ -574,6 +590,16 @@ import {
 
                 {/* Ações Rápidas */}
                 <div className="pt-2 flex flex-col gap-2">
+                  <Button 
+                    variant="outline"
+                    className="w-full h-12 rounded-xl font-bold flex items-center gap-2 border-primary/20 text-primary hover:bg-primary/5"
+                    onClick={() => {
+                      toast.info("Carregando venda para edição...");
+                      window.open(`/pdv?edit=${selectedSale.id}`, '_blank');
+                    }}
+                  >
+                    <Edit className="h-4 w-4" /> Editar Venda
+                  </Button>
                   <Button 
                     className="w-full h-12 rounded-xl font-bold flex items-center gap-2"
                     onClick={() => window.open(`/pdv?view=${selectedSale.id}`, '_blank')}
