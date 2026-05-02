@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 
 export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: boolean) => void }) {
   const location = useLocation();
-  const { user, logout } = useAuth();
+   const { user, profile, permissions, logout } = useAuth();
   const [flyout, setFlyout] = useState<any | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,19 +28,45 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
     if (flyout) setIsCollapsed(true);
   }, [flyout]);
 
-  const filteredItems = useMemo(() => {
-    if (!searchQuery) return sidebarItems;
-    
-    const query = searchQuery.toLowerCase();
-    return sidebarItems.filter((item: any) => {
-      if (item.type === "header") return false;
-      const matchesTitle = item.title.toLowerCase().includes(query);
-      const matchesChildren = item.children?.some((child: any) => 
-        child.title.toLowerCase().includes(query)
-      );
-      return matchesTitle || matchesChildren;
-    });
-  }, [searchQuery]);
+   const filteredItems = useMemo(() => {
+     const items = sidebarItems.filter((item: any) => {
+       if (item.type === "header") return true; // Keep headers for now
+       
+       if (!permissions && profile?.role !== 'super_admin') return true; // Show all if no permissions loaded yet (or skip filtering)
+       if (profile?.role === 'super_admin') return true; // Super admin sees everything
+       
+       // Logic to filter by permissions
+       const url = item.url;
+       if (url === "/" && !permissions?.dashboard) return false;
+       if (url === "/relatorios" && !permissions?.relatorios) return false;
+       if (url === "/crm" && !permissions?.crm) return false;
+       if (url === "/vendas" && !permissions?.vendas) return false;
+       if (url === "/pdv" && !permissions?.pdv) return false;
+       if (url === "/servicos" && !permissions?.servicos) return false;
+       if (url === "/clientes" && !permissions?.clientes) return false;
+       if (url === "/estoque" && !permissions?.estoque) return false;
+       if (url === "/produtos" && !permissions?.estoque) return false;
+       if (url === "/financeiro" && !permissions?.financeiro) return false;
+       if (url === "/fiscal" && !permissions?.fiscal) return false;
+       if (url === "/equipe" && !permissions?.configuracoes) return false;
+       if (url === "/configuracoes" && !permissions?.configuracoes) return false;
+       
+       return true;
+     });
+ 
+     // Now apply search query
+     if (!searchQuery) return items;
+     
+     const query = searchQuery.toLowerCase();
+     return items.filter((item: any) => {
+       if (item.type === "header") return false;
+       const matchesTitle = item.title.toLowerCase().includes(query);
+       const matchesChildren = item.children?.some((child: any) => 
+         child.title.toLowerCase().includes(query)
+       );
+       return matchesTitle || matchesChildren;
+     });
+   }, [searchQuery, permissions, profile]);
 
   const isSmall = isCollapsed || !!flyout;
 
