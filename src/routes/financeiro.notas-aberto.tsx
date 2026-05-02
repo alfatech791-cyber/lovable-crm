@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Fragment } from "react";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { Card } from "@/components/ui/card";
@@ -16,7 +16,12 @@ import {
   FileText, 
   Clock, 
   AlertCircle,
-  CheckCircle2
+   CheckCircle2,
+   Truck,
+   Package,
+   Receipt,
+   ChevronDown,
+   ChevronUp
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -39,7 +44,8 @@ function NotasAbertoPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+   const [searchTerm, setSearchTerm] = useState("");
+   const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   const fetchTransactions = useCallback(async () => {
     if (!user?.id) return;
@@ -85,9 +91,10 @@ function NotasAbertoPage() {
     }
   };
 
-  const filteredTransactions = transactions.filter(t => 
-    t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (t.category && t.category.toLowerCase().includes(searchTerm.toLowerCase()))
+   const filteredTransactions = transactions.filter(t => 
+     t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     (t.category && t.category.toLowerCase().includes(searchTerm.toLowerCase())) ||
+     (t.supplier_name && t.supplier_name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const stats = {
