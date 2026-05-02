@@ -8,7 +8,7 @@ import { Topbar } from "@/components/layout/Topbar";
      Lightbulb, AlertCircle, Loader2, Home, User, Package, ShoppingCart,
      Hammer, Archive, FileText, List, ChevronDown, UserPlus, UserRound,
     Trophy, Cake, Scale, CreditCard, LayoutDashboard, History, ClipboardList,
-    Box, FileSpreadsheet, Calculator
+    Box, FileSpreadsheet, Calculator, Contact2, Wallet, Users2, Building2, UserCircle, Briefcase, Facebook
  } from "lucide-react";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart as RePieChart, Pie } from "recharts";
@@ -300,9 +300,42 @@ export const Route = createFileRoute("/relatorios")({
         { id: "fiscal-nfe", label: "Relatório de NFe", icon: FileSpreadsheet },
       ]
     },
-    { id: "vendedores", label: "Vendedores", icon: UserCheck, isNew: true, hasArrow: true },
-    { id: "tecnicos", label: "Técnicos", icon: Users, isNew: true, hasArrow: true },
-    { id: "outros", label: "Outros", icon: List, hasArrow: true },
+    { 
+      id: "vendedores", 
+      label: "Vendedores", 
+      icon: UserCheck, 
+      isNew: true, 
+      hasArrow: true,
+      children: [
+        { id: "vend-dash", label: "Dashboard Vendedor", icon: Contact2 },
+        { id: "vend-comissao", label: "Rel. de Comissão", icon: Wallet, isNew: true },
+        { id: "vend-relatorio", label: "Rel. de Vendedores", icon: Users2 },
+        { id: "vend-multi", label: "Rel. de Vendedores Multi Empresa", icon: Building2 },
+        { id: "vend-por-dia", label: "Vendas por vendedor (Por dia)", icon: UserCircle },
+        { id: "vend-pagamento", label: "Total por vendedor e Forma de pagamento", icon: UserCircle },
+      ]
+    },
+    { 
+      id: "tecnicos", 
+      label: "Técnicos", 
+      icon: Users, 
+      isNew: true, 
+      hasArrow: true,
+      children: [
+        { id: "tec-comissao", label: "Rel. de Comissão Técnico", icon: Wallet, isNew: true },
+      ]
+    },
+    { 
+      id: "outros", 
+      label: "Outros", 
+      icon: List, 
+      hasArrow: true,
+      children: [
+        { id: "out-metas", label: "Dashboard Metas", icon: BarChart3 },
+        { id: "out-recap", label: "Relatório Recap Anual", icon: TrendingUp },
+        { id: "out-mkt", label: "Dashboard Marketing (Meta)", icon: Facebook },
+      ]
+    },
     { id: "antigos", label: "Antigos", icon: Archive, hasArrow: true },
   ];
 
