@@ -63,7 +63,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+      // Limpar estados locais manualmente para garantir que a UI reflita a saída
+      setSession(null);
+      setUser(null);
+      setProfile(null);
+      setPermissions(null);
+      // Forçar recarregamento se necessário, ou redirecionar via router
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Erro ao sair:", error);
+      // Mesmo com erro, tentamos limpar o estado
+      window.location.href = "/login";
+    }
   };
 
   return (
