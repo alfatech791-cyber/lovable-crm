@@ -55,7 +55,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
   }, []);
 
   useEffect(() => {
-    const savedOrder = localStorage.getItem('sidebar-menu-order-v2');
+    const savedOrder = localStorage.getItem('sidebar-menu-order-v3');
     if (savedOrder) {
       try {
         setItems(JSON.parse(savedOrder));
@@ -85,8 +85,17 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
         const activeIndex = prev.findIndex((i) => (i.url || i.title) === active.id);
         const overIndex = prev.findIndex((i) => (i.url || i.title) === over.id);
         
+        const activeItem = prev[activeIndex];
+        const overItem = prev[overIndex];
+
+        // Se arrastarmos um item para cima de outro (não um cabeçalho)
+        // e ele não tiver filhos ainda, poderíamos criar uma lógica de "folder"
+        // mas para manter simples e funcional, vamos permitir o reordenamento
+        // e se for arrastado ligeiramente para a direita (nesting) vamos tratar
+        // no futuro. Por enquanto, focamos em reordenamento estável.
+
         const newOrder = arrayMove(prev, activeIndex, overIndex);
-        localStorage.setItem('sidebar-menu-order-v2', JSON.stringify(newOrder));
+        localStorage.setItem('sidebar-menu-order-v3', JSON.stringify(newOrder));
         return newOrder;
       });
     }
@@ -141,18 +150,18 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
         <div className={cn("flex items-center h-[68px] border-b border-sidebar-border shrink-0 transition-all", isSmall ? "px-3 justify-center" : "px-5 justify-between")}>
           <div className="flex items-center gap-2.5 overflow-hidden">
             <div className="h-9 w-9 rounded-xl bg-gradient-primary grid place-items-center shadow-glow shrink-0">
-              <Sparkles className="h-4.5 w-4.5 text-white" strokeWidth={2.5} />
+              <Icons.Sparkles className="h-4.5 w-4.5 text-white" strokeWidth={2.5} />
             </div>
             {!isSmall && <div className="leading-tight animate-in fade-in slide-in-from-left-2 duration-300"><div className="font-display font-bold text-[17px] text-foreground tracking-tight">ConectaCRM</div></div>}
           </div>
-          {!isSmall && <button onClick={() => setIsCollapsed(true)} className="p-1.5 rounded-lg text-sidebar-foreground/40 hover:text-foreground hover:bg-sidebar-accent transition-colors"><PanelLeftClose className="h-4 w-4" /></button>}
-          {isSmall && !flyout && <button onClick={() => setIsCollapsed(false)} className="absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-sidebar-primary text-white shadow-glow grid place-items-center z-50 lg:flex hidden"><PanelLeftOpen className="h-3 w-3" /></button>}
+          {!isSmall && <button onClick={() => setIsCollapsed(true)} className="p-1.5 rounded-lg text-sidebar-foreground/40 hover:text-foreground hover:bg-sidebar-accent transition-colors"><Icons.PanelLeftClose className="h-4 w-4" /></button>}
+          {isSmall && !flyout && <button onClick={() => setIsCollapsed(false)} className="absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-sidebar-primary text-white shadow-glow grid place-items-center z-50 lg:flex hidden"><Icons.PanelLeftOpen className="h-3 w-3" /></button>}
         </div>
 
         {!isSmall && (
           <div className="px-4 pt-4 shrink-0">
             <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-sidebar-foreground/40 group-focus-within:text-sidebar-primary transition-colors" />
+              <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-sidebar-foreground/40 group-focus-within:text-sidebar-primary transition-colors" />
               <Input placeholder="Buscar menu..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="h-9 pl-9 bg-sidebar-accent/30 border-sidebar-border/50 text-xs focus-visible:ring-sidebar-primary/30 placeholder:text-sidebar-foreground/30" />
             </div>
           </div>
@@ -181,7 +190,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
               }),
             }}>
               {activeId ? (
-                <div className="opacity-80 scale-105 pointer-events-none">
+                <div className="opacity-80 scale-105 pointer-events-none w-[230px] bg-sidebar rounded-lg shadow-2xl border border-sidebar-border">
                   {(() => {
                     const item = items.find(i => (i.url || i.title) === activeId);
                     if (!item) return null;
@@ -196,17 +205,17 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
         <div className="px-3 pb-3 space-y-3 shrink-0">
           {!isSmall && (
             <div className="rounded-xl bg-gradient-sidebar-cta p-3.5 text-white shadow-elegant relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform"><Sparkles className="h-12 w-12" /></div>
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform"><Icons.Sparkles className="h-12 w-12" /></div>
               <div className="relative z-10">
-                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider"><Sparkles className="h-3.5 w-3.5" /> IA Conecta</div>
+                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider"><Icons.Sparkles className="h-3.5 w-3.5" /> IA Conecta</div>
                 <p className="mt-1.5 text-xs text-white/85 leading-snug">Otimize seu atendimento com nossa IA.</p>
                 <button className="mt-3 w-full rounded-md bg-white/15 hover:bg-white/25 backdrop-blur-sm py-1.5 text-xs font-medium transition shadow-sm">Ativar agora</button>
               </div>
             </div>
           )}
-          {isSmall ? <Tooltip><TooltipTrigger asChild><button className="h-10 w-10 flex items-center justify-center rounded-lg text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-white transition-colors"><HelpCircle className="h-5 w-5" /></button></TooltipTrigger><TooltipContent side="right">Central de Ajuda</TooltipContent></Tooltip> : <button className="flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent transition-colors"><HelpCircle className="h-4 w-4" /><span className="text-[13px]">Central de Ajuda</span></button>}
+          {isSmall ? <Tooltip><TooltipTrigger asChild><button className="h-10 w-10 flex items-center justify-center rounded-lg text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-white transition-colors"><Icons.HelpCircle className="h-5 w-5" /></button></TooltipTrigger><TooltipContent side="right">Central de Ajuda</TooltipContent></Tooltip> : <button className="flex items-center gap-3 px-3 py-2 rounded-lg text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent transition-colors"><Icons.HelpCircle className="h-4 w-4" /><span className="text-[13px]">Central de Ajuda</span></button>}
           <div className={cn("pt-2 border-t border-sidebar-border/40 flex flex-col gap-1", isSmall ? "items-center" : "")}>
-            {isSmall ? <Tooltip><TooltipTrigger asChild><button onClick={logout} className="h-10 w-10 flex items-center justify-center rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition"><LogOut className="h-5 w-5" /></button></TooltipTrigger><TooltipContent side="right">Sair da Conta</TooltipContent></Tooltip> : <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-sidebar-accent/50 transition-colors group cursor-pointer"><div className="h-9 w-9 rounded-full bg-sidebar-primary/20 border border-sidebar-primary/30 grid place-items-center text-sidebar-primary font-bold text-sm shrink-0">{user?.email?.charAt(0).toUpperCase() || "U"}</div><div className="flex-1 min-w-0"><div className="text-[13px] font-semibold text-foreground truncate">{user?.email?.split('@')[0] || "Usuário"}</div><div className="text-[11px] text-sidebar-foreground/50 truncate">Plano Pro</div></div><button onClick={logout} className="p-1.5 rounded-lg text-sidebar-foreground/30 hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"><LogOut className="h-4 w-4" /></button></div>}
+            {isSmall ? <Tooltip><TooltipTrigger asChild><button onClick={logout} className="h-10 w-10 flex items-center justify-center rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition"><Icons.LogOut className="h-5 w-5" /></button></TooltipTrigger><TooltipContent side="right">Sair da Conta</TooltipContent></Tooltip> : <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-sidebar-accent/50 transition-colors group cursor-pointer"><div className="h-9 w-9 rounded-full bg-sidebar-primary/20 border border-sidebar-primary/30 grid place-items-center text-sidebar-primary font-bold text-sm shrink-0">{user?.email?.charAt(0).toUpperCase() || "U"}</div><div className="flex-1 min-w-0"><div className="text-[13px] font-semibold text-foreground truncate">{user?.email?.split('@')[0] || "Usuário"}</div><div className="text-[11px] text-sidebar-foreground/50 truncate">Plano Pro</div></div><button onClick={logout} className="p-1.5 rounded-lg text-sidebar-foreground/30 hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"><Icons.LogOut className="h-4 w-4" /></button></div>}
           </div>
         </div>
       </aside>
@@ -217,7 +226,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
               <div className="flex items-center gap-2.5">
                 <div className="h-9 w-9 rounded-xl bg-gradient-primary grid place-items-center shadow-glow">
                   {(() => {
-                    const FIcon = (Icons as any)[flyout.icon] || HelpCircle;
+                    const FIcon = (Icons as any)[flyout.icon] || Icons.HelpCircle;
                     return <FIcon className="h-4.5 w-4.5 text-white" strokeWidth={2.5} />;
                   })()}
                 </div>
@@ -226,7 +235,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
                   <div className="text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-bold">Menu dedicado</div>
                 </div>
               </div>
-              <button onClick={() => setFlyout(null)} className="h-8 w-8 grid place-items-center rounded-lg text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-foreground transition" aria-label="Fechar"><X className="h-4 w-4" /></button>
+              <button onClick={() => setFlyout(null)} className="h-8 w-8 grid place-items-center rounded-lg text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-foreground transition" aria-label="Fechar"><Icons.X className="h-4 w-4" /></button>
             </div>
             <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
               {flyout.children?.map((child: any) => {
