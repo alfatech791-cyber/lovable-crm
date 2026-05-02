@@ -4,8 +4,9 @@ import { Topbar } from "@/components/layout/Topbar";
  import { 
    BarChart3, TrendingUp, Users, DollarSign, Calendar, Download, 
    Filter, ArrowUpRight, Shield, PieChart, Target, Zap, 
-   ArrowDownRight, ChevronRight, MoreHorizontal, UserCheck, Sparkles,
-   Lightbulb, AlertCircle, Loader2
+    ArrowDownRight, ChevronRight, MoreHorizontal, UserCheck, Sparkles,
+    Lightbulb, AlertCircle, Loader2, Home, User, Package, ShoppingCart,
+    Hammer, Archive, FileText, List, ChevronDown
  } from "lucide-react";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart as RePieChart, Pie } from "recharts";
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/relatorios")({
       avgTicketTrend: { value: "0%", isUp: true },
     });
     const [aiInsight, setAiInsight] = useState<string>("Carregando análise da ConectaAI...");
+    const [activeCategory, setActiveCategory] = useState("visao-geral");
  
     const [funnelData, setFunnelData] = useState<any[]>([]);
     const [originData, setOriginData] = useState<any[]>([]);
@@ -209,56 +211,120 @@ export const Route = createFileRoute("/relatorios")({
     );
   }
 
+  const reportCategories = [
+    { id: "visao-geral", label: "Visão geral - Atalhos", icon: Home },
+    { id: "clientes", label: "Clientes", icon: Users, hasArrow: true },
+    { id: "financeiro", label: "Financeiro", icon: DollarSign, hasArrow: true },
+    { id: "produto", label: "Produto", icon: Package, isNew: true, hasArrow: true },
+    { id: "vendas", label: "Vendas", icon: ShoppingCart, isNew: true, hasArrow: true },
+    { id: "ordem-servico", label: "Ordem de serviço", icon: Hammer, hasArrow: true },
+    { id: "fiscal", label: "Fiscal", icon: DollarSign, hasArrow: true },
+    { id: "vendedores", label: "Vendedores", icon: UserCheck, isNew: true, hasArrow: true },
+    { id: "tecnicos", label: "Técnicos", icon: Users, isNew: true, hasArrow: true },
+    { id: "outros", label: "Outros", icon: List, hasArrow: true },
+    { id: "antigos", label: "Antigos", icon: Archive, hasArrow: true },
+  ];
+
   return (
     <div className="min-h-screen flex w-full bg-[#F8FAFC]">
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar title="Métricas & Relatórios" subtitle="Análise detalhada do seu desempenho comercial" />
         
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
-          {/* Toolbar */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex p-1 bg-white border border-border rounded-xl shadow-sm">
-                {["Hoje", "7D", "30D", "12M", "Tudo"].map((p) => (
-                  <button key={p} className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${p === "30D" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:bg-muted"}`}>
-                    {p}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Side Menu from Image */}
+          <aside className="w-72 border-r border-slate-100 bg-white overflow-y-auto hidden md:block shadow-sm">
+            <div className="p-4">
+              <button className="w-full flex items-center justify-between p-3 rounded-xl bg-[#E8F0FE] text-primary font-bold text-sm mb-6">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  <span>Relatórios</span>
+                  <span className="bg-success text-white text-[10px] px-1.5 py-0.5 rounded-full font-black">NOVO</span>
+                </div>
+                <ChevronDown className="h-4 w-4" />
+              </button>
+
+              <nav className="space-y-1">
+                {reportCategories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveCategory(cat.id)}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-[13px] font-medium transition-all ${
+                      activeCategory === cat.id 
+                        ? "bg-slate-50 text-slate-900 shadow-sm" 
+                        : "text-slate-500 hover:bg-slate-50/50 hover:text-slate-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <cat.icon className={`h-4.5 w-4.5 ${activeCategory === cat.id ? "text-blue-600" : "text-slate-400"}`} />
+                      <span className={activeCategory === cat.id ? "font-bold text-slate-900" : ""}>{cat.label}</span>
+                      {cat.isNew && (
+                        <span className="bg-[#22C55E] text-white text-[9px] px-2 py-0.5 rounded-full font-black uppercase ml-1">Novo</span>
+                      )}
+                    </div>
+                    {cat.hasArrow && <ChevronRight className="h-3.5 w-3.5 opacity-50" />}
                   </button>
                 ))}
+              </nav>
+            </div>
+          </aside>
+
+          <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#F8FAFC]">
+            {activeCategory !== 'visao-geral' && (
+              <div className="mb-6 flex items-center gap-2">
+                <button onClick={() => setActiveCategory('visao-geral')} className="text-sm font-bold text-primary hover:underline flex items-center gap-1">
+                  <ChevronRight className="h-4 w-4 rotate-180" /> Voltar para Visão Geral
+                </button>
+                <span className="text-slate-300">/</span>
+                <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">
+                  {reportCategories.find(c => c.id === activeCategory)?.label}
+                </span>
               </div>
-              <button className="h-10 px-4 rounded-xl border border-border bg-white text-[13px] font-bold shadow-sm flex items-center gap-2 hover:bg-muted transition-colors">
-                <Calendar className="h-4 w-4 text-primary" /> 01/04/2024 - 30/04/2024
-              </button>
-              <button className="h-10 px-4 rounded-xl border border-border bg-white text-[13px] font-bold shadow-sm flex items-center gap-2 hover:bg-muted transition-colors">
-                <Filter className="h-4 w-4 text-primary" /> Todos Agentes
-              </button>
+            )}
+
+            {/* Toolbar */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex p-1 bg-white border border-border rounded-xl shadow-sm">
+                  {["Hoje", "7D", "30D", "12M", "Tudo"].map((p) => (
+                    <button key={p} className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${p === "30D" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:bg-muted"}`}>
+                      {p}
+                    </button>
+                  ))}
+                </div>
+                <button className="h-10 px-4 rounded-xl border border-border bg-white text-[13px] font-bold shadow-sm flex items-center gap-2 hover:bg-muted transition-colors">
+                  <Calendar className="h-4 w-4 text-primary" /> 01/04/2024 - 30/04/2024
+                </button>
+                <button className="h-10 px-4 rounded-xl border border-border bg-white text-[13px] font-bold shadow-sm flex items-center gap-2 hover:bg-muted transition-colors">
+                  <Filter className="h-4 w-4 text-primary" /> Todos Agentes
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <button className="h-10 px-4 rounded-xl bg-white border border-border text-foreground text-[13px] font-bold shadow-sm hover:bg-muted transition-colors flex items-center gap-2">
+                  <Download className="h-4 w-4" /> Exportar CSV
+                </button>
+                <button 
+                  onClick={() => {
+                    const report = `RELATÓRIO DE DESEMPENHO - CONECTACRM\n\n` +
+                      `Período: 30 dias\n` +
+                      `Faturamento: ${stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (${stats.revenueTrend.value})\n` +
+                      `Leads: ${stats.leads} (${stats.leadsTrend.value})\n` +
+                      `Conversão: ${stats.conversion.toFixed(1)}%\n` +
+                      `Ticket Médio: ${stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n\n` +
+                      `Insight ConectaAI: ${aiInsight}`;
+                    const blob = new Blob([report], { type: 'text/plain' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `relatorio-crm-${new Date().toISOString().split('T')[0]}.txt`;
+                    a.click();
+                  }}
+                  className="h-10 px-4 rounded-xl bg-primary text-white text-[13px] font-bold shadow-elegant hover:opacity-90 transition flex items-center gap-2"
+                >
+                  <Zap className="h-4 w-4 fill-white" /> Exportar Relatório IA
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button className="h-10 px-4 rounded-xl bg-white border border-border text-foreground text-[13px] font-bold shadow-sm hover:bg-muted transition-colors flex items-center gap-2">
-                <Download className="h-4 w-4" /> Exportar CSV
-              </button>
-              <button 
-                onClick={() => {
-                  const report = `RELATÓRIO DE DESEMPENHO - CONECTACRM\n\n` +
-                    `Período: 30 dias\n` +
-                    `Faturamento: ${stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (${stats.revenueTrend.value})\n` +
-                    `Leads: ${stats.leads} (${stats.leadsTrend.value})\n` +
-                    `Conversão: ${stats.conversion.toFixed(1)}%\n` +
-                    `Ticket Médio: ${stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n\n` +
-                    `Insight ConectaAI: ${aiInsight}`;
-                  const blob = new Blob([report], { type: 'text/plain' });
-                  const url = window.URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `relatorio-crm-${new Date().toISOString().split('T')[0]}.txt`;
-                  a.click();
-                }}
-                className="h-10 px-4 rounded-xl bg-primary text-white text-[13px] font-bold shadow-elegant hover:opacity-90 transition flex items-center gap-2"
-              >
-                <Zap className="h-4 w-4 fill-white" /> Exportar Relatório IA
-              </button>
-            </div>
-          </div>
 
           {/* AI Insights Section */}
           <div className="bg-gradient-to-r from-primary/5 via-primary/[0.02] to-transparent border border-primary/10 rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center gap-6">
@@ -284,33 +350,35 @@ export const Route = createFileRoute("/relatorios")({
             </div>
           </div>
 
-           {/* Main Stats Cards */}
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-             {[
-               { label: "Faturamento", value: stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.revenueTrend, icon: DollarSign, bg: "bg-primary/10", text: "text-primary" },
-               { label: "Leads Totais", value: stats.leads.toString(), trend: stats.leadsTrend, icon: Users, bg: "bg-info/10", text: "text-info" },
-               { label: "Conversão", value: stats.conversion.toFixed(1) + "%", trend: stats.conversionTrend, icon: Target, bg: "bg-success/10", text: "text-success" },
-               { label: "Ticket Médio", value: stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.avgTicketTrend, icon: TrendingUp, bg: "bg-warning/10", text: "text-warning" },
-             ].map((stat, i) => (
-               <div key={i} className="bg-white border border-border rounded-2xl p-5 shadow-card hover:border-primary/20 transition-colors group">
-                 <div className="flex items-start justify-between mb-4">
-                   <div className={`h-11 w-11 rounded-xl ${stat.bg} ${stat.text} flex items-center justify-center`}>
-                     <stat.icon className="h-5 w-5" />
+           {/* Content based on Active Category */}
+           <div className="space-y-8">
+             {/* Summary Cards */}
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+               {[
+                 { label: "Faturamento", value: stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.revenueTrend, icon: DollarSign, bg: "bg-primary/10", text: "text-primary", category: 'financeiro' },
+                 { label: "Leads Totais", value: stats.leads.toString(), trend: stats.leadsTrend, icon: Users, bg: "bg-info/10", text: "text-info", category: 'clientes' },
+                 { label: "Conversão", value: stats.conversion.toFixed(1) + "%", trend: stats.conversionTrend, icon: Target, bg: "bg-success/10", text: "text-success", category: 'vendas' },
+                 { label: "Ticket Médio", value: stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), trend: stats.avgTicketTrend, icon: TrendingUp, bg: "bg-warning/10", text: "text-warning", category: 'vendas' },
+               ].filter(s => activeCategory === 'visao-geral' || s.category === activeCategory || (activeCategory === 'financeiro' && s.label === "Faturamento") || (activeCategory === 'vendas' && s.label === "Conversão")).map((stat, i) => (
+                 <div key={i} className="bg-white border border-border rounded-2xl p-5 shadow-card hover:border-primary/20 transition-colors group">
+                   <div className="flex items-start justify-between mb-4">
+                     <div className={`h-11 w-11 rounded-xl ${stat.bg} ${stat.text} flex items-center justify-center`}>
+                       <stat.icon className="h-5 w-5" />
+                     </div>
+                      <div className={`flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-lg ${stat.trend.isUp ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+                        {stat.trend.isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                        {stat.trend.value}
+                     </div>
                    </div>
-                    <div className={`flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-lg ${stat.trend.isUp ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                      {stat.trend.isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-                      {stat.trend.value}
-                   </div>
+                   <p className="text-[13px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{stat.label}</p>
+                   {loading ? (
+                     <div className="h-8 w-24 bg-muted animate-pulse rounded-lg" />
+                   ) : (
+                     <h3 className="text-2xl font-bold font-display tracking-tight group-hover:text-primary transition-colors">{stat.value}</h3>
+                   )}
                  </div>
-                 <p className="text-[13px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{stat.label}</p>
-                 {loading ? (
-                   <div className="h-8 w-24 bg-muted animate-pulse rounded-lg" />
-                 ) : (
-                   <h3 className="text-2xl font-bold font-display tracking-tight group-hover:text-primary transition-colors">{stat.value}</h3>
-                 )}
-               </div>
-             ))}
-           </div>
+               ))}
+             </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             <div className="lg:col-span-2 space-y-6">
@@ -564,8 +632,10 @@ export const Route = createFileRoute("/relatorios")({
               <button className="text-xs font-bold text-primary hover:underline">Ver todo o histórico de relatórios</button>
             </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
+  </div>
+</div>
   );
 }
