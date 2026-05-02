@@ -32,11 +32,12 @@ export function FinanceDashboard() {
    const fetchTransactions = async () => {
      if (!user?.id) return;
      setLoading(true);
-     try {
-       const { data, error } = await supabase
-         .from("finance_transactions")
-         .select("*")
-         .eq("user_id", user.id);
+      try {
+        const { data, error } = await supabase
+          .from("finance_transactions")
+          .select("*")
+          .eq("user_id", user.id)
+          .order('created_at', { ascending: false });
        if (error) throw error;
        setTransactions(data || []);
      } catch (error) {
