@@ -119,7 +119,7 @@ export function KpiCard({
     <>
       <button 
         onClick={() => setIsModalOpen(true)}
-        className={`relative overflow-hidden rounded-2xl bg-card border border-border p-3 sm:p-4 shadow-card hover:shadow-elegant hover:-translate-y-1 transition-all text-left w-full group hover:ring-2 min-w-0 ${styles.ring}`}
+        className={`relative overflow-hidden rounded-2xl bg-card border border-border p-3 sm:p-4 shadow-card hover:shadow-elegant hover:-translate-y-1 active:scale-[0.97] transition-all duration-150 text-left w-full group hover:ring-2 min-w-0 ${styles.ring}`}
       >
         <div className={`absolute inset-0 bg-gradient-to-br ${styles.gradient} opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-0`} />
         <div 

@@ -156,19 +156,26 @@
 
   /* Fast feedback for all interactive elements */
   .cursor-pointer {
-    @apply transition-transform active:scale-[0.98] duration-75;
+    @apply transition-all active:scale-[0.98] duration-100;
   }
   
-  button:active, 
-  [role="button"]:active,
-  a:active {
-    transform: scale(0.97);
-    transition: transform 0.05s ease-out;
+  button, 
+  [role="button"],
+  a,
+  input[type="submit"],
+  input[type="button"] {
+    @apply transition-all duration-100 active:scale-95;
   }
 
-  /* Remove mobile click delay */
+  /* Speed up common transitions */
+  .transition-all, .transition-colors, .transition-transform, .transition-opacity {
+    transition-duration: 100ms !important;
+  }
+
+  /* Remove mobile click delay and ensure touch responsiveness */
   a, button, [role="button"], input, label, select, textarea {
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
