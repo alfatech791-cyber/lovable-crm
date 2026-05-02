@@ -17,7 +17,8 @@ import {
    Type,
    Pencil,
    Download,
-   Plus,
+    Plus,
+    ArrowLeft,
 } from "lucide-react";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
