@@ -230,7 +230,10 @@ export function FinanceDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 border-border shadow-sm rounded-2xl">
+         <Card 
+           className="lg:col-span-2 border-border shadow-sm rounded-2xl cursor-pointer hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.99]"
+           onClick={() => navigate({ to: "/financeiro/caixa" })}
+         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
             <div>
               <CardTitle className="text-base font-black flex items-center gap-2 text-slate-900">
@@ -288,7 +291,10 @@ export function FinanceDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border shadow-sm rounded-2xl">
+         <Card 
+           className="border-border shadow-sm rounded-2xl cursor-pointer hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]"
+           onClick={() => navigate({ to: "/financeiro/caixa" })}
+         >
           <CardHeader className="pb-7">
             <CardTitle className="text-base font-black flex items-center gap-2 text-slate-900">
               <PieChart className="h-4 w-4 text-blue-600" /> Gastos por Categoria
