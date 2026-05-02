@@ -339,6 +339,26 @@ async function persist(
           .update({ last_message_direction: 'outbound', updated_at: new Date().toISOString() })
           .eq("id", leadAfterRpc.id);
       }
+
+      // Dispara qualificação automática em background se houver lead e for mensagem do usuário
+      if (lastMsg.role === "user") {
+        const qualifierUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/pipeline-qualifier`;
+        const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+        
+        fetch(qualifierUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${serviceKey}`,
+            apikey: serviceKey!,
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            lead_id: leadAfterRpc.id,
+            message: lastMsg.content
+          }),
+        }).catch(e => console.error("Qualificação automática falhou:", e));
+      }
     }
   }
 }
