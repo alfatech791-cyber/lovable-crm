@@ -34,6 +34,13 @@ function ReportsPage() {
     avgTicketTrend: { value: "0%", isUp: true },
   });
   const [activeCategory, setActiveCategory] = useState("visao-geral");
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+
+  const toggleCategory = (catId: string) => {
+    setExpandedCategories(prev => 
+      prev.includes(catId) ? prev.filter(id => id !== catId) : [...prev, catId]
+    );
+  };
 
   useLayoutEffect(() => {
     window.dispatchEvent(new CustomEvent('force-sidebar-collapse', { detail: true }));
@@ -113,23 +120,50 @@ function ReportsPage() {
                 <ChevronDown className="h-4 w-4" />
               </button>
               <nav className="space-y-1">
-                {reportCategories.map((cat) => (
-                  <div key={cat.id} className="space-y-1">
-                    <button onClick={() => setActiveCategory(cat.id)} className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-[13px] font-medium transition-all ${activeCategory === cat.id || (cat.children?.some((c: any) => c.id === activeCategory)) ? "bg-[#E8F0FE] text-primary shadow-sm" : "text-slate-500 hover:bg-slate-50/50 hover:text-slate-700"}`}>
-                      <div className="flex items-center gap-3.5"><cat.icon className={`h-4.5 w-4.5 ${(activeCategory === cat.id || cat.children?.some((c: any) => c.id === activeCategory)) ? "text-primary" : "text-slate-400"}`} /><span className={(activeCategory === cat.id || cat.children?.some((c: any) => c.id === activeCategory)) ? "font-bold" : ""}>{cat.label}</span></div>
-                      {cat.hasArrow && <ChevronDown className={`h-3.5 w-3.5 opacity-50 transition-transform ${(activeCategory === cat.id || cat.children?.some((c: any) => c.id === activeCategory)) ? "rotate-0" : "-rotate-90"}`} />}
-                    </button>
-                    {cat.children && (activeCategory === cat.id || cat.children.some((c: any) => c.id === activeCategory)) && (
-                      <div className="ml-4 space-y-1 animate-in fade-in duration-200">
-                        {cat.children.map((child: any) => (
-                          <button key={child.id} onClick={() => setActiveCategory(child.id)} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-[12.5px] transition-all ${activeCategory === child.id ? "bg-[#537FF1] text-white font-bold shadow-md" : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"}`}>
-                            <child.icon className={`h-4 w-4 ${activeCategory === child.id ? "text-white" : "text-slate-400"}`} /><span>{child.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                {reportCategories.map((cat) => {
+                  const isExpanded = expandedCategories.includes(cat.id) || (cat.children?.some((c: any) => c.id === activeCategory));
+                  const isActive = activeCategory === cat.id || (cat.children?.some((c: any) => c.id === activeCategory));
+                  
+                  return (
+                    <div key={cat.id} className="space-y-1">
+                      <button 
+                        onClick={() => {
+                          setActiveCategory(cat.id);
+                          if (cat.children) toggleCategory(cat.id);
+                        }} 
+                        className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-[13px] font-medium transition-all ${isActive ? "bg-[#E8F0FE] text-primary shadow-sm" : "text-slate-500 hover:bg-slate-50/50 hover:text-slate-700"}`}
+                      >
+                        <div className="flex items-center gap-3.5">
+                          <cat.icon className={`h-4.5 w-4.5 ${isActive ? "text-primary" : "text-slate-400"}`} />
+                          <span className={isActive ? "font-bold" : ""}>{cat.label}</span>
+                        </div>
+                        {cat.hasArrow && (
+                          <ChevronDown 
+                            className={`h-3.5 w-3.5 opacity-50 transition-transform ${isExpanded ? "rotate-0" : "-rotate-90"}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleCategory(cat.id);
+                            }}
+                          />
+                        )}
+                      </button>
+                      {cat.children && isExpanded && (
+                        <div className="ml-4 space-y-1 animate-in fade-in duration-200">
+                          {cat.children.map((child: any) => (
+                            <button 
+                              key={child.id} 
+                              onClick={() => setActiveCategory(child.id)} 
+                              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-[12.5px] transition-all ${activeCategory === child.id ? "bg-[#537FF1] text-white font-bold shadow-md" : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"}`}
+                            >
+                              <child.icon className={`h-4 w-4 ${activeCategory === child.id ? "text-white" : "text-slate-400"}`} />
+                              <span>{child.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </nav>
             </div>
           </aside>
