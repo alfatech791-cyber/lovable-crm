@@ -20,11 +20,7 @@ export function HeroHeader({ userName, todaySales, monthRevenue, newLeads }: Her
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0 });
 
   return (
-    <div className="relative overflow-hidden rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-8 mb-6 animate-fade-in"
-      style={{
-        background: "linear-gradient(135deg, oklch(0.45 0.22 268) 0%, oklch(0.55 0.22 295) 50%, oklch(0.6 0.2 330) 100%)",
-      }}
-    >
+    <div className="relative overflow-hidden rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-8 mb-6 animate-fade-in bg-gradient-primary shadow-elegant">
       {/* Decorative blurred orbs */}
       <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full opacity-30 blur-3xl"
         style={{ background: "oklch(0.85 0.2 330)" }} />
