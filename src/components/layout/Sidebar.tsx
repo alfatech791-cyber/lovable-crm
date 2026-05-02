@@ -19,6 +19,8 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  DragOverlay,
+  defaultDropAnimationSideEffects,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -36,6 +38,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
   const [isForcedCollapsed, setIsForcedCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [items, setItems] = useState<any[]>(sidebarItems);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   useEffect(() => { setFlyout(null); }, [location.pathname]);
 
@@ -52,23 +55,10 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
   }, []);
 
   useEffect(() => {
-    const savedOrder = localStorage.getItem('sidebar-menu-order');
+    const savedOrder = localStorage.getItem('sidebar-menu-order-v2');
     if (savedOrder) {
       try {
-        const orderIds = JSON.parse(savedOrder);
-        setItems(prev => {
-          const sorted = [...prev].sort((a, b) => {
-            const aId = a.url || a.title;
-            const bId = b.url || b.title;
-            const aIndex = orderIds.indexOf(aId);
-            const bIndex = orderIds.indexOf(bId);
-            if (aIndex === -1 && bIndex === -1) return 0;
-            if (aIndex === -1) return 1;
-            if (bIndex === -1) return -1;
-            return aIndex - bIndex;
-          });
-          return sorted;
-        });
+        setItems(JSON.parse(savedOrder));
       } catch (e) {
         console.error("Error parsing sidebar order", e);
       }
@@ -82,14 +72,21 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
     })
   );
 
+  const handleDragStart = (event: any) => {
+    setActiveId(event.active.id);
+  };
+
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
+    setActiveId(null);
+
     if (active && over && active.id !== over.id) {
       setItems((prev) => {
-        const oldIndex = prev.findIndex((i) => (i.url || i.title) === active.id);
-        const newIndex = prev.findIndex((i) => (i.url || i.title) === over.id);
-        const newOrder = arrayMove(prev, oldIndex, newIndex);
-        localStorage.setItem('sidebar-menu-order', JSON.stringify(newOrder.map(i => i.url || i.title)));
+        const activeIndex = prev.findIndex((i) => (i.url || i.title) === active.id);
+        const overIndex = prev.findIndex((i) => (i.url || i.title) === over.id);
+        
+        const newOrder = arrayMove(prev, activeIndex, overIndex);
+        localStorage.setItem('sidebar-menu-order-v2', JSON.stringify(newOrder));
         return newOrder;
       });
     }
@@ -162,12 +159,37 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
         )}
 
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto custom-scrollbar">
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <DndContext 
+            sensors={sensors} 
+            collisionDetection={closestCenter} 
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
             <SortableContext items={filteredItems.map(i => i.url || i.title)} strategy={verticalListSortingStrategy}>
               {filteredItems.map((item: any) => (
                 <SortableSidebarItem key={item.url || item.title} item={item} isSmall={isSmall} flyout={flyout} setFlyout={setFlyout} />
               ))}
             </SortableContext>
+            
+            <DragOverlay dropAnimation={{
+              sideEffects: defaultDropAnimationSideEffects({
+                styles: {
+                  active: {
+                    opacity: '0.5',
+                  },
+                },
+              }),
+            }}>
+              {activeId ? (
+                <div className="opacity-80 scale-105 pointer-events-none">
+                  {(() => {
+                    const item = items.find(i => (i.url || i.title) === activeId);
+                    if (!item) return null;
+                    return <SortableSidebarItem item={item} isSmall={isSmall} flyout={null} setFlyout={() => {}} />;
+                  })()}
+                </div>
+              ) : null}
+            </DragOverlay>
           </DndContext>
         </nav>
 
