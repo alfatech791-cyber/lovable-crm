@@ -4,8 +4,9 @@ import { Topbar } from "@/components/layout/Topbar";
  import { 
    BarChart3, TrendingUp, Users, DollarSign, Calendar, Download, 
    Filter, ArrowUpRight, Shield, PieChart, Target, Zap, 
-   ArrowDownRight, ChevronRight, MoreHorizontal, UserCheck, Sparkles,
-   Lightbulb, AlertCircle, Loader2
+    ArrowDownRight, ChevronRight, MoreHorizontal, UserCheck, Sparkles,
+    Lightbulb, AlertCircle, Loader2, Home, User, Package, ShoppingCart,
+    Hammer, Archive, FileText, List, ChevronDown
  } from "lucide-react";
 import { SalesChart } from "@/components/dashboard/SalesChart";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart as RePieChart, Pie } from "recharts";
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/relatorios")({
       avgTicketTrend: { value: "0%", isUp: true },
     });
     const [aiInsight, setAiInsight] = useState<string>("Carregando análise da ConectaAI...");
+    const [activeCategory, setActiveCategory] = useState("visao-geral");
  
     const [funnelData, setFunnelData] = useState<any[]>([]);
     const [originData, setOriginData] = useState<any[]>([]);
@@ -209,56 +211,108 @@ export const Route = createFileRoute("/relatorios")({
     );
   }
 
+  const reportCategories = [
+    { id: "visao-geral", label: "Visão geral - Atalhos", icon: Home },
+    { id: "clientes", label: "Clientes", icon: Users, hasArrow: true },
+    { id: "financeiro", label: "Financeiro", icon: DollarSign, hasArrow: true },
+    { id: "produto", label: "Produto", icon: Package, isNew: true, hasArrow: true },
+    { id: "vendas", label: "Vendas", icon: ShoppingCart, isNew: true, hasArrow: true },
+    { id: "ordem-servico", label: "Ordem de serviço", icon: Hammer, hasArrow: true },
+    { id: "fiscal", label: "Fiscal", icon: DollarSign, hasArrow: true },
+    { id: "vendedores", label: "Vendedores", icon: UserCheck, isNew: true, hasArrow: true },
+    { id: "tecnicos", label: "Técnicos", icon: Users, isNew: true, hasArrow: true },
+    { id: "outros", label: "Outros", icon: List, hasArrow: true },
+    { id: "antigos", label: "Antigos", icon: Archive, hasArrow: true },
+  ];
+
   return (
     <div className="min-h-screen flex w-full bg-[#F8FAFC]">
       <AppSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar title="Métricas & Relatórios" subtitle="Análise detalhada do seu desempenho comercial" />
         
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
-          {/* Toolbar */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex p-1 bg-white border border-border rounded-xl shadow-sm">
-                {["Hoje", "7D", "30D", "12M", "Tudo"].map((p) => (
-                  <button key={p} className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${p === "30D" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:bg-muted"}`}>
-                    {p}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Side Menu from Image */}
+          <aside className="w-64 border-r border-border bg-white overflow-y-auto hidden md:block">
+            <div className="p-4">
+              <button className="w-full flex items-center justify-between p-3 rounded-xl bg-primary/5 text-primary font-bold text-sm mb-4">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  <span>Relatórios</span>
+                  <span className="bg-success text-white text-[10px] px-1.5 py-0.5 rounded-full font-black">NOVO</span>
+                </div>
+                <ChevronDown className="h-4 w-4" />
+              </button>
+
+              <nav className="space-y-1">
+                {reportCategories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveCategory(cat.id)}
+                    className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      activeCategory === cat.id 
+                        ? "bg-muted text-foreground" 
+                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <cat.icon className={`h-4 w-4 ${activeCategory === cat.id ? "text-primary" : ""}`} />
+                      <span className={activeCategory === cat.id ? "font-bold text-slate-800" : ""}>{cat.label}</span>
+                      {cat.isNew && (
+                        <span className="bg-success text-white text-[9px] px-1.5 py-0.5 rounded-full font-black uppercase">Novo</span>
+                      )}
+                    </div>
+                    {cat.hasArrow && <ChevronRight className="h-3.5 w-3.5 opacity-50" />}
                   </button>
                 ))}
+              </nav>
+            </div>
+          </aside>
+
+          <main className="flex-1 overflow-y-auto p-4 md:p-8">
+            {/* Toolbar */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex p-1 bg-white border border-border rounded-xl shadow-sm">
+                  {["Hoje", "7D", "30D", "12M", "Tudo"].map((p) => (
+                    <button key={p} className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${p === "30D" ? "bg-primary text-white shadow-glow" : "text-muted-foreground hover:bg-muted"}`}>
+                      {p}
+                    </button>
+                  ))}
+                </div>
+                <button className="h-10 px-4 rounded-xl border border-border bg-white text-[13px] font-bold shadow-sm flex items-center gap-2 hover:bg-muted transition-colors">
+                  <Calendar className="h-4 w-4 text-primary" /> 01/04/2024 - 30/04/2024
+                </button>
+                <button className="h-10 px-4 rounded-xl border border-border bg-white text-[13px] font-bold shadow-sm flex items-center gap-2 hover:bg-muted transition-colors">
+                  <Filter className="h-4 w-4 text-primary" /> Todos Agentes
+                </button>
               </div>
-              <button className="h-10 px-4 rounded-xl border border-border bg-white text-[13px] font-bold shadow-sm flex items-center gap-2 hover:bg-muted transition-colors">
-                <Calendar className="h-4 w-4 text-primary" /> 01/04/2024 - 30/04/2024
-              </button>
-              <button className="h-10 px-4 rounded-xl border border-border bg-white text-[13px] font-bold shadow-sm flex items-center gap-2 hover:bg-muted transition-colors">
-                <Filter className="h-4 w-4 text-primary" /> Todos Agentes
-              </button>
+              <div className="flex items-center gap-2">
+                <button className="h-10 px-4 rounded-xl bg-white border border-border text-foreground text-[13px] font-bold shadow-sm hover:bg-muted transition-colors flex items-center gap-2">
+                  <Download className="h-4 w-4" /> Exportar CSV
+                </button>
+                <button 
+                  onClick={() => {
+                    const report = `RELATÓRIO DE DESEMPENHO - CONECTACRM\n\n` +
+                      `Período: 30 dias\n` +
+                      `Faturamento: ${stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (${stats.revenueTrend.value})\n` +
+                      `Leads: ${stats.leads} (${stats.leadsTrend.value})\n` +
+                      `Conversão: ${stats.conversion.toFixed(1)}%\n` +
+                      `Ticket Médio: ${stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n\n` +
+                      `Insight ConectaAI: ${aiInsight}`;
+                    const blob = new Blob([report], { type: 'text/plain' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `relatorio-crm-${new Date().toISOString().split('T')[0]}.txt`;
+                    a.click();
+                  }}
+                  className="h-10 px-4 rounded-xl bg-primary text-white text-[13px] font-bold shadow-elegant hover:opacity-90 transition flex items-center gap-2"
+                >
+                  <Zap className="h-4 w-4 fill-white" /> Exportar Relatório IA
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button className="h-10 px-4 rounded-xl bg-white border border-border text-foreground text-[13px] font-bold shadow-sm hover:bg-muted transition-colors flex items-center gap-2">
-                <Download className="h-4 w-4" /> Exportar CSV
-              </button>
-              <button 
-                onClick={() => {
-                  const report = `RELATÓRIO DE DESEMPENHO - CONECTACRM\n\n` +
-                    `Período: 30 dias\n` +
-                    `Faturamento: ${stats.revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} (${stats.revenueTrend.value})\n` +
-                    `Leads: ${stats.leads} (${stats.leadsTrend.value})\n` +
-                    `Conversão: ${stats.conversion.toFixed(1)}%\n` +
-                    `Ticket Médio: ${stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n\n` +
-                    `Insight ConectaAI: ${aiInsight}`;
-                  const blob = new Blob([report], { type: 'text/plain' });
-                  const url = window.URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `relatorio-crm-${new Date().toISOString().split('T')[0]}.txt`;
-                  a.click();
-                }}
-                className="h-10 px-4 rounded-xl bg-primary text-white text-[13px] font-bold shadow-elegant hover:opacity-90 transition flex items-center gap-2"
-              >
-                <Zap className="h-4 w-4 fill-white" /> Exportar Relatório IA
-              </button>
-            </div>
-          </div>
 
           {/* AI Insights Section */}
           <div className="bg-gradient-to-r from-primary/5 via-primary/[0.02] to-transparent border border-primary/10 rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center gap-6">
