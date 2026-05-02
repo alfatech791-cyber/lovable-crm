@@ -1,10 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, ShoppingCart, History, FileText, ArrowRight } from "lucide-react";
+import { Plus, ShoppingCart, History, FileText, ArrowRight, Upload } from "lucide-react";
+import { useState } from "react";
+import { SalesImportModal } from "./SalesImportModal";
 import { useNavigate } from "@tanstack/react-router";
 import { SalesHistory } from "./SalesHistory";
 
 export default function Vendas() {
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const navigate = useNavigate();
 
   return (
@@ -14,9 +17,25 @@ export default function Vendas() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Gestão de Vendas</h1>
           <p className="text-muted-foreground mt-1">Controle comercial e histórico de operações.</p>
         </div>
-        <Button onClick={() => navigate({ to: "/pdv" })} className="flex items-center gap-2 h-11 px-6 bg-primary shadow-lg shadow-primary/20 text-primary-foreground">
-          <Plus className="h-4 w-4" /> Nova Venda (PDV)
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsImportModalOpen(true)}
+            className="flex items-center gap-2 h-11 px-6 border-primary/20 hover:bg-primary/5 text-primary font-bold"
+          >
+            <Upload className="h-4 w-4" /> Importar
+          </Button>
+          <Button 
+            onClick={() => navigate({ to: "/pdv" })} 
+            className="flex items-center gap-2 h-11 px-6 bg-primary shadow-lg shadow-primary/20 text-primary-foreground font-bold"
+          >
+            <Plus className="h-4 w-4" /> Nova Venda (PDV)
+          </Button>
+        </div>
+      <SalesImportModal 
+        isOpen={isImportModalOpen} 
+        onClose={() => setIsImportModalOpen(false)} 
+      />
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="cursor-pointer group hover:border-primary/50 transition-all border-border/40 bg-card/50 shadow-sm" onClick={() => navigate({ to: "/pdv" })}>
