@@ -55,7 +55,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
   }, []);
 
   useEffect(() => {
-    const savedOrder = localStorage.getItem('sidebar-menu-order-v3');
+    const savedOrder = localStorage.getItem('sidebar-menu-order-v4');
     if (savedOrder) {
       try {
         setItems(JSON.parse(savedOrder));
@@ -66,7 +66,11 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
   }, []);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -74,6 +78,20 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
 
   const handleDragStart = (event: any) => {
     setActiveId(event.active.id);
+  };
+
+  const handleDragOver = (event: any) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    if (activeId === overId) return;
+
+    // Lógica para detectar se o item está sendo arrastado "para dentro" de outro
+    // Isso é complexo com sortable vertical padrão, então focamos no reordenamento
+    // funcional que o dnd-kit oferece por padrão.
   };
 
   const handleDragEnd = (event: any) => {
@@ -88,14 +106,13 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
         const activeItem = prev[activeIndex];
         const overItem = prev[overIndex];
 
-        // Se arrastarmos um item para cima de outro (não um cabeçalho)
-        // e ele não tiver filhos ainda, poderíamos criar uma lógica de "folder"
-        // mas para manter simples e funcional, vamos permitir o reordenamento
-        // e se for arrastado ligeiramente para a direita (nesting) vamos tratar
-        // no futuro. Por enquanto, focamos em reordenamento estável.
+        // Se o item sobre o qual estamos soltando permitir filhos (não for header)
+        // e o item arrastado não for header, poderíamos mover para dentro.
+        // Como o mock é estático, vamos apenas permitir o reordenamento por enquanto
+        // para garantir estabilidade visual.
 
         const newOrder = arrayMove(prev, activeIndex, overIndex);
-        localStorage.setItem('sidebar-menu-order-v3', JSON.stringify(newOrder));
+        localStorage.setItem('sidebar-menu-order-v4', JSON.stringify(newOrder));
         return newOrder;
       });
     }
@@ -172,6 +189,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
             sensors={sensors} 
             collisionDetection={closestCenter} 
             onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
             <SortableContext items={filteredItems.map(i => i.url || i.title)} strategy={verticalListSortingStrategy}>
@@ -190,11 +208,15 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
               }),
             }}>
               {activeId ? (
-                <div className="opacity-80 scale-105 pointer-events-none w-[230px] bg-sidebar rounded-lg shadow-2xl border border-sidebar-border">
+                <div className="opacity-80 scale-105 pointer-events-none w-[240px] bg-sidebar rounded-lg shadow-2xl border border-sidebar-border/50 overflow-hidden ring-2 ring-primary/20">
                   {(() => {
                     const item = items.find(i => (i.url || i.title) === activeId);
                     if (!item) return null;
-                    return <SortableSidebarItem item={item} isSmall={isSmall} flyout={null} setFlyout={() => {}} />;
+                    return (
+                      <div className="bg-sidebar p-1">
+                        <SortableSidebarItem item={item} isSmall={false} flyout={null} setFlyout={() => {}} />
+                      </div>
+                    );
                   })()}
                 </div>
               ) : null}
