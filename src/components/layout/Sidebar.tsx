@@ -98,15 +98,15 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
           </div>
           {!isSmall && (
             <div className="leading-tight animate-in fade-in slide-in-from-left-2 duration-300">
-              <div className="font-display font-bold text-[17px] text-white tracking-tight">ConectaCRM</div>
+            <div className="font-display font-bold text-[17px] text-foreground tracking-tight">ConectaCRM</div>
             </div>
           )}
         </div>
         
         {!isSmall && (
-          <button 
+          <button
             onClick={() => setIsCollapsed(true)}
-            className="p-1.5 rounded-lg text-sidebar-foreground/40 hover:text-white hover:bg-sidebar-accent transition-colors"
+            className="p-1.5 rounded-lg text-sidebar-foreground/40 hover:text-foreground hover:bg-sidebar-accent transition-colors"
           >
             <PanelLeftClose className="h-4 w-4" />
           </button>
@@ -163,7 +163,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
                       "justify-center",
                       active || flyout?.url === item.url
                         ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-glow"
-                        : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-white"
+                        : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-foreground"
                     )}
                   >
                     <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.4 : 2} />
@@ -177,7 +177,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
                         "group relative flex min-w-0 flex-1 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
                         active
                           ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-glow"
-                          : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-white"
+                          : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-foreground"
                       )}
                     >
                       <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.4 : 2} />
@@ -196,7 +196,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
                         "grid h-9 w-9 shrink-0 place-items-center rounded-lg transition-all",
                         flyout?.url === item.url
                           ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-glow"
-                          : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-white"
+                          : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-foreground"
                       )}
                     >
                       <ChevronRight className={cn("h-4 w-4 transition-transform", flyout?.url === item.url ? "rotate-90" : "")} />
@@ -212,7 +212,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
                     isSmall ? "justify-center" : "",
                     active
                       ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-glow"
-                      : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-white"
+                      : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-foreground"
                   )}
                 >
                   <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.4 : 2} />
@@ -231,9 +231,9 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
                       preload="intent"
                       className={cn(
                         "block rounded-md px-3 py-1.5 text-[12.5px] transition-colors",
-                        location.pathname === child.url 
-                          ? "text-white font-medium bg-white/10" 
-                          : "text-sidebar-foreground/60 hover:text-white hover:bg-white/5"
+                        location.pathname === child.url
+                          ? "text-foreground font-medium bg-primary/10"
+                          : "text-sidebar-foreground/60 hover:text-foreground hover:bg-primary/5"
                       )}
                     >
                       {child.title}
@@ -321,7 +321,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
                 {user?.email?.charAt(0).toUpperCase() || "U"}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[13px] font-semibold text-white truncate">{user?.email?.split('@')[0] || "Usuário"}</div>
+                <div className="text-[13px] font-semibold text-foreground truncate">{user?.email?.split('@')[0] || "Usuário"}</div>
                 <div className="text-[11px] text-sidebar-foreground/50 truncate">Plano Pro</div>
               </div>
               <button
@@ -348,13 +348,13 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
                 })()}
               </div>
               <div className="leading-tight">
-                <div className="font-display font-bold text-[16px] text-white tracking-tight">{flyout.title}</div>
+                <div className="font-display font-bold text-[16px] text-foreground tracking-tight">{flyout.title}</div>
                 <div className="text-[10px] uppercase tracking-widest text-sidebar-foreground/50 font-bold">Menu dedicado</div>
               </div>
             </div>
             <button
               onClick={() => setFlyout(null)}
-              className="h-8 w-8 grid place-items-center rounded-lg text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-white transition"
+              className="h-8 w-8 grid place-items-center rounded-lg text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-foreground transition"
               aria-label="Fechar"
             >
               <X className="h-4 w-4" />
