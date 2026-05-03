@@ -631,10 +631,13 @@ type Deal = {
     })();
 
      const filteredDeals = dedupedDeals
-       .filter(d => {
-         // Filter by active instance
- 
-         const leadName = d.lead?.name?.toLowerCase() || "";
+        .filter((d: any) => {
+          // Filter by active instance visual check
+          if (activeInstance && activeInstance !== "none" && d.instance_name && d.instance_name !== activeInstance) {
+            return false;
+          }
+
+          const leadName = d.lead?.name?.toLowerCase() || "";
          const leadPhone = d.lead?.phone || "";
          const search = searchTerm.toLowerCase();
          return leadName.includes(search) || leadPhone.includes(searchTerm);
@@ -1254,8 +1257,8 @@ type Deal = {
                         
                         if (!matchSearch) return false;
                         
-                        // Adicionado filtro visual de instância para garantir que apenas dados da selecionada apareçam
-                        if (activeInstance && c.instance_name && c.instance_name !== activeInstance) {
+                        // Visual instance filter safety check
+                        if (activeInstance && activeInstance !== "none" && c.instance_name && c.instance_name !== activeInstance) {
                           return false;
                         }
 
