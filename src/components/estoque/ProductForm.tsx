@@ -82,7 +82,8 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
       fetchExistingData();
     }
   }, [open]);
-  const [isSmartphone, setIsSmartphone] = useState(product?.category === "Smartphones");
+   const [activeTab, setActiveTab] = useState<"geral" | "financeiro" | "logistica" | "especificacoes">("geral");
+   const [isSmartphone, setIsSmartphone] = useState(product?.category === "Smartphones");
   const [formData, setFormData] = useState<ProductFormData>({
     name: product?.name || "",
     sku: product?.sku || "",
@@ -234,91 +235,92 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-muted/5">
-            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
-               <div className="flex flex-col gap-8">
-                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-1 bg-muted/20 rounded-2xl border border-sidebar-border/30">
-                    <Button variant="ghost" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider bg-background shadow-sm text-primary">
-                      <LayoutGrid className="h-3.5 w-3.5 mr-2" /> Geral
-                    </Button>
-                    <Button variant="ghost" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider hover:bg-background/50">
-                      <Coins className="h-3.5 w-3.5 mr-2" /> Financeiro
-                    </Button>
-                    <Button variant="ghost" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider hover:bg-background/50">
-                      <Package className="h-3.5 w-3.5 mr-2" /> Logística
-                    </Button>
-                    <Button variant="ghost" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider hover:bg-background/50">
-                      <Monitor className="h-3.5 w-3.5 mr-2" /> Especificações
-                    </Button>
-                 </div>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
+            <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
+              <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-4 p-1 bg-muted/20 rounded-2xl border border-sidebar-border/30 h-auto mb-10">
+                <TabsTrigger value="geral" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
+                  <LayoutGrid className="h-3.5 w-3.5 mr-2" /> Geral
+                </TabsTrigger>
+                <TabsTrigger value="financeiro" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
+                  <Coins className="h-3.5 w-3.5 mr-2" /> Financeiro
+                </TabsTrigger>
+                <TabsTrigger value="logistica" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
+                  <Package className="h-3.5 w-3.5 mr-2" /> Logística
+                </TabsTrigger>
+                <TabsTrigger value="especificacoes" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
+                  <Monitor className="h-3.5 w-3.5 mr-2" /> Especificações
+                </TabsTrigger>
+              </TabsList>
 
-                 <div className="space-y-8">
-                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                     <section className="lg:col-span-8 bg-background rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm hover:shadow-md transition-all duration-300">
-                         <div className="flex items-center justify-between">
-                           <h3 className="text-[13px] font-black uppercase tracking-widest text-primary flex items-center gap-2.5">
-                             <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                               <Tag className="h-4 w-4 text-primary" />
-                             </div>
-                             Dados do Produto
-                           </h3>
-                           <Badge variant="outline" className="bg-emerald-500/5 text-emerald-600 border-emerald-500/20 text-[9px] font-black py-1">Sincronizado</Badge>
-                         </div>
-                         
-                         <div className="grid gap-6">
-                         <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                           <div className="md:col-span-8 grid gap-2">
-                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 flex items-center gap-2">
-                               Nome do Produto
-                               <Badge variant="outline" className="text-[8px] h-3.5 px-1 py-0 border-primary/20 text-primary">Obrigatório</Badge>
-                             </Label>
-                        <Input 
-                          id="name" 
-                          value={formData.name} 
-                          onChange={(e) => handleChange("name", e.target.value)}
-                          placeholder="Ex: Apple iPhone 15 Pro Max 256GB" 
-                          className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
-                          required
-                        />
-                           </div>
-                           <div className="md:col-span-4 grid gap-2">
-                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código Interno / SKU</Label>
-                              <Input 
-                                value={formData.sku}
-                                onChange={(e) => handleChange("sku", e.target.value)}
-                                placeholder="AUTO-GEN-001" 
-                                className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
-                              />
-                           </div>
-                         </div>
+              <TabsContent value="geral" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+                <div className="flex flex-col gap-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <section className="lg:col-span-8 bg-background rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm hover:shadow-md transition-all duration-300">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-[13px] font-black uppercase tracking-widest text-primary flex items-center gap-2.5">
+                          <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <Tag className="h-4 w-4 text-primary" />
+                          </div>
+                          Dados do Produto
+                        </h3>
+                        <Badge variant="outline" className="bg-emerald-500/5 text-emerald-600 border-emerald-500/20 text-[9px] font-black py-1">Sincronizado</Badge>
+                      </div>
+
+                      <div className="grid gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                          <div className="md:col-span-8 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 flex items-center gap-2">
+                              Nome do Produto
+                              <Badge variant="outline" className="text-[8px] h-3.5 px-1 py-0 border-primary/20 text-primary">Obrigatório</Badge>
+                            </Label>
+                            <Input 
+                              id="name" 
+                              value={formData.name} 
+                              onChange={(e) => handleChange("name", e.target.value)}
+                              placeholder="Ex: Apple iPhone 15 Pro Max 256GB" 
+                              className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                              required
+                            />
+                          </div>
+                          <div className="md:col-span-4 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código Interno / SKU</Label>
+                            <Input 
+                              value={formData.sku}
+                              onChange={(e) => handleChange("sku", e.target.value)}
+                              placeholder="AUTO-GEN-001" 
+                              className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                            />
+                          </div>
+                        </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                           <div className="md:col-span-3 grid gap-2">
-                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">EAN / Código de Barras</Label>
-                             <Input 
-                               value={formData.ean}
-                               onChange={(e) => handleChange("ean", e.target.value)}
-                               placeholder="789..." 
-                               className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
-                             />
-                           </div>
-                           <div className="md:col-span-3 grid gap-2">
-                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código NCM</Label>
-                             <Input 
-                               value={formData.ncm}
-                               onChange={(e) => handleChange("ncm", e.target.value)}
-                               placeholder="8517.13.00" 
-                               className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
-                             />
-                           </div>
-                           <div className="md:col-span-3 grid gap-2">
-                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Referência do Fabricante</Label>
-                             <Input 
-                               value={formData.reference}
-                               onChange={(e) => handleChange("reference", e.target.value)}
-                               placeholder="REF-123" 
-                               className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
-                             />
-                           </div>
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">EAN / Código de Barras</Label>
+                            <Input 
+                              value={formData.ean}
+                              onChange={(e) => handleChange("ean", e.target.value)}
+                              placeholder="789..." 
+                              className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                            />
+                          </div>
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código NCM</Label>
+                            <Input 
+                              value={formData.ncm}
+                              onChange={(e) => handleChange("ncm", e.target.value)}
+                              placeholder="8517.13.00" 
+                              className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                            />
+                          </div>
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Referência do Fabricante</Label>
+                            <Input 
+                              value={formData.reference}
+                              onChange={(e) => handleChange("reference", e.target.value)}
+                              placeholder="REF-123" 
+                              className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                            />
+                          </div>
                           <div className="md:col-span-3 grid gap-2">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 flex items-center gap-2">
                               Tipo do Produto
@@ -335,20 +337,22 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                           <div className="grid gap-2">
-                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Categoria</Label>
-                             <Select value={formData.category} onValueChange={(v) => handleChange("category", v)}>
-                               <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
-                               <SelectContent className="border-border shadow-elegant">
-                                 <SelectItem value="Smartphones">Smartphones</SelectItem>
-                                 <SelectItem value="Tablets">Tablets</SelectItem>
-                                 <SelectItem value="Watch">Smartwatches</SelectItem>
-                                 <SelectItem value="Acessórios">Acessórios</SelectItem>
-                               </SelectContent>
-                             </Select>
-                           </div>
-                            <div className="grid gap-2">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Categoria</Label>
+                            <Select value={formData.category} onValueChange={(v) => handleChange("category", v)}>
+                              <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
+                              <SelectContent className="border-border shadow-elegant">
+                                <SelectItem value="Smartphones">Smartphones</SelectItem>
+                                <SelectItem value="Tablets">Tablets</SelectItem>
+                                <SelectItem value="Watch">Smartwatches</SelectItem>
+                                <SelectItem value="Acessórios">Acessórios</SelectItem>
+                                <SelectItem value="Serviços">Serviços</SelectItem>
+                                <SelectItem value="Peças">Peças</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="grid gap-2">
                                 <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fabricante / Marca</Label>
                                 <div className="flex w-full group">
                                   <Input 
@@ -524,48 +528,47 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                         </section>
                      </div>
 
-                     <div className="lg:col-span-4 space-y-6">
-                  <section className="bg-card rounded-3xl border border-border/60 p-6 space-y-5 shadow-sm hover:shadow-md transition-shadow h-full">
-                    <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
-                      <ImageIcon className="h-3 w-3" /> Mídia do Produto
-                    </h3>
-                    <div className="space-y-4">
-                      {formData.image_url ? (
-                        <div className="relative aspect-square rounded-3xl overflow-hidden border border-border group">
-                          <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
-                          <button 
-                            onClick={() => handleChange("image_url", "")}
-                            className="absolute top-2 right-2 p-1.5 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="aspect-square border-2 border-dashed border-primary/20 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-primary/[0.02] hover:border-primary/40 transition-all cursor-pointer group bg-muted/10">
-                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-glow">
-                            <Upload className="h-5 w-5" />
+                  <div className="lg:col-span-4 space-y-6">
+                    <section className="bg-card rounded-3xl border border-border/60 p-6 space-y-5 shadow-sm hover:shadow-md transition-shadow h-full">
+                      <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
+                        <ImageIcon className="h-3 w-3" /> Mídia do Produto
+                      </h3>
+                      <div className="space-y-4">
+                        {formData.image_url ? (
+                          <div className="relative aspect-square rounded-3xl overflow-hidden border border-border group">
+                            <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
+                            <button 
+                              onClick={() => handleChange("image_url", "")}
+                              className="absolute top-2 right-2 p-1.5 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
                           </div>
-                          <div className="text-center px-4">
-                             <span className="text-[10px] font-black text-primary uppercase tracking-widest block">URL da Imagem</span>
-                             <Input 
-                               value={formData.image_url}
-                               onChange={(e) => handleChange("image_url", e.target.value)}
-                               placeholder="https://..."
-                               className="mt-2 h-8 text-[10px] bg-transparent border-primary/20"
-                             />
+                        ) : (
+                          <div className="aspect-square border-2 border-dashed border-primary/20 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-primary/[0.02] hover:border-primary/40 transition-all cursor-pointer group bg-muted/10">
+                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-glow">
+                              <Upload className="h-5 w-5" />
+                            </div>
+                            <div className="text-center px-4">
+                               <span className="text-[10px] font-black text-primary uppercase tracking-widest block">URL da Imagem</span>
+                               <Input 
+                                 value={formData.image_url}
+                                 onChange={(e) => handleChange("image_url", e.target.value)}
+                                 placeholder="https://..."
+                                 className="mt-2 h-8 text-[10px] bg-transparent border-primary/20"
+                               />
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  </section>
-                     </div>
-                   </div>
-                 </div>
-               </div>
+                        )}
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </TabsContent>
 
-               {/* Gestão de Estoque, Preço e Localização */}
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-border/50">
-                 <section className="bg-primary/5 rounded-3xl border border-primary/10 p-6 space-y-6 shadow-sm">
+              <TabsContent value="financeiro" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <section className="bg-primary/5 rounded-3xl border border-primary/10 p-6 space-y-6 shadow-sm">
                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                      <DollarSign className="h-3.5 w-3.5" /> Precificação e Venda
                    </h5>
@@ -653,12 +656,14 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                                <Percent className="h-4 w-4" />
                              </div>
                           </div>
-                       </div>
-                    </div>
-                 </section>
+                        </div>
+                      </div>
+                    </TabsContent>
 
-                 <section className="bg-muted/5 rounded-3xl border border-sidebar-border/40 p-6 space-y-6 shadow-sm">
-                   <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                    <TabsContent value="logistica" className="space-y-8 mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <section className="bg-muted/5 rounded-3xl border border-sidebar-border/40 p-6 space-y-6 shadow-sm">
+                          <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                      <Warehouse className="h-3.5 w-3.5" /> Estoque & Unidade
                    </h5>
                    <div className="grid gap-4">
@@ -746,14 +751,14 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                             <SelectItem value="indisponivel">Indisponível</SelectItem>
                           </SelectContent>
                         </Select>
+                          </div>
+                        </section>
                       </div>
-                    </div>
-                  </section>
-               </div>
+                    </TabsContent>
 
-              {/* Técnico */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-border/50">
-                <div className="space-y-5">
+                    <TabsContent value="especificacoes" className="space-y-8 mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="space-y-5">
                   <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
                     <Hash className="h-3 w-3" /> Identificação Técnica
                   </h5>
@@ -846,11 +851,12 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                       </div>
                     </div>
                   </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </div>
-              </div>
-
             </div>
-        </div>
 
         <DialogFooter className="p-6 gap-4 bg-muted/30 border-t border-border shrink-0">
           <div className="mr-auto hidden md:flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
