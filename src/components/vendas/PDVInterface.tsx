@@ -1092,67 +1092,11 @@ import { ProductForm } from "@/components/estoque/ProductForm";
          </DialogContent>
        </Dialog>
 
-        <Dialog open={isNewProductModalOpen} onOpenChange={setIsNewProductModalOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Cadastrar Novo Produto</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Nome do Produto</Label>
-                <Input 
-                  placeholder="Ex: iPhone 13 128GB" 
-                  value={newProductName}
-                  onChange={(e) => setNewProductName(e.target.value)}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Preço de Venda</Label>
-                  <Input 
-                    type="number"
-                    placeholder="0,00" 
-                    value={newProductPrice}
-                    onChange={(e) => setNewProductPrice(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Estoque Inicial</Label>
-                  <Input 
-                    type="number"
-                    placeholder="1" 
-                    value={newProductStock}
-                    onChange={(e) => setNewProductStock(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Categoria</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['Geral', 'Smartphones', 'Acessórios', 'Serviços'].map(cat => (
-                    <Button
-                      key={cat}
-                      type="button"
-                      variant={newProductCategory === cat ? "default" : "outline"}
-                      className="text-xs h-9 justify-start"
-                      onClick={() => setNewProductCategory(cat)}
-                    >
-                      <div className={`w-2 h-2 rounded-full mr-2 ${newProductCategory === cat ? 'bg-white' : 'bg-primary'}`} />
-                      {cat}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              <Button 
-                className="w-full bg-primary" 
-                onClick={handleCreateProduct}
-                disabled={!newProductName || !newProductPrice || isCreatingProduct}
-              >
-                {isCreatingProduct ? <Loader2 className="h-4 w-4 animate-spin" /> : "Cadastrar e Adicionar"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <ProductForm 
+          open={isNewProductModalOpen} 
+          onOpenChange={setIsNewProductModalOpen}
+          onSave={handleSaveNewProduct}
+        />
 
         <Dialog open={isNewCustomerModalOpen} onOpenChange={setIsNewCustomerModalOpen}>
           <DialogContent>
