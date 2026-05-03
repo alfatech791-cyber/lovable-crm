@@ -505,7 +505,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                             </div>
                          </div>
 
-                         <div className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
+                          <div className="bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
                         <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                            <Settings2 className="h-3 w-3" /> Visibilidade & Status
                         </h3>
