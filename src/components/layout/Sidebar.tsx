@@ -39,6 +39,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
   const [searchQuery, setSearchQuery] = useState("");
   const [items, setItems] = useState<any[]>(sidebarItems);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
 
   useEffect(() => { setFlyout(null); }, [location.pathname]);
 
@@ -55,7 +56,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
   }, []);
 
   useEffect(() => {
-    const savedOrder = localStorage.getItem('sidebar-menu-order-v5');
+    const savedOrder = localStorage.getItem('sidebar-menu-order-v6');
     if (savedOrder) {
       try {
         setItems(JSON.parse(savedOrder));
@@ -80,68 +81,62 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
     setActiveId(event.active.id);
   };
 
+  const handleDragOver = (event: any) => {
+    setOverId(event.over?.id || null);
+  };
+
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
     setActiveId(null);
+    setOverId(null);
 
     if (active && over && active.id !== over.id) {
       setItems((prev) => {
         const activeIndex = prev.findIndex((i) => (i.url || i.title) === active.id);
-        const overIndex = prev.findIndex((i) => (i.url || i.title) === over.id);
+        const targetIndex = prev.findIndex((i) => (i.url || i.title) === over.id);
         
+        if (activeIndex === -1 || targetIndex === -1) return prev;
+
         const activeItem = prev[activeIndex];
-        const overItem = prev[overIndex];
+        const targetItem = prev[targetIndex];
 
-        // Lógica de Aninhamento: Se soltar um item "sobre" outro (overIndex), 
-        // e o overItem puder ter filhos, movemos para dentro.
-        // Como o SortableContext padrão trata trocas de posição, detectamos se a intenção
-        // é aninhar. Para simplificar no mock, vamos tratar como reordenamento
-        // mas permitindo mover para dentro de grupos existentes se soltarmos no final.
-
-        const newOrder = arrayMove(prev, activeIndex, overIndex);
-        
-        // Se o item sobre o qual estamos soltando for uma categoria/pai
-        // podemos adicionar como filho. No mock, ajustamos a estrutura.
-        if (overItem && !overItem.type && activeItem && activeItem.type !== "header") {
-          // Lógica simplificada de aninhamento
+        // Se o item de destino não for um header, aninhamos
+        if (targetItem && targetItem.type !== "header") {
           const updatedItems = [...prev];
-          const movedItem = updatedItems.splice(activeIndex, 1)[0];
+          const [movedItem] = updatedItems.splice(activeIndex, 1);
           
-          // Re-localiza overIndex após o splice
-          const newOverIndex = updatedItems.findIndex((i) => (i.url || i.title) === over.id);
+          // Re-localiza o destino após a remoção
+          const newTargetIndex = updatedItems.findIndex((i) => (i.url || i.title) === over.id);
           
-          if (!updatedItems[newOverIndex].children) {
-            updatedItems[newOverIndex].children = [];
+          if (!updatedItems[newTargetIndex].children) {
+            updatedItems[newTargetIndex].children = [];
           }
-          updatedItems[newOverIndex].children.push(movedItem);
           
-          localStorage.setItem('sidebar-menu-order-v5', JSON.stringify(updatedItems));
+          // Adiciona como filho
+          updatedItems[newTargetIndex].children.push(movedItem);
+          
+          localStorage.setItem('sidebar-menu-order-v6', JSON.stringify(updatedItems));
           return updatedItems;
         }
 
-        localStorage.setItem('sidebar-menu-order-v5', JSON.stringify(newOrder));
+        // Caso contrário, apenas reordenamos
+        const newOrder = arrayMove(prev, activeIndex, targetIndex);
+        localStorage.setItem('sidebar-menu-order-v6', JSON.stringify(newOrder));
         return newOrder;
       });
     }
   };
 
   const filteredItems = useMemo(() => {
-    const fItems = items.filter((item: any) => {
+    return items.filter((item: any) => {
       if (item.type === "header") return true;
       if (item.roleRestriction === "super_admin" && profile?.role !== 'super_admin') return false;
-      if (!permissions && profile?.role !== 'super_admin') return true;
-      if (profile?.role === 'super_admin') return true;
-      return true;
+      
+      if (!searchQuery) return true;
+      const query = searchQuery.toLowerCase();
+      return item.title.toLowerCase().includes(query);
     });
-
-    if (!searchQuery) return fItems;
-    const query = searchQuery.toLowerCase();
-    return fItems.filter((item: any) => {
-      if (item.type === "header") return false;
-      const matchesTitle = item.title.toLowerCase().includes(query);
-      return matchesTitle;
-    });
-  }, [items, searchQuery, permissions, profile]);
+  }, [items, searchQuery, profile]);
 
   const isSmall = isCollapsed || !!flyout || isForcedCollapsed;
 
@@ -179,6 +174,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
             sensors={sensors} 
             collisionDetection={closestCenter} 
             onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
           >
             <SortableContext items={filteredItems.map(i => i.url || i.title)} strategy={verticalListSortingStrategy}>
@@ -187,17 +183,9 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
               ))}
             </SortableContext>
             
-            <DragOverlay dropAnimation={{
-              sideEffects: defaultDropAnimationSideEffects({
-                styles: {
-                  active: {
-                    opacity: '0.5',
-                  },
-                },
-              }),
-            }}>
+            <DragOverlay dropAnimation={null}>
               {activeId ? (
-                <div className="opacity-80 scale-105 pointer-events-none w-[240px] bg-sidebar rounded-lg shadow-2xl border border-primary/30 overflow-hidden ring-2 ring-primary/20">
+                <div className="opacity-90 scale-105 pointer-events-none w-[240px] bg-sidebar rounded-lg shadow-2xl border border-primary/40 ring-4 ring-primary/10 overflow-hidden">
                   {(() => {
                     const item = items.find(i => (i.url || i.title) === activeId);
                     if (!item) return null;
@@ -213,15 +201,24 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
           </DndContext>
         </nav>
 
-        <div className="px-3 pb-3 space-y-3 shrink-0">
-          {/* Central de Ajuda e Perfil de Usuário omitidos para brevidade */}
+        <div className="px-3 pb-3 mt-auto shrink-0">
           <div className={cn("pt-2 border-t border-sidebar-border/40 flex flex-col gap-1", isSmall ? "items-center" : "")}>
-            {isSmall ? <Tooltip><TooltipTrigger asChild><button onClick={logout} className="h-10 w-10 flex items-center justify-center rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition"><Icons.LogOut className="h-5 w-5" /></button></TooltipTrigger><TooltipContent side="right">Sair da Conta</TooltipContent></Tooltip> : <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-sidebar-accent/50 transition-colors group cursor-pointer"><div className="h-9 w-9 rounded-full bg-sidebar-primary/20 border border-sidebar-primary/30 grid place-items-center text-sidebar-primary font-bold text-sm shrink-0">{user?.email?.charAt(0).toUpperCase() || "U"}</div><div className="flex-1 min-w-0"><div className="text-[13px] font-semibold text-foreground truncate">{user?.email?.split('@')[0] || "Usuário"}</div><div className="text-[11px] text-sidebar-foreground/50 truncate">Plano Pro</div></div><button onClick={logout} className="p-1.5 rounded-lg text-sidebar-foreground/30 hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"><Icons.LogOut className="h-4 w-4" /></button></div>}
+            {isSmall ? (
+              <Tooltip><TooltipTrigger asChild><button onClick={logout} className="h-10 w-10 flex items-center justify-center rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition"><Icons.LogOut className="h-5 w-5" /></button></TooltipTrigger><TooltipContent side="right">Sair</TooltipContent></Tooltip>
+            ) : (
+              <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-sidebar-accent/50 transition-colors group cursor-pointer">
+                <div className="h-9 w-9 rounded-full bg-sidebar-primary/20 border border-sidebar-primary/30 grid place-items-center text-sidebar-primary font-bold text-sm shrink-0">{user?.email?.charAt(0).toUpperCase() || "U"}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-semibold text-foreground truncate">{user?.email?.split('@')[0] || "Usuário"}</div>
+                  <div className="text-[11px] text-sidebar-foreground/50 truncate">Plano Pro</div>
+                </div>
+                <button onClick={logout} className="p-1.5 rounded-lg text-sidebar-foreground/30 hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"><Icons.LogOut className="h-4 w-4" /></button>
+              </div>
+            )}
           </div>
         </div>
       </aside>
 
-      {/* Flyout para submenus */}
       {flyout && (
         <aside className="relative z-40 w-[280px] shrink-0 bg-sidebar border-l border-sidebar-border/40 text-sidebar-foreground flex flex-col shadow-2xl animate-in slide-in-from-left-4 duration-300">
             <div className="flex items-center justify-between px-5 h-[68px] border-b border-sidebar-border shrink-0">
