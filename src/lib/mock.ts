@@ -187,9 +187,13 @@ export interface Automation {
     reference?: string;
     brand?: string;
     ncm?: string;
-     ean?: string;
-     unit?: string;
-     description?: string;
+    ean?: string;
+    unit?: string;
+    description?: string;
+    model?: string;
+    capacity?: string;
+    color?: string;
+    battery_health?: string;
   }
   
   export const products: Product[] = [];
