@@ -174,8 +174,11 @@ import { toast } from "sonner";
 
   const handleAddProduct = async (data: any) => {
     if (!user?.id) return;
+    const { data: profile } = await supabase.from('profiles').select('owner_id').eq('id', user.id).maybeSingle();
+    const ownerId = profile?.owner_id || user.id;
+
     const payload = {
-      user_id: user.id,
+      user_id: ownerId,
       ...data,
       price: Number(data.price || 0),
       cost_price: Number(data.cost_price || 0),
