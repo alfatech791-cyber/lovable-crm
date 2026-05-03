@@ -793,11 +793,12 @@ import { ProductForm } from "@/components/estoque/ProductForm";
           price: data.price || 0,
           stock: data.stock_quantity || 0,
           description: data.description || "",
-          model: data.model,
-          capacity: data.capacity,
-          color: data.color,
-          battery_health: data.battery_health
         };
+
+        if (data.model) formattedProduct.model = data.model;
+        if (data.capacity) formattedProduct.capacity = data.capacity;
+        if (data.color) formattedProduct.color = data.color;
+        if (data.battery_health) formattedProduct.battery_health = data.battery_health;
 
         toast.success("Produto cadastrado com sucesso!");
         addToCart(formattedProduct);
