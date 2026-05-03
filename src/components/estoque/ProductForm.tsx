@@ -563,13 +563,13 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                     </div>
                   </section>
                      </div>
-                   </div>
-                 </div>
-               </div>
+                        </div>
+                      </div>
+                    </TabsContent>
 
-               {/* Gestão de Estoque, Preço e Localização */}
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-border/50">
-                 <section className="bg-primary/5 rounded-3xl border border-primary/10 p-6 space-y-6 shadow-sm">
+                    <TabsContent value="financeiro" className="space-y-8 mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <section className="bg-primary/5 rounded-3xl border border-primary/10 p-6 space-y-6 shadow-sm">
                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                      <DollarSign className="h-3.5 w-3.5" /> Precificação e Venda
                    </h5>
@@ -657,12 +657,14 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                                <Percent className="h-4 w-4" />
                              </div>
                           </div>
-                       </div>
-                    </div>
-                 </section>
+                        </div>
+                      </div>
+                    </TabsContent>
 
-                 <section className="bg-muted/5 rounded-3xl border border-sidebar-border/40 p-6 space-y-6 shadow-sm">
-                   <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                    <TabsContent value="logistica" className="space-y-8 mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <section className="bg-muted/5 rounded-3xl border border-sidebar-border/40 p-6 space-y-6 shadow-sm">
+                          <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                      <Warehouse className="h-3.5 w-3.5" /> Estoque & Unidade
                    </h5>
                    <div className="grid gap-4">
@@ -750,14 +752,14 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                             <SelectItem value="indisponivel">Indisponível</SelectItem>
                           </SelectContent>
                         </Select>
+                          </div>
+                        </section>
                       </div>
-                    </div>
-                  </section>
-               </div>
+                    </TabsContent>
 
-              {/* Técnico */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-border/50">
-                <div className="space-y-5">
+                    <TabsContent value="especificacoes" className="space-y-8 mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="space-y-5">
                   <h5 className="text-[11px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
                     <Hash className="h-3 w-3" /> Identificação Técnica
                   </h5>
@@ -850,11 +852,12 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                       </div>
                     </div>
                   </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </div>
-              </div>
-
             </div>
-        </div>
 
         <DialogFooter className="p-6 gap-4 bg-muted/30 border-t border-border shrink-0">
           <div className="mr-auto hidden md:flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
