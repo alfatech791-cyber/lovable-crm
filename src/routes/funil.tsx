@@ -165,7 +165,7 @@ type Deal = {
      setSyncing(true);
 
       try {
-        const instance = activeInstance;
+        const instance = activeInstance || await resolveInstance();
         if (!instance) {
           if (showToast) toast.error("Nenhuma instância do WhatsApp conectada");
           return;
@@ -194,9 +194,8 @@ type Deal = {
           .select("id, contact_phone, contact_name, transcript, status, last_message_at, instance_name")
           .eq("user_id", user.id);
         
-        existingQuery = existingQuery.eq("instance_name", instance);
-
-        const { data: existingRows, error: existingError } = await existingQuery.order("last_message_at", { ascending: false });
+        const { data: existingRows, error: existingError } = await existingQuery
+          .order("last_message_at", { ascending: false });
 
        if (existingError) throw existingError;
 
@@ -275,7 +274,7 @@ type Deal = {
             status: existing?.status ?? "active",
             messages_count: previewTranscript.length,
             last_message_at: lastAt,
-            instance_name: instance,
+            instance_name: instance || (existing as any)?.instance_name || null,
           };
         }).filter(Boolean);
 
@@ -742,10 +741,8 @@ type Deal = {
             .select("*")
             .eq("user_id", user.id);
   
-          if (currentInstance && currentInstance !== "none") {
-            dlQuery = dlQuery.eq("instance_name", currentInstance);
-            convQuery = convQuery.eq("instance_name", currentInstance);
-          }
+          dlQuery = dlQuery.eq("instance_name", currentInstance || "none");
+          convQuery = convQuery.eq("instance_name", currentInstance || "none");
  
          dlQuery = dlQuery.order("created_at", { ascending: false });
          convQuery = convQuery.order("last_message_at", { ascending: false });
@@ -801,7 +798,7 @@ type Deal = {
       
         const dealsWithLastMessage = (dlRes.data as any[])?.map((deal: any) => {
           const dealPhone = normalizePhone(deal.lead?.phone);
-          const conv = convs.find(c => normalizePhone(c.contact_phone) === dealPhone);
+          const conv = convs.find(c => normalizePhone(c.contact_phone) === dealPhone || c.contact_phone === dealPhone);
           let lastMessage = deal.lead_id ? lastMessagesMap[deal.lead_id]?.content : undefined;
           let lastMessageAt = deal.lead_id ? lastMessagesMap[deal.lead_id]?.created_at : undefined;
           let lastMessageRole = deal.lead_id ? lastMessagesMap[deal.lead_id]?.role : undefined;
@@ -1248,27 +1245,18 @@ type Deal = {
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Nenhuma conversa</p>
                       </div>
                     ) : (
-                      conversations
-                        .filter(c => {
-
-                          const matchSearch = !searchTerm || 
-                            (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
-                            c.contact_phone.includes(searchTerm);
-                          
-                          if (!matchSearch) return false;
-                          
-                          if (statusFilter === "bot") return c.status !== "handed_off";
-                          if (statusFilter === "manual") return c.status === "handed_off";
-                          if (statusFilter === "unread") {
-                            const incoming = (c.transcript ?? []).filter((m) => m.role === "user").length;
-                            return incoming > 0;
-                          }
-                          if (statusFilter === "pending") {
-                            const lastMsg = c.transcript?.[c.transcript.length - 1];
-                            return lastMsg?.role === "user";
-                          }
-                          return true;
-                        })
+                      conversations.filter(c => {
+                        const matchSearch = !searchTerm || 
+                          (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
+                          c.contact_phone.includes(searchTerm);
+                        
+                        if (!matchSearch) return false;
+                        if (statusFilter === "bot") return c.status !== "handed_off";
+                        if (statusFilter === "manual") return c.status === "handed_off";
+                        if (statusFilter === "unread") return (c.transcript ?? []).some(m => m.role === "user");
+                        if (statusFilter === "pending") return c.transcript?.[c.transcript.length - 1]?.role === "user";
+                        return true;
+                      })
                         .map((conv) => (
                           <button
                             key={conv.id}
