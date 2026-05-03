@@ -30,34 +30,37 @@ import { toast } from "sonner";
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
     const [quickProduct, setQuickProduct] = useState({ name: "", price: "", stock: "", category: "Acessórios", cost_price: "" });
 
-     const fetchProducts = async (pageNum: number, isInitial = false) => {
-       if (!user?.id) return;
-       if (isInitial) {
-         setLoading(true);
-         setPage(0);
-       }
-       
-       const { data, error } = await supabase
-         .from("products")
-         .select("*")
-         .eq("user_id", user.id)
-         .order("created_at", { ascending: false })
-         .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1);
- 
-       if (error) {
-         toast.error("Erro ao carregar produtos: " + error.message);
-       } else {
-         const rows = (data ?? []).map((p: any) => ({ ...p, stock: p.stock_quantity ?? 0 }));
-         if (isInitial) {
-           setLocalProducts(rows);
-         } else {
-           setLocalProducts(prev => [...prev, ...rows]);
-         }
-         setHasMore(rows.length === PAGE_SIZE);
-       }
-       
-       if (isInitial) setLoading(false);
-     };
+    const fetchProducts = async (pageNum: number, isInitial = false) => {
+      if (!user?.id) return;
+      if (isInitial) {
+        setLoading(true);
+        setPage(0);
+      }
+      
+      console.log("Fetching products for user:", user.id);
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1);
+
+      if (error) {
+        console.error("Supabase error fetching products:", error);
+        toast.error("Erro ao carregar produtos: " + error.message);
+      } else {
+        console.log("Products found:", data?.length);
+        const rows = (data ?? []).map((p: any) => ({ ...p, stock: p.stock_quantity ?? 0 }));
+        if (isInitial) {
+          setLocalProducts(rows);
+        } else {
+          setLocalProducts(prev => [...prev, ...rows]);
+        }
+        setHasMore(rows.length === PAGE_SIZE);
+      }
+      
+      if (isInitial) setLoading(false);
+    };
  
       useEffect(() => {
         if (user?.id) {
