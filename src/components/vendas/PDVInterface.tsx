@@ -1189,7 +1189,21 @@
          {/* Lado Esquerdo: Seleção de Produtos e Campos de Venda */}
          <div className="flex flex-col gap-4 overflow-hidden animate-in slide-in-from-left duration-500">
            {/* Barra Superior de Busca e Campos */}
-           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-card border border-border rounded-2xl p-4 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-card border border-border rounded-2xl p-4 shadow-sm relative">
+              <div className="absolute right-4 top-4 hidden md:block">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-7 gap-1 text-[10px] font-bold uppercase border-primary/20 hover:bg-primary/5 hover:text-primary transition-all"
+                  onClick={() => {
+                    setNewProductName("");
+                    setIsNewProductModalOpen(true);
+                  }}
+                >
+                  <Plus className="h-3 w-3" /> Cadastrar Produto
+                </Button>
+              </div>
+
               <div className="md:col-span-2 space-y-1.5">
                 <Label className="text-[10px] font-bold uppercase text-muted-foreground">Código (F1)</Label>
                <div className="relative" ref={searchContainerRef}>
