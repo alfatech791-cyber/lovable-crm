@@ -198,7 +198,9 @@ type Deal = {
           existingQuery = existingQuery.eq("instance_name", instance);
         }
 
-        const { data: existingRows, error: existingError } = await existingQuery.order("last_message_at", { ascending: false });
+        const { data: existingRows, error: existingError } = await existingQuery
+          .eq("instance_name", instance)
+          .order("last_message_at", { ascending: false });
 
        if (existingError) throw existingError;
 
