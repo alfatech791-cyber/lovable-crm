@@ -208,12 +208,26 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
 
    const grossProfit = (formData.price || 0) - (formData.cost_price || 0);
 
-  const handleSave = () => {
-    if (onSave) {
-      onSave(formData);
-    }
-    onOpenChange(false);
-  };
+   const [isSaving, setIsSaving] = useState(false);
+ 
+   const handleSave = async () => {
+     if (!formData.name.trim()) {
+       alert("O nome do produto é obrigatório.");
+       return;
+     }
+ 
+     setIsSaving(true);
+     try {
+       if (onSave) {
+         await onSave(formData);
+       }
+       onOpenChange(false);
+     } catch (error) {
+       console.error("Erro ao salvar produto no formulário:", error);
+     } finally {
+       setIsSaving(false);
+     }
+   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -905,10 +919,20 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
              <InfoIcon className="h-3.5 w-3.5 text-primary/60" /> Verifique todos os dados antes de salvar o registro
           </div>
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-2xl h-12 px-8 font-black text-[10px] uppercase tracking-widest hover:bg-destructive/10 hover:text-destructive transition-all">Descartar</Button>
-          <Button onClick={handleSave} className="bg-gradient-primary shadow-glow gap-3 px-10 rounded-2xl h-12 font-black text-[10px] uppercase tracking-widest group">
-            {product ? <CheckCircle2 className="h-4 w-4 group-hover:scale-110 transition-transform" /> : <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />}
-            {product ? "Salvar Registro" : "Concluir Cadastro"}
-          </Button>
+           <Button 
+             onClick={handleSave} 
+             disabled={isSaving}
+             className="bg-gradient-primary shadow-glow gap-3 px-10 rounded-2xl h-12 font-black text-[10px] uppercase tracking-widest group"
+           >
+             {isSaving ? (
+               <Loader2 className="h-4 w-4 animate-spin" />
+             ) : product ? (
+               <CheckCircle2 className="h-4 w-4 group-hover:scale-110 transition-transform" />
+             ) : (
+               <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />
+             )}
+             {isSaving ? "Salvando..." : product ? "Salvar Registro" : "Concluir Cadastro"}
+           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
