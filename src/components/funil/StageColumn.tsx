@@ -25,10 +25,10 @@
      <div
        onDragOver={(e) => e.preventDefault()}
        onDrop={() => { if (dragId) onMoveDeal(dragId, stage.id); setDragId(null); }}
-       className={cn(
-         "w-[310px] shrink-0 flex flex-col h-full rounded-2xl transition-all duration-200",
-         dragId ? "bg-primary/5 border-2 border-dashed border-primary/20" : "bg-muted/30 border border-transparent hover:border-border/50"
-       )}
+        className={cn(
+          "w-[280px] sm:w-[310px] shrink-0 flex flex-col h-full rounded-2xl transition-all duration-200",
+          dragId ? "bg-primary/5 border-2 border-dashed border-primary/20" : "bg-muted/30 border border-transparent hover:border-border/50"
+        )}
      >
        {/* Header da Coluna */}
        <div className="p-4 flex flex-col gap-2 relative group">
