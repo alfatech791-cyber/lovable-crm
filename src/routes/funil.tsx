@@ -1242,6 +1242,11 @@ type Deal = {
                     ) : (
                       conversations
                         .filter(c => {
+                          // Filter by active instance
+                          if (activeInstance && c.instance_name && c.instance_name !== activeInstance) {
+                            return false;
+                          }
+
                           const matchSearch = !searchTerm || 
                             (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
                             c.contact_phone.includes(searchTerm);
