@@ -30,34 +30,37 @@ import { toast } from "sonner";
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
     const [quickProduct, setQuickProduct] = useState({ name: "", price: "", stock: "", category: "Acessórios", cost_price: "" });
 
-     const fetchProducts = async (pageNum: number, isInitial = false) => {
-       if (!user?.id) return;
-       if (isInitial) {
-         setLoading(true);
-         setPage(0);
-       }
-       
-       const { data, error } = await supabase
-         .from("products")
-         .select("*")
-         .eq("user_id", user.id)
-         .order("created_at", { ascending: false })
-         .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1);
- 
-       if (error) {
-         toast.error("Erro ao carregar produtos: " + error.message);
-       } else {
-         const rows = (data ?? []).map((p: any) => ({ ...p, stock: p.stock_quantity ?? 0 }));
-         if (isInitial) {
-           setLocalProducts(rows);
-         } else {
-           setLocalProducts(prev => [...prev, ...rows]);
-         }
-         setHasMore(rows.length === PAGE_SIZE);
-       }
-       
-       if (isInitial) setLoading(false);
-     };
+    const fetchProducts = async (pageNum: number, isInitial = false) => {
+      if (!user?.id) return;
+      if (isInitial) {
+        setLoading(true);
+        setPage(0);
+      }
+      
+      const { data: profile } = await supabase.from('profiles').select('owner_id').eq('id', user.id).maybeSingle();
+      const ownerId = profile?.owner_id || user.id;
+
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("user_id", ownerId)
+        .order("created_at", { ascending: false })
+        .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1);
+
+      if (error) {
+        toast.error("Erro ao carregar produtos: " + error.message);
+      } else {
+        const rows = (data ?? []).map((p: any) => ({ ...p, stock: p.stock_quantity ?? 0 }));
+        if (isInitial) {
+          setLocalProducts(rows);
+        } else {
+          setLocalProducts(prev => [...prev, ...rows]);
+        }
+        setHasMore(rows.length === PAGE_SIZE);
+      }
+      
+      if (isInitial) setLoading(false);
+    };
  
       useEffect(() => {
         if (user?.id) {
@@ -79,10 +82,13 @@ import { toast } from "sonner";
 
     const fetchStats = async () => {
       if (!user?.id) return;
+      const { data: profile } = await supabase.from('profiles').select('owner_id').eq('id', user.id).maybeSingle();
+      const ownerId = profile?.owner_id || user.id;
+
       const { data, error } = await supabase
         .from('products')
         .select('price, cost_price, stock_quantity, min_stock')
-        .eq('user_id', user.id);
+        .eq('user_id', ownerId);
 
       if (error) return;
       
@@ -168,8 +174,11 @@ import { toast } from "sonner";
 
   const handleAddProduct = async (data: any) => {
     if (!user?.id) return;
+    const { data: profile } = await supabase.from('profiles').select('owner_id').eq('id', user.id).maybeSingle();
+    const ownerId = profile?.owner_id || user.id;
+
     const payload = {
-      user_id: user.id,
+      user_id: ownerId,
       ...data,
       price: Number(data.price || 0),
       cost_price: Number(data.cost_price || 0),
@@ -224,8 +233,11 @@ import { toast } from "sonner";
       if (!user?.id) return;
       if (!quickProduct.name.trim()) { toast.error("Nome é obrigatório"); return; }
       setLoading(true);
+      const { data: profile } = await supabase.from('profiles').select('owner_id').eq('id', user.id).maybeSingle();
+      const ownerId = profile?.owner_id || user.id;
+
       const payload = {
-        user_id: user.id,
+        user_id: ownerId,
         name: quickProduct.name.trim(),
         cost_price: Number(quickProduct.cost_price || 0),
         price: Number(quickProduct.price || 0),
