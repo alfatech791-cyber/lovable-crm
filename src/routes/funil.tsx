@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
    messages_count: number;
    last_message_at: string;
    transcript: Msg[];
+  instance_name?: string | null;
  };
  
  import { StageColumn } from "@/components/funil/StageColumn";
@@ -1242,6 +1243,11 @@ type Deal = {
                     ) : (
                       conversations
                         .filter(c => {
+                          // Filter by active instance
+                          if (activeInstance && c.instance_name && c.instance_name !== activeInstance) {
+                            return false;
+                          }
+
                           const matchSearch = !searchTerm || 
                             (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
                             c.contact_phone.includes(searchTerm);
