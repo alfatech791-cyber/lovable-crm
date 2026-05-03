@@ -741,8 +741,10 @@ type Deal = {
             .select("*")
             .eq("user_id", user.id);
   
-          dlQuery = dlQuery.eq("instance_name", currentInstance || "none");
-          convQuery = convQuery.eq("instance_name", currentInstance || "none");
+          if (currentInstance) {
+            dlQuery = dlQuery.eq("instance_name", currentInstance);
+            convQuery = convQuery.eq("instance_name", currentInstance);
+          }
  
          dlQuery = dlQuery.order("created_at", { ascending: false });
          convQuery = convQuery.order("last_message_at", { ascending: false });
@@ -1251,6 +1253,12 @@ type Deal = {
                           c.contact_phone.includes(searchTerm);
                         
                         if (!matchSearch) return false;
+                        
+                        // Adicionado filtro visual de instância para garantir que apenas dados da selecionada apareçam
+                        if (activeInstance && c.instance_name && c.instance_name !== activeInstance) {
+                          return false;
+                        }
+
                         if (statusFilter === "bot") return c.status !== "handed_off";
                         if (statusFilter === "manual") return c.status === "handed_off";
                         if (statusFilter === "unread") return (c.transcript ?? []).some(m => m.role === "user");
