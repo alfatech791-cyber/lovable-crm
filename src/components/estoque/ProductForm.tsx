@@ -759,6 +759,40 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                       </div>
                     </TabsContent>
 
+                    <TabsContent value="servicos" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+                      <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
+                        <section className="bg-card rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-[13px] font-black uppercase tracking-widest text-primary flex items-center gap-2.5">
+                              <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                                <Briefcase className="h-4 w-4 text-primary" />
+                              </div>
+                              Configurações de Serviço
+                            </h3>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid gap-2">
+                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Tempo Estimado (minutos)</Label>
+                              <Input 
+                                type="number"
+                                placeholder="Ex: 60" 
+                                className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold" 
+                              />
+                            </div>
+                            <div className="grid gap-2">
+                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Garantia (dias)</Label>
+                              <Input 
+                                type="number"
+                                placeholder="Ex: 90" 
+                                className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold" 
+                              />
+                            </div>
+                          </div>
+                        </section>
+                      </div>
+                    </TabsContent>
+
                     <TabsContent value="especificacoes" className="space-y-8 mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div className="space-y-5">
