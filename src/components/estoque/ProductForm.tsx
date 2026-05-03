@@ -609,101 +609,94 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                   </div>
                 </TabsContent>
 
-              <TabsContent value="financeiro" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <section className="bg-primary/5 rounded-3xl border border-primary/10 p-6 space-y-6 shadow-sm">
-                   <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                     <DollarSign className="h-3.5 w-3.5" /> Precificação e Venda
-                   </h5>
-                    <div className="grid gap-4">
-                      <div className="grid gap-2">
-                        <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda (Varejo)</Label>
-                        <div className="relative group">
-                           <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-primary text-primary-foreground font-black text-[10px] rounded-l-xl shadow-glow">R$</div>
-                           <Input 
-                             id="price" 
-                             type="number" 
-                             value={formData.price}
-                             onChange={(e) => handleChange("price", parseFloat(e.target.value) || 0)}
-                             className="bg-card h-12 border-primary/20 focus:ring-4 focus:ring-primary/5 text-lg font-black text-primary transition-all pl-12" 
-                           />
+               <TabsContent value="financeiro" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+                 <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                   <section className="md:col-span-8 bg-background rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm">
+                     <div className="flex items-center justify-between">
+                       <h3 className="text-[13px] font-black uppercase tracking-widest text-primary flex items-center gap-2.5">
+                         <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                           <CreditCard className="h-4 w-4 text-primary" />
                          </div>
-                      </div>
-                       <div className="grid gap-4">
-                         <div className="grid gap-2">
-                           <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Venda (Atacado)</Label>
-                           <div className="relative group">
-                              <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-muted text-muted-foreground font-black text-[10px] rounded-l-xl border border-r-0 border-border">R$</div>
-                              <Input 
-                                type="number" 
-                                value={formData.wholesale_price}
-                                onChange={(e) => handleChange("wholesale_price", parseFloat(e.target.value) || 0)}
-                                className="bg-card h-12 border-border focus:ring-4 focus:ring-primary/5 text-lg font-black transition-all pl-12" 
-                              />
-                            </div>
-                         </div>
-                         <div className="grid gap-2">
-                           <Label className="text-[10px] font-black uppercase text-muted-foreground/60 tracking-wider">Preço de Custo (Compra)</Label>
-                           <div className="relative group">
-                              <div className="absolute inset-y-0 left-0 w-10 flex items-center justify-center bg-muted text-muted-foreground font-black text-[10px] rounded-l-xl border border-r-0 border-border">R$</div>
-                              <Input 
-                                type="number" 
-                                value={formData.cost_price}
-                                onChange={(e) => handleChange("cost_price", parseFloat(e.target.value) || 0)}
-                                className="bg-card h-12 border-border focus:ring-4 focus:ring-primary/5 text-lg font-black transition-all pl-12" 
-                              />
-                            </div>
-                         </div>
+                         Pagamento ao Fornecedor
+                       </h3>
+                       <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[9px] font-black py-1 uppercase">Controle Financeiro</Badge>
+                     </div>
+ 
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                       <div className="grid gap-2">
+                         <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Forma de Pagamento</Label>
+                         <Select defaultValue="boleto">
+                           <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="pix">PIX</SelectItem>
+                             <SelectItem value="boleto">Boleto Bancário</SelectItem>
+                             <SelectItem value="cartao_credito">Cartão de Crédito</SelectItem>
+                             <SelectItem value="transferencia">Transferência / TED</SelectItem>
+                             <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                           </SelectContent>
+                         </Select>
                        </div>
-                       <div className="grid grid-cols-2 gap-3">
-                         <div className="grid gap-1.5">
-                           <div className="flex items-center justify-between">
-                             <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Margem (%)</Label>
-                             <div className="flex gap-1">
-                               <button onClick={() => handleChange("margin", 30)} className="text-[8px] px-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-primary font-bold">30%</button>
-                               <button onClick={() => handleChange("margin", 50)} className="text-[8px] px-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-primary font-bold">50%</button>
-                             </div>
-                           </div>
-                           <div className="relative">
-                             <Input 
-                               type="number" 
-                               value={formData.margin?.toFixed(2)} 
-                               onChange={(e) => handleChange("margin", parseFloat(e.target.value) || 0)}
-                               className="bg-card h-9 border-border text-xs font-bold pr-7" 
-                             />
-                             <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">%</span>
-                           </div>
-                         </div>
-                         <div className="grid gap-1.5">
-                           <Label className="text-[9px] font-black uppercase text-muted-foreground/60 tracking-wider">Markup (%)</Label>
-                           <div className="relative">
-                             <Input 
-                               type="number" 
-                               value={formData.markup?.toFixed(2)} 
-                               onChange={(e) => handleChange("markup", parseFloat(e.target.value) || 0)}
-                               className="bg-card h-9 border-border text-xs font-bold pr-7" 
-                             />
-                             <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">%</span>
-                           </div>
-                         </div>
+                       <div className="grid gap-2">
+                         <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Condição de Pagamento</Label>
+                         <Select defaultValue="vista">
+                           <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="vista">À Vista</SelectItem>
+                             <SelectItem value="30_dias">30 Dias</SelectItem>
+                             <SelectItem value="parcelado">Parcelado</SelectItem>
+                             <SelectItem value="antecipado">Pagamento Antecipado</SelectItem>
+                           </SelectContent>
+                         </Select>
                        </div>
-                       <div className="pt-2 space-y-3">
-                          <div className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${grossProfit > 0 ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-destructive/10 border-destructive/20'}`}>
-                             <div className="space-y-0.5">
-                                <span className={`text-[9px] font-black uppercase block ${grossProfit > 0 ? 'text-emerald-600' : 'text-destructive'}`}>Lucro Real por Unidade</span>
-                                <span className={`text-sm font-black ${grossProfit > 0 ? 'text-emerald-600' : 'text-destructive'}`}>
-                                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(grossProfit)}
-                                </span>
-                             </div>
-                             <div className={`p-2 rounded-lg ${grossProfit > 0 ? 'bg-emerald-500/20 text-emerald-600' : 'bg-destructive/20 text-destructive'}`}>
-                               <Percent className="h-4 w-4" />
-                             </div>
-                          </div>
-                          </div>
+                     </div>
+ 
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid gap-2">
+                          <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Data da Compra</Label>
+                          <Input type="date" className="bg-card h-11 border-border font-bold text-sm" />
                         </div>
-                      </section>
-                    </div>
-                  </TabsContent>
+                        <div className="grid gap-2">
+                          <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Vencimento</Label>
+                          <Input type="date" className="bg-card h-11 border-border font-bold text-sm text-destructive" />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 font-black">Valor Total</Label>
+                          <div className="relative">
+                             <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-black text-[9px] rounded-l-lg border border-r-0 border-border">R$</div>
+                             <Input 
+                               type="number" 
+                               value={formData.cost_price}
+                               readOnly
+                               className="bg-muted/30 h-11 border-border font-black transition-all pl-10 text-sm" 
+                             />
+                           </div>
+                        </div>
+                     </div>
+                   </section>
+ 
+                   <section className="md:col-span-4 space-y-6">
+                     <div className="bg-primary/5 rounded-3xl border border-primary/10 p-6 space-y-4">
+                       <h4 className="text-[11px] font-black uppercase tracking-wider text-primary flex items-center gap-2">
+                         <InfoIcon className="h-3.5 w-3.5" /> Resumo de Custo
+                       </h4>
+                       <div className="space-y-3">
+                         <div className="flex justify-between items-center py-2 border-b border-primary/10">
+                           <span className="text-[10px] font-bold text-muted-foreground uppercase">Preço Unitário</span>
+                           <span className="text-sm font-black">{Number(formData.cost_price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                         </div>
+                         <div className="flex justify-between items-center py-2 border-b border-primary/10">
+                           <span className="text-[10px] font-bold text-muted-foreground uppercase">Quantidade</span>
+                           <span className="text-sm font-black">{formData.stock || 0}</span>
+                         </div>
+                         <div className="flex justify-between items-center pt-2">
+                           <span className="text-[10px] font-black text-primary uppercase">Total Investido</span>
+                           <span className="text-lg font-black text-primary">{Number((formData.cost_price || 0) * (formData.stock || 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                         </div>
+                       </div>
+                     </div>
+                   </section>
+                 </div>
+               </TabsContent>
 
                     <TabsContent value="logistica" className="space-y-8 mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
