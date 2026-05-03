@@ -639,9 +639,6 @@ type Deal = {
      const filteredDeals = dedupedDeals
        .filter(d => {
          // Filter by active instance
-          if (activeInstance && activeInstance !== "none" && (d as any).instance_name && (d as any).instance_name !== activeInstance) {
-           return false;
-         }
  
          const leadName = d.lead?.name?.toLowerCase() || "";
          const leadPhone = d.lead?.phone || "";
