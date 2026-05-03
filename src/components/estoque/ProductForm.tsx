@@ -565,6 +565,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                         )}
                       </div>
                     </section>
+                      </div>
                     </div>
                   </div>
                 </TabsContent>
