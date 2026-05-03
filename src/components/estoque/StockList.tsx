@@ -37,19 +37,19 @@ import { toast } from "sonner";
         setPage(0);
       }
       
-      console.log("Fetching products for user:", user.id);
+      const { data: profile } = await supabase.from('profiles').select('owner_id').eq('id', user.id).maybeSingle();
+      const ownerId = profile?.owner_id || user.id;
+
       const { data, error } = await supabase
         .from("products")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", ownerId)
         .order("created_at", { ascending: false })
         .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1);
 
       if (error) {
-        console.error("Supabase error fetching products:", error);
         toast.error("Erro ao carregar produtos: " + error.message);
       } else {
-        console.log("Products found:", data?.length);
         const rows = (data ?? []).map((p: any) => ({ ...p, stock: p.stock_quantity ?? 0 }));
         if (isInitial) {
           setLocalProducts(rows);
