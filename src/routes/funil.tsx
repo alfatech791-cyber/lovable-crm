@@ -194,9 +194,7 @@ type Deal = {
           .select("id, contact_phone, contact_name, transcript, status, last_message_at, instance_name")
           .eq("user_id", user.id);
         
-        if (instance) {
-          existingQuery = existingQuery.eq("instance_name", instance);
-        }
+        existingQuery = existingQuery.eq("instance_name", instance);
 
         const { data: existingRows, error: existingError } = await existingQuery.order("last_message_at", { ascending: false });
 
