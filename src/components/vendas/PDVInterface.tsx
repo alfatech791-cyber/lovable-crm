@@ -1,6 +1,7 @@
  import { useState, useMemo, useEffect, useCallback, useRef } from "react";
  import { Search, ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, QrCode, User, Package, ChevronRight, X, UserPlus, Info, Loader2, ArrowLeft, History, Calculator, Percent, Tag, ReceiptText, Printer, FileText, CheckCircle2, Eraser, ChevronDown } from "lucide-react";
- import { Product } from "@/lib/mock";
+import { Product } from "@/lib/mock";
+import { ProductForm } from "@/components/estoque/ProductForm";
  import { toast } from "sonner";
  import { supabase } from "@/integrations/supabase/client";
  import { useAuth } from "@/contexts/AuthContext";
