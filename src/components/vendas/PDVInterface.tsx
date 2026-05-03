@@ -1127,16 +1127,20 @@
               </div>
               <div className="space-y-2">
                 <Label>Categoria</Label>
-                <select 
-                  className="w-full h-10 px-3 rounded-md bg-muted/20 border border-input text-sm"
-                  value={newProductCategory}
-                  onChange={(e) => setNewProductCategory(e.target.value)}
-                >
-                  <option value="Geral">Geral</option>
-                  <option value="Smartphones">Smartphones</option>
-                  <option value="Acessórios">Acessórios</option>
-                  <option value="Serviços">Serviços</option>
-                </select>
+                <div className="grid grid-cols-2 gap-2">
+                  {['Geral', 'Smartphones', 'Acessórios', 'Serviços'].map(cat => (
+                    <Button
+                      key={cat}
+                      type="button"
+                      variant={newProductCategory === cat ? "default" : "outline"}
+                      className="text-xs h-9 justify-start"
+                      onClick={() => setNewProductCategory(cat)}
+                    >
+                      <div className={`w-2 h-2 rounded-full mr-2 ${newProductCategory === cat ? 'bg-white' : 'bg-primary'}`} />
+                      {cat}
+                    </Button>
+                  ))}
+                </div>
               </div>
               <Button 
                 className="w-full bg-primary" 
