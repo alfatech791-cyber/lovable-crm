@@ -85,39 +85,42 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
   }, [open]);
    const [activeTab, setActiveTab] = useState<"geral" | "financeiro" | "logistica" | "especificacoes" | "servicos">("geral");
    const [isSmartphone, setIsSmartphone] = useState(product?.category === "Smartphones");
-  const [formData, setFormData] = useState<ProductFormData>({
-    name: product?.name || "",
-    sku: product?.sku || "",
-    ean: product?.ean || "",
-    ncm: product?.ncm || "",
-    reference: product?.reference || "",
-    category: product?.category || "Acessórios",
-    brand: product?.brand || "apple",
-    supplier: product?.supplier || "padrao",
-    model: product?.model || "",
-    price: product?.price || 0,
-    wholesale_price: product?.wholesale_price || 0,
-    cost_price: product?.cost_price || 0,
-    stock: product?.stock || 0,
-    min_stock: product?.min_stock || 2,
-    unit: product?.unit || "un",
-    weight: product?.weight || 0,
-    location: product?.location || "",
-    store: product?.store || "matriz",
+  const [formData, setFormData] = useState<ProductFormData>(() => {
+    const isNew = !product;
+    return {
+      name: product?.name || "",
+      sku: product?.sku || "",
+      ean: product?.ean || "",
+      ncm: product?.ncm || "",
+      reference: product?.reference || "",
+      category: product?.category || (isNew ? localStorage.getItem("last_product_category") || "Acessórios" : "Acessórios"),
+      brand: product?.brand || (isNew ? localStorage.getItem("last_product_brand") || "apple" : "apple"),
+      supplier: product?.supplier || (isNew ? localStorage.getItem("last_product_supplier") || "padrao" : "padrao"),
+      model: product?.model || (isNew ? localStorage.getItem("last_product_model") || "" : ""),
+      price: product?.price || 0,
+      wholesale_price: product?.wholesale_price || 0,
+      cost_price: product?.cost_price || 0,
+      stock: product?.stock || 0,
+      min_stock: product?.min_stock || 2,
+      unit: product?.unit || (isNew ? localStorage.getItem("last_product_unit") || "un" : "un"),
+      weight: product?.weight || 0,
+      location: product?.location || (isNew ? localStorage.getItem("last_product_location") || "" : ""),
+      store: product?.store || (isNew ? localStorage.getItem("last_product_store") || "matriz" : "matriz"),
       imei: product?.imei || "",
       imei2: product?.imei2 || "",
-    color: product?.color || "",
-    capacity: product?.capacity || "",
-    description: product?.description || "",
-     image_url: product?.image_url || "",
-      processor: product?.processor || "",
-      ram: product?.ram || "",
-      display: product?.display || "",
+      color: product?.color || (isNew ? localStorage.getItem("last_product_color") || "" : ""),
+      capacity: product?.capacity || (isNew ? localStorage.getItem("last_product_capacity") || "" : ""),
+      description: product?.description || "",
+      image_url: product?.image_url || "",
+      processor: product?.processor || (isNew ? localStorage.getItem("last_product_processor") || "" : ""),
+      ram: product?.ram || (isNew ? localStorage.getItem("last_product_ram") || "" : ""),
+      display: product?.display || (isNew ? localStorage.getItem("last_product_display") || "" : ""),
       battery_health: product?.battery_health || "",
       observations: product?.observations || "",
       margin: 0,
       markup: 0,
-    });
+    };
+  });
 
   useEffect(() => {
     if (product) {
@@ -178,33 +181,42 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
      return cost * (1 + markup / 100);
    };
 
-   const handleChange = (field: keyof ProductFormData, value: any) => {
-     setFormData(prev => {
-       const newData = { ...prev, [field]: value };
-       
-        if (field === "price" || field === "cost_price") {
-          const p = field === "price" ? (typeof value === 'number' ? value : parseFloat(value) || 0) : prev.price;
-          const c = field === "cost_price" ? (typeof value === 'number' ? value : parseFloat(value) || 0) : prev.cost_price;
-          const { margin, markup } = calculateFromPrice(p, c);
-         newData.margin = margin;
-         newData.markup = markup;
-       } else if (field === "margin") {
-         newData.price = calculateFromMargin(value, prev.cost_price || 0);
-         const { markup } = calculateFromPrice(newData.price, prev.cost_price || 0);
-         newData.markup = markup;
-       } else if (field === "markup") {
-         newData.price = calculateFromMarkup(value, prev.cost_price || 0);
-         const { margin } = calculateFromPrice(newData.price, prev.cost_price || 0);
-         newData.margin = margin;
-       }
-       
-       return newData;
-     });
-     
-     if (field === "category") {
-       setIsSmartphone(value === "Smartphones");
-     }
-   };
+  const handleChange = (field: keyof ProductFormData, value: any) => {
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      
+      if (field === "price" || field === "cost_price") {
+        const p = field === "price" ? (typeof value === 'number' ? value : parseFloat(value) || 0) : prev.price;
+        const c = field === "cost_price" ? (typeof value === 'number' ? value : parseFloat(value) || 0) : prev.cost_price;
+        const { margin, markup } = calculateFromPrice(p, c);
+        newData.margin = margin;
+        newData.markup = markup;
+      } else if (field === "margin") {
+        newData.price = calculateFromMargin(value, prev.cost_price || 0);
+        const { markup } = calculateFromPrice(newData.price, prev.cost_price || 0);
+        newData.markup = markup;
+      } else if (field === "markup") {
+        newData.price = calculateFromMarkup(value, prev.cost_price || 0);
+        const { margin } = calculateFromPrice(newData.price, prev.cost_price || 0);
+        newData.margin = margin;
+      }
+      
+      return newData;
+    });
+    
+    if (field === "category") {
+      setIsSmartphone(value === "Smartphones");
+    }
+
+    const persistentFields = [
+      "category", "brand", "supplier", "model", "unit", "location", "store",
+      "processor", "ram", "display", "capacity", "color"
+    ];
+    
+    if (!product && persistentFields.includes(field)) {
+      localStorage.setItem(`last_product_${field}`, String(value));
+    }
+  };
 
    const grossProfit = (formData.price || 0) - (formData.cost_price || 0);
 
