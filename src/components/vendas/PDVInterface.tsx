@@ -1270,22 +1270,17 @@
                </div>
              </div>
  
-             <div className="md:col-span-4 space-y-1.5">
-               <Label className="text-[10px] font-bold uppercase text-muted-foreground">Vendedor (F4)</Label>
-               <div className="relative">
-                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
-                 <select 
-                   className="w-full h-11 pl-9 pr-3 rounded-md bg-muted/20 border border-input text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none"
-                   value={vendedorId}
-                   onChange={(e) => setVendedorId(e.target.value)}
-                 >
-                   <option value="">Selecione um vendedor</option>
-                   <option value="1">Vendedor Padrão</option>
-                   <option value={user?.id}>Eu ({user?.email?.split('@')[0]})</option>
-                 </select>
-                 <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground rotate-90 pointer-events-none" />
-               </div>
-             </div>
+              <div className="md:col-span-4 space-y-1.5">
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground">Categoria</Label>
+                <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
+                  <TabsList className="grid grid-cols-4 h-11 bg-muted/40 p-1 rounded-xl">
+                    <TabsTrigger value="all" className="text-[10px] font-black uppercase tracking-tighter">Geral</TabsTrigger>
+                    <TabsTrigger value="phones" className="text-[10px] font-black uppercase tracking-tighter">Smart</TabsTrigger>
+                    <TabsTrigger value="acc" className="text-[10px] font-black uppercase tracking-tighter">Acess</TabsTrigger>
+                    <TabsTrigger value="services" className="text-[10px] font-black uppercase tracking-tighter">Serv</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
            </div>
  
            {/* Observações da Venda */}
