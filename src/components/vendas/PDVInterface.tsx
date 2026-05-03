@@ -1560,11 +1560,11 @@
  
            <div className="space-y-3 py-2">
              <div className="grid grid-cols-3 gap-2">
-             {[
-               { id: 'money', icon: Banknote, label: 'Dinheiro' },
-               { id: 'card', icon: CreditCard, label: 'Cartão' },
-               { id: 'pix', icon: QrCode, label: 'PIX' },
-             ].map(method => (
+              {[
+                { id: 'money', icon: Banknote, label: 'Dinheiro', color: 'text-green-600', bg: 'bg-green-500/10' },
+                { id: 'card', icon: CreditCard, label: 'Cartão', color: 'text-blue-600', bg: 'bg-blue-500/10' },
+                { id: 'pix', icon: QrCode, label: 'PIX', color: 'text-purple-600', bg: 'bg-purple-500/10' },
+              ].map(method => (
                  <button
                    key={method.id}
                    onClick={() => {
@@ -1576,12 +1576,12 @@
                        if (method.id === 'pix') setPixAmount(total.toFixed(2));
                      }
                    }}
-                   className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition text-[11px] font-bold uppercase
-                     ${paymentMethod === method.id 
-                       ? 'border-primary bg-primary/5 text-primary' 
-                       : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
-                     }`}
-                 >
+                    className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition text-[11px] font-bold uppercase
+                      ${paymentMethod === method.id 
+                        ? `border-primary ${method.bg} ${method.color}` 
+                        : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
+                      }`}
+                  >
                  {(method.id === 'money' && parseFloat(moneyAmount) > 0) || 
                   (method.id === 'card' && parseFloat(cardAmount) > 0) || 
                   (method.id === 'pix' && parseFloat(pixAmount) > 0) ? (
