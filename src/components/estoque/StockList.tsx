@@ -524,14 +524,15 @@ import { toast } from "sonner";
                         </div>
                     </td>
                      <td className="px-6 py-5">
-                       <div className="flex flex-col gap-1">
-                         <span className={`text-[10px] font-black ${(product.price - (product.cost_price || 0)) > 0 ? 'text-emerald-600' : 'text-destructive'}`}>
-                           {Number(product.price - (product.cost_price || 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                         </span>
-                         <span className={`px-2 py-0.5 rounded-full text-[8px] font-black border w-fit ${ (product.stock || 0) > 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-destructive/10 text-destructive border-destructive/20' }`}>
-                           { (product.stock || 0) > 0 ? 'EM ESTOQUE' : 'ESGOTADO' }
-                         </span>
-                       </div>
+                        <div className="flex flex-col gap-2 items-start">
+                          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black ${(product.price - (product.cost_price || 0)) > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 'bg-destructive/5 text-destructive border border-destructive/10'}`}>
+                            <TrendingUp className="h-3 w-3" />
+                            {Number(product.price - (product.cost_price || 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </div>
+                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-black border tracking-wider shadow-sm ${ (product.stock || 0) > 0 ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-transparent' : 'bg-slate-100 text-slate-500 border-slate-200' }`}>
+                            { (product.stock || 0) > 0 ? 'DISPONÍVEL' : 'ESGOTADO' }
+                          </span>
+                        </div>
                     </td>
                     <td className="px-6 py-5 text-right" onClick={(e) => e.stopPropagation()}>
                        <div className="flex items-center justify-end gap-2">
