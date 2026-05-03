@@ -270,10 +270,10 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                 </TabsTrigger>
               </TabsList>
 
-               <TabsContent value="geral" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300 pb-20">
-                <div className="space-y-8">
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <section className="lg:col-span-8 bg-background rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm hover:shadow-md transition-all duration-300">
+                <TabsContent value="geral" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+                 <div className="space-y-6 pb-20">
+                   <div className="flex flex-col lg:flex-row gap-6 items-start">
+                     <section className="flex-1 bg-background rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm hover:shadow-md transition-all duration-300">
                       <div className="flex items-center justify-between">
                         <h3 className="text-[13px] font-black uppercase tracking-widest text-primary flex items-center gap-2.5">
                           <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -459,7 +459,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                         </div>
                       </section>
 
-                      <section className="lg:col-span-4 space-y-6">
+                      <section className="w-full lg:w-[380px] space-y-6 shrink-0">
                          <div className="bg-primary/5 rounded-3xl border border-primary/20 p-6 space-y-5 shadow-sm">
                             <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                                <DollarSign className="h-4 w-4" /> Precificação Básica
@@ -539,8 +539,8 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                      </section>
                    </div>
 
-                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                     <div className="lg:col-span-8 space-y-6">
+                   <div className="flex flex-col lg:flex-row gap-6 items-start">
+                     <div className="flex-1 space-y-6">
                         <section className="bg-card rounded-3xl border border-border/60 p-6 space-y-4 shadow-sm hover:shadow-md transition-shadow">
                            <div className="flex items-center justify-between">
                               <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
@@ -592,7 +592,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                         </section>
                      </div>
 
-                  <div className="lg:col-span-4 space-y-6">
+                  <div className="w-full lg:w-[380px] space-y-6 shrink-0">
                     <section className="bg-card rounded-3xl border border-border/60 p-6 space-y-5 shadow-sm hover:shadow-md transition-shadow h-full">
                       <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
                         <ImageIcon className="h-3 w-3" /> Mídia do Produto
