@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Tag, DollarSign, History, CheckCircle2, Plus, Cpu, Upload, Image as ImageIcon, Hash, Settings2, Info as InfoIcon, Zap, Box, ClipboardList, Warehouse, MapPin, Percent, Globe, Trash2, ChevronDown, Sparkles, LayoutGrid, Coins, Package, Monitor, Briefcase } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
