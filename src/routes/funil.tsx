@@ -165,7 +165,7 @@ type Deal = {
      setSyncing(true);
 
       try {
-        const instance = activeInstance || await resolveInstance();
+        const instance = activeInstance;
         if (!instance) {
           if (showToast) toast.error("Nenhuma instância do WhatsApp conectada");
           return;
@@ -1053,15 +1053,30 @@ type Deal = {
                             <SelectValue placeholder="Selecionar Instância" className="text-xs font-bold" />
                           </div>
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-[300px]">
                           {availableInstances.length === 0 ? (
-                            <SelectItem value="none" disabled className="text-[10px]">
-                              Nenhuma ativa
-                            </SelectItem>
+                            <div className="p-4 text-center">
+                              <p className="text-[10px] font-bold text-muted-foreground uppercase mb-2">Nenhuma instância ativa</p>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="h-7 text-[9px] font-black"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  fetchAvailableInstances();
+                                }}
+                              >
+                                <RefreshCw className="h-3 w-3 mr-1" /> Atualizar Lista
+                              </Button>
+                            </div>
                           ) : (
                             availableInstances.map((ins) => (
-                              <SelectItem key={ins.instanceName} value={ins.instanceName} className="text-[10px]">
-                                {ins.instanceName}
+                              <SelectItem key={ins.instanceName} value={ins.instanceName} className="text-[10px] py-3">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.4)]" />
+                                  <span className="font-bold">{ins.instanceName}</span>
+                                  <span className="text-[8px] opacity-40">({ins.status})</span>
+                                </div>
                               </SelectItem>
                             ))
                           )}
