@@ -165,7 +165,7 @@ type Deal = {
      setSyncing(true);
 
       try {
-        const instance = await resolveInstance();
+        const instance = activeInstance;
         if (!instance) {
           if (showToast) toast.error("Nenhuma instância do WhatsApp conectada");
           return;
@@ -639,7 +639,7 @@ type Deal = {
      const filteredDeals = dedupedDeals
        .filter(d => {
          // Filter by active instance
-         if (activeInstance && (d as any).instance_name && (d as any).instance_name !== activeInstance) {
+          if (activeInstance && activeInstance !== "none" && (d as any).instance_name && (d as any).instance_name !== activeInstance) {
            return false;
          }
  
@@ -750,7 +750,8 @@ type Deal = {
             .select("*")
             .eq("user_id", user.id);
   
-          if (currentInstance) {
+          // Apply strict instance filtering if one is selected
+          if (currentInstance && currentInstance !== "none") {
             dlQuery = dlQuery.eq("instance_name", currentInstance);
             convQuery = convQuery.eq("instance_name", currentInstance);
           }
@@ -1048,15 +1049,30 @@ type Deal = {
                             <SelectValue placeholder="Selecionar Instância" className="text-xs font-bold" />
                           </div>
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-[300px]">
                           {availableInstances.length === 0 ? (
-                            <SelectItem value="none" disabled className="text-[10px]">
-                              Nenhuma ativa
-                            </SelectItem>
+                            <div className="p-4 text-center">
+                              <p className="text-[10px] font-bold text-muted-foreground uppercase mb-2">Nenhuma instância ativa</p>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="h-7 text-[9px] font-black"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  fetchAvailableInstances();
+                                }}
+                              >
+                                <RefreshCw className="h-3 w-3 mr-1" /> Atualizar Lista
+                              </Button>
+                            </div>
                           ) : (
                             availableInstances.map((ins) => (
-                              <SelectItem key={ins.instanceName} value={ins.instanceName} className="text-[10px]">
-                                {ins.instanceName}
+                              <SelectItem key={ins.instanceName} value={ins.instanceName} className="text-[10px] py-3">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.4)]" />
+                                  <span className="font-bold">{ins.instanceName}</span>
+                                  <span className="text-[8px] opacity-40">({ins.status})</span>
+                                </div>
                               </SelectItem>
                             ))
                           )}
@@ -1243,8 +1259,8 @@ type Deal = {
                     ) : (
                       conversations
                         .filter(c => {
-                          // Filter by active instance
-                          if (activeInstance && c.instance_name && c.instance_name !== activeInstance) {
+                          // Safety check for local state filtering
+                          if (activeInstance && activeInstance !== "none" && c.instance_name && c.instance_name !== activeInstance) {
                             return false;
                           }
 
