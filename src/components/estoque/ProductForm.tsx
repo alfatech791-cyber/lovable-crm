@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Tag, DollarSign, History, CheckCircle2, Plus, Cpu, Upload, Image as ImageIcon, Hash, Settings2, Info as InfoIcon, Zap, Box, ClipboardList, Warehouse, MapPin, Percent, Globe, Trash2, ChevronDown, Sparkles, LayoutGrid, Coins, Package, Monitor } from "lucide-react";
+import { Tag, DollarSign, History, CheckCircle2, Plus, Cpu, Upload, Image as ImageIcon, Hash, Settings2, Info as InfoIcon, Zap, Box, ClipboardList, Warehouse, MapPin, Percent, Globe, Trash2, ChevronDown, Sparkles, LayoutGrid, Coins, Package, Monitor, Briefcase } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 interface ProductFormData {
@@ -82,7 +82,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
       fetchExistingData();
     }
   }, [open]);
-   const [activeTab, setActiveTab] = useState<"geral" | "financeiro" | "logistica" | "especificacoes">("geral");
+   const [activeTab, setActiveTab] = useState<"geral" | "financeiro" | "logistica" | "especificacoes" | "servicos">("geral");
    const [isSmartphone, setIsSmartphone] = useState(product?.category === "Smartphones");
   const [formData, setFormData] = useState<ProductFormData>({
     name: product?.name || "",
@@ -237,7 +237,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-muted/5">
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
             <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
-              <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-4 p-1 bg-muted/20 rounded-2xl border border-sidebar-border/30 h-auto mb-10">
+              <TabsList className="grid grid-cols-2 md:grid-cols-5 gap-4 p-1 bg-muted/20 rounded-2xl border border-sidebar-border/30 h-auto mb-10">
                 <TabsTrigger value="geral" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
                   <LayoutGrid className="h-3.5 w-3.5 mr-2" /> Geral
                 </TabsTrigger>
@@ -250,10 +250,13 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                 <TabsTrigger value="especificacoes" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
                   <Monitor className="h-3.5 w-3.5 mr-2" /> Especificações
                 </TabsTrigger>
+                <TabsTrigger value="servicos" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
+                  <Briefcase className="h-3.5 w-3.5 mr-2" /> Serviços
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="geral" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
-                <div className="flex flex-col gap-8">
+                <div className="space-y-8">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <section className="lg:col-span-8 bg-background rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm hover:shadow-md transition-all duration-300">
                       <div className="flex items-center justify-between">
@@ -756,6 +759,40 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                       </div>
                     </TabsContent>
 
+                    <TabsContent value="servicos" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+                      <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
+                        <section className="bg-card rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-[13px] font-black uppercase tracking-widest text-primary flex items-center gap-2.5">
+                              <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                                <Briefcase className="h-4 w-4 text-primary" />
+                              </div>
+                              Configurações de Serviço
+                            </h3>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid gap-2">
+                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Tempo Estimado (minutos)</Label>
+                              <Input 
+                                type="number"
+                                placeholder="Ex: 60" 
+                                className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold" 
+                              />
+                            </div>
+                            <div className="grid gap-2">
+                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Garantia (dias)</Label>
+                              <Input 
+                                type="number"
+                                placeholder="Ex: 90" 
+                                className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold" 
+                              />
+                            </div>
+                          </div>
+                        </section>
+                      </div>
+                    </TabsContent>
+
                     <TabsContent value="especificacoes" className="space-y-8 mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div className="space-y-5">
@@ -853,7 +890,6 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                   </div>
                         </div>
                       </div>
-                    </TabsContent>
                   </Tabs>
                 </div>
             </div>
