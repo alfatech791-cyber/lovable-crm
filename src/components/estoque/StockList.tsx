@@ -233,8 +233,11 @@ import { toast } from "sonner";
       if (!user?.id) return;
       if (!quickProduct.name.trim()) { toast.error("Nome é obrigatório"); return; }
       setLoading(true);
+      const { data: profile } = await supabase.from('profiles').select('owner_id').eq('id', user.id).maybeSingle();
+      const ownerId = profile?.owner_id || user.id;
+
       const payload = {
-        user_id: user.id,
+        user_id: ownerId,
         name: quickProduct.name.trim(),
         cost_price: Number(quickProduct.cost_price || 0),
         price: Number(quickProduct.price || 0),
