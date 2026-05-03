@@ -82,10 +82,13 @@ import { toast } from "sonner";
 
     const fetchStats = async () => {
       if (!user?.id) return;
+      const { data: profile } = await supabase.from('profiles').select('owner_id').eq('id', user.id).maybeSingle();
+      const ownerId = profile?.owner_id || user.id;
+
       const { data, error } = await supabase
         .from('products')
         .select('price, cost_price, stock_quantity, min_stock')
-        .eq('user_id', user.id);
+        .eq('user_id', ownerId);
 
       if (error) return;
       
