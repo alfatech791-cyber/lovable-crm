@@ -235,27 +235,26 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-muted/5">
-            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
-               <div className="flex flex-col gap-8">
-                  <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
-                    <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-4 p-1 bg-muted/20 rounded-2xl border border-sidebar-border/30 h-auto mb-8">
-                      <TabsTrigger value="geral" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
-                        <LayoutGrid className="h-3.5 w-3.5 mr-2" /> Geral
-                      </TabsTrigger>
-                      <TabsTrigger value="financeiro" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
-                        <Coins className="h-3.5 w-3.5 mr-2" /> Financeiro
-                      </TabsTrigger>
-                      <TabsTrigger value="logistica" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
-                        <Package className="h-3.5 w-3.5 mr-2" /> Logística
-                      </TabsTrigger>
-                      <TabsTrigger value="especificacoes" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
-                        <Monitor className="h-3.5 w-3.5 mr-2" /> Especificações
-                      </TabsTrigger>
-                    </TabsList>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
+            <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
+              <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-4 p-1 bg-muted/20 rounded-2xl border border-sidebar-border/30 h-auto mb-10">
+                <TabsTrigger value="geral" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
+                  <LayoutGrid className="h-3.5 w-3.5 mr-2" /> Geral
+                </TabsTrigger>
+                <TabsTrigger value="financeiro" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
+                  <Coins className="h-3.5 w-3.5 mr-2" /> Financeiro
+                </TabsTrigger>
+                <TabsTrigger value="logistica" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
+                  <Package className="h-3.5 w-3.5 mr-2" /> Logística
+                </TabsTrigger>
+                <TabsTrigger value="especificacoes" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
+                  <Monitor className="h-3.5 w-3.5 mr-2" /> Especificações
+                </TabsTrigger>
+              </TabsList>
 
-                    <TabsContent value="geral" className="space-y-8 mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
-                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        <section className="lg:col-span-8 bg-background rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm hover:shadow-md transition-all duration-300">
+              <TabsContent value="geral" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <section className="lg:col-span-8 bg-background rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm hover:shadow-md transition-all duration-300">
                             <div className="flex items-center justify-between">
                               <h3 className="text-[13px] font-black uppercase tracking-widest text-primary flex items-center gap-2.5">
                                 <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -528,48 +527,47 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                         </section>
                      </div>
 
-                     <div className="lg:col-span-4 space-y-6">
-                  <section className="bg-card rounded-3xl border border-border/60 p-6 space-y-5 shadow-sm hover:shadow-md transition-shadow h-full">
-                    <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
-                      <ImageIcon className="h-3 w-3" /> Mídia do Produto
-                    </h3>
-                    <div className="space-y-4">
-                      {formData.image_url ? (
-                        <div className="relative aspect-square rounded-3xl overflow-hidden border border-border group">
-                          <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
-                          <button 
-                            onClick={() => handleChange("image_url", "")}
-                            className="absolute top-2 right-2 p-1.5 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="aspect-square border-2 border-dashed border-primary/20 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-primary/[0.02] hover:border-primary/40 transition-all cursor-pointer group bg-muted/10">
-                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-glow">
-                            <Upload className="h-5 w-5" />
+                  <div className="lg:col-span-4 space-y-6">
+                    <section className="bg-card rounded-3xl border border-border/60 p-6 space-y-5 shadow-sm hover:shadow-md transition-shadow h-full">
+                      <h3 className="text-[11px] font-black uppercase tracking-[0.1em] text-primary flex items-center gap-2">
+                        <ImageIcon className="h-3 w-3" /> Mídia do Produto
+                      </h3>
+                      <div className="space-y-4">
+                        {formData.image_url ? (
+                          <div className="relative aspect-square rounded-3xl overflow-hidden border border-border group">
+                            <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
+                            <button 
+                              onClick={() => handleChange("image_url", "")}
+                              className="absolute top-2 right-2 p-1.5 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
                           </div>
-                          <div className="text-center px-4">
-                             <span className="text-[10px] font-black text-primary uppercase tracking-widest block">URL da Imagem</span>
-                             <Input 
-                               value={formData.image_url}
-                               onChange={(e) => handleChange("image_url", e.target.value)}
-                               placeholder="https://..."
-                               className="mt-2 h-8 text-[10px] bg-transparent border-primary/20"
-                             />
+                        ) : (
+                          <div className="aspect-square border-2 border-dashed border-primary/20 rounded-3xl flex flex-col items-center justify-center gap-3 hover:bg-primary/[0.02] hover:border-primary/40 transition-all cursor-pointer group bg-muted/10">
+                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-glow">
+                              <Upload className="h-5 w-5" />
+                            </div>
+                            <div className="text-center px-4">
+                               <span className="text-[10px] font-black text-primary uppercase tracking-widest block">URL da Imagem</span>
+                               <Input 
+                                 value={formData.image_url}
+                                 onChange={(e) => handleChange("image_url", e.target.value)}
+                                 placeholder="https://..."
+                                 className="mt-2 h-8 text-[10px] bg-transparent border-primary/20"
+                               />
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  </section>
-                     </div>
-                        </div>
+                        )}
                       </div>
-                    </TabsContent>
+                    </section>
+                  </div>
+                </div>
+              </TabsContent>
 
-                    <TabsContent value="financeiro" className="space-y-8 mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <section className="bg-primary/5 rounded-3xl border border-primary/10 p-6 space-y-6 shadow-sm">
+              <TabsContent value="financeiro" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <section className="bg-primary/5 rounded-3xl border border-primary/10 p-6 space-y-6 shadow-sm">
                    <h5 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                      <DollarSign className="h-3.5 w-3.5" /> Precificação e Venda
                    </h5>
