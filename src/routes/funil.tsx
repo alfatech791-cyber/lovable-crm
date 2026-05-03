@@ -233,9 +233,6 @@ type Deal = {
           const phone = normalizePhone(remoteJid);
           const existing = existingByPhone.get(phone);
 
-          if (existing && (existing as any).instance_name && (existing as any).instance_name !== instance) {
-            return null;
-          }
 
           const lastMsg = chat.lastMessage;
           const fallbackContent =
