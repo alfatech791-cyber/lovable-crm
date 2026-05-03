@@ -165,7 +165,7 @@ type Deal = {
      setSyncing(true);
 
       try {
-        const instance = activeInstance || await resolveInstance();
+        const instance = activeInstance;
         if (!instance) {
           if (showToast) toast.error("Nenhuma instância do WhatsApp conectada");
           return;
@@ -717,14 +717,7 @@ type Deal = {
         console.warn("ensure_default_funnel_stages falhou:", e);
       }
 
-      let currentInstance = activeInstance;
-      if (!currentInstance) {
-        currentInstance = await resolveInstance();
-        if (currentInstance) {
-          setActiveInstance(currentInstance);
-          localStorage.setItem("last_active_instance", currentInstance);
-        }
-      }
+      const currentInstance = activeInstance;
       
       fetchAvailableInstances();
 
@@ -741,10 +734,9 @@ type Deal = {
             .select("*")
             .eq("user_id", user.id);
   
-          if (currentInstance) {
-            dlQuery = dlQuery.eq("instance_name", currentInstance);
-            convQuery = convQuery.eq("instance_name", currentInstance);
-          }
+          // Always filter by instance to keep view consistency
+          dlQuery = dlQuery.eq("instance_name", currentInstance || "none");
+          convQuery = convQuery.eq("instance_name", currentInstance || "none");
  
          dlQuery = dlQuery.order("created_at", { ascending: false });
          convQuery = convQuery.order("last_message_at", { ascending: false });
