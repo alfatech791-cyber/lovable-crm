@@ -750,11 +750,8 @@ type Deal = {
             .select("*")
             .eq("user_id", user.id);
   
-          // Apply strict instance filtering if one is selected
-          if (currentInstance && currentInstance !== "none") {
-            dlQuery = dlQuery.eq("instance_name", currentInstance);
-            convQuery = convQuery.eq("instance_name", currentInstance);
-          }
+          dlQuery = dlQuery.eq("instance_name", currentInstance || "none");
+          convQuery = convQuery.eq("instance_name", currentInstance || "none");
  
          dlQuery = dlQuery.order("created_at", { ascending: false });
          convQuery = convQuery.order("last_message_at", { ascending: false });
