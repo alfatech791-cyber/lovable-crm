@@ -165,7 +165,7 @@ type Deal = {
      setSyncing(true);
 
       try {
-        const instance = activeInstance;
+        const instance = activeInstance || await resolveInstance();
         if (!instance) {
           if (showToast) toast.error("Nenhuma instância do WhatsApp conectada");
           return;
