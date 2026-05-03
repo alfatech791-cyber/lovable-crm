@@ -536,10 +536,11 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                               <Switch className="scale-75" />
                            </div>
                         </div>
-                     </section>
-                   </div>
+                      </div>
+                    </section>
+                  </div>
 
-                   <div className="flex flex-col lg:flex-row gap-6 items-start">
+                  <div className="flex flex-col lg:flex-row gap-6 items-start">
                      <div className="flex-1 space-y-6">
                         <section className="bg-card rounded-3xl border border-border/60 p-6 space-y-4 shadow-sm hover:shadow-md transition-shadow">
                            <div className="flex items-center justify-between">
