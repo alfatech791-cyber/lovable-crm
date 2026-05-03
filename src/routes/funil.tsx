@@ -1259,7 +1259,7 @@ type Deal = {
                       conversations
                         .filter(c => {
                           // Safety check for local state filtering
-                          if (activeInstance && activeInstance !== "none" && c.instance_name && c.instance_name !== activeInstance) {
+                          if (activeInstance && activeInstance !== "none" && (!c.instance_name || c.instance_name !== activeInstance)) {
                             return false;
                           }
 
