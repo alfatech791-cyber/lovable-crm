@@ -76,19 +76,24 @@ import { ProductForm } from "@/components/estoque/ProductForm";
        
        if (error) throw error;
        
-       const formattedProducts: Product[] = (data || []).map(p => ({
-         id: p.id,
-         name: p.name,
-         category: p.category || "Geral",
-         price: p.price || 0,
-         stock: p.stock_quantity || 0,
-          description: p.description || "",
-          image: p.image_url || undefined,
-          model: p.model,
-          capacity: p.capacity,
-          color: p.color,
-          battery_health: p.battery_health
-       }));
+        const formattedProducts: Product[] = (data || []).map(p => {
+          const product: Product = {
+            id: p.id,
+            name: p.name,
+            category: p.category || "Geral",
+            price: p.price || 0,
+            stock: p.stock_quantity || 0,
+            description: p.description || "",
+            image: p.image_url || undefined,
+          };
+          
+          if (p.model) product.model = p.model;
+          if (p.capacity) product.capacity = p.capacity;
+          if (p.color) product.color = p.color;
+          if (p.battery_health) product.battery_health = p.battery_health;
+          
+          return product;
+        });
        
        setAllProducts(formattedProducts);
      } catch (error) {
