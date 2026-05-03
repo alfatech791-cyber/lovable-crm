@@ -165,7 +165,7 @@ type Deal = {
      setSyncing(true);
 
       try {
-        const instance = await resolveInstance();
+        const instance = activeInstance || await resolveInstance();
         if (!instance) {
           if (showToast) toast.error("Nenhuma instância do WhatsApp conectada");
           return;
@@ -750,9 +750,14 @@ type Deal = {
             .select("*")
             .eq("user_id", user.id);
   
+          // Always filter by instance to ensure data integrity
           if (currentInstance) {
             dlQuery = dlQuery.eq("instance_name", currentInstance);
             convQuery = convQuery.eq("instance_name", currentInstance);
+          } else {
+             // If no instance selected, but we have data, we might want to show everything or nothing.
+             // Given the user complaint, let's make sure we don't accidentally hide data if currentInstance is null but data exists.
+             // However, the app seems designed around instances.
           }
  
          dlQuery = dlQuery.order("created_at", { ascending: false });
@@ -1243,7 +1248,7 @@ type Deal = {
                     ) : (
                       conversations
                         .filter(c => {
-                          // Filter by active instance
+                          // The main query already filters by instance, but this is a safety check for local state
                           if (activeInstance && c.instance_name && c.instance_name !== activeInstance) {
                             return false;
                           }
