@@ -535,7 +535,6 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                               </div>
                               <Switch className="scale-75" />
                            </div>
-                        </div>
                       </div>
                     </section>
                   </div>
