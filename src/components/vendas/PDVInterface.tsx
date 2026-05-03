@@ -1313,45 +1313,44 @@
             </div>
 
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-                <ScrollArea className="flex-1">
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 py-2 pr-4 pb-4">
-                   {allProducts
-                     .filter(p => activeCategory === "all" || 
-                       (activeCategory === "phones" && ["Smartphones", "Celulares", "Aparelhos"].some(c => p.category.includes(c))) ||
-                       (activeCategory === "acc" && ["Acessórios", "Películas", "Cabos", "Fones", "Carregadores"].some(c => p.category.includes(c))) ||
-                       (activeCategory === "services" && ["Serviços", "Mão de Obra"].some(c => p.category.includes(c)))
-                     )
-                      .slice(0, 30)
-                     .map(product => (
-                       <button
-                         key={product.id}
-                         onClick={() => { addToCart(product); setIsSearchFocused(false); }}
-                         disabled={product.stock <= 0}
-                          className={`h-24 rounded-2xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition flex flex-col items-center justify-center gap-1 font-medium group relative ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                       >
-                         <div className="h-10 w-10 rounded-full bg-muted group-hover:bg-primary/10 grid place-items-center transition">
-                           <Package className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                         </div>
-                         <span className="text-xs text-center px-2 line-clamp-2">{product.name}</span>
-                         <div className="flex flex-col items-center">
-                           <span className="text-[10px] font-bold text-primary">
-                             {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                           </span>
-                           <span className={`text-[8px] uppercase font-bold ${product.stock <= 5 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                             Estoque: {product.stock}
-                           </span>
-                         </div>
-                         {product.stock <= 0 && (
-                           <div className="absolute inset-0 bg-background/60 flex items-center justify-center rounded-2xl">
-                             <span className="bg-destructive text-white text-[8px] font-bold px-2 py-0.5 rounded-full uppercase">Esgotado</span>
-                           </div>
-                         )}
-                       </button>
-                     ))}
-                 </div>
-               </ScrollArea>
-             </Tabs>
-          </div>
+              <ScrollArea className="flex-1">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 py-2 pr-4 pb-4">
+                  {allProducts
+                    .filter(p => activeCategory === "all" || 
+                      (activeCategory === "phones" && ["Smartphones", "Celulares", "Aparelhos"].some(c => p.category.includes(c))) ||
+                      (activeCategory === "acc" && ["Acessórios", "Películas", "Cabos", "Fones", "Carregadores"].some(c => p.category.includes(c))) ||
+                      (activeCategory === "services" && ["Serviços", "Mão de Obra"].some(c => p.category.includes(c)))
+                    )
+                    .slice(0, 30)
+                    .map(product => (
+                      <button
+                        key={product.id}
+                        onClick={() => { addToCart(product); setIsSearchFocused(false); }}
+                        disabled={product.stock <= 0}
+                        className={`h-24 rounded-2xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition flex flex-col items-center justify-center gap-1 font-medium group relative ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        <div className="h-10 w-10 rounded-full bg-muted group-hover:bg-primary/10 grid place-items-center transition">
+                          <Package className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                        </div>
+                        <span className="text-xs text-center px-2 line-clamp-2">{product.name}</span>
+                        <div className="flex flex-col items-center">
+                          <span className="text-[10px] font-bold text-primary">
+                            {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </span>
+                          <span className={`text-[8px] uppercase font-bold ${product.stock <= 5 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                            Estoque: {product.stock}
+                          </span>
+                        </div>
+                        {product.stock <= 0 && (
+                          <div className="absolute inset-0 bg-background/60 flex items-center justify-center rounded-2xl">
+                            <span className="bg-destructive text-white text-[8px] font-bold px-2 py-0.5 rounded-full uppercase">Esgotado</span>
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                </div>
+              </ScrollArea>
+            </div>
        </div>
  
         {/* Lado Direito: Carrinho e Checkout */}
