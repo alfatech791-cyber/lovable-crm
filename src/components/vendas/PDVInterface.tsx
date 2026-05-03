@@ -76,19 +76,24 @@ import { ProductForm } from "@/components/estoque/ProductForm";
        
        if (error) throw error;
        
-       const formattedProducts: Product[] = (data || []).map(p => ({
-         id: p.id,
-         name: p.name,
-         category: p.category || "Geral",
-         price: p.price || 0,
-         stock: p.stock_quantity || 0,
-          description: p.description || "",
-          image: p.image_url || undefined,
-          model: p.model,
-          capacity: p.capacity,
-          color: p.color,
-          battery_health: p.battery_health
-       }));
+        const formattedProducts: Product[] = (data || []).map(p => {
+          const product: Product = {
+            id: p.id,
+            name: p.name,
+            category: p.category || "Geral",
+            price: p.price || 0,
+            stock: p.stock_quantity || 0,
+            description: p.description || "",
+            image: p.image_url || undefined,
+          };
+          
+          if (p.model) product.model = p.model;
+          if (p.capacity) product.capacity = p.capacity;
+          if (p.color) product.color = p.color;
+          if (p.battery_health) product.battery_health = p.battery_health;
+          
+          return product;
+        });
        
        setAllProducts(formattedProducts);
      } catch (error) {
@@ -737,22 +742,44 @@ import { ProductForm } from "@/components/estoque/ProductForm";
         setIsFinishing(false);
       }
     };
-    const handleCreateProduct = async () => {
-      if (!user?.id || !newProductName || !newProductPrice) {
-        toast.error("Nome e preço são obrigatórios");
-        return;
-      }
-
+    const handleSaveNewProduct = async (formData: any) => {
+      if (!user?.id) return;
+      
       setIsCreatingProduct(true);
       try {
         const { data, error } = await supabase
           .from("products")
           .insert({
             user_id: user.id,
-            name: newProductName,
-            price: parseFloat(newProductPrice),
-            category: newProductCategory,
-            stock_quantity: parseInt(newProductStock) || 0,
+            name: formData.name,
+            sku: formData.sku,
+            ean: formData.ean,
+            ncm: formData.ncm,
+            reference: formData.reference,
+            category: formData.category,
+            brand: formData.brand,
+            supplier: formData.supplier,
+            model: formData.model,
+            price: formData.price,
+            wholesale_price: formData.wholesale_price,
+            cost_price: formData.cost_price,
+            stock_quantity: formData.stock,
+            min_stock: formData.min_stock,
+            unit: formData.unit,
+            weight: formData.weight,
+            location: formData.location,
+            store: formData.store,
+            imei: formData.imei,
+            imei2: formData.imei2,
+            color: formData.color,
+            capacity: formData.capacity,
+            description: formData.description,
+            image_url: formData.image_url,
+            processor: formData.processor,
+            ram: formData.ram,
+            display: formData.display,
+            battery_health: formData.battery_health,
+            observations: formData.observations
           })
           .select()
           .single();
@@ -765,14 +792,17 @@ import { ProductForm } from "@/components/estoque/ProductForm";
           category: data.category || "Geral",
           price: data.price || 0,
           stock: data.stock_quantity || 0,
+          description: data.description || "",
         };
+
+        if (data.model) formattedProduct.model = data.model;
+        if (data.capacity) formattedProduct.capacity = data.capacity;
+        if (data.color) formattedProduct.color = data.color;
+        if (data.battery_health) formattedProduct.battery_health = data.battery_health;
 
         toast.success("Produto cadastrado com sucesso!");
         addToCart(formattedProduct);
         setIsNewProductModalOpen(false);
-        setNewProductName("");
-        setNewProductPrice("");
-        setNewProductStock("1");
         fetchProducts();
       } catch (error: any) {
         console.error("Erro ao criar produto:", error);
@@ -1092,67 +1122,11 @@ import { ProductForm } from "@/components/estoque/ProductForm";
          </DialogContent>
        </Dialog>
 
-        <Dialog open={isNewProductModalOpen} onOpenChange={setIsNewProductModalOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Cadastrar Novo Produto</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Nome do Produto</Label>
-                <Input 
-                  placeholder="Ex: iPhone 13 128GB" 
-                  value={newProductName}
-                  onChange={(e) => setNewProductName(e.target.value)}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Preço de Venda</Label>
-                  <Input 
-                    type="number"
-                    placeholder="0,00" 
-                    value={newProductPrice}
-                    onChange={(e) => setNewProductPrice(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Estoque Inicial</Label>
-                  <Input 
-                    type="number"
-                    placeholder="1" 
-                    value={newProductStock}
-                    onChange={(e) => setNewProductStock(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Categoria</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['Geral', 'Smartphones', 'Acessórios', 'Serviços'].map(cat => (
-                    <Button
-                      key={cat}
-                      type="button"
-                      variant={newProductCategory === cat ? "default" : "outline"}
-                      className="text-xs h-9 justify-start"
-                      onClick={() => setNewProductCategory(cat)}
-                    >
-                      <div className={`w-2 h-2 rounded-full mr-2 ${newProductCategory === cat ? 'bg-white' : 'bg-primary'}`} />
-                      {cat}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              <Button 
-                className="w-full bg-primary" 
-                onClick={handleCreateProduct}
-                disabled={!newProductName || !newProductPrice || isCreatingProduct}
-              >
-                {isCreatingProduct ? <Loader2 className="h-4 w-4 animate-spin" /> : "Cadastrar e Adicionar"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <ProductForm 
+          open={isNewProductModalOpen} 
+          onOpenChange={setIsNewProductModalOpen}
+          onSave={handleSaveNewProduct}
+        />
 
         <Dialog open={isNewCustomerModalOpen} onOpenChange={setIsNewCustomerModalOpen}>
           <DialogContent>
