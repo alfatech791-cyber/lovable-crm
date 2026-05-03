@@ -165,7 +165,7 @@ type Deal = {
      setSyncing(true);
 
       try {
-        const instance = activeInstance || await resolveInstance();
+        const instance = activeInstance;
         if (!instance) {
           if (showToast) toast.error("Nenhuma instância do WhatsApp conectada");
           return;
@@ -631,10 +631,13 @@ type Deal = {
     })();
 
      const filteredDeals = dedupedDeals
-       .filter(d => {
-         // Filter by active instance
- 
-         const leadName = d.lead?.name?.toLowerCase() || "";
+        .filter((d: any) => {
+          // Filter by active instance visual check
+          if (activeInstance && activeInstance !== "none" && d.instance_name && d.instance_name !== activeInstance) {
+            return false;
+          }
+
+          const leadName = d.lead?.name?.toLowerCase() || "";
          const leadPhone = d.lead?.phone || "";
          const search = searchTerm.toLowerCase();
          return leadName.includes(search) || leadPhone.includes(searchTerm);
@@ -717,14 +720,7 @@ type Deal = {
         console.warn("ensure_default_funnel_stages falhou:", e);
       }
 
-      let currentInstance = activeInstance;
-      if (!currentInstance) {
-        currentInstance = await resolveInstance();
-        if (currentInstance) {
-          setActiveInstance(currentInstance);
-          localStorage.setItem("last_active_instance", currentInstance);
-        }
-      }
+      const currentInstance = activeInstance;
       
       fetchAvailableInstances();
 
@@ -741,8 +737,11 @@ type Deal = {
             .select("*")
             .eq("user_id", user.id);
   
-          dlQuery = dlQuery.eq("instance_name", currentInstance || "none");
-          convQuery = convQuery.eq("instance_name", currentInstance || "none");
+          // Always filter by instance to keep view consistency, unless "none" is selected explicitly
+          if (currentInstance && currentInstance !== "none") {
+            dlQuery = dlQuery.eq("instance_name", currentInstance);
+            convQuery = convQuery.eq("instance_name", currentInstance);
+          }
  
          dlQuery = dlQuery.order("created_at", { ascending: false });
          convQuery = convQuery.order("last_message_at", { ascending: false });
@@ -1037,7 +1036,13 @@ type Deal = {
                             <SelectValue placeholder="Selecionar Instância" className="text-xs font-bold" />
                           </div>
                         </SelectTrigger>
-                        <SelectContent className="max-h-[300px]">
+                        <SelectContent className="max-h-[300px] rounded-2xl border-border/50 shadow-2xl">
+                          <SelectItem value="none" className="text-[10px] py-3 opacity-50">
+                            <div className="flex items-center gap-2 italic">
+                              <X className="h-2 w-2" />
+                              Sem Instância (Ver Tudo)
+                            </div>
+                          </SelectItem>
                           {availableInstances.length === 0 ? (
                             <div className="p-4 text-center">
                               <p className="text-[10px] font-bold text-muted-foreground uppercase mb-2">Nenhuma instância ativa</p>
@@ -1251,6 +1256,12 @@ type Deal = {
                           c.contact_phone.includes(searchTerm);
                         
                         if (!matchSearch) return false;
+                        
+                        // Visual instance filter safety check
+                        if (activeInstance && activeInstance !== "none" && c.instance_name && c.instance_name !== activeInstance) {
+                          return false;
+                        }
+
                         if (statusFilter === "bot") return c.status !== "handed_off";
                         if (statusFilter === "manual") return c.status === "handed_off";
                         if (statusFilter === "unread") return (c.transcript ?? []).some(m => m.role === "user");
