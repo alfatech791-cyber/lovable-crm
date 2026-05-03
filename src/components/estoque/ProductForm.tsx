@@ -565,9 +565,9 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                         )}
                       </div>
                     </section>
+                    </div>
                   </div>
-                </div>
-              </TabsContent>
+                </TabsContent>
 
               <TabsContent value="financeiro" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -658,6 +658,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                              <div className={`p-2 rounded-lg ${grossProfit > 0 ? 'bg-emerald-500/20 text-emerald-600' : 'bg-destructive/20 text-destructive'}`}>
                                <Percent className="h-4 w-4" />
                              </div>
+                          </div>
                           </div>
                         </div>
                       </section>
@@ -754,11 +755,12 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                             <SelectItem value="rascunho">Rascunho</SelectItem>
                             <SelectItem value="indisponivel">Indisponível</SelectItem>
                           </SelectContent>
-                        </Select>
+                          </Select>
+                        </div>
                       </div>
                     </section>
-                      </div>
-                    </TabsContent>
+                  </div>
+                </TabsContent>
 
                     <TabsContent value="servicos" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
                       <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
