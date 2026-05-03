@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
    messages_count: number;
    last_message_at: string;
    transcript: Msg[];
+  instance_name?: string | null;
  };
  
  import { StageColumn } from "@/components/funil/StageColumn";
