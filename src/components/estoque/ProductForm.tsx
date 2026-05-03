@@ -82,7 +82,8 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
       fetchExistingData();
     }
   }, [open]);
-  const [isSmartphone, setIsSmartphone] = useState(product?.category === "Smartphones");
+   const [activeTab, setActiveTab] = useState<"geral" | "financeiro" | "logistica" | "especificacoes">("geral");
+   const [isSmartphone, setIsSmartphone] = useState(product?.category === "Smartphones");
   const [formData, setFormData] = useState<ProductFormData>({
     name: product?.name || "",
     sku: product?.sku || "",
@@ -236,23 +237,24 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-muted/5">
             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto">
                <div className="flex flex-col gap-8">
-                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-1 bg-muted/20 rounded-2xl border border-sidebar-border/30">
-                    <Button variant="ghost" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider bg-background shadow-sm text-primary">
-                      <LayoutGrid className="h-3.5 w-3.5 mr-2" /> Geral
-                    </Button>
-                    <Button variant="ghost" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider hover:bg-background/50">
-                      <Coins className="h-3.5 w-3.5 mr-2" /> Financeiro
-                    </Button>
-                    <Button variant="ghost" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider hover:bg-background/50">
-                      <Package className="h-3.5 w-3.5 mr-2" /> Logística
-                    </Button>
-                    <Button variant="ghost" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider hover:bg-background/50">
-                      <Monitor className="h-3.5 w-3.5 mr-2" /> Especificações
-                    </Button>
-                 </div>
+                  <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
+                    <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-4 p-1 bg-muted/20 rounded-2xl border border-sidebar-border/30 h-auto mb-8">
+                      <TabsTrigger value="geral" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
+                        <LayoutGrid className="h-3.5 w-3.5 mr-2" /> Geral
+                      </TabsTrigger>
+                      <TabsTrigger value="financeiro" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
+                        <Coins className="h-3.5 w-3.5 mr-2" /> Financeiro
+                      </TabsTrigger>
+                      <TabsTrigger value="logistica" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
+                        <Package className="h-3.5 w-3.5 mr-2" /> Logística
+                      </TabsTrigger>
+                      <TabsTrigger value="especificacoes" className="rounded-xl h-10 font-bold text-[10px] uppercase tracking-wider data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary">
+                        <Monitor className="h-3.5 w-3.5 mr-2" /> Especificações
+                      </TabsTrigger>
+                    </TabsList>
 
-                 <div className="space-y-8">
-                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <TabsContent value="geral" className="space-y-8 mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                      <section className="lg:col-span-8 bg-background rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm hover:shadow-md transition-all duration-300">
                          <div className="flex items-center justify-between">
                            <h3 className="text-[13px] font-black uppercase tracking-widest text-primary flex items-center gap-2.5">
@@ -335,7 +337,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                            <div className="grid gap-2">
                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Categoria</Label>
                              <Select value={formData.category} onValueChange={(v) => handleChange("category", v)}>
@@ -345,6 +347,8 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                                  <SelectItem value="Tablets">Tablets</SelectItem>
                                  <SelectItem value="Watch">Smartwatches</SelectItem>
                                  <SelectItem value="Acessórios">Acessórios</SelectItem>
+                                 <SelectItem value="Serviços">Serviços</SelectItem>
+                                 <SelectItem value="Peças">Peças</SelectItem>
                                </SelectContent>
                              </Select>
                            </div>
