@@ -1191,31 +1191,53 @@
                    autoFocus
                  />
                   {(search === "" || search || loadingProducts) && isSearchFocused && (
-                   <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 border border-border rounded-xl shadow-2xl overflow-hidden max-h-[300px] overflow-y-auto bg-card">
-                     {loadingProducts ? (
-                       <div className="p-8 flex flex-col items-center justify-center gap-2">
-                         <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                       </div>
-                      ) : filteredProducts.slice(0, 50).map(product => (
-                       <button
-                         key={product.id}
-                         onClick={() => { addToCart(product); setIsSearchFocused(false); }}
-                         className="w-full flex items-center gap-3 p-3 hover:bg-primary/5 transition text-left border-b border-border last:border-none"
-                       >
-                          <div className="flex-1 min-w-0 flex flex-col">
-                            <div className="font-bold text-sm truncate">{product.name}</div>
-                            {product.description && (
-                              <div className="text-[10px] text-muted-foreground line-clamp-1 italic">
-                                {product.description}
-                              </div>
-                            )}
-                            <div className="text-[10px] text-muted-foreground mt-0.5">Estoque: {product.stock}</div>
+                    <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 border border-border rounded-xl shadow-2xl overflow-hidden bg-card">
+                      <div className="max-h-[300px] overflow-y-auto">
+                        {loadingProducts ? (
+                          <div className="p-8 flex flex-col items-center justify-center gap-2">
+                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
                           </div>
-                         <div className="font-black text-sm text-primary">
-                           {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                         </div>
-                       </button>
-                     ))}
+                         ) : filteredProducts.length > 0 ? (
+                           filteredProducts.slice(0, 50).map(product => (
+                            <button
+                              key={product.id}
+                              onClick={() => { addToCart(product); setIsSearchFocused(false); }}
+                              className="w-full flex items-center gap-3 p-3 hover:bg-primary/5 transition text-left border-b border-border last:border-none"
+                            >
+                               <div className="flex-1 min-w-0 flex flex-col">
+                                 <div className="font-bold text-sm truncate">{product.name}</div>
+                                 {product.description && (
+                                   <div className="text-[10px] text-muted-foreground line-clamp-1 italic">
+                                     {product.description}
+                                   </div>
+                                 )}
+                                 <div className="text-[10px] text-muted-foreground mt-0.5">Estoque: {product.stock}</div>
+                               </div>
+                              <div className="font-black text-sm text-primary">
+                                {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                              </div>
+                            </button>
+                          ))
+                         ) : (
+                           <div className="p-6 text-center text-muted-foreground italic text-sm">
+                             Produto não encontrado.
+                           </div>
+                         )}
+                      </div>
+                      <div className="p-2 border-t border-border bg-muted/20">
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          className="w-full gap-2 text-xs font-bold"
+                          onClick={() => {
+                            setNewProductName(search);
+                            setIsNewProductModalOpen(true);
+                            setIsSearchFocused(false);
+                          }}
+                        >
+                          <Plus className="h-3.5 w-3.5" /> Cadastrar "{search || 'Novo'}"
+                        </Button>
+                      </div>
                    </div>
                  )}
                </div>
