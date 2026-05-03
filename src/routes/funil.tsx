@@ -277,7 +277,7 @@ type Deal = {
             status: existing?.status ?? "active",
             messages_count: previewTranscript.length,
             last_message_at: lastAt,
-            instance_name: instance || (existing as any)?.instance_name || null,
+            instance_name: instance,
           };
         }).filter(Boolean);
 
