@@ -910,18 +910,41 @@
                   </div>
                 </div>
 
-               <div className="bg-muted/50 p-4 rounded-xl space-y-2 border border-border">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Total Recebido:</span>
-                    <span className="font-black text-foreground">
-                      {totalReceived.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </span>
+                <div className="bg-muted/50 p-4 rounded-xl space-y-2 border border-border">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">Total Bruto:</span>
+                      <span className="font-bold text-foreground">
+                        {subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+                    </div>
+                    {discountValue > 0 && (
+                      <div className="flex justify-between items-center text-sm text-destructive font-medium">
+                        <span>Desconto Aplicado:</span>
+                        <span>-{discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center text-base font-black border-t border-border/50 pt-2 mt-1">
+                      <span className="text-primary uppercase text-xs">Total Líquido:</span>
+                      <span className="text-primary text-xl">
+                        {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+                    </div>
                   </div>
-                  <div className="border-t border-border/50 my-1 pt-1 flex justify-between text-[11px]">
-                    <span className="text-muted-foreground italic">Restante:</span>
-                    <span className={`font-bold ${totalReceived >= total ? 'text-success' : 'text-destructive'}`}>
-                      {Math.max(0, total - totalReceived).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </span>
+                  
+                  <div className="pt-3 space-y-1 border-t border-border/50">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">Total Recebido:</span>
+                      <span className="font-black text-foreground">
+                        {totalReceived.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-muted-foreground italic">{totalReceived >= total ? 'Troco a devolver:' : 'Ainda resta:'}</span>
+                      <span className={`font-bold ${totalReceived >= total ? 'text-success' : 'text-destructive'}`}>
+                        {Math.abs(total - totalReceived).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Cliente:</span>
