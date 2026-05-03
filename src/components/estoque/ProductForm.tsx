@@ -533,11 +533,12 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                                 <Label className="text-[9px] font-bold uppercase opacity-60">Venda Exclusiva</Label>
                                 <p className="text-[8px] text-muted-foreground">Apenas para clientes VIP</p>
                               </div>
-                              <Switch className="scale-75" />
-                           </div>
-                      </div>
-                    </section>
-                  </div>
+                               <Switch className="scale-75" />
+                            </div>
+                         </div>
+                       </div>
+                     </section>
+                   </div>
 
                   <div className="flex flex-col lg:flex-row gap-6 items-start">
                      <div className="flex-1 space-y-6">
