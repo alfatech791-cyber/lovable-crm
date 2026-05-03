@@ -511,14 +511,17 @@ import { toast } from "sonner";
                   </div>
                 </td>
                      <td className="px-6 py-5">
-                       <div className="flex flex-col">
-                         <span className="text-sm font-black text-primary leading-none">
-                           {Number(product.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                         </span>
-                         {product.wholesale_price > 0 && (
-                           <span className="text-[9px] text-muted-foreground font-bold mt-1">Atacado: {Number(product.wholesale_price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                         )}
-                       </div>
+                        <div className="flex flex-col items-start gap-1">
+                          <span className="text-sm font-black text-primary bg-primary/5 px-2 py-1 rounded-lg">
+                            {Number(product.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </span>
+                          {product.wholesale_price > 0 && (
+                            <span className="text-[10px] text-muted-foreground font-bold ml-1 flex items-center gap-1">
+                              <Tags className="h-3 w-3" />
+                              Atacado: {Number(product.wholesale_price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </span>
+                          )}
+                        </div>
                     </td>
                      <td className="px-6 py-5">
                        <div className="flex flex-col gap-1">
