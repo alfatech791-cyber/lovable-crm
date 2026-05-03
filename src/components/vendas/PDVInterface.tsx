@@ -1289,26 +1289,37 @@
            </div>
  
            {/* Observações da Venda */}
-           <div className="bg-card border border-border rounded-2xl p-4 shadow-sm">
-             <Label className="text-[10px] font-bold uppercase text-muted-foreground mb-1.5 block">Observações / Instruções</Label>
-             <textarea 
-               className="w-full h-20 bg-muted/10 border border-input rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none placeholder:text-muted-foreground/50"
-               placeholder="Ex: Entrega agendada, embalagem para presente..."
-               value={obs}
-               onChange={(e) => setObs(e.target.value)}
-             />
-           </div>
- 
-           <div className="flex-1 flex flex-col min-h-0">
-             <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full h-full flex flex-col">
-               <TabsList className="grid w-full grid-cols-4 bg-muted/30">
-                 <TabsTrigger value="all">Tudo</TabsTrigger>
-                 <TabsTrigger value="phones">Aparelhos</TabsTrigger>
-                 <TabsTrigger value="acc">Acessórios</TabsTrigger>
-                 <TabsTrigger value="services">Serviços</TabsTrigger>
-               </TabsList>
-               <ScrollArea className="flex-1 mt-4">
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 pb-4">
+            <div className="bg-card border border-border rounded-2xl p-4 shadow-sm flex flex-col gap-1.5 shrink-0">
+              <div className="flex items-center justify-between">
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground">Vendedor (F4)</Label>
+                <div className="relative min-w-[200px]">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/60" />
+                  <select 
+                    className="w-full h-9 pl-9 pr-3 rounded-md bg-muted/30 border-none text-[13px] font-bold focus:outline-none focus:ring-1 focus:ring-primary/20 appearance-none"
+                    value={vendedorId}
+                    onChange={(e) => setVendedorId(e.target.value)}
+                  >
+                    <option value="">Selecione um vendedor</option>
+                    <option value="1">Vendedor Padrão</option>
+                    <option value={user?.id}>Eu ({user?.email?.split('@')[0]})</option>
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                </div>
+              </div>
+              <div className="pt-2 border-t border-border/50">
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground mb-1.5 block italic">Observações da Venda</Label>
+                <textarea 
+                  className="w-full h-12 bg-muted/10 border border-input border-dashed rounded-xl p-3 text-xs focus:outline-none focus:ring-1 focus:ring-primary/20 resize-none placeholder:text-muted-foreground/30"
+                  placeholder="Instruções internas ou detalhes do pedido..."
+                  value={obs}
+                  onChange={(e) => setObs(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                <ScrollArea className="flex-1">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 py-2 pr-4 pb-4">
                    {allProducts
                      .filter(p => activeCategory === "all" || 
                        (activeCategory === "phones" && ["Smartphones", "Celulares", "Aparelhos"].some(c => p.category.includes(c))) ||
