@@ -198,7 +198,9 @@ type Deal = {
           existingQuery = existingQuery.eq("instance_name", instance);
         }
 
-        const { data: existingRows, error: existingError } = await existingQuery.order("last_message_at", { ascending: false });
+        const { data: existingRows, error: existingError } = await existingQuery
+          .eq("instance_name", instance)
+          .order("last_message_at", { ascending: false });
 
        if (existingError) throw existingError;
 
@@ -750,11 +752,8 @@ type Deal = {
             .select("*")
             .eq("user_id", user.id);
   
-          // Apply strict instance filtering if one is selected
-          if (currentInstance && currentInstance !== "none") {
-            dlQuery = dlQuery.eq("instance_name", currentInstance);
-            convQuery = convQuery.eq("instance_name", currentInstance);
-          }
+          dlQuery = dlQuery.eq("instance_name", currentInstance || "none");
+          convQuery = convQuery.eq("instance_name", currentInstance || "none");
  
          dlQuery = dlQuery.order("created_at", { ascending: false });
          convQuery = convQuery.order("last_message_at", { ascending: false });
@@ -1260,7 +1259,7 @@ type Deal = {
                       conversations
                         .filter(c => {
                           // Safety check for local state filtering
-                          if (activeInstance && activeInstance !== "none" && c.instance_name && c.instance_name !== activeInstance) {
+                          if (activeInstance && activeInstance !== "none" && (!c.instance_name || c.instance_name !== activeInstance)) {
                             return false;
                           }
 
