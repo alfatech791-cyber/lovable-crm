@@ -833,7 +833,7 @@
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-6 flex-1 overflow-hidden">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_450px] gap-6 flex-1 overflow-hidden">
           <Dialog open={isCheckoutModalOpen} onOpenChange={setIsCheckoutModalOpen}>
             <DialogContent className="sm:max-w-[500px]">
            <DialogHeader>
@@ -910,18 +910,41 @@
                   </div>
                 </div>
 
-               <div className="bg-muted/50 p-4 rounded-xl space-y-2 border border-border">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Total Recebido:</span>
-                    <span className="font-black text-foreground">
-                      {totalReceived.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </span>
+                <div className="bg-muted/50 p-4 rounded-xl space-y-2 border border-border">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">Total Bruto:</span>
+                      <span className="font-bold text-foreground">
+                        {subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+                    </div>
+                    {discountValue > 0 && (
+                      <div className="flex justify-between items-center text-sm text-destructive font-medium">
+                        <span>Desconto Aplicado:</span>
+                        <span>-{discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center text-base font-black border-t border-border/50 pt-2 mt-1">
+                      <span className="text-primary uppercase text-xs">Total Líquido:</span>
+                      <span className="text-primary text-xl">
+                        {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+                    </div>
                   </div>
-                  <div className="border-t border-border/50 my-1 pt-1 flex justify-between text-[11px]">
-                    <span className="text-muted-foreground italic">Restante:</span>
-                    <span className={`font-bold ${totalReceived >= total ? 'text-success' : 'text-destructive'}`}>
-                      {Math.max(0, total - totalReceived).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </span>
+                  
+                  <div className="pt-3 space-y-1 border-t border-border/50">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">Total Recebido:</span>
+                      <span className="font-black text-foreground">
+                        {totalReceived.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-[11px]">
+                      <span className="text-muted-foreground italic">{totalReceived >= total ? 'Troco a devolver:' : 'Ainda resta:'}</span>
+                      <span className={`font-bold ${totalReceived >= total ? 'text-success' : 'text-destructive'}`}>
+                        {Math.abs(total - totalReceived).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Cliente:</span>
@@ -1104,16 +1127,20 @@
               </div>
               <div className="space-y-2">
                 <Label>Categoria</Label>
-                <select 
-                  className="w-full h-10 px-3 rounded-md bg-muted/20 border border-input text-sm"
-                  value={newProductCategory}
-                  onChange={(e) => setNewProductCategory(e.target.value)}
-                >
-                  <option value="Geral">Geral</option>
-                  <option value="Smartphones">Smartphones</option>
-                  <option value="Acessórios">Acessórios</option>
-                  <option value="Serviços">Serviços</option>
-                </select>
+                <div className="grid grid-cols-2 gap-2">
+                  {['Geral', 'Smartphones', 'Acessórios', 'Serviços'].map(cat => (
+                    <Button
+                      key={cat}
+                      type="button"
+                      variant={newProductCategory === cat ? "default" : "outline"}
+                      className="text-xs h-9 justify-start"
+                      onClick={() => setNewProductCategory(cat)}
+                    >
+                      <div className={`w-2 h-2 rounded-full mr-2 ${newProductCategory === cat ? 'bg-white' : 'bg-primary'}`} />
+                      {cat}
+                    </Button>
+                  ))}
+                </div>
               </div>
               <Button 
                 className="w-full bg-primary" 
@@ -1243,82 +1270,87 @@
                </div>
              </div>
  
-             <div className="md:col-span-4 space-y-1.5">
-               <Label className="text-[10px] font-bold uppercase text-muted-foreground">Vendedor (F4)</Label>
-               <div className="relative">
-                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
-                 <select 
-                   className="w-full h-11 pl-9 pr-3 rounded-md bg-muted/20 border border-input text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none"
-                   value={vendedorId}
-                   onChange={(e) => setVendedorId(e.target.value)}
-                 >
-                   <option value="">Selecione um vendedor</option>
-                   <option value="1">Vendedor Padrão</option>
-                   <option value={user?.id}>Eu ({user?.email?.split('@')[0]})</option>
-                 </select>
-                 <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground rotate-90 pointer-events-none" />
-               </div>
-             </div>
+              <div className="md:col-span-4 space-y-1.5">
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground">Categoria</Label>
+                <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
+                  <TabsList className="grid grid-cols-4 h-11 bg-muted/40 p-1 rounded-xl">
+                    <TabsTrigger value="all" className="text-[10px] font-black uppercase tracking-tighter">Geral</TabsTrigger>
+                    <TabsTrigger value="phones" className="text-[10px] font-black uppercase tracking-tighter">Smart</TabsTrigger>
+                    <TabsTrigger value="acc" className="text-[10px] font-black uppercase tracking-tighter">Acess</TabsTrigger>
+                    <TabsTrigger value="services" className="text-[10px] font-black uppercase tracking-tighter">Serv</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
            </div>
  
            {/* Observações da Venda */}
-           <div className="bg-card border border-border rounded-2xl p-4 shadow-sm">
-             <Label className="text-[10px] font-bold uppercase text-muted-foreground mb-1.5 block">Observações / Instruções</Label>
-             <textarea 
-               className="w-full h-20 bg-muted/10 border border-input rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none placeholder:text-muted-foreground/50"
-               placeholder="Ex: Entrega agendada, embalagem para presente..."
-               value={obs}
-               onChange={(e) => setObs(e.target.value)}
-             />
-           </div>
- 
-           <div className="flex-1 flex flex-col min-h-0">
-             <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full h-full flex flex-col">
-               <TabsList className="grid w-full grid-cols-4 bg-muted/30">
-                 <TabsTrigger value="all">Tudo</TabsTrigger>
-                 <TabsTrigger value="phones">Aparelhos</TabsTrigger>
-                 <TabsTrigger value="acc">Acessórios</TabsTrigger>
-                 <TabsTrigger value="services">Serviços</TabsTrigger>
-               </TabsList>
-               <ScrollArea className="flex-1 mt-4">
-                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
-                   {allProducts
-                     .filter(p => activeCategory === "all" || 
-                       (activeCategory === "phones" && ["Smartphones", "Celulares", "Aparelhos"].some(c => p.category.includes(c))) ||
-                       (activeCategory === "acc" && ["Acessórios", "Películas", "Cabos", "Fones", "Carregadores"].some(c => p.category.includes(c))) ||
-                       (activeCategory === "services" && ["Serviços", "Mão de Obra"].some(c => p.category.includes(c)))
-                     )
-                     .slice(0, 12)
-                     .map(product => (
-                       <button
-                         key={product.id}
-                         onClick={() => { addToCart(product); setIsSearchFocused(false); }}
-                         disabled={product.stock <= 0}
-                         className={`h-28 rounded-2xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition flex flex-col items-center justify-center gap-2 font-medium group relative ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                       >
-                         <div className="h-10 w-10 rounded-full bg-muted group-hover:bg-primary/10 grid place-items-center transition">
-                           <Package className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
-                         </div>
-                         <span className="text-xs text-center px-2 line-clamp-2">{product.name}</span>
-                         <div className="flex flex-col items-center">
-                           <span className="text-[10px] font-bold text-primary">
-                             {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                           </span>
-                           <span className={`text-[8px] uppercase font-bold ${product.stock <= 5 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                             Estoque: {product.stock}
-                           </span>
-                         </div>
-                         {product.stock <= 0 && (
-                           <div className="absolute inset-0 bg-background/60 flex items-center justify-center rounded-2xl">
-                             <span className="bg-destructive text-white text-[8px] font-bold px-2 py-0.5 rounded-full uppercase">Esgotado</span>
-                           </div>
-                         )}
-                       </button>
-                     ))}
-                 </div>
-               </ScrollArea>
-             </Tabs>
-          </div>
+            <div className="bg-card border border-border rounded-2xl p-4 shadow-sm flex flex-col gap-1.5 shrink-0">
+              <div className="flex items-center justify-between">
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground">Vendedor (F4)</Label>
+                <div className="relative min-w-[200px]">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/60" />
+                  <select 
+                    className="w-full h-9 pl-9 pr-3 rounded-md bg-muted/30 border-none text-[13px] font-bold focus:outline-none focus:ring-1 focus:ring-primary/20 appearance-none"
+                    value={vendedorId}
+                    onChange={(e) => setVendedorId(e.target.value)}
+                  >
+                    <option value="">Selecione um vendedor</option>
+                    <option value="1">Vendedor Padrão</option>
+                    <option value={user?.id}>Eu ({user?.email?.split('@')[0]})</option>
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                </div>
+              </div>
+              <div className="pt-2 border-t border-border/50">
+                <Label className="text-[10px] font-bold uppercase text-muted-foreground mb-1.5 block italic">Observações da Venda</Label>
+                <textarea 
+                  className="w-full h-12 bg-muted/10 border border-input border-dashed rounded-xl p-3 text-xs focus:outline-none focus:ring-1 focus:ring-primary/20 resize-none placeholder:text-muted-foreground/30"
+                  placeholder="Instruções internas ou detalhes do pedido..."
+                  value={obs}
+                  onChange={(e) => setObs(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+              <ScrollArea className="flex-1">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 py-2 pr-4 pb-4">
+                  {allProducts
+                    .filter(p => activeCategory === "all" || 
+                      (activeCategory === "phones" && ["Smartphones", "Celulares", "Aparelhos"].some(c => p.category.includes(c))) ||
+                      (activeCategory === "acc" && ["Acessórios", "Películas", "Cabos", "Fones", "Carregadores"].some(c => p.category.includes(c))) ||
+                      (activeCategory === "services" && ["Serviços", "Mão de Obra"].some(c => p.category.includes(c)))
+                    )
+                    .slice(0, 30)
+                    .map(product => (
+                      <button
+                        key={product.id}
+                        onClick={() => { addToCart(product); setIsSearchFocused(false); }}
+                        disabled={product.stock <= 0}
+                        className={`h-24 rounded-2xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition flex flex-col items-center justify-center gap-1 font-medium group relative ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        <div className="h-10 w-10 rounded-full bg-muted group-hover:bg-primary/10 grid place-items-center transition">
+                          <Package className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                        </div>
+                        <span className="text-xs text-center px-2 line-clamp-2">{product.name}</span>
+                        <div className="flex flex-col items-center">
+                          <span className="text-[10px] font-bold text-primary">
+                            {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </span>
+                          <span className={`text-[8px] uppercase font-bold ${product.stock <= 5 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                            Estoque: {product.stock}
+                          </span>
+                        </div>
+                        {product.stock <= 0 && (
+                          <div className="absolute inset-0 bg-background/60 flex items-center justify-center rounded-2xl">
+                            <span className="bg-destructive text-white text-[8px] font-bold px-2 py-0.5 rounded-full uppercase">Esgotado</span>
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                </div>
+              </ScrollArea>
+            </div>
        </div>
  
         {/* Lado Direito: Carrinho e Checkout */}
@@ -1533,11 +1565,11 @@
  
            <div className="space-y-3 py-2">
              <div className="grid grid-cols-3 gap-2">
-             {[
-               { id: 'money', icon: Banknote, label: 'Dinheiro' },
-               { id: 'card', icon: CreditCard, label: 'Cartão' },
-               { id: 'pix', icon: QrCode, label: 'PIX' },
-             ].map(method => (
+              {[
+                { id: 'money', icon: Banknote, label: 'Dinheiro', color: 'text-green-600', bg: 'bg-green-500/10' },
+                { id: 'card', icon: CreditCard, label: 'Cartão', color: 'text-blue-600', bg: 'bg-blue-500/10' },
+                { id: 'pix', icon: QrCode, label: 'PIX', color: 'text-purple-600', bg: 'bg-purple-500/10' },
+              ].map(method => (
                  <button
                    key={method.id}
                    onClick={() => {
@@ -1549,12 +1581,12 @@
                        if (method.id === 'pix') setPixAmount(total.toFixed(2));
                      }
                    }}
-                   className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition text-[11px] font-bold uppercase
-                     ${paymentMethod === method.id 
-                       ? 'border-primary bg-primary/5 text-primary' 
-                       : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
-                     }`}
-                 >
+                    className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition text-[11px] font-bold uppercase
+                      ${paymentMethod === method.id 
+                        ? `border-primary ${method.bg} ${method.color}` 
+                        : 'border-transparent bg-muted/50 text-muted-foreground hover:bg-muted'
+                      }`}
+                  >
                  {(method.id === 'money' && parseFloat(moneyAmount) > 0) || 
                   (method.id === 'card' && parseFloat(cardAmount) > 0) || 
                   (method.id === 'pix' && parseFloat(pixAmount) > 0) ? (

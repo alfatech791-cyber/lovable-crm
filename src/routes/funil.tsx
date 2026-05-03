@@ -1264,8 +1264,8 @@ type Deal = {
 
                         if (statusFilter === "bot") return c.status !== "handed_off";
                         if (statusFilter === "manual") return c.status === "handed_off";
-                        if (statusFilter === "unread") return (c.transcript ?? []).some(m => m.role === "user");
-                        if (statusFilter === "pending") return c.transcript?.[c.transcript.length - 1]?.role === "user";
+                        if (statusFilter === "unread") return (c.transcript ?? []).some(m => m.role === "user" && !m.sent);
+                        if (statusFilter === "pending") return c.transcript?.[c.transcript.length - 1]?.role === "user" && !c.transcript?.[c.transcript.length - 1]?.sent;
                         return true;
                       })
                         .map((conv) => (
