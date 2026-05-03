@@ -39,8 +39,14 @@
    const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
    const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
    const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false);
+  const [isNewProductModalOpen, setIsNewProductModalOpen] = useState(false);
    const [newCustomerName, setNewCustomerName] = useState("");
    const [newCustomerPhone, setNewCustomerPhone] = useState("");
+  const [newProductName, setNewProductName] = useState("");
+  const [newProductPrice, setNewProductPrice] = useState("");
+  const [newProductCategory, setNewProductCategory] = useState("Geral");
+  const [newProductStock, setNewProductStock] = useState("1");
+  const [isCreatingProduct, setIsCreatingProduct] = useState(false);
     const [moneyAmount, setMoneyAmount] = useState<string>("");
     const [cardAmount, setCardAmount] = useState<string>("");
     const [pixAmount, setPixAmount] = useState<string>("");
@@ -730,6 +736,51 @@
         setIsFinishing(false);
       }
     };
+    const handleCreateProduct = async () => {
+      if (!user?.id || !newProductName || !newProductPrice) {
+        toast.error("Nome e preço são obrigatórios");
+        return;
+      }
+
+      setIsCreatingProduct(true);
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .insert({
+            user_id: user.id,
+            name: newProductName,
+            price: parseFloat(newProductPrice),
+            category: newProductCategory,
+            stock_quantity: parseInt(newProductStock) || 0,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        const formattedProduct: Product = {
+          id: data.id,
+          name: data.name,
+          category: data.category || "Geral",
+          price: data.price || 0,
+          stock: data.stock_quantity || 0,
+        };
+
+        toast.success("Produto cadastrado com sucesso!");
+        addToCart(formattedProduct);
+        setIsNewProductModalOpen(false);
+        setNewProductName("");
+        setNewProductPrice("");
+        setNewProductStock("1");
+        fetchProducts();
+      } catch (error: any) {
+        console.error("Erro ao criar produto:", error);
+        toast.error("Erro ao cadastrar produto.");
+      } finally {
+        setIsCreatingProduct(false);
+      }
+    };
+
     const handleCreateCustomer = async () => {
       if (!user?.id || !newCustomerName) return;
      try {
