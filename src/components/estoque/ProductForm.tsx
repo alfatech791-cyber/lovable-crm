@@ -660,8 +660,9 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                              </div>
                           </div>
                         </div>
-                      </div>
-                    </TabsContent>
+                      </section>
+                    </div>
+                  </TabsContent>
 
                     <TabsContent value="logistica" className="space-y-8 mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
