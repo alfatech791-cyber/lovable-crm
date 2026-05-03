@@ -737,22 +737,44 @@ import { ProductForm } from "@/components/estoque/ProductForm";
         setIsFinishing(false);
       }
     };
-    const handleCreateProduct = async () => {
-      if (!user?.id || !newProductName || !newProductPrice) {
-        toast.error("Nome e preço são obrigatórios");
-        return;
-      }
-
+    const handleSaveNewProduct = async (formData: any) => {
+      if (!user?.id) return;
+      
       setIsCreatingProduct(true);
       try {
         const { data, error } = await supabase
           .from("products")
           .insert({
             user_id: user.id,
-            name: newProductName,
-            price: parseFloat(newProductPrice),
-            category: newProductCategory,
-            stock_quantity: parseInt(newProductStock) || 0,
+            name: formData.name,
+            sku: formData.sku,
+            ean: formData.ean,
+            ncm: formData.ncm,
+            reference: formData.reference,
+            category: formData.category,
+            brand: formData.brand,
+            supplier: formData.supplier,
+            model: formData.model,
+            price: formData.price,
+            wholesale_price: formData.wholesale_price,
+            cost_price: formData.cost_price,
+            stock_quantity: formData.stock,
+            min_stock: formData.min_stock,
+            unit: formData.unit,
+            weight: formData.weight,
+            location: formData.location,
+            store: formData.store,
+            imei: formData.imei,
+            imei2: formData.imei2,
+            color: formData.color,
+            capacity: formData.capacity,
+            description: formData.description,
+            image_url: formData.image_url,
+            processor: formData.processor,
+            ram: formData.ram,
+            display: formData.display,
+            battery_health: formData.battery_health,
+            observations: formData.observations
           })
           .select()
           .single();
@@ -765,14 +787,16 @@ import { ProductForm } from "@/components/estoque/ProductForm";
           category: data.category || "Geral",
           price: data.price || 0,
           stock: data.stock_quantity || 0,
+          description: data.description || "",
+          model: data.model,
+          capacity: data.capacity,
+          color: data.color,
+          battery_health: data.battery_health
         };
 
         toast.success("Produto cadastrado com sucesso!");
         addToCart(formattedProduct);
         setIsNewProductModalOpen(false);
-        setNewProductName("");
-        setNewProductPrice("");
-        setNewProductStock("1");
         fetchProducts();
       } catch (error: any) {
         console.error("Erro ao criar produto:", error);
