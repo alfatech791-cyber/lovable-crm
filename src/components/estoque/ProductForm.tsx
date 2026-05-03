@@ -755,8 +755,8 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                             <SelectItem value="indisponivel">Indisponível</SelectItem>
                           </SelectContent>
                         </Select>
-                          </div>
-                        </section>
+                      </div>
+                    </section>
                       </div>
                     </TabsContent>
 
@@ -891,6 +891,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                   </div>
                         </div>
                       </div>
+                    </TabsContent>
                   </Tabs>
                 </div>
             </div>
