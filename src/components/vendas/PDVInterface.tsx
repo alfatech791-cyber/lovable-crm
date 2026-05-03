@@ -39,8 +39,14 @@
    const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
    const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
    const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false);
+  const [isNewProductModalOpen, setIsNewProductModalOpen] = useState(false);
    const [newCustomerName, setNewCustomerName] = useState("");
    const [newCustomerPhone, setNewCustomerPhone] = useState("");
+  const [newProductName, setNewProductName] = useState("");
+  const [newProductPrice, setNewProductPrice] = useState("");
+  const [newProductCategory, setNewProductCategory] = useState("Geral");
+  const [newProductStock, setNewProductStock] = useState("1");
+  const [isCreatingProduct, setIsCreatingProduct] = useState(false);
     const [moneyAmount, setMoneyAmount] = useState<string>("");
     const [cardAmount, setCardAmount] = useState<string>("");
     const [pixAmount, setPixAmount] = useState<string>("");
@@ -730,6 +736,51 @@
         setIsFinishing(false);
       }
     };
+    const handleCreateProduct = async () => {
+      if (!user?.id || !newProductName || !newProductPrice) {
+        toast.error("Nome e preço são obrigatórios");
+        return;
+      }
+
+      setIsCreatingProduct(true);
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .insert({
+            user_id: user.id,
+            name: newProductName,
+            price: parseFloat(newProductPrice),
+            category: newProductCategory,
+            stock_quantity: parseInt(newProductStock) || 0,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        const formattedProduct: Product = {
+          id: data.id,
+          name: data.name,
+          category: data.category || "Geral",
+          price: data.price || 0,
+          stock: data.stock_quantity || 0,
+        };
+
+        toast.success("Produto cadastrado com sucesso!");
+        addToCart(formattedProduct);
+        setIsNewProductModalOpen(false);
+        setNewProductName("");
+        setNewProductPrice("");
+        setNewProductStock("1");
+        fetchProducts();
+      } catch (error: any) {
+        console.error("Erro ao criar produto:", error);
+        toast.error("Erro ao cadastrar produto.");
+      } finally {
+        setIsCreatingProduct(false);
+      }
+    };
+
     const handleCreateCustomer = async () => {
       if (!user?.id || !newCustomerName) return;
      try {
@@ -1017,6 +1068,64 @@
          </DialogContent>
        </Dialog>
 
+        <Dialog open={isNewProductModalOpen} onOpenChange={setIsNewProductModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Cadastrar Novo Produto</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Nome do Produto</Label>
+                <Input 
+                  placeholder="Ex: iPhone 13 128GB" 
+                  value={newProductName}
+                  onChange={(e) => setNewProductName(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Preço de Venda</Label>
+                  <Input 
+                    type="number"
+                    placeholder="0,00" 
+                    value={newProductPrice}
+                    onChange={(e) => setNewProductPrice(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Estoque Inicial</Label>
+                  <Input 
+                    type="number"
+                    placeholder="1" 
+                    value={newProductStock}
+                    onChange={(e) => setNewProductStock(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Categoria</Label>
+                <select 
+                  className="w-full h-10 px-3 rounded-md bg-muted/20 border border-input text-sm"
+                  value={newProductCategory}
+                  onChange={(e) => setNewProductCategory(e.target.value)}
+                >
+                  <option value="Geral">Geral</option>
+                  <option value="Smartphones">Smartphones</option>
+                  <option value="Acessórios">Acessórios</option>
+                  <option value="Serviços">Serviços</option>
+                </select>
+              </div>
+              <Button 
+                className="w-full bg-primary" 
+                onClick={handleCreateProduct}
+                disabled={!newProductName || !newProductPrice || isCreatingProduct}
+              >
+                {isCreatingProduct ? <Loader2 className="h-4 w-4 animate-spin" /> : "Cadastrar e Adicionar"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <Dialog open={isNewCustomerModalOpen} onOpenChange={setIsNewCustomerModalOpen}>
           <DialogContent>
             <DialogHeader>
@@ -1082,31 +1191,53 @@
                    autoFocus
                  />
                   {(search === "" || search || loadingProducts) && isSearchFocused && (
-                   <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 border border-border rounded-xl shadow-2xl overflow-hidden max-h-[300px] overflow-y-auto bg-card">
-                     {loadingProducts ? (
-                       <div className="p-8 flex flex-col items-center justify-center gap-2">
-                         <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                       </div>
-                      ) : filteredProducts.slice(0, 50).map(product => (
-                       <button
-                         key={product.id}
-                         onClick={() => { addToCart(product); setIsSearchFocused(false); }}
-                         className="w-full flex items-center gap-3 p-3 hover:bg-primary/5 transition text-left border-b border-border last:border-none"
-                       >
-                          <div className="flex-1 min-w-0 flex flex-col">
-                            <div className="font-bold text-sm truncate">{product.name}</div>
-                            {product.description && (
-                              <div className="text-[10px] text-muted-foreground line-clamp-1 italic">
-                                {product.description}
-                              </div>
-                            )}
-                            <div className="text-[10px] text-muted-foreground mt-0.5">Estoque: {product.stock}</div>
+                    <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 border border-border rounded-xl shadow-2xl overflow-hidden bg-card">
+                      <div className="max-h-[300px] overflow-y-auto">
+                        {loadingProducts ? (
+                          <div className="p-8 flex flex-col items-center justify-center gap-2">
+                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
                           </div>
-                         <div className="font-black text-sm text-primary">
-                           {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                         </div>
-                       </button>
-                     ))}
+                         ) : filteredProducts.length > 0 ? (
+                           filteredProducts.slice(0, 50).map(product => (
+                            <button
+                              key={product.id}
+                              onClick={() => { addToCart(product); setIsSearchFocused(false); }}
+                              className="w-full flex items-center gap-3 p-3 hover:bg-primary/5 transition text-left border-b border-border last:border-none"
+                            >
+                               <div className="flex-1 min-w-0 flex flex-col">
+                                 <div className="font-bold text-sm truncate">{product.name}</div>
+                                 {product.description && (
+                                   <div className="text-[10px] text-muted-foreground line-clamp-1 italic">
+                                     {product.description}
+                                   </div>
+                                 )}
+                                 <div className="text-[10px] text-muted-foreground mt-0.5">Estoque: {product.stock}</div>
+                               </div>
+                              <div className="font-black text-sm text-primary">
+                                {product.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                              </div>
+                            </button>
+                          ))
+                         ) : (
+                           <div className="p-6 text-center text-muted-foreground italic text-sm">
+                             Produto não encontrado.
+                           </div>
+                         )}
+                      </div>
+                      <div className="p-2 border-t border-border bg-muted/20">
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          className="w-full gap-2 text-xs font-bold"
+                          onClick={() => {
+                            setNewProductName(search);
+                            setIsNewProductModalOpen(true);
+                            setIsSearchFocused(false);
+                          }}
+                        >
+                          <Plus className="h-3.5 w-3.5" /> Cadastrar "{search || 'Novo'}"
+                        </Button>
+                      </div>
                    </div>
                  )}
                </div>
