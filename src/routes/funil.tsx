@@ -194,13 +194,9 @@ type Deal = {
           .select("id, contact_phone, contact_name, transcript, status, last_message_at, instance_name")
           .eq("user_id", user.id);
         
-        if (instance) {
-          existingQuery = existingQuery.eq("instance_name", instance);
-        }
+        existingQuery = existingQuery.eq("instance_name", instance);
 
-        const { data: existingRows, error: existingError } = await existingQuery
-          .eq("instance_name", instance)
-          .order("last_message_at", { ascending: false });
+        const { data: existingRows, error: existingError } = await existingQuery.order("last_message_at", { ascending: false });
 
        if (existingError) throw existingError;
 
@@ -230,14 +226,11 @@ type Deal = {
           })
           .slice(0, 50);
 
-        const upsertRows = validChats.map((chat: any) => {
+        const upsertRows = validChats.map((chat: any): any => {
           const remoteJid = chat.remoteJid || chat.id || "";
           const phone = normalizePhone(remoteJid);
           const existing = existingByPhone.get(phone);
 
-          if (existing && (existing as any).instance_name && (existing as any).instance_name !== instance) {
-            return null;
-          }
 
           const lastMsg = chat.lastMessage;
           const fallbackContent =
@@ -641,9 +634,6 @@ type Deal = {
      const filteredDeals = dedupedDeals
        .filter(d => {
          // Filter by active instance
-          if (activeInstance && activeInstance !== "none" && (d as any).instance_name && (d as any).instance_name !== activeInstance) {
-           return false;
-         }
  
          const leadName = d.lead?.name?.toLowerCase() || "";
          const leadPhone = d.lead?.phone || "";
@@ -752,8 +742,10 @@ type Deal = {
             .select("*")
             .eq("user_id", user.id);
   
-          dlQuery = dlQuery.eq("instance_name", currentInstance || "none");
-          convQuery = convQuery.eq("instance_name", currentInstance || "none");
+          if (currentInstance && currentInstance !== "none") {
+            dlQuery = dlQuery.eq("instance_name", currentInstance);
+            convQuery = convQuery.eq("instance_name", currentInstance);
+          }
  
          dlQuery = dlQuery.order("created_at", { ascending: false });
          convQuery = convQuery.order("last_message_at", { ascending: false });
@@ -1258,10 +1250,6 @@ type Deal = {
                     ) : (
                       conversations
                         .filter(c => {
-                          // Safety check for local state filtering
-                          if (activeInstance && activeInstance !== "none" && (!c.instance_name || c.instance_name !== activeInstance)) {
-                            return false;
-                          }
 
                           const matchSearch = !searchTerm || 
                             (c.contact_name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) || 
