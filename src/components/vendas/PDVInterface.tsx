@@ -1068,6 +1068,64 @@
          </DialogContent>
        </Dialog>
 
+        <Dialog open={isNewProductModalOpen} onOpenChange={setIsNewProductModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Cadastrar Novo Produto</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Nome do Produto</Label>
+                <Input 
+                  placeholder="Ex: iPhone 13 128GB" 
+                  value={newProductName}
+                  onChange={(e) => setNewProductName(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Preço de Venda</Label>
+                  <Input 
+                    type="number"
+                    placeholder="0,00" 
+                    value={newProductPrice}
+                    onChange={(e) => setNewProductPrice(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Estoque Inicial</Label>
+                  <Input 
+                    type="number"
+                    placeholder="1" 
+                    value={newProductStock}
+                    onChange={(e) => setNewProductStock(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Categoria</Label>
+                <select 
+                  className="w-full h-10 px-3 rounded-md bg-muted/20 border border-input text-sm"
+                  value={newProductCategory}
+                  onChange={(e) => setNewProductCategory(e.target.value)}
+                >
+                  <option value="Geral">Geral</option>
+                  <option value="Smartphones">Smartphones</option>
+                  <option value="Acessórios">Acessórios</option>
+                  <option value="Serviços">Serviços</option>
+                </select>
+              </div>
+              <Button 
+                className="w-full bg-primary" 
+                onClick={handleCreateProduct}
+                disabled={!newProductName || !newProductPrice || isCreatingProduct}
+              >
+                {isCreatingProduct ? <Loader2 className="h-4 w-4 animate-spin" /> : "Cadastrar e Adicionar"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <Dialog open={isNewCustomerModalOpen} onOpenChange={setIsNewCustomerModalOpen}>
           <DialogContent>
             <DialogHeader>
