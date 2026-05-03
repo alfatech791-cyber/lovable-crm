@@ -9,7 +9,7 @@ export function Topbar({ title, subtitle, toggleSidebar }: { title: string; subt
    const isHome = location.pathname === "/";
 
   return (
-    <header className="h-[68px] shrink-0 bg-card border-b border-border flex items-center gap-2 sm:gap-3 lg:gap-4 px-3 sm:px-4 lg:px-6">
+    <header className="h-[68px] sticky top-0 z-30 shrink-0 bg-card border-b border-border flex items-center gap-2 sm:gap-3 lg:gap-4 px-3 sm:px-4 lg:px-6">
       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         <button 
           className="lg:hidden p-2 rounded-md hover:bg-muted"

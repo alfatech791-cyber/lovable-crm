@@ -839,7 +839,7 @@ import { ProductForm } from "@/components/estoque/ProductForm";
    };
 
     return (
-      <div className="flex flex-col gap-4 h-[calc(100vh-140px)] animate-in fade-in duration-500">
+      <div className="flex flex-col gap-4 h-full lg:h-[calc(100vh-140px)] animate-in fade-in duration-500 overflow-y-auto lg:overflow-hidden p-2 sm:p-0">
         {/* Header de Ações Rápidas */}
         <div className="flex items-center justify-between bg-card p-4 border border-border rounded-2xl shadow-sm">
           <div className="flex items-center gap-4">
@@ -864,7 +864,7 @@ import { ProductForm } from "@/components/estoque/ProductForm";
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_450px] gap-6 flex-1 overflow-hidden">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_450px] gap-4 sm:gap-6 flex-1 overflow-visible lg:overflow-hidden">
           <Dialog open={isCheckoutModalOpen} onOpenChange={setIsCheckoutModalOpen}>
             <DialogContent className="sm:max-w-[500px]">
            <DialogHeader>
