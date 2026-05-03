@@ -20,7 +20,6 @@ import {
   useSensor,
   useSensors,
   DragOverlay,
-  defaultDropAnimationSideEffects,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -32,7 +31,7 @@ import { SortableSidebarItem } from "./SortableSidebarItem";
 
 export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: boolean) => void }) {
   const location = useLocation();
-  const { user, profile, permissions, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
   const [flyout, setFlyout] = useState<any | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isForcedCollapsed, setIsForcedCollapsed] = useState(false);
@@ -56,7 +55,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
   }, []);
 
   useEffect(() => {
-    const savedOrder = localStorage.getItem('sidebar-menu-order-v7');
+    const savedOrder = localStorage.getItem('sidebar-menu-order-v8');
     if (savedOrder) {
       try {
         setItems(JSON.parse(savedOrder));
@@ -92,39 +91,54 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
 
     if (active && over && active.id !== over.id) {
       setItems((prev) => {
-        const activeIndex = prev.findIndex((i) => (i.url || i.title) === active.id);
-        const targetIndex = prev.findIndex((i) => (i.url || i.title) === over.id);
-        
-        if (activeIndex === -1 || targetIndex === -1) return prev;
+        // Encontra o item em qualquer nível da árvore
+        const findAndRemove = (list: any[], id: string): [any | null, any[]] => {
+          let foundItem: any = null;
+          const newList = list.filter(item => {
+            if ((item.url || item.title) === id) {
+              foundItem = item;
+              return false;
+            }
+            if (item.children) {
+              const [found, subList] = findAndRemove(item.children, id);
+              if (found) {
+                foundItem = found;
+                item.children = subList;
+              }
+            }
+            return true;
+          });
+          return [foundItem, newList];
+        };
 
-        const activeItem = prev[activeIndex];
-        const targetItem = prev[targetIndex];
+        const [movedItem, itemsWithoutMoved] = findAndRemove([...prev], active.id);
+        if (!movedItem) return prev;
 
-        // Melhorando a experiência: Só aninha se soltar no MEIO do item alvo
-        // Se soltar nas bordas, ele apenas troca de posição (comportamento padrão dnd)
+        // Encontra a posição de destino no nível raiz
+        const targetIndex = itemsWithoutMoved.findIndex((i) => (i.url || i.title) === over.id);
         
-        // No momento, dnd-kit closestCenter já faz uma boa aproximação.
-        // Vamos permitir aninhar em qualquer item que não seja um HEADER.
-        if (targetItem && targetItem.type !== "header") {
-          const updatedItems = [...prev];
-          const [movedItem] = updatedItems.splice(activeIndex, 1);
-          
-          const newTargetIndex = updatedItems.findIndex((i) => (i.url || i.title) === over.id);
-          
-          if (!updatedItems[newTargetIndex].children) {
-            updatedItems[newTargetIndex].children = [];
+        if (targetIndex !== -1) {
+          const targetItem = itemsWithoutMoved[targetIndex];
+
+          // Se soltar sobre um item que não é header, aninhamos e garantimos que ele saia da raiz
+          if (targetItem.type !== "header") {
+            if (!targetItem.children) targetItem.children = [];
+            
+            // Evita duplicatas no novo pai
+            const alreadyExists = targetItem.children.some((c: any) => (c.url || c.title) === (movedItem.url || movedItem.title));
+            if (!alreadyExists) {
+              targetItem.children.push(movedItem);
+            }
+            
+            localStorage.setItem('sidebar-menu-order-v8', JSON.stringify(itemsWithoutMoved));
+            return itemsWithoutMoved;
           }
-          
-          // Adiciona como sub-item
-          updatedItems[newTargetIndex].children.push(movedItem);
-          
-          localStorage.setItem('sidebar-menu-order-v7', JSON.stringify(updatedItems));
-          return updatedItems;
         }
 
-        const newOrder = arrayMove(prev, activeIndex, targetIndex);
-        localStorage.setItem('sidebar-menu-order-v7', JSON.stringify(newOrder));
-        return newOrder;
+        // Se for apenas reordenamento na raiz
+        const finalOrder = arrayMove(prev, prev.findIndex(i => (i.url || i.title) === active.id), prev.findIndex(i => (i.url || i.title) === over.id));
+        localStorage.setItem('sidebar-menu-order-v8', JSON.stringify(finalOrder));
+        return finalOrder;
       });
     }
   };
@@ -133,10 +147,8 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
     return items.filter((item: any) => {
       if (item.type === "header") return true;
       if (item.roleRestriction === "super_admin" && profile?.role !== 'super_admin') return false;
-      
       if (!searchQuery) return true;
-      const query = searchQuery.toLowerCase();
-      return item.title.toLowerCase().includes(query);
+      return item.title.toLowerCase().includes(searchQuery.toLowerCase());
     });
   }, [items, searchQuery, profile]);
 
@@ -162,23 +174,8 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
           {isSmall && !flyout && <button onClick={() => setIsCollapsed(false)} className="absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-sidebar-primary text-white shadow-glow grid place-items-center z-50 lg:flex hidden"><Icons.PanelLeftOpen className="h-3 w-3" /></button>}
         </div>
 
-        {!isSmall && (
-          <div className="px-4 pt-4 shrink-0">
-            <div className="relative group">
-              <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-sidebar-foreground/40 group-focus-within:text-sidebar-primary transition-colors" />
-              <Input placeholder="Buscar menu..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="h-9 pl-9 bg-sidebar-accent/30 border-sidebar-border/50 text-xs focus-visible:ring-sidebar-primary/30 placeholder:text-sidebar-foreground/30" />
-            </div>
-          </div>
-        )}
-
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto custom-scrollbar">
-          <DndContext 
-            sensors={sensors} 
-            collisionDetection={closestCenter} 
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-          >
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
             <SortableContext items={filteredItems.map(i => i.url || i.title)} strategy={verticalListSortingStrategy}>
               {filteredItems.map((item: any) => (
                 <SortableSidebarItem 
@@ -191,19 +188,25 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
                 />
               ))}
             </SortableContext>
-            
             <DragOverlay dropAnimation={null}>
               {activeId ? (
                 <div className="opacity-90 scale-105 pointer-events-none w-[240px] bg-sidebar rounded-lg shadow-2xl border-2 border-primary ring-8 ring-primary/5 overflow-hidden">
-                  {(() => {
-                    const item = items.find(i => (i.url || i.title) === activeId);
-                    if (!item) return null;
-                    return (
-                      <div className="bg-sidebar p-1">
-                        <SortableSidebarItem item={item} isSmall={false} flyout={null} setFlyout={() => {}} />
-                      </div>
-                    );
-                  })()}
+                  <div className="bg-sidebar p-1">
+                    {(() => {
+                      const findItem = (list: any[], id: string): any => {
+                        for (const item of list) {
+                          if ((item.url || item.title) === id) return item;
+                          if (item.children) {
+                            const sub = findItem(item.children, id);
+                            if (sub) return sub;
+                          }
+                        }
+                        return null;
+                      };
+                      const item = findItem(items, activeId);
+                      return item ? <SortableSidebarItem item={item} isSmall={false} flyout={null} setFlyout={() => {}} /> : null;
+                    })()}
+                  </div>
                 </div>
               ) : null}
             </DragOverlay>
@@ -212,18 +215,10 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
 
         <div className="px-3 pb-3 mt-auto shrink-0">
           <div className={cn("pt-2 border-t border-sidebar-border/40 flex flex-col gap-1", isSmall ? "items-center" : "")}>
-            {isSmall ? (
-              <Tooltip><TooltipTrigger asChild><button onClick={logout} className="h-10 w-10 flex items-center justify-center rounded-lg text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition"><Icons.LogOut className="h-5 w-5" /></button></TooltipTrigger><TooltipContent side="right">Sair</TooltipContent></Tooltip>
-            ) : (
-              <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-sidebar-accent/50 transition-colors group cursor-pointer">
-                <div className="h-9 w-9 rounded-full bg-sidebar-primary/20 border border-sidebar-primary/30 grid place-items-center text-sidebar-primary font-bold text-sm shrink-0">{user?.email?.charAt(0).toUpperCase() || "U"}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-semibold text-foreground truncate">{user?.email?.split('@')[0] || "Usuário"}</div>
-                  <div className="text-[11px] text-sidebar-foreground/50 truncate">Plano Pro</div>
-                </div>
-                <button onClick={logout} className="p-1.5 rounded-lg text-sidebar-foreground/30 hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"><Icons.LogOut className="h-4 w-4" /></button>
-              </div>
-            )}
+            <button onClick={logout} className="h-10 w-full flex items-center gap-3 px-3 py-2 rounded-lg text-destructive/70 hover:bg-destructive/10 transition">
+              <Icons.LogOut className="h-4 w-4" />
+              {!isSmall && <span className="text-sm font-bold">Sair</span>}
+            </button>
           </div>
         </div>
       </aside>
