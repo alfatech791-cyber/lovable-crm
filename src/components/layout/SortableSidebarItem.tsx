@@ -17,6 +17,7 @@ interface SortableSidebarItemProps {
   flyout: any;
   setFlyout: (val: any) => void;
   depth?: number;
+  isOver?: boolean;
 }
 
 export const SortableSidebarItem: React.FC<SortableSidebarItemProps> = ({
@@ -24,7 +25,8 @@ export const SortableSidebarItem: React.FC<SortableSidebarItemProps> = ({
   isSmall,
   flyout,
   setFlyout,
-  depth = 0
+  depth = 0,
+  isOver = false
 }) => {
   const location = useLocation();
   const {
@@ -45,7 +47,7 @@ export const SortableSidebarItem: React.FC<SortableSidebarItemProps> = ({
   const style = {
     transform: CSS.Translate.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.4 : 1,
     zIndex: isDragging ? 100 : 1,
     marginLeft: !isSmall ? `${depth * 12}px` : 0
   };
@@ -71,7 +73,15 @@ export const SortableSidebarItem: React.FC<SortableSidebarItemProps> = ({
   const active = location.pathname === item.url || (item.children?.some((child: any) => location.pathname === child.url));
 
   const NavItem = (
-    <div ref={setNodeRef} style={style} className={cn("space-y-1 group/item relative", isDragging && "z-50")}>
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className={cn(
+        "space-y-1 group/item relative transition-all duration-200",
+        isDragging && "z-50",
+        isOver && !isDragging && "ring-2 ring-primary/40 bg-primary/5 rounded-lg scale-[1.02]"
+      )}
+    >
       {!isSmall && (
         <div {...attributes} {...listeners} className="absolute -left-1 top-2.5 cursor-grab active:cursor-grabbing text-sidebar-foreground/20 hover:text-sidebar-foreground/40 opacity-0 group-hover/item:opacity-100 transition-opacity z-10">
           <GripVertical className="h-3.5 w-3.5" />
