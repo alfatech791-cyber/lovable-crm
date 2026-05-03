@@ -426,19 +426,33 @@ import { toast } from "sonner";
                    >
                      <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
-                        {product.image_url ? (
-                          <img src={product.image_url} alt={product.name} className="h-10 w-10 rounded-lg object-cover shrink-0 border border-border" />
-                        ) : (
-                          <div className="h-10 w-10 rounded-lg bg-muted grid place-items-center shrink-0 border border-border">
-                            <Package className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                        )}
-                        <div>
-                          <div className="font-semibold text-sm text-foreground leading-none mb-1">{product.name}</div>
-                          <div className="flex items-center gap-2">
-                            {product.reference && <span className="text-[10px] bg-secondary px-1.5 py-0.5 rounded text-secondary-foreground font-medium">REF: {product.reference}</span>}
-                            {product.brand && <span className="text-[10px] text-muted-foreground">{product.brand}</span>}
-                            {product.imei && <div className="text-[10px] text-muted-foreground font-mono">IMEI: {product.imei}</div>}
+                        <div className="flex items-center gap-4">
+                          {product.image_url ? (
+                            <img src={product.image_url} alt={product.name} className="h-12 w-12 rounded-xl object-cover shrink-0 border border-border shadow-sm group-hover:scale-110 transition-transform" />
+                          ) : (
+                            <div className="h-12 w-12 rounded-xl bg-muted grid place-items-center shrink-0 border border-border group-hover:bg-primary/10 transition-colors">
+                              <Package className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                            </div>
+                          )}
+                          <div className="space-y-1">
+                            <div className="font-bold text-sm text-foreground leading-tight group-hover:text-primary transition-colors">{product.name}</div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              {product.brand && (
+                                <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold border border-blue-100 uppercase tracking-tighter">
+                                  {product.brand}
+                                </span>
+                              )}
+                              {product.reference && (
+                                <span className="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-bold border border-amber-100 uppercase tracking-tighter">
+                                  {product.reference}
+                                </span>
+                              )}
+                              {product.imei && (
+                                <span className="text-[10px] text-muted-foreground font-mono bg-muted/50 px-2 py-0.5 rounded">
+                                  IMEI: {product.imei}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -497,24 +511,28 @@ import { toast } from "sonner";
                   </div>
                 </td>
                      <td className="px-6 py-5">
-                       <div className="flex flex-col">
-                         <span className="text-sm font-black text-primary leading-none">
-                           {Number(product.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                         </span>
-                         {product.wholesale_price > 0 && (
-                           <span className="text-[9px] text-muted-foreground font-bold mt-1">Atacado: {Number(product.wholesale_price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                         )}
-                       </div>
+                        <div className="flex flex-col items-start gap-1">
+                          <span className="text-sm font-black text-primary bg-primary/5 px-2 py-1 rounded-lg">
+                            {Number(product.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </span>
+                          {product.wholesale_price > 0 && (
+                            <span className="text-[10px] text-muted-foreground font-bold ml-1 flex items-center gap-1">
+                              <Tags className="h-3 w-3" />
+                              Atacado: {Number(product.wholesale_price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </span>
+                          )}
+                        </div>
                     </td>
                      <td className="px-6 py-5">
-                       <div className="flex flex-col gap-1">
-                         <span className={`text-[10px] font-black ${(product.price - (product.cost_price || 0)) > 0 ? 'text-emerald-600' : 'text-destructive'}`}>
-                           {Number(product.price - (product.cost_price || 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                         </span>
-                         <span className={`px-2 py-0.5 rounded-full text-[8px] font-black border w-fit ${ (product.stock || 0) > 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-destructive/10 text-destructive border-destructive/20' }`}>
-                           { (product.stock || 0) > 0 ? 'EM ESTOQUE' : 'ESGOTADO' }
-                         </span>
-                       </div>
+                        <div className="flex flex-col gap-2 items-start">
+                          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black ${(product.price - (product.cost_price || 0)) > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 'bg-destructive/5 text-destructive border border-destructive/10'}`}>
+                            <TrendingUp className="h-3 w-3" />
+                            {Number(product.price - (product.cost_price || 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </div>
+                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-black border tracking-wider shadow-sm ${ (product.stock || 0) > 0 ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-transparent' : 'bg-slate-100 text-slate-500 border-slate-200' }`}>
+                            { (product.stock || 0) > 0 ? 'DISPONÍVEL' : 'ESGOTADO' }
+                          </span>
+                        </div>
                     </td>
                     <td className="px-6 py-5 text-right" onClick={(e) => e.stopPropagation()}>
                        <div className="flex items-center justify-end gap-2">
