@@ -256,103 +256,103 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                 <div className="flex flex-col gap-8">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <section className="lg:col-span-8 bg-background rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm hover:shadow-md transition-all duration-300">
-                            <div className="flex items-center justify-between">
-                              <h3 className="text-[13px] font-black uppercase tracking-widest text-primary flex items-center gap-2.5">
-                                <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                                  <Tag className="h-4 w-4 text-primary" />
-                                </div>
-                                Dados do Produto
-                              </h3>
-                              <Badge variant="outline" className="bg-emerald-500/5 text-emerald-600 border-emerald-500/20 text-[9px] font-black py-1">Sincronizado</Badge>
-                            </div>
-                            
-                            <div className="grid gap-6">
-                              <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                                <div className="md:col-span-8 grid gap-2">
-                                  <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 flex items-center gap-2">
-                                    Nome do Produto
-                                    <Badge variant="outline" className="text-[8px] h-3.5 px-1 py-0 border-primary/20 text-primary">Obrigatório</Badge>
-                                  </Label>
-                                  <Input 
-                                    id="name" 
-                                    value={formData.name} 
-                                    onChange={(e) => handleChange("name", e.target.value)}
-                                    placeholder="Ex: Apple iPhone 15 Pro Max 256GB" 
-                                    className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
-                                    required
-                                  />
-                                </div>
-                                <div className="md:col-span-4 grid gap-2">
-                                  <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código Interno / SKU</Label>
-                                  <Input 
-                                    value={formData.sku}
-                                    onChange={(e) => handleChange("sku", e.target.value)}
-                                    placeholder="AUTO-GEN-001" 
-                                    className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
-                                  />
-                                </div>
-                              </div>
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-[13px] font-black uppercase tracking-widest text-primary flex items-center gap-2.5">
+                          <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <Tag className="h-4 w-4 text-primary" />
+                          </div>
+                          Dados do Produto
+                        </h3>
+                        <Badge variant="outline" className="bg-emerald-500/5 text-emerald-600 border-emerald-500/20 text-[9px] font-black py-1">Sincronizado</Badge>
+                      </div>
 
-                              <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                                <div className="md:col-span-3 grid gap-2">
-                                  <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">EAN / Código de Barras</Label>
-                                  <Input 
-                                    value={formData.ean}
-                                    onChange={(e) => handleChange("ean", e.target.value)}
-                                    placeholder="789..." 
-                                    className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
-                                  />
-                                </div>
-                                <div className="md:col-span-3 grid gap-2">
-                                  <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código NCM</Label>
-                                  <Input 
-                                    value={formData.ncm}
-                                    onChange={(e) => handleChange("ncm", e.target.value)}
-                                    placeholder="8517.13.00" 
-                                    className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
-                                  />
-                                </div>
-                                <div className="md:col-span-3 grid gap-2">
-                                  <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Referência do Fabricante</Label>
-                                  <Input 
-                                    value={formData.reference}
-                                    onChange={(e) => handleChange("reference", e.target.value)}
-                                    placeholder="REF-123" 
-                                    className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
-                                  />
-                                </div>
-                                <div className="md:col-span-3 grid gap-2">
-                                  <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 flex items-center gap-2">
-                                    Tipo do Produto
-                                    <Badge variant="outline" className="text-[8px] h-3.5 px-1 py-0 border-primary/20 text-primary">Estoque</Badge>
-                                  </Label>
-                                  <Select defaultValue="simples">
-                                    <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="simples">Produto Simples</SelectItem>
-                                      <SelectItem value="composto">Produto Composto</SelectItem>
-                                      <SelectItem value="servico">Serviço</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
+                      <div className="grid gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                          <div className="md:col-span-8 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 flex items-center gap-2">
+                              Nome do Produto
+                              <Badge variant="outline" className="text-[8px] h-3.5 px-1 py-0 border-primary/20 text-primary">Obrigatório</Badge>
+                            </Label>
+                            <Input 
+                              id="name" 
+                              value={formData.name} 
+                              onChange={(e) => handleChange("name", e.target.value)}
+                              placeholder="Ex: Apple iPhone 15 Pro Max 256GB" 
+                              className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                              required
+                            />
+                          </div>
+                          <div className="md:col-span-4 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código Interno / SKU</Label>
+                            <Input 
+                              value={formData.sku}
+                              onChange={(e) => handleChange("sku", e.target.value)}
+                              placeholder="AUTO-GEN-001" 
+                              className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                            />
+                          </div>
+                        </div>
 
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="grid gap-2">
-                                  <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Categoria</Label>
-                                  <Select value={formData.category} onValueChange={(v) => handleChange("category", v)}>
-                                    <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
-                                    <SelectContent className="border-border shadow-elegant">
-                                      <SelectItem value="Smartphones">Smartphones</SelectItem>
-                                      <SelectItem value="Tablets">Tablets</SelectItem>
-                                      <SelectItem value="Watch">Smartwatches</SelectItem>
-                                      <SelectItem value="Acessórios">Acessórios</SelectItem>
-                                      <SelectItem value="Serviços">Serviços</SelectItem>
-                                      <SelectItem value="Peças">Peças</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                            <div className="grid gap-2">
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">EAN / Código de Barras</Label>
+                            <Input 
+                              value={formData.ean}
+                              onChange={(e) => handleChange("ean", e.target.value)}
+                              placeholder="789..." 
+                              className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                            />
+                          </div>
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Código NCM</Label>
+                            <Input 
+                              value={formData.ncm}
+                              onChange={(e) => handleChange("ncm", e.target.value)}
+                              placeholder="8517.13.00" 
+                              className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                            />
+                          </div>
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Referência do Fabricante</Label>
+                            <Input 
+                              value={formData.reference}
+                              onChange={(e) => handleChange("reference", e.target.value)}
+                              placeholder="REF-123" 
+                              className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                            />
+                          </div>
+                          <div className="md:col-span-3 grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1 flex items-center gap-2">
+                              Tipo do Produto
+                              <Badge variant="outline" className="text-[8px] h-3.5 px-1 py-0 border-primary/20 text-primary">Estoque</Badge>
+                            </Label>
+                            <Select defaultValue="simples">
+                              <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="simples">Produto Simples</SelectItem>
+                                <SelectItem value="composto">Produto Composto</SelectItem>
+                                <SelectItem value="servico">Serviço</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="grid gap-2">
+                            <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Categoria</Label>
+                            <Select value={formData.category} onValueChange={(v) => handleChange("category", v)}>
+                              <SelectTrigger className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 font-semibold transition-all"><SelectValue /></SelectTrigger>
+                              <SelectContent className="border-border shadow-elegant">
+                                <SelectItem value="Smartphones">Smartphones</SelectItem>
+                                <SelectItem value="Tablets">Tablets</SelectItem>
+                                <SelectItem value="Watch">Smartwatches</SelectItem>
+                                <SelectItem value="Acessórios">Acessórios</SelectItem>
+                                <SelectItem value="Serviços">Serviços</SelectItem>
+                                <SelectItem value="Peças">Peças</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="grid gap-2">
                                 <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Fabricante / Marca</Label>
                                 <div className="flex w-full group">
                                   <Input 
