@@ -228,7 +228,7 @@ type Deal = {
           })
           .slice(0, 50);
 
-        const upsertRows = validChats.map((chat: any) => {
+        const upsertRows = validChats.map((chat: any): any => {
           const remoteJid = chat.remoteJid || chat.id || "";
           const phone = normalizePhone(remoteJid);
           const existing = existingByPhone.get(phone);
@@ -277,7 +277,7 @@ type Deal = {
             status: existing?.status ?? "active",
             messages_count: previewTranscript.length,
             last_message_at: lastAt,
-            instance_name: instance,
+            instance_name: instance || (existing as any)?.instance_name || null,
           };
         }).filter(Boolean);
 
