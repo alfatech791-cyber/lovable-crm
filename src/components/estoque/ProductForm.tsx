@@ -270,7 +270,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="geral" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
+               <TabsContent value="geral" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300 pb-20">
                 <div className="space-y-8">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <section className="lg:col-span-8 bg-background rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm hover:shadow-md transition-all duration-300">
@@ -446,18 +446,42 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
                                 </Select>
                               </div>
                             </div>
-                           <div className="grid gap-2">
-                             <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Modelo / Referência</Label>
-                             <Input 
-                               value={formData.model}
-                               onChange={(e) => handleChange("model", e.target.value)}
-                               placeholder="iPhone 15 Pro Max" 
-                               className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
-                             />
-                           </div>
-                         </div>
-                       </div>
-                     </section>
+                            <div className="grid gap-2 md:col-span-1">
+                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Modelo / Referência</Label>
+                              <Input 
+                                value={formData.model}
+                                onChange={(e) => handleChange("model", e.target.value)}
+                                placeholder="iPhone 15 Pro Max" 
+                                className="bg-card h-11 border-border shadow-sm focus:ring-4 focus:ring-primary/5 text-sm font-bold transition-all" 
+                              />
+                            </div>
+                            <div className="grid gap-2">
+                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Preço Venda</Label>
+                              <div className="relative group">
+                                 <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-primary text-primary-foreground font-black text-[9px] rounded-l-lg shadow-glow">R$</div>
+                                 <Input 
+                                   type="number" 
+                                   value={formData.price}
+                                   onChange={(e) => handleChange("price", parseFloat(e.target.value) || 0)}
+                                   className="bg-card h-11 border-primary/20 focus:ring-4 focus:ring-primary/5 text-sm font-black text-primary transition-all pl-10" 
+                                 />
+                               </div>
+                            </div>
+                            <div className="grid gap-2">
+                              <Label className="text-[10px] font-black uppercase text-muted-foreground/80 tracking-widest px-1">Preço Custo</Label>
+                              <div className="relative group">
+                                 <div className="absolute inset-y-0 left-0 w-8 flex items-center justify-center bg-muted text-muted-foreground font-black text-[9px] rounded-l-lg border border-r-0 border-border">R$</div>
+                                 <Input 
+                                   type="number" 
+                                   value={formData.cost_price}
+                                   onChange={(e) => handleChange("cost_price", parseFloat(e.target.value) || 0)}
+                                   className="bg-card h-11 border-border focus:ring-4 focus:ring-primary/5 text-sm font-black transition-all pl-10" 
+                                 />
+                               </div>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
 
                      <section className="lg:col-span-4 bg-muted/10 rounded-2xl border border-sidebar-border/50 p-5 space-y-4">
                         <h3 className="text-[11px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
