@@ -1031,7 +1031,13 @@ type Deal = {
                             <SelectValue placeholder="Selecionar Instância" className="text-xs font-bold" />
                           </div>
                         </SelectTrigger>
-                        <SelectContent className="max-h-[300px]">
+                        <SelectContent className="max-h-[300px] rounded-2xl border-border/50 shadow-2xl">
+                          <SelectItem value="none" className="text-[10px] py-3 opacity-50">
+                            <div className="flex items-center gap-2 italic">
+                              <X className="h-2 w-2" />
+                              Sem Instância (Ver Tudo)
+                            </div>
+                          </SelectItem>
                           {availableInstances.length === 0 ? (
                             <div className="p-4 text-center">
                               <p className="text-[10px] font-bold text-muted-foreground uppercase mb-2">Nenhuma instância ativa</p>
