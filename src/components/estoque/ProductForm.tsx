@@ -256,7 +256,7 @@ export function ProductForm({ open, onOpenChange, product, onSave }: ProductForm
               </TabsList>
 
               <TabsContent value="geral" className="mt-0 animate-in fade-in slide-in-from-left-4 duration-300">
-                <div className="flex flex-col gap-8">
+                <div className="space-y-8">
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     <section className="lg:col-span-8 bg-background rounded-3xl border border-sidebar-border/60 p-8 space-y-8 shadow-sm hover:shadow-md transition-all duration-300">
                       <div className="flex items-center justify-between">
