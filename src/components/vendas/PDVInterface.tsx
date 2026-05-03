@@ -1308,20 +1308,20 @@
                  <TabsTrigger value="services">Serviços</TabsTrigger>
                </TabsList>
                <ScrollArea className="flex-1 mt-4">
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 pb-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 pb-4">
                    {allProducts
                      .filter(p => activeCategory === "all" || 
                        (activeCategory === "phones" && ["Smartphones", "Celulares", "Aparelhos"].some(c => p.category.includes(c))) ||
                        (activeCategory === "acc" && ["Acessórios", "Películas", "Cabos", "Fones", "Carregadores"].some(c => p.category.includes(c))) ||
                        (activeCategory === "services" && ["Serviços", "Mão de Obra"].some(c => p.category.includes(c)))
                      )
-                      .slice(0, 20)
+                      .slice(0, 30)
                      .map(product => (
                        <button
                          key={product.id}
                          onClick={() => { addToCart(product); setIsSearchFocused(false); }}
                          disabled={product.stock <= 0}
-                         className={`h-28 rounded-2xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition flex flex-col items-center justify-center gap-2 font-medium group relative ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          className={`h-24 rounded-2xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition flex flex-col items-center justify-center gap-1 font-medium group relative ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                        >
                          <div className="h-10 w-10 rounded-full bg-muted group-hover:bg-primary/10 grid place-items-center transition">
                            <Package className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
