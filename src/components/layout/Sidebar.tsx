@@ -56,7 +56,7 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
   }, []);
 
   useEffect(() => {
-    const savedOrder = localStorage.getItem('sidebar-menu-order-v6');
+    const savedOrder = localStorage.getItem('sidebar-menu-order-v7');
     if (savedOrder) {
       try {
         setItems(JSON.parse(savedOrder));
@@ -100,28 +100,30 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
         const activeItem = prev[activeIndex];
         const targetItem = prev[targetIndex];
 
-        // Se o item de destino não for um header, aninhamos
+        // Melhorando a experiência: Só aninha se soltar no MEIO do item alvo
+        // Se soltar nas bordas, ele apenas troca de posição (comportamento padrão dnd)
+        
+        // No momento, dnd-kit closestCenter já faz uma boa aproximação.
+        // Vamos permitir aninhar em qualquer item que não seja um HEADER.
         if (targetItem && targetItem.type !== "header") {
           const updatedItems = [...prev];
           const [movedItem] = updatedItems.splice(activeIndex, 1);
           
-          // Re-localiza o destino após a remoção
           const newTargetIndex = updatedItems.findIndex((i) => (i.url || i.title) === over.id);
           
           if (!updatedItems[newTargetIndex].children) {
             updatedItems[newTargetIndex].children = [];
           }
           
-          // Adiciona como filho
+          // Adiciona como sub-item
           updatedItems[newTargetIndex].children.push(movedItem);
           
-          localStorage.setItem('sidebar-menu-order-v6', JSON.stringify(updatedItems));
+          localStorage.setItem('sidebar-menu-order-v7', JSON.stringify(updatedItems));
           return updatedItems;
         }
 
-        // Caso contrário, apenas reordenamos
         const newOrder = arrayMove(prev, activeIndex, targetIndex);
-        localStorage.setItem('sidebar-menu-order-v6', JSON.stringify(newOrder));
+        localStorage.setItem('sidebar-menu-order-v7', JSON.stringify(newOrder));
         return newOrder;
       });
     }
@@ -179,13 +181,20 @@ export function AppSidebar({ open, setOpen }: { open?: boolean; setOpen?: (val: 
           >
             <SortableContext items={filteredItems.map(i => i.url || i.title)} strategy={verticalListSortingStrategy}>
               {filteredItems.map((item: any) => (
-                <SortableSidebarItem key={item.url || item.title} item={item} isSmall={isSmall} flyout={flyout} setFlyout={setFlyout} />
+                <SortableSidebarItem 
+                  key={item.url || item.title} 
+                  item={item} 
+                  isSmall={isSmall} 
+                  flyout={flyout} 
+                  setFlyout={setFlyout}
+                  isOver={overId === (item.url || item.title)}
+                />
               ))}
             </SortableContext>
             
             <DragOverlay dropAnimation={null}>
               {activeId ? (
-                <div className="opacity-90 scale-105 pointer-events-none w-[240px] bg-sidebar rounded-lg shadow-2xl border border-primary/40 ring-4 ring-primary/10 overflow-hidden">
+                <div className="opacity-90 scale-105 pointer-events-none w-[240px] bg-sidebar rounded-lg shadow-2xl border-2 border-primary ring-8 ring-primary/5 overflow-hidden">
                   {(() => {
                     const item = items.find(i => (i.url || i.title) === activeId);
                     if (!item) return null;
