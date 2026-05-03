@@ -1313,7 +1313,27 @@ import { ProductForm } from "@/components/estoque/ProductForm";
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden mt-2">
+              <div className="flex items-center justify-between mb-3 px-1">
+                <h3 className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
+                  <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Package className="h-3.5 w-3.5" />
+                  </div>
+                  Catálogo de Produtos
+                </h3>
+                <Button 
+                  variant="default" 
+                  size="sm"
+                  className="h-8 gap-2 font-bold text-[10px] uppercase bg-primary shadow-glow hover:scale-[1.02] transition-all"
+                  onClick={() => {
+                    setNewProductName("");
+                    setIsNewProductModalOpen(true);
+                  }}
+                >
+                  <Plus className="h-3.5 w-3.5" /> Cadastrar Novo
+                </Button>
+              </div>
+              
               <ScrollArea className="flex-1">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 py-2 pr-4 pb-4">
                   {allProducts
