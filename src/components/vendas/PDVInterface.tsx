@@ -1308,14 +1308,14 @@
                  <TabsTrigger value="services">Serviços</TabsTrigger>
                </TabsList>
                <ScrollArea className="flex-1 mt-4">
-                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 pb-4">
                    {allProducts
                      .filter(p => activeCategory === "all" || 
                        (activeCategory === "phones" && ["Smartphones", "Celulares", "Aparelhos"].some(c => p.category.includes(c))) ||
                        (activeCategory === "acc" && ["Acessórios", "Películas", "Cabos", "Fones", "Carregadores"].some(c => p.category.includes(c))) ||
                        (activeCategory === "services" && ["Serviços", "Mão de Obra"].some(c => p.category.includes(c)))
                      )
-                     .slice(0, 12)
+                      .slice(0, 20)
                      .map(product => (
                        <button
                          key={product.id}
