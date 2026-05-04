@@ -1,1 +1,0 @@
-ALTER TABLE public.bot_conversations ADD COLUMN IF NOT EXISTS notes TEXT;
